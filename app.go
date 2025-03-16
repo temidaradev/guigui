@@ -76,6 +76,8 @@ type RunOptions struct {
 	WindowMaxWidth  int
 	WindowMaxHeight int
 	AppScale        float64
+
+	RunGameOptions *ebiten.RunGameOptions
 }
 
 func Run(root Widget, options *RunOptions) error {
@@ -113,10 +115,16 @@ func Run(root Widget, options *RunOptions) error {
 	if options.AppScale > 0 {
 		a.context.appScaleMinus1 = options.AppScale - 1
 	}
-	eop := &ebiten.RunGameOptions{
-		ColorSpace: ebiten.ColorSpaceSRGB,
+
+	var eop ebiten.RunGameOptions
+	if options.RunGameOptions != nil {
+		eop = *options.RunGameOptions
 	}
-	return ebiten.RunGameWithOptions(a, eop)
+	// Prefer SRGB for consistent result.
+	if eop.ColorSpace == ebiten.ColorSpaceDefault {
+		eop.ColorSpace = ebiten.ColorSpaceSRGB
+	}
+	return ebiten.RunGameWithOptions(a, &eop)
 }
 
 func (a app) bounds() image.Rectangle {
