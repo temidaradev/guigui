@@ -375,6 +375,9 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		return guigui.HandleInputResult{}
 	}
 
+	// For Windows key binds, see:
+	// https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec#textediting
+
 	// TODO: Use WebAPI to detect OS is runtime.GOOS == "js"
 	isDarwin := runtime.GOOS == "darwin"
 
@@ -409,6 +412,12 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
 			} else if isDarwin && end < len(t.field.Text()) {
+				text, pos := deleteOnClusters(t.field.Text(), face, end)
+				t.setTextAndSelection(text, pos, pos, -1)
+			}
+		case isKeyRepeating(ebiten.KeyDelete):
+			// Delete one cluster
+			if _, end := t.field.Selection(); end < len(t.field.Text()) {
 				text, pos := deleteOnClusters(t.field.Text(), face, end)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
