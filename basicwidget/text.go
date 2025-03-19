@@ -376,7 +376,6 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 	}
 
 	// TODO: Use WebAPI to detect OS is runtime.GOOS == "js"
-	isWindows := runtime.GOOS == "windows"
 	isDarwin := runtime.GOOS == "darwin"
 
 	if t.editable {
@@ -402,7 +401,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				text, pos := backspaceOnClusters(t.field.Text(), face, start)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
-		case isWindows && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD) ||
+		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD) ||
 			isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD):
 			// Delete
 			start, end := t.field.Selection()
@@ -414,7 +413,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
 
-		case isWindows && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyX) ||
+		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyX) ||
 			isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyX):
 			// Cut
 			start, end := t.field.Selection()
@@ -426,7 +425,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
 			}
-		case isWindows && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyV) ||
+		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyV) ||
 			isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyV):
 			// Paste
 			start, end := t.field.Selection()
@@ -549,10 +548,10 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		} else {
 			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 		}
-	case isWindows && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA) ||
+	case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA) ||
 		isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyA):
 		t.selectAll()
-	case isWindows && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyC) ||
+	case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyC) ||
 		isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyC):
 		// Copy
 		start, end := t.field.Selection()
