@@ -700,7 +700,7 @@ func (t *Text) selectionToDraw() (start, end int, ok bool) {
 	// In this case, put the cursor at the end of the composition.
 	// TODO: This behavior might be macOS specific. Investigate this.
 	if cs == ce {
-		return s + ce, e + ce, true
+		return s + ce, s + ce, true
 	}
 	return 0, 0, false
 }
