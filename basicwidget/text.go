@@ -11,12 +11,14 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/exp/textinput"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/rivo/uniseg"
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
@@ -34,6 +36,29 @@ func isKeyRepeating(key ebiten.Key) bool {
 		return false
 	}
 	return (d-24)%4 == 0
+}
+
+func findWordBoundaries(text string, idx int) (start, end int) {
+	start = idx
+	end = idx
+
+	word, _, _ := uniseg.FirstWordInString(text[idx:], -1)
+	end += len(word)
+
+	for {
+		word, _, _ = uniseg.FirstWordInString(text[start:], -1)
+		if start+len(word) < end {
+			start += len(word)
+			break
+		}
+		if start == 0 {
+			break
+		}
+		_, l := utf8.DecodeLastRuneInString(text[:start])
+		start -= l
+	}
+
+	return start, end
 }
 
 type TextFilter func(text string, start, end int) (string, int, int)
@@ -68,6 +93,9 @@ type Text struct {
 	dragging             bool
 	toAdjustScrollOffset bool
 	prevFocused          bool
+
+	clickCount    int
+	lastClickTick int64
 
 	filter TextFilter
 
@@ -329,13 +357,33 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if cursorPosition.In(guigui.VisibleBounds(t)) {
-			t.dragging = true
-			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
-			t.selectionDragStart = idx
-			guigui.Focus(t)
-			if start, end := t.field.Selection(); start != idx || end != idx {
-				t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) {
+				t.clickCount++
+			} else {
+				t.clickCount = 1
 			}
+
+			switch t.clickCount {
+			case 1:
+				t.dragging = true
+				idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
+				t.selectionDragStart = idx
+				if start, end := t.field.Selection(); start != idx || end != idx {
+					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+				}
+			case 2:
+				text := t.field.Text()
+				idx := textIndexFromPosition(textBounds, cursorPosition, text, face, t.lineHeight(context), t.hAlign, t.vAlign)
+				start, end := findWordBoundaries(text, idx)
+				// TODO: `selectionDragEnd` needed to emulate Chrome's behavior.
+				t.selectionDragStart = start
+				t.setTextAndSelection(text, start, end, -1)
+			case 3:
+				t.selectAll()
+			}
+
+			guigui.Focus(t)
+			t.lastClickTick = ebiten.Tick()
 			return guigui.HandleInputByWidget(t)
 		}
 		guigui.Blur(t)
