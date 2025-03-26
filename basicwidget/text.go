@@ -94,8 +94,9 @@ type Text struct {
 	toAdjustScrollOffset bool
 	prevFocused          bool
 
-	clickCount    int
-	lastClickTick int64
+	clickCount         int
+	lastClickTick      int64
+	lastClickTextIndex int
 
 	filter TextFilter
 
@@ -357,7 +358,9 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if cursorPosition.In(guigui.VisibleBounds(t)) {
-			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) {
+			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
+
+			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
 				t.clickCount++
 			} else {
 				t.clickCount = 1
@@ -366,14 +369,12 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 			switch t.clickCount {
 			case 1:
 				t.dragging = true
-				idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
 				t.selectionDragStart = idx
 				if start, end := t.field.Selection(); start != idx || end != idx {
 					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 				}
 			case 2:
 				text := t.field.Text()
-				idx := textIndexFromPosition(textBounds, cursorPosition, text, face, t.lineHeight(context), t.hAlign, t.vAlign)
 				start, end := findWordBoundaries(text, idx)
 				// TODO: `selectionDragEnd` needed to emulate Chrome's behavior.
 				t.selectionDragStart = start
@@ -384,6 +385,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 
 			guigui.Focus(t)
 			t.lastClickTick = ebiten.Tick()
+			t.lastClickTextIndex = idx
 			return guigui.HandleInputByWidget(t)
 		}
 		guigui.Blur(t)
