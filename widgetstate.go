@@ -40,9 +40,10 @@ func (w *widgetsAndBounds) equals(currentWidgets []Widget) bool {
 	return true
 }
 
-func (w *widgetsAndBounds) redrawIfAboveParentZ() {
-	for widget := range w.bounds {
+func (w *widgetsAndBounds) redrawIfAboveParentZ(app *app) {
+	for widget, bounds := range w.bounds {
 		if isAboveParentZ(widget) {
+			app.requestRedraw(bounds)
 			RequestRedraw(widget)
 		}
 	}
@@ -70,7 +71,7 @@ func Position(widget Widget) image.Point {
 
 func SetPosition(widget Widget, position image.Point) {
 	widget.widgetState().position = position
-	// Rerendering happens at a.addInvalidatedRegions if necessary.
+	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
 }
 
 func Bounds(widget Widget) image.Rectangle {

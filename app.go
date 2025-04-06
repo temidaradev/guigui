@@ -433,9 +433,10 @@ func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 	widgetState := widget.widgetState()
 	// If the children and/or children's bounds are changed, request redraw.
 	if !widgetState.prev.equals(widgetState.children) {
-		// Widgets above their parents' Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
-		widgetState.prev.redrawIfAboveParentZ()
 		a.requestRedraw(VisibleBounds(widget))
+
+		// Widgets above their parents' Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
+		widgetState.prev.redrawIfAboveParentZ(a)
 		for _, child := range widgetState.children {
 			if isAboveParentZ(child) {
 				a.requestRedraw(VisibleBounds(child))
