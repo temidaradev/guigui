@@ -6,6 +6,7 @@ package basicwidget
 import (
 	"image"
 	"image/color"
+	"iter"
 	"strings"
 	"unicode/utf8"
 
@@ -171,36 +172,41 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 	return text.AppendGlyphs(nil, str, face, nil)
 }
 
-func logicalClusters(str string, face text.Face) []text.Glyph {
-	gs := text.AppendGlyphs(nil, str, face, nil)
-	result := make([]text.Glyph, 0, len(gs))
+func logicalClusters(str string, face text.Face) iter.Seq[text.Glyph] {
+	return func(yield func(g text.Glyph) bool) {
+		gs := text.AppendGlyphs(nil, str, face, nil)
 
-	var lastEndInBytes int
-	for _, g := range gs {
-		for i := range str[lastEndInBytes:g.StartIndexInBytes] {
+		var lastEndInBytes int
+		for _, g := range gs {
+			for i := range str[lastEndInBytes:g.StartIndexInBytes] {
+				_, size := utf8.DecodeRuneInString(str[lastEndInBytes+i:])
+				if !yield(text.Glyph{
+					StartIndexInBytes: lastEndInBytes + i,
+					EndIndexInBytes:   lastEndInBytes + i + size,
+				}) {
+					return
+				}
+			}
+			if !yield(g) {
+				return
+			}
+			lastEndInBytes = g.EndIndexInBytes
+		}
+
+		for i := range str[lastEndInBytes:] {
 			_, size := utf8.DecodeRuneInString(str[lastEndInBytes+i:])
-			result = append(result, text.Glyph{
+			if !yield(text.Glyph{
 				StartIndexInBytes: lastEndInBytes + i,
 				EndIndexInBytes:   lastEndInBytes + i + size,
-			})
+			}) {
+				return
+			}
 		}
-		result = append(result, g)
-		lastEndInBytes = g.EndIndexInBytes
 	}
-
-	for i := range str[lastEndInBytes:] {
-		_, size := utf8.DecodeRuneInString(str[lastEndInBytes+i:])
-		result = append(result, text.Glyph{
-			StartIndexInBytes: lastEndInBytes + i,
-			EndIndexInBytes:   lastEndInBytes + i + size,
-		})
-	}
-
-	return result
 }
 
 func backspaceOnClusters(str string, face text.Face, position int) (string, int) {
-	for _, c := range logicalClusters(str, face) {
+	for c := range logicalClusters(str, face) {
 		if position > c.EndIndexInBytes {
 			continue
 		}
@@ -210,7 +216,7 @@ func backspaceOnClusters(str string, face text.Face, position int) (string, int)
 }
 
 func deleteOnClusters(str string, face text.Face, position int) (string, int) {
-	for _, c := range logicalClusters(str, face) {
+	for c := range logicalClusters(str, face) {
 		if position > c.StartIndexInBytes {
 			continue
 		}
@@ -220,7 +226,7 @@ func deleteOnClusters(str string, face text.Face, position int) (string, int) {
 }
 
 func prevPositionOnClusters(str string, face text.Face, position int) int {
-	for _, c := range logicalClusters(str, face) {
+	for c := range logicalClusters(str, face) {
 		if position > c.EndIndexInBytes {
 			continue
 		}
@@ -230,7 +236,7 @@ func prevPositionOnClusters(str string, face text.Face, position int) int {
 }
 
 func nextPositionOnClusters(str string, face text.Face, position int) int {
-	for _, c := range logicalClusters(str, face) {
+	for c := range logicalClusters(str, face) {
 		if position > c.StartIndexInBytes {
 			continue
 		}
