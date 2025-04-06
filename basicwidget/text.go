@@ -108,6 +108,7 @@ type Text struct {
 
 	cachedWidth  int
 	cachedHeight int
+	lastAppScale float64
 	initOnce     sync.Once
 
 	onEnterPressed func(text string)
@@ -744,6 +745,11 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 }
 
 func (t *Text) Update(context *guigui.Context) error {
+	if t.lastAppScale != context.AppScale() {
+		t.lastAppScale = context.AppScale()
+		t.resetCachedSize()
+	}
+
 	guigui.Hide(&t.scrollOverlay)
 
 	if !t.prevFocused && guigui.IsFocused(t) {
