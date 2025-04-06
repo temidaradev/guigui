@@ -114,7 +114,7 @@ func adjustedWheel() (float64, float64) {
 	return x, y
 }
 
-func (s *ScrollOverlay) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	s.setHovering(image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(s)) && guigui.IsVisible(s))
 
 	if s.hovering {

@@ -145,9 +145,14 @@ func (a *app) Update() error {
 
 	// HandleInput
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
-	if r := a.handleInputWidget(); r.widget != nil {
+	if r := a.handleInputWidget(handleInputTypePointing); r.widget != nil {
 		if theDebugMode.showInputLogs {
-			slog.Info("input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
+			slog.Info("pointing input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
+		}
+	}
+	if r := a.handleInputWidget(handleInputTypeButton); r.widget != nil {
+		if theDebugMode.showInputLogs {
+			slog.Info("keyboard input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
 		}
 	}
 
@@ -309,17 +314,24 @@ func (a *app) doLayout(widget Widget) {
 	}
 }
 
-func (a *app) handleInputWidget() HandleInputResult {
+type handleInputType int
+
+const (
+	handleInputTypePointing handleInputType = iota
+	handleInputTypeButton
+)
+
+func (a *app) handleInputWidget(typ handleInputType) HandleInputResult {
 	for i := len(a.zs) - 1; i >= 0; i-- {
 		z := a.zs[i]
-		if r := a.doHandleInputWidget(a.root, z); r.ShouldRaise() {
+		if r := a.doHandleInputWidget(typ, a.root, z); r.ShouldRaise() {
 			return r
 		}
 	}
 	return HandleInputResult{}
 }
 
-func (a *app) doHandleInputWidget(widget Widget, zToHandle int) HandleInputResult {
+func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle int) HandleInputResult {
 	if zToHandle < z(widget) {
 		return HandleInputResult{}
 	}
@@ -332,7 +344,7 @@ func (a *app) doHandleInputWidget(widget Widget, zToHandle int) HandleInputResul
 	// Iterate the children in the reverse order of rendering.
 	for i := len(widgetState.children) - 1; i >= 0; i-- {
 		child := widgetState.children[i]
-		if r := a.doHandleInputWidget(child, zToHandle); r.ShouldRaise() {
+		if r := a.doHandleInputWidget(typ, child, zToHandle); r.ShouldRaise() {
 			return r
 		}
 	}
@@ -340,7 +352,15 @@ func (a *app) doHandleInputWidget(widget Widget, zToHandle int) HandleInputResul
 	if zToHandle != z(widget) {
 		return HandleInputResult{}
 	}
-	return widget.HandleInput(&a.context)
+
+	switch typ {
+	case handleInputTypePointing:
+		return widget.HandlePointingInput(&a.context)
+	case handleInputTypeButton:
+		return widget.HandleButtonInput(&a.context)
+	default:
+		panic(fmt.Sprintf("guigui: unknown handleInputType: %d", typ))
+	}
 }
 
 func (a *app) cursorShape() bool {

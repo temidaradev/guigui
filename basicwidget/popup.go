@@ -74,7 +74,7 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	appender.AppendChildWidget(&p.frame)
 }
 
-func (p *Popup) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if p.showing || p.hiding {
 		return guigui.AbortHandlingInputByWidget(p)
 	}
@@ -162,7 +162,7 @@ func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWid
 	}
 }
 
-func (p *popupContent) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(p)) {
 		return guigui.AbortHandlingInputByWidget(p)
 	}

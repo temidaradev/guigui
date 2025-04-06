@@ -32,7 +32,7 @@ func (b *Button) SetOnUp(f func()) {
 	b.onUp = f
 }
 
-func (b *Button) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if guigui.IsEnabled(b) && b.isHovering() {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			if b.onDown != nil {

@@ -12,7 +12,11 @@ type DefaultWidget struct {
 func (*DefaultWidget) Layout(context *Context, appender *ChildWidgetAppender) {
 }
 
-func (*DefaultWidget) HandleInput(context *Context) HandleInputResult {
+func (*DefaultWidget) HandlePointingInput(context *Context) HandleInputResult {
+	return HandleInputResult{}
+}
+
+func (*DefaultWidget) HandleButtonInput(context *Context) HandleInputResult {
 	return HandleInputResult{}
 }
 

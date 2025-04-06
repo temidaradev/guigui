@@ -114,7 +114,7 @@ func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 	appender.AppendChildWidget(&p.contextMenuPopup)
 }
 
-func (p *Popups) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 		pt := image.Pt(ebiten.CursorPosition())
 		if pt.In(guigui.VisibleBounds(&p.contextMenuPopupClickHereText)) {

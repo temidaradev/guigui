@@ -32,7 +32,7 @@ func (d *DragDropOverlay) Start(object any) {
 	d.object = object
 }
 
-func (d *DragDropOverlay) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (d *DragDropOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if d.object != nil {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(d)) {

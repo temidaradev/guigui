@@ -9,7 +9,8 @@ import (
 
 type Widget interface {
 	Layout(context *Context, appender *ChildWidgetAppender)
-	HandleInput(context *Context) HandleInputResult
+	HandlePointingInput(context *Context) HandleInputResult
+	HandleButtonInput(context *Context) HandleInputResult
 	Update(context *Context) error
 	CursorShape(context *Context) (ebiten.CursorShapeType, bool)
 	Draw(context *Context, dst *ebiten.Image)

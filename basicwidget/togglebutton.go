@@ -53,7 +53,7 @@ func toggleButtonMaxCount() int {
 	return ebiten.TPS() / 12
 }
 
-func (t *ToggleButton) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if guigui.IsEnabled(t) && t.isHovering() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		t.SetValue(!t.value)
 		return guigui.HandleInputByWidget(t)

@@ -332,7 +332,7 @@ func (t *Text) lineHeight(context *guigui.Context) float64 {
 	return LineHeight(context) * (t.scaleMinus1 + 1)
 }
 
-func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if !t.selectable && !t.editable {
 		return guigui.HandleInputResult{}
 	}
@@ -489,9 +489,13 @@ func (t *Text) compositionSelectionToDraw() (uStart, cStart, cEnd, uEnd int, ok 
 	return s, s + cs, s + ce, s + l, true
 }
 
-func (t *Text) handleKeyboardInput(context *guigui.Context) error {
+func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
+	if !guigui.IsFocused(t) || !guigui.IsEnabled(t) {
+		return guigui.HandleInputResult{}
+	}
+
 	if !t.selectable && !t.editable {
-		return nil
+		return guigui.HandleInputResult{}
 	}
 
 	textBounds := t.textBounds(context)
@@ -503,18 +507,19 @@ func (t *Text) handleKeyboardInput(context *guigui.Context) error {
 		var err error
 		processed, err = t.field.HandleInput(int(x), int(bottom))
 		if err != nil {
-			return err
+			slog.Error(err.Error())
+			return guigui.AbortHandlingInputByWidget(t)
 		}
 	}
 	if processed {
 		guigui.RequestRedraw(t)
 		t.adjustScrollOffset(context)
-		return nil
+		return guigui.HandleInputByWidget(t)
 	}
 
 	// Do not accept key inputs when compositing.
 	if _, _, ok := t.field.CompositionSelection(); ok {
-		return nil
+		return guigui.HandleInputByWidget(t)
 	}
 
 	// For Windows key binds, see:
@@ -570,7 +575,8 @@ func (t *Text) handleKeyboardInput(context *guigui.Context) error {
 			start, end := t.field.Selection()
 			if start != end {
 				if err := clipboard.WriteAll(t.field.Text()[start:end]); err != nil {
-					return err
+					slog.Error(err.Error())
+					return guigui.AbortHandlingInputByWidget(t)
 				}
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
@@ -581,7 +587,8 @@ func (t *Text) handleKeyboardInput(context *guigui.Context) error {
 			start, end := t.field.Selection()
 			ct, err := clipboard.ReadAll()
 			if err != nil {
-				return err
+				slog.Error(err.Error())
+				return guigui.AbortHandlingInputByWidget(t)
 			}
 			text := t.field.Text()[:start] + ct + t.field.Text()[end:]
 			t.setTextAndSelection(text, start+len(ct), start+len(ct), -1)
@@ -706,7 +713,8 @@ func (t *Text) handleKeyboardInput(context *guigui.Context) error {
 		start, end := t.field.Selection()
 		if start != end {
 			if err := clipboard.WriteAll(t.field.Text()[start:end]); err != nil {
-				return err
+				slog.Error(err.Error())
+				return guigui.AbortHandlingInputByWidget(t)
 			}
 		}
 	case isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyK):
@@ -731,16 +739,11 @@ func (t *Text) handleKeyboardInput(context *guigui.Context) error {
 			t.setTextAndSelection(text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
 		}
 	}
-	return nil
+
+	return guigui.HandleInputByWidget(t)
 }
 
 func (t *Text) Update(context *guigui.Context) error {
-	if guigui.IsFocused(t) && guigui.IsEnabled(t) {
-		if err := t.handleKeyboardInput(context); err != nil {
-			return err
-		}
-	}
-
 	guigui.Hide(&t.scrollOverlay)
 
 	if !t.prevFocused && guigui.IsFocused(t) {

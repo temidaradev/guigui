@@ -226,7 +226,7 @@ func (l *List) calcDropDstIndex(context *guigui.Context) int {
 	return len(l.items)
 }
 
-func (l *List) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	// Process dragging.
 	if l.dragDropOverlay.IsDragging() {
 		_, y := ebiten.CursorPosition()

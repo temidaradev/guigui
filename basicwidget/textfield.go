@@ -80,7 +80,7 @@ func (t *TextField) Layout(context *guigui.Context, appender *guigui.ChildWidget
 	}
 }
 
-func (t *TextField) HandleInput(context *guigui.Context) guigui.HandleInputResult {
+func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	x, y := ebiten.CursorPosition()
 	t.hovering = image.Pt(x, y).In(guigui.VisibleBounds(t))
 	if t.hovering {
