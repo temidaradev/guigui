@@ -40,13 +40,6 @@ func (f *Form) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	f.calcItemBounds(context)
 
 	for i, item := range f.items {
-		f.primaryBounds = append(f.primaryBounds, image.Rectangle{})
-		f.secondaryBounds = append(f.secondaryBounds, image.Rectangle{})
-
-		if item.PrimaryWidget == nil && item.SecondaryWidget == nil {
-			continue
-		}
-
 		if item.PrimaryWidget != nil {
 			guigui.SetPosition(item.PrimaryWidget, f.primaryBounds[i].Min)
 			appender.AppendChildWidget(item.PrimaryWidget)
