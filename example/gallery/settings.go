@@ -21,6 +21,8 @@ type Settings struct {
 	colorModeDropdownList basicwidget.DropdownList
 	localeText            basicwidget.Text
 	localeDropdownList    basicwidget.DropdownList
+	scaleText             basicwidget.Text
+	scaleDropdownList     basicwidget.DropdownList
 
 	initOnce sync.Once
 }
@@ -49,6 +51,19 @@ func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetA
 		context.SetAppLocales([]language.Tag{lang})
 	})
 
+	s.scaleText.SetText("Scale")
+	s.scaleDropdownList.SetItemsByStrings([]string{"80%", "100%", "120%"})
+	s.scaleDropdownList.SetOnValueChanged(func(index int) {
+		switch index {
+		case 0:
+			context.SetAppScale(0.8)
+		case 1:
+			context.SetAppScale(1.0)
+		case 2:
+			context.SetAppScale(1.2)
+		}
+	})
+
 	s.initOnce.Do(func() {
 		switch context.ColorMode() {
 		case guigui.ColorModeLight:
@@ -58,6 +73,7 @@ func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetA
 		}
 
 		s.localeDropdownList.SetSelectedItemIndex(0)
+		s.scaleDropdownList.SetSelectedItemIndex(1)
 	})
 
 	u := float64(basicwidget.UnitSize(context))
@@ -71,6 +87,10 @@ func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetA
 		{
 			PrimaryWidget:   &s.localeText,
 			SecondaryWidget: &s.localeDropdownList,
+		},
+		{
+			PrimaryWidget:   &s.scaleText,
+			SecondaryWidget: &s.scaleDropdownList,
 		},
 	})
 	{
