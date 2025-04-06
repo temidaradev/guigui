@@ -186,7 +186,7 @@ func (a *app) Update() error {
 				continue
 			}
 			if theDebugMode.showRenderingRegions {
-				slog.Info("Request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
+				slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
 			}
 			a.invalidatedRegions = a.invalidatedRegions.Union(vb)
 		}
