@@ -34,6 +34,9 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 
 	d.textButton.SetOnDown(func() {
 		pt := guigui.Position(d)
+		pt.Y -= listItemPadding(context)
+		_, y := d.Size(context)
+		pt.Y += int((float64(y) - LineHeight(context)) / 2)
 		pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
 		pt.Y = max(pt.Y, 0)
 		// TODO: Chaning the position here might be too late here.
@@ -63,15 +66,3 @@ func (d *DropdownList) SetSelectedItemIndex(index int) {
 func (d *DropdownList) Size(context *guigui.Context) (int, int) {
 	return d.textButton.Size(context)
 }
-
-/*func (d *DropdownList) Enable() {
-	d.textButton().Enable()
-}
-
-func (d *DropdownList) Disable() {
-	d.button.Disable()
-	if d.popup != nil {
-		d.popup.Close()
-	}
-}
-*/
