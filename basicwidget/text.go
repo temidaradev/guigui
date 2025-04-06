@@ -404,25 +404,116 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		return guigui.HandleInputResult{}
 	}
 
+	return guigui.HandleInputResult{}
+}
+
+func (t *Text) adjustScrollOffset(context *guigui.Context) {
+	t.updateContentSize(context)
+
+	start, end, ok := t.selectionToDraw()
+	if !ok {
+		return
+	}
+	text := t.textToDraw()
+
+	tb := t.textBounds(context)
+	face := t.face(context)
+	bounds := guigui.Bounds(t)
+	if x, _, y, ok := textPosition(tb, text, end, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
+		var dx, dy float64
+		if max := float64(bounds.Max.X); x > max {
+			dx = max - x
+		}
+		if max := float64(bounds.Max.Y); y > max {
+			dy = max - y
+		}
+		t.scrollOverlay.SetOffsetByDelta(dx, dy)
+	}
+	if x, y, _, ok := textPosition(tb, text, start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
+		var dx, dy float64
+		if min := float64(bounds.Min.X); x < min {
+			dx = min - x
+		}
+		if min := float64(bounds.Min.Y); y < min {
+			dy = min - y
+		}
+		t.scrollOverlay.SetOffsetByDelta(dx, dy)
+	}
+}
+
+func (t *Text) textToDraw() string {
+	return t.field.TextForRendering()
+}
+
+func (t *Text) selectionToDraw() (start, end int, ok bool) {
+	s, e := t.field.Selection()
+	if !t.editable {
+		return s, e, true
+	}
+	if !guigui.IsFocused(t) {
+		return s, e, true
+	}
+	cs, ce, ok := t.field.CompositionSelection()
+	if !ok {
+		return s, e, true
+	}
+	// When cs == ce, the composition already started but any conversion is not done yet.
+	// In this case, put the cursor at the end of the composition.
+	// TODO: This behavior might be macOS specific. Investigate this.
+	if cs == ce {
+		return s + ce, s + ce, true
+	}
+	return 0, 0, false
+}
+
+func (t *Text) compositionSelectionToDraw() (uStart, cStart, cEnd, uEnd int, ok bool) {
+	if !t.editable {
+		return 0, 0, 0, 0, false
+	}
+	if !guigui.IsFocused(t) {
+		return 0, 0, 0, 0, false
+	}
+	s, _ := t.field.Selection()
+	cs, ce, ok := t.field.CompositionSelection()
+	if !ok {
+		return 0, 0, 0, 0, false
+	}
+	// When cs == ce, the composition already started but any conversion is not done yet.
+	// In this case, assume the entire region is the composition.
+	// TODO: This behavior might be macOS specific. Investigate this.
+	l := t.field.UncommittedTextLengthInBytes()
+	if cs == ce {
+		return s, s, s + l, s + l, true
+	}
+	return s, s + cs, s + ce, s + l, true
+}
+
+func (t *Text) handleKeyboardInput(context *guigui.Context) error {
+	if !t.selectable && !t.editable {
+		return nil
+	}
+
+	textBounds := t.textBounds(context)
+	face := t.face(context)
+
 	start, _ := t.field.Selection()
 	var processed bool
 	if x, _, bottom, ok := textPosition(textBounds, t.field.Text(), start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var err error
 		processed, err = t.field.HandleInput(int(x), int(bottom))
 		if err != nil {
-			slog.Error(err.Error())
-			processed = false
+			return err
 		}
 	}
 	if processed {
 		guigui.RequestRedraw(t)
 		t.adjustScrollOffset(context)
-		return guigui.HandleInputByWidget(t)
+		return nil
 	}
 
 	// Do not accept key inputs when compositing.
 	if _, _, ok := t.field.CompositionSelection(); ok {
-		return guigui.HandleInputResult{}
+		return nil
 	}
 
 	// For Windows key binds, see:
@@ -478,8 +569,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 			start, end := t.field.Selection()
 			if start != end {
 				if err := clipboard.WriteAll(t.field.Text()[start:end]); err != nil {
-					slog.Error(err.Error())
-					return guigui.HandleInputResult{}
+					return err
 				}
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
@@ -490,8 +580,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 			start, end := t.field.Selection()
 			ct, err := clipboard.ReadAll()
 			if err != nil {
-				slog.Error(err.Error())
-				return guigui.HandleInputResult{}
+				return err
 			}
 			text := t.field.Text()[:start] + ct + t.field.Text()[end:]
 			t.setTextAndSelection(text, start+len(ct), start+len(ct), -1)
@@ -616,8 +705,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		start, end := t.field.Selection()
 		if start != end {
 			if err := clipboard.WriteAll(t.field.Text()[start:end]); err != nil {
-				slog.Error(err.Error())
-				return guigui.HandleInputResult{}
+				return err
 			}
 		}
 	case isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyK):
@@ -642,92 +730,16 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 			t.setTextAndSelection(text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
 		}
 	}
-
-	return guigui.HandleInputResult{}
-}
-
-func (t *Text) adjustScrollOffset(context *guigui.Context) {
-	t.updateContentSize(context)
-
-	start, end, ok := t.selectionToDraw()
-	if !ok {
-		return
-	}
-	text := t.textToDraw()
-
-	tb := t.textBounds(context)
-	face := t.face(context)
-	bounds := guigui.Bounds(t)
-	if x, _, y, ok := textPosition(tb, text, end, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
-		var dx, dy float64
-		if max := float64(bounds.Max.X); x > max {
-			dx = max - x
-		}
-		if max := float64(bounds.Max.Y); y > max {
-			dy = max - y
-		}
-		t.scrollOverlay.SetOffsetByDelta(dx, dy)
-	}
-	if x, y, _, ok := textPosition(tb, text, start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
-		var dx, dy float64
-		if min := float64(bounds.Min.X); x < min {
-			dx = min - x
-		}
-		if min := float64(bounds.Min.Y); y < min {
-			dy = min - y
-		}
-		t.scrollOverlay.SetOffsetByDelta(dx, dy)
-	}
-}
-
-func (t *Text) textToDraw() string {
-	return t.field.TextForRendering()
-}
-
-func (t *Text) selectionToDraw() (start, end int, ok bool) {
-	s, e := t.field.Selection()
-	if !t.editable {
-		return s, e, true
-	}
-	if !guigui.IsFocused(t) {
-		return s, e, true
-	}
-	cs, ce, ok := t.field.CompositionSelection()
-	if !ok {
-		return s, e, true
-	}
-	// When cs == ce, the composition already started but any conversion is not done yet.
-	// In this case, put the cursor at the end of the composition.
-	// TODO: This behavior might be macOS specific. Investigate this.
-	if cs == ce {
-		return s + ce, s + ce, true
-	}
-	return 0, 0, false
-}
-
-func (t *Text) compositionSelectionToDraw() (uStart, cStart, cEnd, uEnd int, ok bool) {
-	if !t.editable {
-		return 0, 0, 0, 0, false
-	}
-	if !guigui.IsFocused(t) {
-		return 0, 0, 0, 0, false
-	}
-	s, _ := t.field.Selection()
-	cs, ce, ok := t.field.CompositionSelection()
-	if !ok {
-		return 0, 0, 0, 0, false
-	}
-	// When cs == ce, the composition already started but any conversion is not done yet.
-	// In this case, assume the entire region is the composition.
-	// TODO: This behavior might be macOS specific. Investigate this.
-	l := t.field.UncommittedTextLengthInBytes()
-	if cs == ce {
-		return s, s, s + l, s + l, true
-	}
-	return s, s + cs, s + ce, s + l, true
+	return nil
 }
 
 func (t *Text) Update(context *guigui.Context) error {
+	if guigui.IsFocused(t) && guigui.IsEnabled(t) {
+		if err := t.handleKeyboardInput(context); err != nil {
+			return err
+		}
+	}
+
 	guigui.Hide(&t.scrollOverlay)
 
 	if !t.prevFocused && guigui.IsFocused(t) {
