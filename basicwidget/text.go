@@ -32,10 +32,11 @@ func isKeyRepeating(key ebiten.Key) bool {
 	if d == 2 {
 		return true
 	}
-	if d < 24 {
+	repeat := ebiten.TPS() * 24 / 60
+	if d < repeat {
 		return false
 	}
-	return (d-24)%4 == 0
+	return (d-repeat)%4 == 0
 }
 
 func findWordBoundaries(text string, idx int) (start, end int) {
