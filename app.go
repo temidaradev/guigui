@@ -21,6 +21,7 @@ import (
 
 type debugMode struct {
 	showRenderingRegions bool
+	showInputLogs        bool
 }
 
 var theDebugMode debugMode
@@ -30,6 +31,8 @@ func init() {
 		switch token {
 		case "showrenderingregions":
 			theDebugMode.showRenderingRegions = true
+		case "showinputlogs":
+			theDebugMode.showInputLogs = true
 		}
 	}
 }
@@ -142,7 +145,11 @@ func (a *app) Update() error {
 
 	// HandleInput
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
-	a.handleInputWidget()
+	if r := a.handleInputWidget(); r.widget != nil {
+		if theDebugMode.showInputLogs {
+			slog.Info("input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
+		}
+	}
 
 	if !a.cursorShape() {
 		ebiten.SetCursorShape(ebiten.CursorShapeDefault)
