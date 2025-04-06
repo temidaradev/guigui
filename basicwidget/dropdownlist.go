@@ -4,6 +4,8 @@
 package basicwidget
 
 import (
+	"log/slog"
+
 	"github.com/hajimehoshi/guigui"
 )
 
@@ -23,7 +25,8 @@ func (d *DropdownList) SetOnValueChanged(f func(index int)) {
 func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
 	img, err := theResourceImages.Get("unfold_more", context.ColorMode())
 	if err != nil {
-		panic(err)
+		slog.Error(err.Error())
+		return
 	}
 	d.textButton.SetImage(img)
 	if item, ok := d.popupMenu.SelectedItem(); ok {
@@ -32,8 +35,11 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		d.textButton.SetText("")
 	}
 
+	d.popupMenu.SetHasCheckmark(true)
 	d.textButton.SetOnDown(func() {
 		pt := guigui.Position(d)
+		pt.X -= int(LineHeight(context)) + listItemTextAndImagePadding(context)
+		pt.X = max(pt.X, 0)
 		pt.Y -= listItemPadding(context)
 		_, y := d.Size(context)
 		pt.Y += int((float64(y) - LineHeight(context)) / 2)
@@ -41,7 +47,6 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		pt.Y = max(pt.Y, 0)
 		// TODO: Chaning the position here might be too late here.
 		// A glitch is visible when the dropdown list is reopened.
-		// TODO: Add a check mark for a selected item.
 		guigui.SetPosition(&d.popupMenu, pt)
 		d.popupMenu.Open(context)
 	})

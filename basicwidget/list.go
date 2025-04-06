@@ -6,6 +6,7 @@ package basicwidget
 import (
 	"image"
 	"image/color"
+	"log/slog"
 	"slices"
 	"time"
 
@@ -43,6 +44,7 @@ func DefaultDisabledListItemTextColor(context *guigui.Context) color.Color {
 type List struct {
 	guigui.DefaultWidget
 
+	checkmark       Image
 	listFrame       listFrame
 	scrollOverlay   ScrollOverlay
 	dragDropOverlay DragDropOverlay
@@ -52,6 +54,7 @@ type List struct {
 	hoveredItemIndexPlus1  int
 	showItemBorders        bool
 	style                  ListStyle
+	hasCheckmark           bool
 	lastSelectingItemTime  time.Time
 
 	indexToJumpPlus1        int
@@ -80,6 +83,14 @@ func (l *List) SetOnItemSelected(f func(index int)) {
 	l.onItemSelected = f
 }
 
+func (l *List) SetHasCheckmark(hasCheckmark bool) {
+	if l.hasCheckmark == hasCheckmark {
+		return
+	}
+	l.hasCheckmark = hasCheckmark
+	guigui.RequestRedraw(l)
+}
+
 func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
 		guigui.SetPosition(&l.listFrame, guigui.Position(l))
@@ -90,14 +101,33 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	p := guigui.Position(l)
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
 	p.Y += RoundedCornerRadius(context) + int(offsetY)
-	for _, item := range l.items {
-		/*r := l.list.itemRect(args, l.index)
-		if l.list.items[l.index].Wide {
-			r.Min.X -= l.list.settings.SmallUnitSize(args.Scale)
-			r.Max.X += l.list.settings.SmallUnitSize(args.Scale)
+	for i, item := range l.items {
+		if l.hasCheckmark && l.SelectedItemIndex() == i {
+			mode := context.ColorMode()
+			if l.HoveredItemIndex() == i {
+				mode = guigui.ColorModeDark
+			}
+			img, err := theResourceImages.Get("check", mode)
+			if err != nil {
+				slog.Error(err.Error())
+				return
+			}
+			l.checkmark.SetImage(img)
+
+			imgSize := listItemCheckmarkSize(context)
+			l.checkmark.SetSize(context, imgSize, imgSize)
+			imgP := p
+			_, itemH := item.Content.Size(context)
+			imgP.Y += (itemH - imgSize) * 3 / 4
+			guigui.SetPosition(&l.checkmark, imgP)
+			appender.AppendChildWidget(&l.checkmark)
 		}
-		return r*/
-		guigui.SetPosition(item.Content, p)
+
+		itemP := p
+		if l.hasCheckmark {
+			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
+		}
+		guigui.SetPosition(item.Content, itemP)
 		appender.AppendChildWidget(item.Content)
 		_, h := item.Content.Size(context)
 		p.Y += h
@@ -295,7 +325,7 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 
 				wasFocused := guigui.IsFocused(l)
 				guigui.Focus(l)
-				if l.SelectedItemIndex() != index || !wasFocused {
+				if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
 					l.SetSelectedItemIndex(index)
 					l.lastSelectingItemTime = time.Now()
 				}
@@ -522,6 +552,9 @@ func (l *List) Size(context *guigui.Context) (int, int) {
 	} else {
 		w = l.defaultWidth(context)
 	}
+	if l.hasCheckmark {
+		w += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
+	}
 	if l.heightSet {
 		h = l.height
 	} else {
@@ -593,4 +626,12 @@ func moveItemInSlice[T any](slice []T, from int, count int, to int) {
 	slice = slices.Delete(slice, from, from+count)
 	// Assume that the slice has enough capacity, then the underlying array should not change.
 	_ = slices.Insert(slice, to, s...)
+}
+
+func listItemCheckmarkSize(context *guigui.Context) int {
+	return int(LineHeight(context) * 3 / 4)
+}
+
+func listItemTextAndImagePadding(context *guigui.Context) int {
+	return UnitSize(context) / 8
 }

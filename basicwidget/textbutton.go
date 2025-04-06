@@ -61,7 +61,7 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 	textP := guigui.Position(t)
 	if t.image.HasImage() {
 		textP.X += (w - tw + UnitSize(context)/4) / 2
-		textP.X -= (t.textImagePadding(context) + imgSize) / 2
+		textP.X -= (textButtonTextAndImagePadding(context) + imgSize) / 2
 	} else {
 		textP.X += (w - tw) / 2
 	}
@@ -73,7 +73,7 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 
 	t.image.SetSize(context, imgSize, imgSize)
 	imgP := guigui.Position(t)
-	imgP.X = textP.X + tw + t.textImagePadding(context)
+	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
 	imgP.Y += (h - imgSize) / 2
 	if t.button.isActive() {
 		imgP.Y += int(1 * context.Scale())
@@ -103,7 +103,7 @@ func (t *TextButton) Size(context *guigui.Context) (int, int) {
 	w, _ := t.text.TextSize(context)
 	if t.image.HasImage() {
 		imgSize := int(LineHeight(context))
-		return w + t.textImagePadding(context) + imgSize + UnitSize(context)*3/4, dh
+		return w + textButtonTextAndImagePadding(context) + imgSize + UnitSize(context)*3/4, dh
 	}
 	return w + UnitSize(context), dh
 }
@@ -118,6 +118,6 @@ func (t *TextButton) ResetWidth() {
 	t.widthSet = false
 }
 
-func (t *TextButton) textImagePadding(context *guigui.Context) int {
+func textButtonTextAndImagePadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }

@@ -22,6 +22,10 @@ func (p *PopupMenu) SetOnClosed(f func(index int)) {
 	p.onClosed = f
 }
 
+func (p *PopupMenu) SetHasCheckmark(hasCheckmarks bool) {
+	p.textList.SetHasCheckmark(hasCheckmarks)
+}
+
 func (p *PopupMenu) IsPopup() bool {
 	return true
 }
