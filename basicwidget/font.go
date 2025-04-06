@@ -8,10 +8,10 @@ import (
 	"image/color"
 	"iter"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/rivo/uniseg"
 )
 
 type HorizontalAlign int
@@ -168,79 +168,75 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 	return x, y + paddingY, y + lineHeight - paddingY, true
 }
 
+func graphemes(str string) iter.Seq[string] {
+	return func(yield func(s string) bool) {
+		state := -1
+		for len(str) > 0 {
+			var cluster string
+			cluster, str, _, state = uniseg.StepString(str, state)
+			if !yield(cluster) {
+				return
+			}
+		}
+	}
+}
+
 func visibleCulsters(str string, face text.Face) []text.Glyph {
 	return text.AppendGlyphs(nil, str, face, nil)
 }
 
-func logicalClusters(str string, face text.Face) iter.Seq[text.Glyph] {
-	return func(yield func(g text.Glyph) bool) {
-		gs := text.AppendGlyphs(nil, str, face, nil)
-
-		var lastEndInBytes int
-		for _, g := range gs {
-			for i := range str[lastEndInBytes:g.StartIndexInBytes] {
-				_, size := utf8.DecodeRuneInString(str[lastEndInBytes+i:])
-				if !yield(text.Glyph{
-					StartIndexInBytes: lastEndInBytes + i,
-					EndIndexInBytes:   lastEndInBytes + i + size,
-				}) {
-					return
-				}
-			}
-			if !yield(g) {
-				return
-			}
-			lastEndInBytes = g.EndIndexInBytes
-		}
-
-		for i := range str[lastEndInBytes:] {
-			_, size := utf8.DecodeRuneInString(str[lastEndInBytes+i:])
-			if !yield(text.Glyph{
-				StartIndexInBytes: lastEndInBytes + i,
-				EndIndexInBytes:   lastEndInBytes + i + size,
-			}) {
-				return
-			}
-		}
-	}
-}
-
-func backspaceOnClusters(str string, face text.Face, position int) (string, int) {
-	for c := range logicalClusters(str, face) {
-		if position > c.EndIndexInBytes {
+func backspaceOnGraphemes(str string, position int) (string, int) {
+	var pos int
+	for c := range graphemes(str) {
+		startPos := pos
+		endPos := pos + len(c)
+		if position > endPos {
+			pos = endPos
 			continue
 		}
-		return str[:c.StartIndexInBytes] + str[c.EndIndexInBytes:], c.StartIndexInBytes
+		return str[:startPos] + str[endPos:], startPos
 	}
 	return str, position
 }
 
-func deleteOnClusters(str string, face text.Face, position int) (string, int) {
-	for c := range logicalClusters(str, face) {
-		if position > c.StartIndexInBytes {
+func deleteOnGraphemes(str string, position int) (string, int) {
+	var pos int
+	for c := range graphemes(str) {
+		startPos := pos
+		endPos := pos + len(c)
+		if position > startPos {
+			pos = endPos
 			continue
 		}
-		return str[:c.StartIndexInBytes] + str[c.EndIndexInBytes:], c.StartIndexInBytes
+		return str[:startPos] + str[endPos:], startPos
 	}
 	return str, position
 }
 
-func prevPositionOnClusters(str string, face text.Face, position int) int {
-	for c := range logicalClusters(str, face) {
-		if position > c.EndIndexInBytes {
+func prevPositionOnGraphemes(str string, position int) int {
+	var pos int
+	for c := range graphemes(str) {
+		startPos := pos
+		endPos := pos + len(c)
+		if position > endPos {
+			pos = endPos
 			continue
 		}
-		return c.StartIndexInBytes
+		return startPos
 	}
 	return position
 }
 
-func nextPositionOnClusters(str string, face text.Face, position int) int {
-	for c := range logicalClusters(str, face) {
-		if position > c.StartIndexInBytes {
+func nextPositionOnGraphemes(str string, position int) int {
+	var pos int
+	for c := range graphemes(str) {
+		startPos := pos
+		endPos := pos + len(c)
+		if position > startPos {
+			pos = endPos
 			continue
 		}
-		return c.EndIndexInBytes
+		return endPos
 	}
 	return position
 }

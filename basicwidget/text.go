@@ -451,7 +451,7 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
 			} else if start > 0 {
-				text, pos := backspaceOnClusters(t.field.Text(), face, start)
+				text, pos := backspaceOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
 		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD) ||
@@ -462,13 +462,13 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
 			} else if isDarwin && end < len(t.field.Text()) {
-				text, pos := deleteOnClusters(t.field.Text(), face, end)
+				text, pos := deleteOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
 		case isKeyRepeating(ebiten.KeyDelete):
 			// Delete one cluster
 			if _, end := t.field.Selection(); end < len(t.field.Text()) {
-				text, pos := deleteOnClusters(t.field.Text(), face, end)
+				text, pos := deleteOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
 
@@ -504,17 +504,17 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		start, end := t.field.Selection()
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
 			if t.selectionShiftIndex == end {
-				pos := prevPositionOnClusters(t.field.Text(), face, end)
+				pos := prevPositionOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(t.field.Text(), start, pos, pos)
 			} else {
-				pos := prevPositionOnClusters(t.field.Text(), face, start)
+				pos := prevPositionOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(t.field.Text(), pos, end, pos)
 			}
 		} else {
 			if start != end {
 				t.setTextAndSelection(t.field.Text(), start, start, -1)
 			} else if start > 0 {
-				pos := prevPositionOnClusters(t.field.Text(), face, start)
+				pos := prevPositionOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
 			}
 		}
@@ -523,17 +523,17 @@ func (t *Text) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 		start, end := t.field.Selection()
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
 			if t.selectionShiftIndex == start {
-				pos := nextPositionOnClusters(t.field.Text(), face, start)
+				pos := nextPositionOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(t.field.Text(), pos, end, pos)
 			} else {
-				pos := nextPositionOnClusters(t.field.Text(), face, end)
+				pos := nextPositionOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(t.field.Text(), start, pos, pos)
 			}
 		} else {
 			if start != end {
 				t.setTextAndSelection(t.field.Text(), end, end, -1)
 			} else if start < len(t.field.Text()) {
-				pos := nextPositionOnClusters(t.field.Text(), face, start)
+				pos := nextPositionOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
 			}
 		}
