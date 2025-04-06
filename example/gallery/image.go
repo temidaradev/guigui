@@ -46,15 +46,15 @@ func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image
 	if err != nil {
 		return nil, err
 	}
-	if colorMode == guigui.ColorModeDark {
-		// Create a white image for dark mode.
+	if colorMode == guigui.ColorModeLight {
+		// Create a white image for light mode.
 		rgbaImg := pImg.(draw.Image)
 		b := rgbaImg.Bounds()
 		for j := b.Min.Y; j < b.Max.Y; j++ {
 			for i := b.Min.X; i < b.Max.X; i++ {
 				if _, _, _, a := rgbaImg.At(i, j).RGBA(); a > 0 {
 					a16 := uint16(a)
-					rgbaImg.Set(i, j, color.RGBA64{a16, a16, a16, a16})
+					rgbaImg.Set(i, j, color.RGBA64{0, 0, 0, a16})
 				}
 			}
 		}

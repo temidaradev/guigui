@@ -23,7 +23,6 @@ func (p *PopupMenu) SetOnClosed(f func(index int)) {
 }
 
 func (p *PopupMenu) IsPopup() bool {
-	// ??
 	return true
 }
 
