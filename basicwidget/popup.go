@@ -76,7 +76,7 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 func (p *Popup) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 	if p.showing || p.hiding {
-		return guigui.AbortHandlingInput()
+		return guigui.AbortHandlingInputByWidget(p)
 	}
 
 	// As this editor is a modal dialog, do not let other widgets to handle inputs.
@@ -91,7 +91,7 @@ func (p *Popup) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 			}
 		}
 	}
-	return guigui.AbortHandlingInput()
+	return guigui.AbortHandlingInputByWidget(p)
 }
 
 func (p *Popup) Open() {
@@ -164,7 +164,7 @@ func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWid
 
 func (p *popupContent) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 	if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(p)) {
-		return guigui.AbortHandlingInput()
+		return guigui.AbortHandlingInputByWidget(p)
 	}
 	return guigui.HandleInputResult{}
 }

@@ -30,9 +30,10 @@ func HandleInputByWidget(widget Widget) HandleInputResult {
 	}
 }
 
-func AbortHandlingInput() HandleInputResult {
+func AbortHandlingInputByWidget(widget Widget) HandleInputResult {
 	return HandleInputResult{
 		aborted: true,
+		widget:  widget,
 	}
 }
 
