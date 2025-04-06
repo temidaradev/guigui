@@ -14,7 +14,7 @@ import (
 type Button struct {
 	guigui.DefaultWidget
 
-	mouseOverlay guigui.MouseOverlay
+	hoverOverlay hoverOverlay
 
 	widthMinusDefault  int
 	heightMinusDefault int
@@ -33,7 +33,7 @@ func (b *Button) SetOnUp(f func()) {
 }
 
 func (b *Button) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
-	b.mouseOverlay.SetOnDown(func(mouseButton ebiten.MouseButton, cursorPosition image.Point) {
+	b.hoverOverlay.SetOnDown(func(mouseButton ebiten.MouseButton, cursorPosition image.Point) {
 		if mouseButton != ebiten.MouseButtonLeft {
 			return
 		}
@@ -41,7 +41,7 @@ func (b *Button) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 			b.onDown()
 		}
 	})
-	b.mouseOverlay.SetOnUp(func(mouseButton ebiten.MouseButton, cursorPosition image.Point) {
+	b.hoverOverlay.SetOnUp(func(mouseButton ebiten.MouseButton, cursorPosition image.Point) {
 		if mouseButton != ebiten.MouseButtonLeft {
 			return
 		}
@@ -50,12 +50,12 @@ func (b *Button) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 		}
 	})
 
-	guigui.SetPosition(&b.mouseOverlay, guigui.Position(b))
-	appender.AppendChildWidget(&b.mouseOverlay)
+	guigui.SetPosition(&b.hoverOverlay, guigui.Position(b))
+	appender.AppendChildWidget(&b.hoverOverlay)
 }
 
 func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if guigui.IsEnabled(b) && b.mouseOverlay.IsHovering() {
+	if guigui.IsEnabled(b) && b.hoverOverlay.IsHovering() {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -71,7 +71,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if b.isActive() {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.95, 0.25)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
-	} else if b.mouseOverlay.IsHovering() && guigui.IsEnabled(&b.mouseOverlay) {
+	} else if b.hoverOverlay.IsHovering() && guigui.IsEnabled(&b.hoverOverlay) {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.975, 0.275)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
 	} else if !guigui.IsEnabled(b) {
@@ -82,7 +82,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(b)
 	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
 	border := !b.borderInvisible
-	if b.mouseOverlay.IsHovering() && guigui.IsEnabled(&b.mouseOverlay) {
+	if b.hoverOverlay.IsHovering() && guigui.IsEnabled(&b.hoverOverlay) {
 		border = true
 	}
 	if border || b.isActive() {
@@ -102,7 +102,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (b *Button) isActive() bool {
-	return guigui.IsEnabled(b) && b.mouseOverlay.IsHovering() && b.mouseOverlay.IsPressing()
+	return guigui.IsEnabled(b) && b.hoverOverlay.IsHovering() && b.hoverOverlay.IsPressing()
 }
 
 func defaultButtonSize(context *guigui.Context) (int, int) {

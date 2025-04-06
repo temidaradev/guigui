@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 Hajime Hoshi
 
-package guigui
+package basicwidget
 
 import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+
+	"github.com/hajimehoshi/guigui"
 )
 
-type MouseOverlay struct {
-	DefaultWidget
+type hoverOverlay struct {
+	guigui.DefaultWidget
 
 	hovering      bool
 	pressingLeft  bool
@@ -21,23 +23,23 @@ type MouseOverlay struct {
 	onUp   func(mouseButton ebiten.MouseButton, cursorPosition image.Point)
 }
 
-func (m *MouseOverlay) SetOnDown(f func(mouseButton ebiten.MouseButton, cursorPosition image.Point)) {
+func (m *hoverOverlay) SetOnDown(f func(mouseButton ebiten.MouseButton, cursorPosition image.Point)) {
 	m.onDown = f
 }
 
-func (m *MouseOverlay) SetOnUp(f func(mouseButton ebiten.MouseButton, cursorPosition image.Point)) {
+func (m *hoverOverlay) SetOnUp(f func(mouseButton ebiten.MouseButton, cursorPosition image.Point)) {
 	m.onUp = f
 }
 
-func (m *MouseOverlay) HandleInput(context *Context) HandleInputResult {
+func (m *hoverOverlay) HandleInput(context *guigui.Context) guigui.HandleInputResult {
 	x, y := ebiten.CursorPosition()
-	m.setHovering(image.Pt(x, y).In(VisibleBounds(m)) && IsVisible(m))
+	m.setHovering(image.Pt(x, y).In(guigui.VisibleBounds(m)) && guigui.IsVisible(m))
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-		if !image.Pt(ebiten.CursorPosition()).In(VisibleBounds(m)) {
-			return HandleInputResult{}
+		if !image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(m)) {
+			return guigui.HandleInputResult{}
 		}
-		if IsEnabled(m) {
+		if guigui.IsEnabled(m) {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 				m.setPressing(true, ebiten.MouseButtonLeft)
 			}
@@ -45,8 +47,8 @@ func (m *MouseOverlay) HandleInput(context *Context) HandleInputResult {
 				m.setPressing(true, ebiten.MouseButtonRight)
 			}
 		}
-		Focus(m)
-		return HandleInputByWidget(m)
+		guigui.Focus(m)
+		return guigui.HandleInputByWidget(m)
 	}
 
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && m.pressingLeft ||
@@ -57,11 +59,11 @@ func (m *MouseOverlay) HandleInput(context *Context) HandleInputResult {
 		if m.pressingRight {
 			m.setPressing(false, ebiten.MouseButtonRight)
 		}
-		if !image.Pt(ebiten.CursorPosition()).In(VisibleBounds(m)) {
-			return HandleInputResult{}
+		if !image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(m)) {
+			return guigui.HandleInputResult{}
 		}
-		if IsEnabled(m) {
-			return HandleInputByWidget(m)
+		if guigui.IsEnabled(m) {
+			return guigui.HandleInputByWidget(m)
 		}
 	}
 
@@ -72,17 +74,17 @@ func (m *MouseOverlay) HandleInput(context *Context) HandleInputResult {
 		m.setPressing(false, ebiten.MouseButtonRight)
 	}
 
-	return HandleInputResult{}
+	return guigui.HandleInputResult{}
 }
 
-func (m *MouseOverlay) Update(context *Context) error {
-	if !IsVisible(m) {
+func (m *hoverOverlay) Update(context *guigui.Context) error {
+	if !guigui.IsVisible(m) {
 		m.setHovering(false)
 	}
 	return nil
 }
 
-func (m *MouseOverlay) setPressing(pressing bool, mouseButton ebiten.MouseButton) {
+func (m *hoverOverlay) setPressing(pressing bool, mouseButton ebiten.MouseButton) {
 	switch mouseButton {
 	case ebiten.MouseButtonLeft:
 		if m.pressingLeft == pressing {
@@ -94,8 +96,8 @@ func (m *MouseOverlay) setPressing(pressing bool, mouseButton ebiten.MouseButton
 		}
 	}
 
-	if IsEnabled(m) {
-		if p := image.Pt(ebiten.CursorPosition()); p.In(VisibleBounds(Parent(m))) {
+	if guigui.IsEnabled(m) {
+		if p := image.Pt(ebiten.CursorPosition()); p.In(guigui.VisibleBounds(guigui.Parent(m))) {
 			if pressing {
 				if m.onDown != nil {
 					m.onDown(mouseButton, p)
@@ -114,21 +116,21 @@ func (m *MouseOverlay) setPressing(pressing bool, mouseButton ebiten.MouseButton
 	case ebiten.MouseButtonRight:
 		m.pressingRight = pressing
 	}
-	RequestRedraw(m)
+	guigui.RequestRedraw(m)
 }
 
-func (m *MouseOverlay) setHovering(hovering bool) {
+func (m *hoverOverlay) setHovering(hovering bool) {
 	if m.hovering == hovering {
 		return
 	}
 	m.hovering = hovering
-	RequestRedraw(m)
+	guigui.RequestRedraw(m)
 }
 
-func (m *MouseOverlay) IsPressing() bool {
+func (m *hoverOverlay) IsPressing() bool {
 	return m.pressingLeft || m.pressingRight
 }
 
-func (m *MouseOverlay) IsHovering() bool {
+func (m *hoverOverlay) IsHovering() bool {
 	return m.hovering
 }
