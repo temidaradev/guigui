@@ -530,3 +530,66 @@ func (a *app) drawDebugIfNeeded(screen *ebiten.Image) {
 	screen.DrawImage(a.offscreen, op)
 	screen.DrawImage(a.debugScreen, nil)
 }
+
+func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
+	if !widget.widgetState().isInTree() {
+		return false
+	}
+
+	z := z(widget)
+	for i := len(a.zs) - 1; i >= z; i-- {
+		z := a.zs[i]
+		switch a.hitTestWidgetAt(a.root, widget, point, z) {
+		case hitTestResultNone:
+			continue
+		case hitTestResultOtherHits:
+			return false
+		case hitTestResultTargetHits:
+			return true
+		}
+	}
+	return false
+}
+
+type hitTestResult int
+
+const (
+	hitTestResultNone hitTestResult = 1 << iota
+	hitTestResultOtherHits
+	hitTestResultTargetHits
+)
+
+func (a *app) hitTestWidgetAt(widget Widget, targetWidget Widget, point image.Point, zToHandle int) hitTestResult {
+	widgetState := widget.widgetState()
+	if !widget.widgetState().isVisible() {
+		return hitTestResultNone
+	}
+	if !widget.widgetState().isEnabled() {
+		return hitTestResultNone
+	}
+
+	// Iterate the children in the reverse order of rendering.
+	var result hitTestResult
+	for i := len(widgetState.children) - 1; i >= 0; i-- {
+		child := widgetState.children[i]
+		switch a.hitTestWidgetAt(child, targetWidget, point, zToHandle) {
+		case hitTestResultNone:
+			continue
+		case hitTestResultOtherHits:
+			result = hitTestResultOtherHits
+		case hitTestResultTargetHits:
+			return hitTestResultTargetHits
+		}
+	}
+
+	if zToHandle != z(widget) {
+		return result
+	}
+	if !point.In(VisibleBounds(widget)) {
+		return result
+	}
+	if widget.widgetState() != targetWidget.widgetState() {
+		return hitTestResultOtherHits
+	}
+	return hitTestResultTargetHits
+}

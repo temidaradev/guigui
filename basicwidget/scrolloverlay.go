@@ -29,7 +29,6 @@ type ScrollOverlay struct {
 	offsetX       float64
 	offsetY       float64
 
-	hovering             bool
 	lastCursorX          int
 	lastCursorY          int
 	lastWheelX           float64
@@ -91,8 +90,8 @@ func (s *ScrollOverlay) SetOffset(x, y float64) {
 	}
 }
 
-func (s *ScrollOverlay) setHovering(hovering bool) {
-	s.hovering = hovering
+func (s *ScrollOverlay) isHovered() bool {
+	return guigui.IsWidgetHitAt(s, image.Pt(ebiten.CursorPosition()))
 }
 
 func (s *ScrollOverlay) setDragging(draggingX, draggingY bool) {
@@ -115,9 +114,8 @@ func adjustedWheel() (float64, float64) {
 }
 
 func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	s.setHovering(image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(s)) && guigui.IsVisible(s))
-
-	if s.hovering {
+	hovered := s.isHovered()
+	if hovered {
 		x, y := ebiten.CursorPosition()
 		dx, dy := adjustedWheel()
 		s.lastCursorX = x
@@ -131,7 +129,7 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 		s.lastWheelY = 0
 	}
 
-	if !s.draggingX && !s.draggingY && s.hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	if !s.draggingX && !s.draggingY && hovered && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		x, y := ebiten.CursorPosition()
 		hb, vb := s.barBounds(context)
 		if image.Pt(x, y).In(hb) {
@@ -191,7 +189,7 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 	}
 
 	if dx, dy := adjustedWheel(); dx != 0 || dy != 0 {
-		if !s.hovering {
+		if !hovered {
 			return guigui.HandleInputResult{}
 		}
 		s.setDragging(false, false)
@@ -277,10 +275,6 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 	if s.contentSizeChanged {
 		s.barVisibleTime = barShowingTime()
 		s.contentSizeChanged = false
-	}
-
-	if !guigui.IsVisible(s) {
-		s.setHovering(false)
 	}
 
 	if s.isBarVisible(context) || (s.barVisibleTime == barShowingTime() && s.barOpacity < barMaxOpacity()) {

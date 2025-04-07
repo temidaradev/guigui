@@ -45,6 +45,14 @@ func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidget
 	p.popup.SetCloseByClickingOutside(true)
 	p.updateContentBounds(context)
 	appender.AppendChildWidget(&p.popup)
+
+	// Sync the visibility with the popup.
+	// TODO: This is tricky. Refactor this. Perhaps, introducing Widget.PassThrough might be a good idea.
+	if guigui.IsVisible(&p.popup) {
+		guigui.Show(p)
+	} else {
+		guigui.Hide(p)
+	}
 }
 
 func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
@@ -84,6 +92,7 @@ func (p *PopupMenu) updateContentBounds(context *guigui.Context) {
 
 func (p *PopupMenu) Open(context *guigui.Context) {
 	p.updateContentBounds(context)
+	guigui.Show(p)
 	p.popup.Open()
 }
 

@@ -33,7 +33,7 @@ func (b *Button) SetOnUp(f func()) {
 }
 
 func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if guigui.IsEnabled(b) && b.isHovering() {
+	if guigui.IsEnabled(b) && b.isHovered() {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			if b.onDown != nil {
 				b.onDown()
@@ -51,15 +51,16 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 }
 
 func (b *Button) Update(context *guigui.Context) error {
-	if b.prevHovered != b.isHovering() {
-		b.prevHovered = b.isHovering()
+	hovered := b.isHovered()
+	if b.prevHovered != hovered {
+		b.prevHovered = hovered
 		guigui.RequestRedraw(b)
 	}
 	return nil
 }
 
 func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if guigui.IsEnabled(b) && b.isHovering() {
+	if guigui.IsEnabled(b) && b.isHovered() {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -75,7 +76,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if b.isActive() {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.95, 0.25)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
-	} else if guigui.IsEnabled(b) && b.isHovering() {
+	} else if guigui.IsEnabled(b) && b.isHovered() {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.975, 0.275)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
 	} else if !guigui.IsEnabled(b) {
@@ -86,7 +87,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(b)
 	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
 	border := !b.borderInvisible
-	if guigui.IsEnabled(b) && b.isHovering() {
+	if guigui.IsEnabled(b) && b.isHovered() {
 		border = true
 	}
 	if border || b.isActive() {
@@ -105,16 +106,16 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
+func (b *Button) isHovered() bool {
+	return guigui.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition()))
+}
+
 func (b *Button) isActive() bool {
-	return guigui.IsEnabled(b) && b.isHovering() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	return guigui.IsEnabled(b) && b.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 }
 
 func defaultButtonSize(context *guigui.Context) (int, int) {
 	return 6 * UnitSize(context), UnitSize(context)
-}
-
-func (b *Button) isHovering() bool {
-	return image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(b))
 }
 
 func (b *Button) SetSize(context *guigui.Context, width, height int) {

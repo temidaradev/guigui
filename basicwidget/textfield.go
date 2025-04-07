@@ -20,7 +20,6 @@ type TextField struct {
 	widthMinusDefault  int
 	heightMinusDefault int
 
-	hovering bool
 	readonly bool
 
 	prevFocused bool
@@ -81,9 +80,7 @@ func (t *TextField) Layout(context *guigui.Context, appender *guigui.ChildWidget
 }
 
 func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	x, y := ebiten.CursorPosition()
-	t.hovering = image.Pt(x, y).In(guigui.VisibleBounds(t))
-	if t.hovering {
+	if guigui.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition())) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			guigui.Focus(&t.text)
 			t.text.selectAll()

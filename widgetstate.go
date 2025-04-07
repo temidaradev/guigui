@@ -288,3 +288,7 @@ func isAboveParentZ(widget Widget) bool {
 	}
 	return z(widget) > z(parent)
 }
+
+func IsWidgetHitAt(widget Widget, point image.Point) bool {
+	return theApp.isWidgetHitAt(widget, point)
+}
