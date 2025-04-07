@@ -12,9 +12,8 @@ import (
 type DropdownList struct {
 	guigui.DefaultWidget
 
-	textButton   TextButton
-	popupMenu    PopupMenu
-	onceImageSet bool
+	textButton TextButton
+	popupMenu  PopupMenu
 }
 
 func (d *DropdownList) SetOnValueChanged(f func(index int)) {
@@ -23,21 +22,17 @@ func (d *DropdownList) SetOnValueChanged(f func(index int)) {
 	})
 }
 
-func (d *DropdownList) ensureButtonImage(context *guigui.Context) {
-	if d.onceImageSet {
-		return
-	}
+func (d *DropdownList) updateButtonImage(context *guigui.Context) {
 	img, err := theResourceImages.Get("unfold_more", context.ColorMode())
 	if err != nil {
 		slog.Error(err.Error())
 		return
 	}
 	d.textButton.SetImage(img)
-	d.onceImageSet = true
 }
 
 func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
-	d.ensureButtonImage(context)
+	d.updateButtonImage(context)
 	d.updateText()
 
 	d.popupMenu.SetHasCheckmark(true)
@@ -85,6 +80,6 @@ func (d *DropdownList) SetSelectedItemIndex(index int) {
 
 func (d *DropdownList) Size(context *guigui.Context) (int, int) {
 	// The button image affects the size.
-	d.ensureButtonImage(context)
+	d.updateButtonImage(context)
 	return d.textButton.Size(context)
 }
