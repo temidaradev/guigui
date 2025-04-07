@@ -332,10 +332,6 @@ func (a *app) handleInputWidget(typ handleInputType) HandleInputResult {
 }
 
 func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle int) HandleInputResult {
-	if zToHandle < z(widget) {
-		return HandleInputResult{}
-	}
-
 	widgetState := widget.widgetState()
 	if widgetState.hidden {
 		return HandleInputResult{}
@@ -374,10 +370,6 @@ func (a *app) cursorShape() bool {
 }
 
 func (a *app) doCursorShape(widget Widget, zToHandle int) bool {
-	if zToHandle < z(widget) {
-		return false
-	}
-
 	widgetState := widget.widgetState()
 	if widgetState.hidden {
 		return false
@@ -471,10 +463,6 @@ func (a *app) drawWidget(screen *ebiten.Image) {
 }
 
 func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
-	if zToRender < z(widget) {
-		return
-	}
-
 	vb := VisibleBounds(widget)
 	if vb.Empty() {
 		return
