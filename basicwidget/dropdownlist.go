@@ -23,18 +23,22 @@ func (d *DropdownList) SetOnValueChanged(f func(index int)) {
 	})
 }
 
-func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
-	d.updateText()
-	// TODO: A widget initializer might be better.
-	if !d.onceImageSet {
-		img, err := theResourceImages.Get("unfold_more", context.ColorMode())
-		if err != nil {
-			slog.Error(err.Error())
-			return
-		}
-		d.textButton.SetImage(img)
-		d.onceImageSet = true
+func (d *DropdownList) ensureButtonImage(context *guigui.Context) {
+	if d.onceImageSet {
+		return
 	}
+	img, err := theResourceImages.Get("unfold_more", context.ColorMode())
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
+	d.textButton.SetImage(img)
+	d.onceImageSet = true
+}
+
+func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+	d.ensureButtonImage(context)
+	d.updateText()
 
 	d.popupMenu.SetHasCheckmark(true)
 	d.textButton.SetOnDown(func() {
@@ -80,10 +84,7 @@ func (d *DropdownList) SetSelectedItemIndex(index int) {
 }
 
 func (d *DropdownList) Size(context *guigui.Context) (int, int) {
-	w, h := d.textButton.Size(context)
-	// TODO: This is a little hacky. Refactor this.
-	if !d.onceImageSet {
-		w += int(LineHeight(context)) + textButtonTextAndImagePadding(context)
-	}
-	return w, h
+	// The button image affects the size.
+	d.ensureButtonImage(context)
+	return d.textButton.Size(context)
 }
