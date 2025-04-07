@@ -85,8 +85,8 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
-func (t *TextList) SetHasCheckmark(hasCheckmarks bool) {
-	t.list.SetHasCheckmark(hasCheckmarks)
+func (t *TextList) SetCheckmarkIndex(index int) {
+	t.list.SetCheckmarkIndex(index)
 }
 
 func (t *TextList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {

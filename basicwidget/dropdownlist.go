@@ -35,7 +35,6 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 	d.updateButtonImage(context)
 	d.updateText()
 
-	d.popupMenu.SetHasCheckmark(true)
 	d.textButton.SetOnDown(func() {
 		pt := guigui.Position(d)
 		pt.X -= int(LineHeight(context)) + listItemTextAndImagePadding(context)
@@ -48,6 +47,7 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		// TODO: Chaning the position here might be too late here.
 		// A glitch is visible when the dropdown list is reopened.
 		guigui.SetPosition(&d.popupMenu, pt)
+		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
 		d.popupMenu.Open(context)
 	})
 

@@ -54,7 +54,7 @@ type List struct {
 	hoveredItemIndexPlus1  int
 	showItemBorders        bool
 	style                  ListStyle
-	hasCheckmark           bool
+	checkmarkIndexPlus1    int
 	lastSelectingItemTime  time.Time
 
 	indexToJumpPlus1        int
@@ -83,11 +83,14 @@ func (l *List) SetOnItemSelected(f func(index int)) {
 	l.onItemSelected = f
 }
 
-func (l *List) SetHasCheckmark(hasCheckmark bool) {
-	if l.hasCheckmark == hasCheckmark {
+func (l *List) SetCheckmarkIndex(index int) {
+	if index < 0 {
+		index = -1
+	}
+	if l.checkmarkIndexPlus1 == index+1 {
 		return
 	}
-	l.hasCheckmark = hasCheckmark
+	l.checkmarkIndexPlus1 = index + 1
 	guigui.RequestRedraw(l)
 }
 
@@ -102,7 +105,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
 	p.Y += RoundedCornerRadius(context) + int(offsetY)
 	for i, item := range l.items {
-		if l.hasCheckmark && l.SelectedItemIndex() == i {
+		if l.checkmarkIndexPlus1 == i+1 {
 			mode := context.ColorMode()
 			if l.HoveredItemIndex() == i {
 				mode = guigui.ColorModeDark
@@ -124,7 +127,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		}
 
 		itemP := p
-		if l.hasCheckmark {
+		if l.checkmarkIndexPlus1 > 0 {
 			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		}
 		guigui.SetPosition(item.Content, itemP)
@@ -552,7 +555,7 @@ func (l *List) Size(context *guigui.Context) (int, int) {
 	} else {
 		w = l.defaultWidth(context)
 	}
-	if l.hasCheckmark {
+	if l.checkmarkIndexPlus1 > 0 {
 		w += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 	}
 	if l.heightSet {
