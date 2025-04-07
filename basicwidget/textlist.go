@@ -129,12 +129,9 @@ func (t *TextList) SetItems(items []TextListItem) {
 	listItems := make([]ListItem, len(items))
 	for i, item := range items {
 		if t.textListItemWidgets[i] == nil {
-			t.textListItemWidgets[i] = &textListItemWidget{
-				textList:     t,
-				textListItem: item,
-			}
+			t.textListItemWidgets[i] = newTextListItemWidget(t, item)
 		} else {
-			t.textListItemWidgets[i].textListItem = item
+			t.textListItemWidgets[i].setTextListItem(item)
 		}
 		listItems[i] = t.textListItemWidgets[i].listItem()
 	}
@@ -233,6 +230,20 @@ type textListItemWidget struct {
 	textListItem TextListItem
 
 	text Text
+}
+
+func newTextListItemWidget(textList *TextList, textListItem TextListItem) *textListItemWidget {
+	t := &textListItemWidget{
+		textList:     textList,
+		textListItem: textListItem,
+	}
+	t.text.SetText(t.textString())
+	return t
+}
+
+func (t *textListItemWidget) setTextListItem(textListItem TextListItem) {
+	t.textListItem = textListItem
+	t.text.SetText(t.textString())
 }
 
 /*func newTextListTextItem(settings *model.Settings, textList *TextList, textListItem TextListItem) *textListTextItem {
