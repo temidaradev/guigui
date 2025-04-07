@@ -246,26 +246,6 @@ func (t *textListItemWidget) setTextListItem(textListItem TextListItem) {
 	t.text.SetText(t.textString())
 }
 
-/*func newTextListTextItem(settings *model.Settings, textList *TextList, textListItem TextListItem) *textListTextItem {
-	t := &textListTextItem{
-		textList:     textList,
-		textListItem: textListItem,
-		label:        NewLabel(settings),
-	}
-	t.label.SetText(t.labelText())
-	t.AddChild(t.label, view.LayoutFunc(func(args view.WidgetArgs) image.Rectangle {
-		bounds := args.Bounds
-		if t.textListItem.Header {
-			bounds.Min.X += t.settings.SmallUnitSize(args.Scale)
-			bounds.Max.X -= t.settings.SmallUnitSize(args.Scale)
-			bounds.Min.Y += t.settings.SmallUnitSize(args.Scale)
-			bounds.Max.Y -= t.settings.SmallUnitSize(args.Scale)
-		}
-		return bounds
-	}))
-	return t
-}*/
-
 func (t *textListItemWidget) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
 	p := guigui.Position(t)
 	if t.textListItem.Header {
