@@ -37,7 +37,7 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 
 	d.textButton.SetOnDown(func() {
 		pt := guigui.Position(d)
-		pt.X -= int(LineHeight(context)) + listItemTextAndImagePadding(context)
+		pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		pt.X = max(pt.X, 0)
 		pt.Y -= listItemPadding(context)
 		_, y := d.Size(context)
