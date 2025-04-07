@@ -54,7 +54,7 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 	guigui.SetPosition(&t.button, guigui.Position(t))
 	appender.AppendChildWidget(&t.button)
 
-	imgSize := int(LineHeight(context))
+	imgSize := textButtonImageSize(context)
 
 	tw, _ := t.text.TextSize(context)
 	t.text.SetSize(tw, h)
@@ -102,7 +102,7 @@ func (t *TextButton) Size(context *guigui.Context) (int, int) {
 	}
 	w, _ := t.text.TextSize(context)
 	if t.image.HasImage() {
-		imgSize := int(LineHeight(context))
+		imgSize := textButtonImageSize(context)
 		return w + textButtonTextAndImagePadding(context) + imgSize + UnitSize(context)*3/4, dh
 	}
 	return w + UnitSize(context), dh
@@ -116,6 +116,10 @@ func (t *TextButton) SetWidth(width int) {
 func (t *TextButton) ResetWidth() {
 	t.width = 0
 	t.widthSet = false
+}
+
+func textButtonImageSize(context *guigui.Context) int {
+	return int(LineHeight(context))
 }
 
 func textButtonTextAndImagePadding(context *guigui.Context) int {
