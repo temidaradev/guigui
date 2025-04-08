@@ -40,9 +40,9 @@ func (w *widgetsAndBounds) equals(currentWidgets []Widget) bool {
 	return true
 }
 
-func (w *widgetsAndBounds) redrawIfAboveParentZ(app *app) {
+func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
 	for widget, bounds := range w.bounds {
-		if isAboveParentZ(widget) {
+		if isDifferentParentZ(widget) {
 			app.requestRedraw(bounds)
 			RequestRedraw(widget)
 		}
@@ -88,7 +88,7 @@ func VisibleBounds(widget Widget) image.Rectangle {
 	if parent == nil {
 		return theApp.bounds()
 	}
-	if isAboveParentZ(widget) {
+	if isDifferentParentZ(widget) {
 		return Bounds(widget)
 	}
 	return VisibleBounds(parent).Intersect(Bounds(widget))
@@ -266,12 +266,12 @@ func traverseWidget(widget Widget, f func(widget Widget)) {
 	}
 }
 
-func isAboveParentZ(widget Widget) bool {
+func isDifferentParentZ(widget Widget) bool {
 	parent := widget.widgetState().parent
 	if parent == nil {
 		return false
 	}
-	return widget.Z() > parent.Z()
+	return widget.Z() != parent.Z()
 }
 
 func IsWidgetHitAt(widget Widget, point image.Point) bool {

@@ -271,17 +271,17 @@ func (a *app) requestRedraw(region image.Rectangle) {
 func (a *app) requestRedrawWidget(widget Widget) {
 	a.invalidatedWidgets = append(a.invalidatedWidgets, widget)
 	for _, child := range widget.widgetState().children {
-		theApp.requestRedrawIfAboveParentZ(child)
+		theApp.requestRedrawIfDifferentParentZ(child)
 	}
 }
 
-func (a *app) requestRedrawIfAboveParentZ(widget Widget) {
-	if isAboveParentZ(widget) {
+func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
+	if isDifferentParentZ(widget) {
 		a.requestRedrawWidget(widget)
 		return
 	}
 	for _, child := range widget.widgetState().children {
-		a.requestRedrawIfAboveParentZ(child)
+		a.requestRedrawIfDifferentParentZ(child)
 	}
 }
 
@@ -427,10 +427,10 @@ func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 	if !widgetState.prev.equals(widgetState.children) {
 		a.requestRedraw(VisibleBounds(widget))
 
-		// Widgets above their parents' Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
-		widgetState.prev.redrawIfAboveParentZ(a)
+		// Widgets with different Z from their parent's Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
+		widgetState.prev.redrawIfDifferentParentZ(a)
 		for _, child := range widgetState.children {
-			if isAboveParentZ(child) {
+			if isDifferentParentZ(child) {
 				a.requestRedraw(VisibleBounds(child))
 			}
 		}
