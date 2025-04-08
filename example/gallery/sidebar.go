@@ -44,11 +44,26 @@ func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 		tag  string
 	}
 	items := []item{
-		{"Settings", "settings"},
-		{"Basic", "basic"},
-		{"Buttons", "buttons"},
-		{"Lists", "lists"},
-		{"Popups", "popups"},
+		{
+			text: "Settings",
+			tag:  "settings",
+		},
+		{
+			text: "Basic",
+			tag:  "basic",
+		},
+		{
+			text: "Buttons",
+			tag:  "buttons",
+		},
+		{
+			text: "Lists",
+			tag:  "lists",
+		},
+		{
+			text: "Popups",
+			tag:  "popups",
+		},
 	}
 
 	if len(s.listItemWidgets) == 0 {
