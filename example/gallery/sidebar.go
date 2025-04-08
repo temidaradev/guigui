@@ -16,7 +16,7 @@ type Sidebar struct {
 
 	sidebar         basicwidget.Sidebar
 	list            basicwidget.List
-	listItemWidgets []basicwidget.ListItem
+	listItemWidgets []basicwidget.Text
 
 	initOnce sync.Once
 }
@@ -38,72 +38,43 @@ func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 	appender.AppendChildWidget(&s.sidebar)
 
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
+
+	type item struct {
+		text string
+		tag  string
+	}
+	items := []item{
+		{"Settings", "settings"},
+		{"Basic", "basic"},
+		{"Buttons", "buttons"},
+		{"Lists", "lists"},
+		{"Popups", "popups"},
+	}
+
 	if len(s.listItemWidgets) == 0 {
-		{
-			var t basicwidget.Text
-			t.SetText("Settings")
-			t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			t.SetHeight(basicwidget.UnitSize(context))
-			s.listItemWidgets = append(s.listItemWidgets, basicwidget.ListItem{
-				Content:    &t,
-				Selectable: true,
-				Tag:        "settings",
-			})
-		}
-		{
-			var t basicwidget.Text
-			t.SetText("Basic")
-			t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			t.SetHeight(basicwidget.UnitSize(context))
-			s.listItemWidgets = append(s.listItemWidgets, basicwidget.ListItem{
-				Content:    &t,
-				Selectable: true,
-				Tag:        "basic",
-			})
-		}
-		{
-			var t basicwidget.Text
-			t.SetText("Buttons")
-			t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			t.SetHeight(basicwidget.UnitSize(context))
-			s.listItemWidgets = append(s.listItemWidgets, basicwidget.ListItem{
-				Content:    &t,
-				Selectable: true,
-				Tag:        "buttons",
-			})
-		}
-		{
-			var t basicwidget.Text
-			t.SetText("Lists")
-			t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			t.SetHeight(basicwidget.UnitSize(context))
-			s.listItemWidgets = append(s.listItemWidgets, basicwidget.ListItem{
-				Content:    &t,
-				Selectable: true,
-				Tag:        "lists",
-			})
-		}
-		{
-			var t basicwidget.Text
-			t.SetText("Popups")
-			t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			t.SetHeight(basicwidget.UnitSize(context))
-			s.listItemWidgets = append(s.listItemWidgets, basicwidget.ListItem{
-				Content:    &t,
-				Selectable: true,
-				Tag:        "popups",
-			})
+		s.listItemWidgets = make([]basicwidget.Text, len(items))
+	}
+	listItems := make([]basicwidget.ListItem, len(items))
+	for i, item := range items {
+		t := &s.listItemWidgets[i]
+		t.SetText(item.text)
+		listItems[i] = basicwidget.ListItem{
+			Content:    t,
+			Selectable: true,
+			Tag:        item.tag,
 		}
 	}
-	for i, w := range s.listItemWidgets {
-		t := w.Content.(*basicwidget.Text)
+	for i := range s.listItemWidgets {
+		t := &s.listItemWidgets[i]
+		t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
+		t.SetHeight(basicwidget.UnitSize(context))
 		if s.list.SelectedItemIndex() == i {
 			t.SetColor(basicwidget.DefaultActiveListItemTextColor(context))
 		} else {
 			t.SetColor(basicwidget.DefaultTextColor(context))
 		}
 	}
-	s.list.SetItems(s.listItemWidgets)
+	s.list.SetItems(listItems)
 
 	s.initOnce.Do(func() {
 		s.list.SetSelectedItemIndex(0)
