@@ -6,7 +6,6 @@ package basicwidget
 import (
 	"image"
 	"image/color"
-	"log/slog"
 	"slices"
 	"time"
 
@@ -94,7 +93,7 @@ func (l *List) SetCheckmarkIndex(index int) {
 	guigui.RequestRedraw(l)
 }
 
-func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
 		guigui.SetPosition(&l.listFrame, guigui.Position(l))
 		appender.AppendChildWidget(&l.listFrame)
@@ -123,8 +122,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			}
 			img, err := theResourceImages.Get("check", mode)
 			if err != nil {
-				slog.Error(err.Error())
-				return
+				return err
 			}
 			l.checkmark.SetImage(img)
 
@@ -149,6 +147,8 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 
 	guigui.SetPosition(&l.dragDropOverlay, guigui.Position(l))
 	appender.AppendChildWidget(&l.dragDropOverlay)
+
+	return nil
 }
 
 func (l *List) SelectedItem() (ListItem, bool) {

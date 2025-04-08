@@ -141,7 +141,9 @@ func (a *app) Update() error {
 	a.context.setDeviceScale(ebiten.Monitor().DeviceScaleFactor())
 
 	// Construct the widget tree.
-	a.layout()
+	if err := a.layout(); err != nil {
+		return err
+	}
 
 	// Handle user inputs.
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
@@ -157,7 +159,9 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree again to reflect the latest state.
-	a.layout()
+	if err := a.layout(); err != nil {
+		return err
+	}
 
 	if !a.cursorShape() {
 		ebiten.SetCursorShape(ebiten.CursorShapeDefault)
@@ -288,8 +292,10 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 	}
 }
 
-func (a *app) layout() {
-	a.doLayout(a.root)
+func (a *app) layout() error {
+	if err := a.doLayout(a.root); err != nil {
+		return err
+	}
 
 	// Calculate z values.
 	clear(a.visitedZs)
@@ -303,9 +309,11 @@ func (a *app) layout() {
 	a.zs = slices.Delete(a.zs, 0, len(a.zs))
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
 	slices.Sort(a.zs)
+
+	return nil
 }
 
-func (a *app) doLayout(widget Widget) {
+func (a *app) doLayout(widget Widget) error {
 	widgetState := widget.widgetState()
 	widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
 	widget.Layout(&a.context, &ChildWidgetAppender{
@@ -313,8 +321,11 @@ func (a *app) doLayout(widget Widget) {
 		widget: widget,
 	})
 	for _, child := range widgetState.children {
-		a.doLayout(child)
+		if err := a.doLayout(child); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 type handleInputType int

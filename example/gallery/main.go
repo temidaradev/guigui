@@ -25,7 +25,7 @@ type Root struct {
 	popups   Popups
 }
 
-func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidget(&r.sidebar)
 
 	guigui.SetPosition(&r.sidebar, guigui.Position(r))
@@ -50,6 +50,8 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	case "popups":
 		appender.AppendChildWidget(&r.popups)
 	}
+
+	return nil
 }
 
 func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {

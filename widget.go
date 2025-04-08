@@ -8,7 +8,7 @@ import (
 )
 
 type Widget interface {
-	Layout(context *Context, appender *ChildWidgetAppender)
+	Layout(context *Context, appender *ChildWidgetAppender) error
 	HandlePointingInput(context *Context) HandleInputResult
 	HandleButtonInput(context *Context) HandleInputResult
 	Update(context *Context) error

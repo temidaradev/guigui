@@ -24,7 +24,7 @@ type Root struct {
 	counter int
 }
 
-func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	{
 		w, h := r.Size(context)
 		w -= 2 * basicwidget.UnitSize(context)
@@ -91,6 +91,8 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		guigui.SetPosition(&r.decButton, p)
 		appender.AppendChildWidget(&r.decButton)
 	}
+
+	return nil
 }
 
 func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {

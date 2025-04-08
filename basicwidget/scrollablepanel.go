@@ -33,7 +33,7 @@ func (s *ScrollablePanel) SetPadding(paddingX, paddingY int) {
 	s.paddingY = paddingY
 }
 
-func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.childWidgets.reset()
 	if s.setContentFunc != nil {
 		offsetX, offsetY := s.scollOverlay.Offset()
@@ -59,6 +59,8 @@ func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.Child
 	s.border.scrollOverlay = &s.scollOverlay
 	guigui.SetPosition(&s.border, p)
 	appender.AppendChildWidget(&s.border)
+
+	return nil
 }
 
 func defaultScrollablePanelSize(context *guigui.Context) (int, int) {

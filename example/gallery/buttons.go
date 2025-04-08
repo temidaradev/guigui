@@ -20,19 +20,16 @@ type Buttons struct {
 	textImageButton     basicwidget.TextButton
 	toggleButtonText    basicwidget.Text
 	toggleButton        basicwidget.ToggleButton
-
-	err error
 }
 
-func (b *Buttons) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (b *Buttons) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Button")
 	b.textImageButtonText.SetText("Text w/ Image Button")
 	b.textImageButton.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
-		b.err = err
-		return
+		return err
 	}
 	b.textImageButton.SetImage(img)
 	b.toggleButtonText.SetText("Toggle Button")
@@ -58,12 +55,7 @@ func (b *Buttons) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 		},
 	})
 	appender.AppendChildWidget(&b.form)
-}
 
-func (b *Buttons) Update(context *guigui.Context) error {
-	if b.err != nil {
-		return b.err
-	}
 	return nil
 }
 

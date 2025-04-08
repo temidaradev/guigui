@@ -123,7 +123,7 @@ func (t *Text) resetCachedSize() {
 	t.cachedHeight = -1
 }
 
-func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.initOnce.Do(func() {
 		t.resetCachedSize()
 	})
@@ -138,6 +138,8 @@ func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	guigui.Hide(&t.scrollOverlay)
 	guigui.SetPosition(&t.scrollOverlay, guigui.Position(t))
 	appender.AppendChildWidget(&t.scrollOverlay)
+
+	return nil
 }
 
 func (t *Text) SetSelectable(selectable bool) {

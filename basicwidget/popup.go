@@ -58,7 +58,7 @@ func (p *Popup) SetCloseByClickingOutside(closeByClickingOutside bool) {
 	p.closeByClickingOutside = closeByClickingOutside
 }
 
-func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.initOnce.Do(func() {
 		guigui.Hide(p)
 	})
@@ -70,6 +70,8 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	appender.AppendChildWidget(&p.content)
 	p.frame.popup = p
 	appender.AppendChildWidget(&p.frame)
+
+	return nil
 }
 
 func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
@@ -154,7 +156,7 @@ func (p *popupContent) setContent(f func(context *guigui.Context, childAppender 
 	p.setContentFunc = f
 }
 
-func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.childWidgets.reset()
 	if p.setContentFunc != nil {
 		p.setContentFunc(context, &p.childWidgets)
@@ -162,6 +164,8 @@ func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWid
 	for _, childWidget := range p.childWidgets.iter() {
 		appender.AppendChildWidget(childWidget)
 	}
+
+	return nil
 }
 
 func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {

@@ -48,7 +48,7 @@ func (t *TextButton) SetTextColor(clr color.Color) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := t.Size(context)
 	t.button.SetSize(context, w, h)
 	guigui.SetPosition(&t.button, guigui.Position(t))
@@ -87,6 +87,8 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 	}
 	guigui.SetPosition(&t.image, imgP)
 	appender.AppendChildWidget(&t.image)
+
+	return nil
 }
 
 func (t *TextButton) Size(context *guigui.Context) (int, int) {

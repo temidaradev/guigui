@@ -58,7 +58,7 @@ func (t *TextField) SelectAll() {
 	t.text.selectAll()
 }
 
-func (t *TextField) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (t *TextField) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.text.SetEditable(true)
 	b := guigui.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
@@ -77,6 +77,8 @@ func (t *TextField) Layout(context *guigui.Context, appender *guigui.ChildWidget
 		guigui.SetPosition(&t.focus, p)
 		appender.AppendChildWidget(&t.focus)
 	}
+
+	return nil
 }
 
 func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {

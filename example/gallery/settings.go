@@ -27,7 +27,7 @@ type Settings struct {
 	initOnce sync.Once
 }
 
-func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
 	s.colorModeDropdownList.SetItemsByStrings([]string{"Light", "Dark"})
 	s.colorModeDropdownList.SetOnValueChanged(func(index int) {
@@ -98,6 +98,8 @@ func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetA
 		guigui.SetPosition(&s.form, p)
 		appender.AppendChildWidget(&s.form)
 	}
+
+	return nil
 }
 
 func (s *Settings) Size(context *guigui.Context) (int, int) {

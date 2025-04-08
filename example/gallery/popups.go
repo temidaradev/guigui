@@ -33,7 +33,7 @@ type Popups struct {
 	contextMenuPopup basicwidget.PopupMenu
 }
 
-func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.blurBackgroundText.SetText("Blur Background")
 	p.closeByClickingOutsideText.SetText("Close by Clicking Outside")
 	p.showButton.SetText("Show")
@@ -112,6 +112,8 @@ func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 	appender.AppendChildWidget(&p.contextMenuPopup)
+
+	return nil
 }
 
 func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {

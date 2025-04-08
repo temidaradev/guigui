@@ -26,7 +26,7 @@ func (p *PopupMenu) SetCheckmarkIndex(index int) {
 	p.textList.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.popup.SetContent(func(context *guigui.Context, childAppender *ContainerChildWidgetAppender) {
 		p.textList.SetStyle(ListStyleMenu)
 		p.textList.list.SetOnItemSelected(func(index int) {
@@ -49,6 +49,8 @@ func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidget
 	} else {
 		guigui.Hide(p)
 	}
+
+	return nil
 }
 
 func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {

@@ -31,7 +31,7 @@ func (d *DropdownList) updateButtonImage(context *guigui.Context) {
 	d.textButton.SetImage(img)
 }
 
-func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	d.updateButtonImage(context)
 	d.updateText()
 
@@ -54,6 +54,8 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 	guigui.SetPosition(&d.textButton, guigui.Position(d))
 	appender.AppendChildWidget(&d.textButton)
 	appender.AppendChildWidget(&d.popupMenu)
+
+	return nil
 }
 
 func (d *DropdownList) updateText() {

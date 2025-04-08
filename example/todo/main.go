@@ -49,7 +49,7 @@ type Root struct {
 	tasks []Task
 }
 
-func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
 	width, _ := r.Size(context)
@@ -129,6 +129,8 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		}
 		delete(r.taskWidgets, id)
 	}
+
+	return nil
 }
 
 func (r *Root) canCreateTask() bool {
