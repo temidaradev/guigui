@@ -14,12 +14,12 @@ type DropdownList struct {
 
 	textButton TextButton
 	popupMenu  PopupMenu
+
+	onValueChanged func(index int)
 }
 
 func (d *DropdownList) SetOnValueChanged(f func(index int)) {
-	d.popupMenu.SetOnClosed(func(index int) {
-		f(index)
-	})
+	d.onValueChanged = f
 }
 
 func (d *DropdownList) updateButtonImage(context *guigui.Context) {
@@ -50,6 +50,12 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
 		d.popupMenu.Open(context)
 	})
+	d.popupMenu.SetOnClosed(func(index int) {
+		if d.onValueChanged != nil {
+			d.onValueChanged(index)
+		}
+	})
+	d.textButton.SetForcePressed(guigui.IsVisible(&d.popupMenu))
 
 	guigui.SetPosition(&d.textButton, guigui.Position(d))
 	appender.AppendChildWidget(&d.textButton)

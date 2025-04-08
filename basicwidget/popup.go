@@ -39,6 +39,8 @@ type Popup struct {
 	closeByClickingOutside bool
 
 	initOnce sync.Once
+
+	onClosed func()
 }
 
 func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)) {
@@ -56,6 +58,10 @@ func (p *Popup) SetBackgroundBlurred(blurBackground bool) {
 
 func (p *Popup) SetCloseByClickingOutside(closeByClickingOutside bool) {
 	p.closeByClickingOutside = closeByClickingOutside
+}
+
+func (p *Popup) SetOnClosed(f func()) {
+	p.onClosed = f
 }
 
 func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -103,6 +109,9 @@ func (p *Popup) Open() {
 func (p *Popup) Close() {
 	p.showing = false
 	p.hiding = true
+	if p.onClosed != nil {
+		p.onClosed()
+	}
 }
 
 func (p *Popup) Update(context *guigui.Context) error {

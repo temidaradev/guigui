@@ -16,6 +16,7 @@ import (
 type ToggleButton struct {
 	guigui.DefaultWidget
 
+	pressed      bool
 	value        bool
 	onceRendered bool
 	prevHovered  bool
@@ -55,8 +56,12 @@ func toggleButtonMaxCount() int {
 
 func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if guigui.IsEnabled(t) && t.isHovered() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		t.pressed = true
 		t.SetValue(!t.value)
 		return guigui.HandleInputByWidget(t)
+	}
+	if !guigui.IsEnabled(t) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		t.pressed = false
 	}
 	return guigui.HandleInputResult{}
 }
@@ -75,7 +80,7 @@ func (t *ToggleButton) Update(context *guigui.Context) error {
 }
 
 func (t *ToggleButton) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if guigui.IsEnabled(t) && t.isHovered() {
+	if t.canPress() || t.pressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -93,7 +98,7 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.isActive() {
 		thumbColor = Color2(cm, ColorTypeBase, 0.95, 0.55)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
-	} else if guigui.IsEnabled(t) && t.isHovered() {
+	} else if t.canPress() {
 		thumbColor = Color2(cm, ColorTypeBase, 0.975, 0.575)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
 	} else if !guigui.IsEnabled(t) {
@@ -139,12 +144,16 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	t.onceRendered = true
 }
 
+func (t *ToggleButton) canPress() bool {
+	return guigui.IsEnabled(t) && t.isHovered() && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+}
+
 func (t *ToggleButton) isHovered() bool {
 	return guigui.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition()))
 }
 
 func (t *ToggleButton) isActive() bool {
-	return guigui.IsEnabled(t) && t.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	return guigui.IsEnabled(t) && t.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && t.pressed
 }
 
 func (t *ToggleButton) Size(context *guigui.Context) (int, int) {

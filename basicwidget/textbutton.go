@@ -48,6 +48,10 @@ func (t *TextButton) SetTextColor(clr color.Color) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *TextButton) SetForcePressed(forcePressed bool) {
+	t.button.SetForcePressed(forcePressed)
+}
+
 func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := t.Size(context)
 	t.button.SetSize(context, w, h)

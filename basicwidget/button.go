@@ -15,6 +15,8 @@ import (
 type Button struct {
 	guigui.DefaultWidget
 
+	pressed            bool
+	forcePressed       bool
 	widthMinusDefault  int
 	heightMinusDefault int
 	borderInvisible    bool
@@ -35,17 +37,22 @@ func (b *Button) SetOnUp(f func()) {
 func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if guigui.IsEnabled(b) && b.isHovered() {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			b.pressed = true
 			if b.onDown != nil {
 				b.onDown()
 			}
 			return guigui.HandleInputByWidget(b)
 		}
-		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && b.pressed {
+			b.pressed = false
 			if b.onUp != nil {
 				b.onUp()
 			}
 			return guigui.HandleInputByWidget(b)
 		}
+	}
+	if !guigui.IsEnabled(b) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		b.pressed = false
 	}
 	return guigui.HandleInputResult{}
 }
@@ -60,7 +67,7 @@ func (b *Button) Update(context *guigui.Context) error {
 }
 
 func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if guigui.IsEnabled(b) && b.isHovered() {
+	if b.canPress() || b.pressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -73,10 +80,10 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	cm := context.ColorMode()
 	backgroundColor := Color2(cm, ColorTypeBase, 1, 0.3)
 	borderColor := Color2(cm, ColorTypeBase, 0.7, 0)
-	if b.isActive() {
+	if b.isActive() || b.forcePressed {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.95, 0.25)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
-	} else if guigui.IsEnabled(b) && b.isHovered() {
+	} else if b.canPress() {
 		backgroundColor = Color2(cm, ColorTypeBase, 0.975, 0.275)
 		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
 	} else if !guigui.IsEnabled(b) {
@@ -87,17 +94,17 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(b)
 	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
 	border := !b.borderInvisible
-	if guigui.IsEnabled(b) && b.isHovered() {
+	if guigui.IsEnabled(b) && b.isHovered() || b.forcePressed {
 		border = true
 	}
-	if border || b.isActive() {
+	if border || b.isActive() || b.forcePressed {
 		bounds := bounds.Inset(int(1 * context.Scale()))
 		DrawRoundedRect(context, dst, bounds, backgroundColor, r)
 	}
 
 	if border {
 		borderType := RoundedRectBorderTypeOutset
-		if b.isActive() {
+		if b.isActive() || b.forcePressed {
 			borderType = RoundedRectBorderTypeInset
 		} else if !guigui.IsEnabled(b) {
 			borderType = RoundedRectBorderTypeRegular
@@ -106,12 +113,20 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
+func (b *Button) canPress() bool {
+	return guigui.IsEnabled(b) && b.isHovered() && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+}
+
 func (b *Button) isHovered() bool {
 	return guigui.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition()))
 }
 
 func (b *Button) isActive() bool {
-	return guigui.IsEnabled(b) && b.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	return guigui.IsEnabled(b) && b.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && b.pressed
+}
+
+func (b *Button) SetForcePressed(pressed bool) {
+	b.forcePressed = pressed
 }
 
 func defaultButtonSize(context *guigui.Context) (int, int) {
