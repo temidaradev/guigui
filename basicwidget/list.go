@@ -6,7 +6,6 @@ package basicwidget
 import (
 	"image"
 	"image/color"
-	"log/slog"
 	"slices"
 	"time"
 
@@ -106,17 +105,6 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	p.Y += RoundedCornerRadius(context) + int(offsetY)
 	for i, item := range l.items {
 		if l.checkmarkIndexPlus1 == i+1 {
-			mode := context.ColorMode()
-			if l.HoveredItemIndex() == i {
-				mode = guigui.ColorModeDark
-			}
-			img, err := theResourceImages.Get("check", mode)
-			if err != nil {
-				slog.Error(err.Error())
-				return
-			}
-			l.checkmark.SetImage(img)
-
 			imgSize := listItemCheckmarkSize(context)
 			l.checkmark.SetSize(context, imgSize, imgSize)
 			imgP := p
@@ -381,6 +369,19 @@ func (l *List) Update(context *guigui.Context) error {
 		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
 		l.scrollOverlay.SetOffset(0, float64(-y))
 		l.indexToJumpPlus1 = 0
+	}
+
+	// Update the image here, as hovering state can be changed at HandlePointingInput.
+	if l.checkmarkIndexPlus1 > 0 {
+		mode := context.ColorMode()
+		if l.checkmarkIndexPlus1 == l.HoveredItemIndex()+1 {
+			mode = guigui.ColorModeDark
+		}
+		img, err := theResourceImages.Get("check", mode)
+		if err != nil {
+			return err
+		}
+		l.checkmark.SetImage(img)
 	}
 
 	return nil
