@@ -537,7 +537,7 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 	}
 
 	z := widget.Z()
-	for i := len(a.zs) - 1; i >= z; i-- {
+	for i := len(a.zs) - 1; i >= 0 && a.zs[i] >= z; i-- {
 		z := a.zs[i]
 		switch a.hitTestWidgetAt(a.root, widget, point, z) {
 		case hitTestResultNone:
