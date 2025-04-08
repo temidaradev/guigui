@@ -1033,8 +1033,8 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), Color(context.ColorMode(), ColorTypeAccent, 0.4), false)
 }
 
-func (t *textCursor) IsPopup() bool {
-	return true
+func (t *textCursor) Z() int {
+	return guigui.Parent(t).Z() + 1
 }
 
 func (t *textCursor) Size(context *guigui.Context) (int, int) {

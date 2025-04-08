@@ -26,10 +26,6 @@ func (p *PopupMenu) SetCheckmarkIndex(index int) {
 	p.textList.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu) IsPopup() bool {
-	return true
-}
-
 func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
 	p.popup.SetContent(func(context *guigui.Context, childAppender *ContainerChildWidgetAppender) {
 		p.textList.SetStyle(ListStyleMenu)
@@ -88,6 +84,10 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 
 func (p *PopupMenu) updateContentBounds(context *guigui.Context) {
 	p.popup.SetContentBounds(p.contentBounds(context))
+}
+
+func (p *PopupMenu) Z() int {
+	return guigui.Parent(p).Z() + popupZ
 }
 
 func (p *PopupMenu) Open(context *guigui.Context) {

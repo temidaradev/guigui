@@ -13,6 +13,8 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
+const popupZ = 16
+
 func easeOutQuad(t float64) float64 {
 	// https://greweb.me/2012/02/bezier-curve-based-easing-functions-from-concept-to-implementation
 	// easeOutQuad
@@ -37,10 +39,6 @@ type Popup struct {
 	closeByClickingOutside bool
 
 	initOnce sync.Once
-}
-
-func (p *Popup) IsPopup() bool {
-	return true
 }
 
 func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)) {
@@ -132,6 +130,10 @@ func (p *Popup) Update(context *guigui.Context) error {
 
 func (p *Popup) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
 	return ebiten.CursorShapeDefault, true
+}
+
+func (p *Popup) Z() int {
+	return guigui.Parent(p).Z() + popupZ
 }
 
 func (p *Popup) Size(context *guigui.Context) (int, int) {

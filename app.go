@@ -294,7 +294,7 @@ func (a *app) layout() {
 		if a.visitedZs == nil {
 			a.visitedZs = map[int]struct{}{}
 		}
-		a.visitedZs[z(widget)] = struct{}{}
+		a.visitedZs[widget.Z()] = struct{}{}
 	})
 
 	a.zs = slices.Delete(a.zs, 0, len(a.zs))
@@ -345,7 +345,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 		}
 	}
 
-	if zToHandle != z(widget) {
+	if zToHandle != widget.Z() {
 		return HandleInputResult{}
 	}
 
@@ -383,7 +383,7 @@ func (a *app) doCursorShape(widget Widget, zToHandle int) bool {
 		}
 	}
 
-	if zToHandle != z(widget) {
+	if zToHandle != widget.Z() {
 		return false
 	}
 
@@ -477,7 +477,7 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 	}
 
 	var origDst *ebiten.Image
-	renderCurrent := zToRender == z(widget)
+	renderCurrent := zToRender == widget.Z()
 	if renderCurrent {
 		if widgetState.opacity() < 1 {
 			origDst = dst
@@ -536,7 +536,7 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 		return false
 	}
 
-	z := z(widget)
+	z := widget.Z()
 	for i := len(a.zs) - 1; i >= z; i-- {
 		z := a.zs[i]
 		switch a.hitTestWidgetAt(a.root, widget, point, z) {
@@ -582,7 +582,7 @@ func (a *app) hitTestWidgetAt(widget Widget, targetWidget Widget, point image.Po
 		}
 	}
 
-	if zToHandle != z(widget) {
+	if zToHandle != widget.Z() {
 		return result
 	}
 	if !point.In(VisibleBounds(widget)) {

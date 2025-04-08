@@ -266,27 +266,12 @@ func traverseWidget(widget Widget, f func(widget Widget)) {
 	}
 }
 
-func z(widget Widget) int {
-	parent := widget.widgetState().parent
-	if parent == nil {
-		if widget.IsPopup() {
-			return 1
-		}
-		return 0
-	}
-	z := z(parent)
-	if widget.IsPopup() {
-		z++
-	}
-	return z
-}
-
 func isAboveParentZ(widget Widget) bool {
 	parent := widget.widgetState().parent
 	if parent == nil {
 		return false
 	}
-	return z(widget) > z(parent)
+	return widget.Z() > parent.Z()
 }
 
 func IsWidgetHitAt(widget Widget, point image.Point) bool {

@@ -14,7 +14,7 @@ type Widget interface {
 	Update(context *Context) error
 	CursorShape(context *Context) (ebiten.CursorShapeType, bool)
 	Draw(context *Context, dst *ebiten.Image)
-	IsPopup() bool
+	Z() int
 	Size(context *Context) (int, int)
 
 	widgetState() *widgetState

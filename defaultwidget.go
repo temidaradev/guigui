@@ -31,8 +31,11 @@ func (*DefaultWidget) CursorShape(context *Context) (ebiten.CursorShapeType, boo
 func (*DefaultWidget) Draw(context *Context, dst *ebiten.Image) {
 }
 
-func (*DefaultWidget) IsPopup() bool {
-	return false
+func (d *DefaultWidget) Z() int {
+	if d.widgetState_.parent == nil {
+		return 0
+	}
+	return d.widgetState_.parent.Z()
 }
 
 func (d *DefaultWidget) Size(context *Context) (int, int) {

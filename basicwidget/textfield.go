@@ -143,8 +143,8 @@ func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
 	DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeAccent, 0.8), int(4*context.Scale())+RoundedCornerRadius(context), float32(4*context.Scale()), RoundedRectBorderTypeRegular)
 }
 
-func (t *textFieldFocus) IsPopup() bool {
-	return true
+func (t *textFieldFocus) Z() int {
+	return guigui.Parent(t).Z() + 1
 }
 
 func (t *textFieldFocus) Size(context *guigui.Context) (int, int) {
