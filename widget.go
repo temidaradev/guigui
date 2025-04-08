@@ -38,7 +38,7 @@ func AbortHandlingInputByWidget(widget Widget) HandleInputResult {
 	}
 }
 
-func (r *HandleInputResult) ShouldRaise() bool {
+func (r *HandleInputResult) shouldRaise() bool {
 	return r.widget != nil || r.aborted
 }
 

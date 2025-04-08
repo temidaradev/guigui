@@ -327,7 +327,7 @@ const (
 func (a *app) handleInputWidget(typ handleInputType) HandleInputResult {
 	for i := len(a.zs) - 1; i >= 0; i-- {
 		z := a.zs[i]
-		if r := a.doHandleInputWidget(typ, a.root, z); r.ShouldRaise() {
+		if r := a.doHandleInputWidget(typ, a.root, z); r.shouldRaise() {
 			return r
 		}
 	}
@@ -343,7 +343,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 	// Iterate the children in the reverse order of rendering.
 	for i := len(widgetState.children) - 1; i >= 0; i-- {
 		child := widgetState.children[i]
-		if r := a.doHandleInputWidget(typ, child, zToHandle); r.ShouldRaise() {
+		if r := a.doHandleInputWidget(typ, child, zToHandle); r.shouldRaise() {
 			return r
 		}
 	}
