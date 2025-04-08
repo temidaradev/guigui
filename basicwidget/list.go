@@ -48,13 +48,13 @@ type List struct {
 	scrollOverlay   ScrollOverlay
 	dragDropOverlay DragDropOverlay
 
-	items                  []ListItem
-	selectedItemIndexPlus1 int
-	hoveredItemIndexPlus1  int
-	showItemBorders        bool
-	style                  ListStyle
-	checkmarkIndexPlus1    int
-	lastSelectingItemTime  time.Time
+	items                      []ListItem
+	selectedItemIndexPlus1     int
+	showItemBorders            bool
+	style                      ListStyle
+	checkmarkIndexPlus1        int
+	lastHoverredItemIndexPlus1 int
+	lastSelectingItemTime      time.Time // TODO: Use ebiten.Tick.
 
 	indexToJumpPlus1        int
 	dropSrcIndexPlus1       int
@@ -110,6 +110,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	guigui.SetPosition(&l.scrollOverlay, guigui.Position(l))
 	appender.AppendChildWidget(&l.scrollOverlay)
 
+	hoveredItemIndex := l.HoveredItemIndex(context)
 	p := guigui.Position(l)
 	_, offsetY := l.scrollOverlay.Offset()
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
@@ -117,7 +118,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	for i, item := range l.items {
 		if l.checkmarkIndexPlus1 == i+1 {
 			mode := context.ColorMode()
-			if l.checkmarkIndexPlus1 == l.HoveredItemIndex()+1 {
+			if l.checkmarkIndexPlus1 == hoveredItemIndex+1 {
 				mode = guigui.ColorModeDark
 			}
 			img, err := theResourceImages.Get("check", mode)
@@ -148,6 +149,11 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	guigui.SetPosition(&l.dragDropOverlay, guigui.Position(l))
 	appender.AppendChildWidget(&l.dragDropOverlay)
 
+	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
+		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
+		guigui.RequestRedraw(l)
+	}
+
 	return nil
 }
 
@@ -170,8 +176,26 @@ func (l *List) SelectedItemIndex() int {
 	return l.selectedItemIndexPlus1 - 1
 }
 
-func (l *List) HoveredItemIndex() int {
-	return l.hoveredItemIndexPlus1 - 1
+func (l *List) HoveredItemIndex(context *guigui.Context) int {
+	if !guigui.IsWidgetHitAt(l, image.Pt(ebiten.CursorPosition())) {
+		return -1
+	}
+	_, y := ebiten.CursorPosition()
+	_, offsetY := l.scrollOverlay.Offset()
+	y -= RoundedCornerRadius(context)
+	y -= guigui.Position(l).Y
+	y -= int(offsetY)
+	index := -1
+	var cy int
+	for i, item := range l.items {
+		_, h := item.Content.Size(context)
+		if cy <= y && y < cy+h {
+			index = i
+			break
+		}
+		cy += h
+	}
+	return index
 }
 
 func (l *List) SetItems(items []ListItem) {
@@ -218,19 +242,6 @@ func (l *List) JumpToItemIndex(index int) {
 		return
 	}
 	l.indexToJumpPlus1 = index + 1
-}
-
-func (l *List) setHoveredItemIndex(index int) {
-	if index < 0 || index >= len(l.items) {
-		index = -1
-	}
-	if l.HoveredItemIndex() == index {
-		return
-	}
-	l.hoveredItemIndexPlus1 = index + 1
-	if l.isHoveringVisible() {
-		guigui.RequestRedraw(l)
-	}
 }
 
 func (l *List) ShowItemBorders(show bool) {
@@ -308,74 +319,58 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 		return guigui.HandleInputByWidget(l)
 	}
 
-	if x, y := ebiten.CursorPosition(); image.Pt(x, y).In(guigui.VisibleBounds(l)) {
-		_, offsetY := l.scrollOverlay.Offset()
-		y -= RoundedCornerRadius(context)
-		y -= guigui.Position(l).Y
-		y -= int(offsetY)
-		index := -1
-		var cy int
-		for i, item := range l.items {
-			_, h := item.Content.Size(context)
-			if cy <= y && y < cy+h {
-				index = i
-				break
-			}
-			cy += h
-		}
-		l.setHoveredItemIndex(index)
-		if index >= 0 && index < len(l.items) {
-			left := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
-			right := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight)
+	index := l.HoveredItemIndex(context)
+	if index >= 0 && index < len(l.items) {
+		x, y := ebiten.CursorPosition()
+		left := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
+		right := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight)
 
-			switch {
-			case left || right:
-				if !l.items[index].Selectable {
-					return guigui.HandleInputByWidget(l)
-				}
-
-				wasFocused := guigui.IsFocused(l)
-				guigui.Focus(l)
-				if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
-					l.SetSelectedItemIndex(index)
-					l.lastSelectingItemTime = time.Now()
-				}
-				l.pressStartX = x
-				l.pressStartY = y
-				if right {
-					/*if l.callback != nil && l.callback.OnContextMenu != nil {
-						x, y := ebiten.CursorPosition()
-						l.callback.OnContextMenu(index, x, y)
-					}*/
-				}
-				l.startPressingIndexPlus1 = index + 1
-				l.startPressingLeft = left
-
-			case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
-				if l.items[index].Draggable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
-					l.dragDropOverlay.Start(index)
-				}
-
-			case inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft):
-				if l.SelectedItemIndex() == index && l.startPressingLeft && time.Since(l.lastSelectingItemTime) > 400*time.Millisecond {
-					/*if l.callback != nil && l.callback.OnItemEditStarted != nil {
-						l.callback.OnItemEditStarted(index)
-					}*/
-				}
-				l.pressStartX = 0
-				l.pressStartY = 0
-				l.startPressingIndexPlus1 = 0
-				l.startPressingLeft = false
+		switch {
+		case left || right:
+			if !l.items[index].Selectable {
+				return guigui.HandleInputByWidget(l)
 			}
 
-			return guigui.HandleInputByWidget(l)
+			wasFocused := guigui.IsFocused(l)
+			guigui.Focus(l)
+			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
+				l.SetSelectedItemIndex(index)
+				l.lastSelectingItemTime = time.Now()
+			}
+			l.pressStartX = x
+			l.pressStartY = y
+			if right {
+				/*if l.callback != nil && l.callback.OnContextMenu != nil {
+					x, y := ebiten.CursorPosition()
+					l.callback.OnContextMenu(index, x, y)
+				}*/
+			}
+			l.startPressingIndexPlus1 = index + 1
+			l.startPressingLeft = left
+
+		case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
+			if l.items[index].Draggable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
+				l.dragDropOverlay.Start(index)
+			}
+
+		case inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft):
+			if l.SelectedItemIndex() == index && l.startPressingLeft && time.Since(l.lastSelectingItemTime) > 400*time.Millisecond {
+				/*if l.callback != nil && l.callback.OnItemEditStarted != nil {
+					l.callback.OnItemEditStarted(index)
+				}*/
+			}
+			l.pressStartX = 0
+			l.pressStartY = 0
+			l.startPressingIndexPlus1 = 0
+			l.startPressingLeft = false
 		}
-		l.dropSrcIndexPlus1 = 0
-		l.pressStartX = 0
-		l.pressStartY = 0
-	} else {
-		l.setHoveredItemIndex(-1)
+
+		return guigui.HandleInputByWidget(l)
 	}
+
+	l.dropSrcIndexPlus1 = 0
+	l.pressStartX = 0
+	l.pressStartY = 0
 
 	return guigui.HandleInputResult{}
 }
@@ -470,8 +465,9 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	if l.isHoveringVisible() && l.HoveredItemIndex() >= 0 && l.HoveredItemIndex() < len(l.items) && l.items[l.HoveredItemIndex()].Selectable {
-		r := l.itemRect(context, l.HoveredItemIndex())
+	hoveredItemIndex := l.HoveredItemIndex(context)
+	if l.isHoveringVisible() && hoveredItemIndex >= 0 && hoveredItemIndex < len(l.items) && l.items[hoveredItemIndex].Selectable {
+		r := l.itemRect(context, hoveredItemIndex)
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
 		if r.Overlaps(guigui.VisibleBounds(l)) {

@@ -98,7 +98,7 @@ func (t *TextList) Layout(context *guigui.Context, appender *guigui.ChildWidgetA
 		item.text.SetBold(item.textListItem.Header)
 		if t.list.style != ListStyleMenu && guigui.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable() {
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		} else if t.list.style == ListStyleMenu && t.list.isHoveringVisible() && t.list.HoveredItemIndex() == i && item.selectable() {
+		} else if t.list.style == ListStyleMenu && t.list.isHoveringVisible() && t.list.HoveredItemIndex(context) == i && item.selectable() {
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
 		} else if !item.selectable() && !item.textListItem.Header {
 			item.text.SetColor(DefaultDisabledListItemTextColor(context))
