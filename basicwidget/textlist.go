@@ -90,8 +90,21 @@ func (t *TextList) SetCheckmarkIndex(index int) {
 }
 
 func (t *TextList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) {
+	// To use HasFocusedChildWidget correctly, create the tree first.
 	guigui.SetPosition(&t.list, guigui.Position(t))
 	appender.AppendChildWidget(&t.list)
+
+	for i, item := range t.textListItemWidgets {
+		item.text.SetBold(item.textListItem.Header)
+		if t.list.style != ListStyleMenu && guigui.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i ||
+			(t.list.isHoveringVisible() && t.list.HoveredItemIndex() == i) && item.selectable() {
+			item.text.SetColor(DefaultActiveListItemTextColor(context))
+		} else if !item.selectable() && !item.textListItem.Header {
+			item.text.SetColor(DefaultDisabledListItemTextColor(context))
+		} else {
+			item.text.SetColor(item.textListItem.Color)
+		}
+	}
 }
 
 func (t *TextList) SelectedItemIndex() int {
@@ -182,21 +195,6 @@ func (t *TextList) RemoveItem(index int) {
 func (t *TextList) MoveItem(from, to int) {
 	moveItemInSlice(t.textListItemWidgets, from, 1, to)
 	t.list.MoveItem(from, to)
-}
-
-func (t *TextList) Update(context *guigui.Context) error {
-	for i, item := range t.textListItemWidgets {
-		item.text.SetBold(item.textListItem.Header)
-		if t.list.style != ListStyleMenu && guigui.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i ||
-			(t.list.isHoveringVisible() && t.list.HoveredItemIndex() == i) && item.selectable() {
-			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		} else if !item.selectable() && !item.textListItem.Header {
-			item.text.SetColor(DefaultDisabledListItemTextColor(context))
-		} else {
-			item.text.SetColor(item.textListItem.Color)
-		}
-	}
-	return nil
 }
 
 func (t *TextList) Size(context *guigui.Context) (int, int) {

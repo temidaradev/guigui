@@ -45,16 +45,6 @@ func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.Child
 	}
 
 	p := guigui.Position(s)
-	guigui.SetPosition(&s.scollOverlay, p)
-	appender.AppendChildWidget(&s.scollOverlay)
-
-	s.border.scrollOverlay = &s.scollOverlay
-	guigui.SetPosition(&s.border, p)
-	appender.AppendChildWidget(&s.border)
-}
-
-func (s *ScrollablePanel) Update(context *guigui.Context) error {
-	p := guigui.Position(s)
 	var w, h int
 	offsetX, offsetY := s.scollOverlay.Offset()
 	for _, childWidget := range s.childWidgets.iter() {
@@ -63,7 +53,12 @@ func (s *ScrollablePanel) Update(context *guigui.Context) error {
 		h = max(h, b.Max.Y-int(offsetY)-p.Y+s.paddingY)
 	}
 	s.scollOverlay.SetContentSize(w, h)
-	return nil
+	guigui.SetPosition(&s.scollOverlay, p)
+	appender.AppendChildWidget(&s.scollOverlay)
+
+	s.border.scrollOverlay = &s.scollOverlay
+	guigui.SetPosition(&s.border, p)
+	appender.AppendChildWidget(&s.border)
 }
 
 func defaultScrollablePanelSize(context *guigui.Context) (int, int) {

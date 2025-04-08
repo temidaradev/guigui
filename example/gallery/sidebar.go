@@ -95,14 +95,6 @@ func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 			})
 		}
 	}
-	s.list.SetItems(s.listItemWidgets)
-
-	s.initOnce.Do(func() {
-		s.list.SetSelectedItemIndex(0)
-	})
-}
-
-func (s *Sidebar) Update(context *guigui.Context) error {
 	for i, w := range s.listItemWidgets {
 		t := w.Content.(*basicwidget.Text)
 		if s.list.SelectedItemIndex() == i {
@@ -111,7 +103,11 @@ func (s *Sidebar) Update(context *guigui.Context) error {
 			t.SetColor(basicwidget.DefaultTextColor(context))
 		}
 	}
-	return nil
+	s.list.SetItems(s.listItemWidgets)
+
+	s.initOnce.Do(func() {
+		s.list.SetSelectedItemIndex(0)
+	})
 }
 
 func (s *Sidebar) Size(context *guigui.Context) (int, int) {

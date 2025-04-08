@@ -68,6 +68,11 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	r.createButton.SetOnUp(func() {
 		r.tryCreateTask()
 	})
+	if r.canCreateTask() {
+		guigui.Enable(&r.createButton)
+	} else {
+		guigui.Disable(&r.createButton)
+	}
 	{
 		p := guigui.Position(r)
 		w, _ := r.Size(context)
@@ -124,16 +129,6 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		}
 		delete(r.taskWidgets, id)
 	}
-}
-
-func (r *Root) Update(context *guigui.Context) error {
-	if r.canCreateTask() {
-		guigui.Enable(&r.createButton)
-	} else {
-		guigui.Disable(&r.createButton)
-	}
-
-	return nil
 }
 
 func (r *Root) canCreateTask() bool {

@@ -6,6 +6,7 @@ package basicwidget
 import (
 	"image"
 	"image/color"
+	"log/slog"
 	"slices"
 	"time"
 
@@ -99,12 +100,34 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		appender.AppendChildWidget(&l.listFrame)
 	}
 
-	_, offsetY := l.scrollOverlay.Offset()
+	if idx := l.indexToJumpPlus1 - 1; idx >= 0 {
+		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
+		l.scrollOverlay.SetOffset(0, float64(-y))
+		l.indexToJumpPlus1 = 0
+	}
+
+	w, _ := l.Size(context)
+	l.scrollOverlay.SetContentSize(w, l.defaultHeight(context))
+	guigui.SetPosition(&l.scrollOverlay, guigui.Position(l))
+	appender.AppendChildWidget(&l.scrollOverlay)
+
 	p := guigui.Position(l)
+	_, offsetY := l.scrollOverlay.Offset()
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
 	p.Y += RoundedCornerRadius(context) + int(offsetY)
 	for i, item := range l.items {
 		if l.checkmarkIndexPlus1 == i+1 {
+			mode := context.ColorMode()
+			if l.checkmarkIndexPlus1 == l.HoveredItemIndex()+1 {
+				mode = guigui.ColorModeDark
+			}
+			img, err := theResourceImages.Get("check", mode)
+			if err != nil {
+				slog.Error(err.Error())
+				return
+			}
+			l.checkmark.SetImage(img)
+
 			imgSize := listItemCheckmarkSize(context)
 			l.checkmark.SetSize(context, imgSize, imgSize)
 			imgP := p
@@ -124,10 +147,7 @@ func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		p.Y += h
 	}
 
-	p = guigui.Position(l)
-	guigui.SetPosition(&l.scrollOverlay, p)
-	appender.AppendChildWidget(&l.scrollOverlay)
-	guigui.SetPosition(&l.dragDropOverlay, p)
+	guigui.SetPosition(&l.dragDropOverlay, guigui.Position(l))
 	appender.AppendChildWidget(&l.dragDropOverlay)
 }
 
@@ -358,33 +378,6 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	return guigui.HandleInputResult{}
-}
-
-func (l *List) Update(context *guigui.Context) error {
-	w, _ := l.Size(context)
-	l.scrollOverlay.SetContentSize(w, l.defaultHeight(context))
-
-	idx := l.indexToJumpPlus1 - 1
-	if idx >= 0 {
-		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
-		l.scrollOverlay.SetOffset(0, float64(-y))
-		l.indexToJumpPlus1 = 0
-	}
-
-	// Update the image here, as hovering state can be changed at HandlePointingInput.
-	if l.checkmarkIndexPlus1 > 0 {
-		mode := context.ColorMode()
-		if l.checkmarkIndexPlus1 == l.HoveredItemIndex()+1 {
-			mode = guigui.ColorModeDark
-		}
-		img, err := theResourceImages.Get("check", mode)
-		if err != nil {
-			return err
-		}
-		l.checkmark.SetImage(img)
-	}
-
-	return nil
 }
 
 func (l *List) itemYFromIndex(context *guigui.Context, index int) int {

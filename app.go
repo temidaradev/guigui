@@ -140,10 +140,10 @@ func (a *app) Update() error {
 
 	a.context.setDeviceScale(ebiten.Monitor().DeviceScaleFactor())
 
-	// AppendChildWidgets
+	// Construct the widget tree.
 	a.layout()
 
-	// HandleInput
+	// Handle user inputs.
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
 	if r := a.handleInputWidget(handleInputTypePointing); r.widget != nil {
 		if theDebugMode.showInputLogs {
@@ -155,6 +155,9 @@ func (a *app) Update() error {
 			slog.Info("keyboard input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
 		}
 	}
+
+	// Construct the widget tree again to reflect the latest state.
+	a.layout()
 
 	if !a.cursorShape() {
 		ebiten.SetCursorShape(ebiten.CursorShapeDefault)

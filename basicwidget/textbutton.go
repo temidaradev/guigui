@@ -58,6 +58,13 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 
 	tw, _ := t.text.TextSize(context)
 	t.text.SetSize(tw, h)
+	if !guigui.IsEnabled(&t.button) {
+		t.text.SetColor(Color(context.ColorMode(), ColorTypeBase, 0.5))
+	} else {
+		t.text.SetColor(t.textColor)
+	}
+	t.text.SetHorizontalAlign(HorizontalAlignCenter)
+	t.text.SetVerticalAlign(VerticalAlignMiddle)
 	textP := guigui.Position(t)
 	if t.image.HasImage() {
 		textP.X += (w - tw + UnitSize(context)/4) / 2
@@ -80,19 +87,6 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 	}
 	guigui.SetPosition(&t.image, imgP)
 	appender.AppendChildWidget(&t.image)
-}
-
-func (t *TextButton) Update(context *guigui.Context) error {
-	if !guigui.IsEnabled(&t.button) {
-		t.text.SetColor(Color(context.ColorMode(), ColorTypeBase, 0.5))
-	} else {
-		t.text.SetColor(t.textColor)
-	}
-
-	t.text.SetHorizontalAlign(HorizontalAlignCenter)
-	t.text.SetVerticalAlign(VerticalAlignMiddle)
-
-	return nil
 }
 
 func (t *TextButton) Size(context *guigui.Context) (int, int) {

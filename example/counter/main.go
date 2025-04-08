@@ -30,6 +30,14 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		w -= 2 * basicwidget.UnitSize(context)
 		h -= 4 * basicwidget.UnitSize(context)
 		r.counterText.SetSize(w, h)
+
+		r.counterText.SetSelectable(true)
+		r.counterText.SetBold(true)
+		r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
+		r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
+		r.counterText.SetScale(4)
+		r.counterText.SetText(fmt.Sprintf("%d", r.counter))
+
 		p := guigui.Position(r)
 		p.X += basicwidget.UnitSize(context)
 		p.Y += basicwidget.UnitSize(context)
@@ -42,6 +50,11 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
 	})
+	if r.counter == 0 {
+		guigui.Disable(&r.resetButton)
+	} else {
+		guigui.Enable(&r.resetButton)
+	}
 	{
 		p := guigui.Position(r)
 		_, h := r.Size(context)
@@ -78,22 +91,6 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		guigui.SetPosition(&r.decButton, p)
 		appender.AppendChildWidget(&r.decButton)
 	}
-}
-
-func (r *Root) Update(context *guigui.Context) error {
-	if r.counter == 0 {
-		guigui.Disable(&r.resetButton)
-	} else {
-		guigui.Enable(&r.resetButton)
-	}
-	r.counterText.SetSelectable(true)
-	r.counterText.SetBold(true)
-	r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
-	r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-	r.counterText.SetScale(4)
-	r.counterText.SetText(fmt.Sprintf("%d", r.counter))
-
-	return nil
 }
 
 func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {
