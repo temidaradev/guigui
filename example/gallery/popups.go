@@ -121,7 +121,7 @@ func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 		pt := image.Pt(ebiten.CursorPosition())
 		if pt.In(guigui.VisibleBounds(&p.contextMenuPopupClickHereText)) {
 			guigui.SetPosition(&p.contextMenuPopup, pt)
-			p.contextMenuPopup.Open(context)
+			p.contextMenuPopup.Open()
 		}
 	}
 	return guigui.HandleInputResult{}

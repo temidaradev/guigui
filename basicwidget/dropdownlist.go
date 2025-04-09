@@ -48,7 +48,7 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		// A glitch is visible when the dropdown list is reopened.
 		guigui.SetPosition(&d.popupMenu, pt)
 		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
-		d.popupMenu.Open(context)
+		d.popupMenu.Open()
 	})
 	d.popupMenu.SetOnClosed(func(index int) {
 		if d.onValueChanged != nil {

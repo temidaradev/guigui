@@ -93,8 +93,7 @@ func (p *PopupMenu) Z() int {
 	return guigui.Parent(p).Z() + popupZ
 }
 
-func (p *PopupMenu) Open(context *guigui.Context) {
-	p.popup.SetContentBounds(p.contentBounds(context))
+func (p *PopupMenu) Open() {
 	guigui.Show(p)
 	p.popup.Open()
 }
