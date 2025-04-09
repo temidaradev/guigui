@@ -44,7 +44,7 @@ func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidget
 			p.onClosed(p.textList.SelectedItemIndex())
 		}
 	})
-	p.updateContentBounds(context)
+	p.popup.SetContentBounds(p.contentBounds(context))
 	appender.AppendChildWidget(&p.popup)
 
 	// Sync the visibility with the popup.
@@ -89,16 +89,12 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	return r
 }
 
-func (p *PopupMenu) updateContentBounds(context *guigui.Context) {
-	p.popup.SetContentBounds(p.contentBounds(context))
-}
-
 func (p *PopupMenu) Z() int {
 	return guigui.Parent(p).Z() + popupZ
 }
 
 func (p *PopupMenu) Open(context *guigui.Context) {
-	p.updateContentBounds(context)
+	p.popup.SetContentBounds(p.contentBounds(context))
 	guigui.Show(p)
 	p.popup.Open()
 }
