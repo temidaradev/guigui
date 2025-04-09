@@ -45,12 +45,3 @@ func (r *HandleInputResult) shouldRaise() bool {
 func Parent(widget Widget) Widget {
 	return widget.widgetState().parent
 }
-
-type RootWidget struct {
-	DefaultWidget
-}
-
-func (*RootWidget) Size(context *Context) (int, int) {
-	bounds := context.app.bounds()
-	return bounds.Dx(), bounds.Dy()
-}

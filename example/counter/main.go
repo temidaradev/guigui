@@ -14,7 +14,7 @@ import (
 )
 
 type Root struct {
-	guigui.RootWidget
+	guigui.DefaultWidget
 
 	resetButton basicwidget.TextButton
 	incButton   basicwidget.TextButton
