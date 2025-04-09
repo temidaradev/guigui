@@ -109,9 +109,6 @@ func (p *Popup) Open() {
 func (p *Popup) Close() {
 	p.showing = false
 	p.hiding = true
-	if p.onClosed != nil {
-		p.onClosed()
-	}
 }
 
 func (p *Popup) Update(context *guigui.Context) error {
@@ -134,6 +131,9 @@ func (p *Popup) Update(context *guigui.Context) error {
 		if p.opacity == 0 {
 			p.hiding = false
 			guigui.Hide(p)
+			if p.onClosed != nil {
+				p.onClosed()
+			}
 		}
 	}
 	return nil
