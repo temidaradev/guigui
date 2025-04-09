@@ -103,3 +103,17 @@ func mixColor(clr0, clr1 color.Color, rate float64) color.Color {
 func FillBackground(dst *ebiten.Image, context *guigui.Context) {
 	dst.Fill(Color(context.ColorMode(), ColorTypeBase, 0.95))
 }
+
+func ScaleAlpha(clr color.Color, alpha float64) color.Color {
+	r, g, b, a := clr.RGBA()
+	r = uint32(float64(r) * alpha)
+	g = uint32(float64(g) * alpha)
+	b = uint32(float64(b) * alpha)
+	a = uint32(float64(a) * alpha)
+	return color.RGBA64{
+		R: uint16(r),
+		G: uint16(g),
+		B: uint16(b),
+		A: uint16(a),
+	}
+}
