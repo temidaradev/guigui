@@ -82,7 +82,7 @@ func (p *Popup) SetCloseByClickingOutside(closeByClickingOutside bool) {
 	p.closeByClickingOutside = closeByClickingOutside
 }
 
-func (p *Popup) SetAnimateOnFading(animateOnFading bool) {
+func (p *Popup) SetAnimationDuringFade(animateOnFading bool) {
 	// TODO: Rename Popup to basePopup and create Popup with animateOnFading true.
 	p.animateOnFading = animateOnFading
 }

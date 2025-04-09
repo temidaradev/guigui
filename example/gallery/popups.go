@@ -107,7 +107,7 @@ func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 	p.simplePopup.SetContentBounds(contentBounds)
 	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleButton.Value())
 	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
-	p.simplePopup.SetAnimateOnFading(true)
+	p.simplePopup.SetAnimationDuringFade(true)
 
 	appender.AppendChildWidget(&p.simplePopup)
 
