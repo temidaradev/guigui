@@ -106,9 +106,11 @@ type Text struct {
 
 	temporaryClipboard string
 
-	cachedWidthPlus1  int
-	cachedHeightPlus1 int
-	lastAppScale      float64
+	cachedWidthPlus1      int
+	cachedHeightPlus1     int
+	cachedTextWidthPlus1  int
+	cachedTextHeightPlus1 int
+	lastAppScale          float64
 
 	onEnterPressed func(text string)
 }
@@ -120,6 +122,8 @@ func (t *Text) SetOnEnterPressed(f func(text string)) {
 func (t *Text) resetCachedSize() {
 	t.cachedWidthPlus1 = 0
 	t.cachedHeightPlus1 = 0
+	t.cachedTextWidthPlus1 = 0
+	t.cachedTextHeightPlus1 = 0
 }
 
 func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -880,9 +884,15 @@ func (t *Text) Size(context *guigui.Context) (int, int) {
 }
 
 func (t *Text) TextSize(context *guigui.Context) (int, int) {
+	if t.cachedTextWidthPlus1 > 0 && t.cachedTextHeightPlus1 > 0 {
+		return t.cachedTextWidthPlus1 - 1, t.cachedTextHeightPlus1 - 1
+	}
+
 	w, _ := text.Measure(t.textToDraw(), t.face(context), t.lineHeight(context))
 	w *= t.scaleMinus1 + 1
 	h := t.textHeight(context, t.textToDraw())
+	t.cachedTextWidthPlus1 = int(w) + 1
+	t.cachedTextHeightPlus1 = h + 1
 	return int(w), h
 }
 
