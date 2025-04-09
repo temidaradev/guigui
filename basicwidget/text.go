@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"slices"
 	"strings"
-	"sync"
 	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -107,10 +106,9 @@ type Text struct {
 
 	temporaryClipboard string
 
-	cachedWidth  int
-	cachedHeight int
-	lastAppScale float64
-	initOnce     sync.Once
+	cachedWidthPlus1  int
+	cachedHeightPlus1 int
+	lastAppScale      float64
 
 	onEnterPressed func(text string)
 }
@@ -120,15 +118,11 @@ func (t *Text) SetOnEnterPressed(f func(text string)) {
 }
 
 func (t *Text) resetCachedSize() {
-	t.cachedWidth = -1
-	t.cachedHeight = -1
+	t.cachedWidthPlus1 = 0
+	t.cachedHeightPlus1 = 0
 }
 
 func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	t.initOnce.Do(func() {
-		t.resetCachedSize()
-	})
-
 	if t.lastAppScale != context.AppScale() {
 		t.lastAppScale = context.AppScale()
 		t.resetCachedSize()
@@ -866,8 +860,8 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (t *Text) Size(context *guigui.Context) (int, int) {
-	if t.cachedWidth >= 0 && t.cachedHeight >= 0 {
-		return t.cachedWidth, t.cachedHeight
+	if t.cachedWidthPlus1 > 0 && t.cachedHeightPlus1 > 0 {
+		return t.cachedWidthPlus1 - 1, t.cachedHeightPlus1 - 1
 	}
 
 	w, h := t.width, t.height
@@ -880,8 +874,8 @@ func (t *Text) Size(context *guigui.Context) (int, int) {
 			h = th
 		}
 	}
-	t.cachedWidth = w
-	t.cachedHeight = h
+	t.cachedWidthPlus1 = w + 1
+	t.cachedHeightPlus1 = h + 1
 	return w, h
 }
 
