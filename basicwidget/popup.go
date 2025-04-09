@@ -47,6 +47,15 @@ func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *Contai
 	p.content.setContent(f)
 }
 
+func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
+	pt := guigui.Position(&p.content)
+	w, h := p.content.Size(context)
+	return image.Rectangle{
+		Min: pt,
+		Max: pt.Add(image.Pt(w, h)),
+	}
+}
+
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
 	guigui.SetPosition(&p.content, bounds.Min)
 	p.content.setSize(bounds.Dx(), bounds.Dy())

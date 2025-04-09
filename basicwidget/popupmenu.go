@@ -35,7 +35,7 @@ func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidget
 				p.onClosed(index)
 			}
 		})
-		guigui.SetPosition(&p.textList, p.contentBounds(context).Min)
+		guigui.SetPosition(&p.textList, p.popup.ContentBounds(context).Min)
 		childAppender.AppendChildWidget(&p.textList)
 	})
 	p.popup.SetCloseByClickingOutside(true)
