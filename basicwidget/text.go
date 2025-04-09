@@ -128,6 +128,28 @@ func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		t.resetCachedSize()
 	})
 
+	if t.lastAppScale != context.AppScale() {
+		t.lastAppScale = context.AppScale()
+		t.resetCachedSize()
+	}
+
+	if !t.prevFocused && guigui.IsFocused(t) {
+		t.field.Focus()
+		t.cursor.resetCounter()
+		start, end := t.field.Selection()
+		if start < 0 || end < 0 {
+			t.selectAll()
+		}
+	} else if t.prevFocused && !guigui.IsFocused(t) {
+		t.applyFilter()
+	}
+	t.prevFocused = guigui.IsFocused(t)
+
+	if t.toAdjustScrollOffset && !guigui.VisibleBounds(t).Empty() {
+		t.adjustScrollOffset(context)
+		t.toAdjustScrollOffset = false
+	}
+
 	if t.selectable || t.editable {
 		p := guigui.Position(t)
 		p.X -= cursorWidth(context)
@@ -745,33 +767,6 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	}
 
 	return guigui.HandleInputByWidget(t)
-}
-
-func (t *Text) Update(context *guigui.Context) error {
-	if t.lastAppScale != context.AppScale() {
-		t.lastAppScale = context.AppScale()
-		t.resetCachedSize()
-	}
-
-	if !t.prevFocused && guigui.IsFocused(t) {
-		t.field.Focus()
-		t.cursor.resetCounter()
-		start, end := t.field.Selection()
-		if start < 0 || end < 0 {
-			t.selectAll()
-		}
-	} else if t.prevFocused && !guigui.IsFocused(t) {
-		t.applyFilter()
-	}
-
-	if t.toAdjustScrollOffset && !guigui.VisibleBounds(t).Empty() {
-		t.adjustScrollOffset(context)
-		t.toAdjustScrollOffset = false
-	}
-
-	t.prevFocused = guigui.IsFocused(t)
-
-	return nil
 }
 
 func (t *Text) applyFilter() {
