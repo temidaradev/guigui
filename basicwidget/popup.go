@@ -37,6 +37,7 @@ type Popup struct {
 	hiding                 bool
 	backgroundBlurred      bool
 	closeByClickingOutside bool
+	animateOnFading        bool
 	contentBounds          image.Rectangle
 	nextContentBounds      image.Rectangle
 	openAfterClose         bool
@@ -55,7 +56,13 @@ func (p *Popup) opacity() float64 {
 }
 
 func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
-	return p.contentBounds
+	if !p.animateOnFading {
+		return p.contentBounds
+	}
+	rate := p.opacity()
+	bounds := p.contentBounds
+	dy := int(-float64(UnitSize(context)) * (1 - rate))
+	return bounds.Add(image.Pt(0, dy))
 }
 
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
@@ -73,6 +80,11 @@ func (p *Popup) SetBackgroundBlurred(blurBackground bool) {
 
 func (p *Popup) SetCloseByClickingOutside(closeByClickingOutside bool) {
 	p.closeByClickingOutside = closeByClickingOutside
+}
+
+func (p *Popup) SetAnimateOnFading(animateOnFading bool) {
+	// TODO: Rename Popup to basePopup and create Popup with animateOnFading true.
+	p.animateOnFading = animateOnFading
 }
 
 func (p *Popup) SetOnClosed(f func()) {
