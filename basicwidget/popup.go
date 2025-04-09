@@ -37,6 +37,7 @@ type Popup struct {
 	hiding                 bool
 	backgroundBlurred      bool
 	closeByClickingOutside bool
+	contentBounds          image.Rectangle
 	nextContentBounds      image.Rectangle
 	openAfterClose         bool
 
@@ -50,12 +51,7 @@ func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *Contai
 }
 
 func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
-	pt := guigui.Position(&p.content)
-	w, h := p.content.Size(context)
-	return image.Rectangle{
-		Min: pt,
-		Max: pt.Add(image.Pt(w, h)),
-	}
+	return p.contentBounds
 }
 
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
@@ -63,8 +59,7 @@ func (p *Popup) SetContentBounds(bounds image.Rectangle) {
 		p.nextContentBounds = bounds
 		return
 	}
-	guigui.SetPosition(&p.content, bounds.Min)
-	p.content.setSize(bounds.Dx(), bounds.Dy())
+	p.contentBounds = bounds
 	p.nextContentBounds = image.Rectangle{}
 }
 
@@ -89,7 +84,11 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		p.background.popup = p
 		appender.AppendChildWidget(&p.background)
 	}
+
+	guigui.SetPosition(&p.content, p.contentBounds.Min)
+	p.content.setSize(p.contentBounds.Dx(), p.contentBounds.Dy())
 	appender.AppendChildWidget(&p.content)
+
 	p.frame.popup = p
 	appender.AppendChildWidget(&p.frame)
 
@@ -149,7 +148,7 @@ func (p *Popup) Update(context *guigui.Context) error {
 		if p.opacity == popupMaxOpacity() {
 			p.showing = false
 			if !p.nextContentBounds.Empty() {
-				p.SetContentBounds(p.nextContentBounds)
+				p.contentBounds = p.nextContentBounds
 				p.nextContentBounds = image.Rectangle{}
 			}
 		}
@@ -167,7 +166,7 @@ func (p *Popup) Update(context *guigui.Context) error {
 			}
 			if p.openAfterClose {
 				if !p.nextContentBounds.Empty() {
-					p.SetContentBounds(p.nextContentBounds)
+					p.contentBounds = p.nextContentBounds
 					p.nextContentBounds = image.Rectangle{}
 				}
 				p.Open()
