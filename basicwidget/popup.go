@@ -37,6 +37,8 @@ type Popup struct {
 	hiding                 bool
 	backgroundBlurred      bool
 	closeByClickingOutside bool
+	nextContentBounds      image.Rectangle
+	openAfterClose         bool
 
 	initOnce sync.Once
 
@@ -57,6 +59,10 @@ func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
 }
 
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
+	if (p.showing || p.hiding) && p.opacity > 0 {
+		p.nextContentBounds = bounds
+		return
+	}
 	guigui.SetPosition(&p.content, bounds.Min)
 	p.content.setSize(bounds.Dx(), bounds.Dy())
 }
@@ -110,14 +116,26 @@ func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputR
 }
 
 func (p *Popup) Open() {
+	if p.showing {
+		return
+	}
+	if p.opacity > 0 {
+		p.Close()
+		p.openAfterClose = true
+		return
+	}
 	guigui.Show(p)
 	p.showing = true
 	p.hiding = false
 }
 
 func (p *Popup) Close() {
+	if p.hiding {
+		return
+	}
 	p.showing = false
 	p.hiding = true
+	p.openAfterClose = false
 }
 
 func (p *Popup) Update(context *guigui.Context) error {
@@ -139,9 +157,16 @@ func (p *Popup) Update(context *guigui.Context) error {
 		guigui.RequestRedraw(&p.background)
 		if p.opacity == 0 {
 			p.hiding = false
-			guigui.Hide(p)
 			if p.onClosed != nil {
 				p.onClosed()
+			}
+			if p.openAfterClose {
+				p.SetContentBounds(p.nextContentBounds)
+				p.Open()
+				p.openAfterClose = false
+				p.nextContentBounds = image.Rectangle{}
+			} else {
+				guigui.Hide(p)
 			}
 		}
 	}
