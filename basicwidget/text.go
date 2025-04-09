@@ -78,6 +78,7 @@ type Text struct {
 	color       color.Color
 	transparent float64
 	locales     []language.Tag
+	fullLocales []language.Tag
 	scaleMinus1 float64
 	bold        bool
 
@@ -345,13 +346,14 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	if t.bold {
 		weight = text.WeightBold
 	}
-	locales := append([]language.Tag(nil), t.locales...)
-	locales = context.AppendLocales(locales)
+	t.fullLocales = slices.Delete(t.fullLocales, 0, len(t.fullLocales))
+	t.fullLocales = append(t.fullLocales, t.locales...)
+	t.fullLocales = context.AppendLocales(t.fullLocales)
 	var liga bool
 	if !t.selectable && !t.editable {
 		liga = true
 	}
-	return fontFace(size, weight, liga, locales)
+	return fontFace(size, weight, liga, t.fullLocales)
 }
 
 func (t *Text) lineHeight(context *guigui.Context) float64 {
