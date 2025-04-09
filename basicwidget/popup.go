@@ -65,6 +65,7 @@ func (p *Popup) SetContentBounds(bounds image.Rectangle) {
 	}
 	guigui.SetPosition(&p.content, bounds.Min)
 	p.content.setSize(bounds.Dx(), bounds.Dy())
+	p.nextContentBounds = image.Rectangle{}
 }
 
 func (p *Popup) SetBackgroundBlurred(blurBackground bool) {
@@ -147,6 +148,10 @@ func (p *Popup) Update(context *guigui.Context) error {
 		guigui.RequestRedraw(&p.background)
 		if p.opacity == popupMaxOpacity() {
 			p.showing = false
+			if !p.nextContentBounds.Empty() {
+				p.SetContentBounds(p.nextContentBounds)
+				p.nextContentBounds = image.Rectangle{}
+			}
 		}
 	}
 	if p.hiding {
@@ -161,10 +166,12 @@ func (p *Popup) Update(context *guigui.Context) error {
 				p.onClosed()
 			}
 			if p.openAfterClose {
-				p.SetContentBounds(p.nextContentBounds)
+				if !p.nextContentBounds.Empty() {
+					p.SetContentBounds(p.nextContentBounds)
+					p.nextContentBounds = image.Rectangle{}
+				}
 				p.Open()
 				p.openAfterClose = false
-				p.nextContentBounds = image.Rectangle{}
 			} else {
 				guigui.Hide(p)
 			}
