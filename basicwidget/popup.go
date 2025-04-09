@@ -88,8 +88,9 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		appender.AppendChildWidget(&p.background)
 	}
 
-	guigui.SetPosition(&p.content, p.contentBounds.Min)
-	p.content.setSize(p.contentBounds.Dx(), p.contentBounds.Dy())
+	bounds := p.ContentBounds(context)
+	guigui.SetPosition(&p.content, bounds.Min)
+	p.content.setSize(bounds.Dx(), bounds.Dy())
 	appender.AppendChildWidget(&p.content)
 
 	appender.AppendChildWidget(&p.frame)
