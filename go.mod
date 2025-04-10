@@ -10,8 +10,8 @@ require (
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08
 	github.com/kisielk/errcheck v1.9.0
 	github.com/rivo/uniseg v0.4.7
-	golang.org/x/text v0.23.0
-	golang.org/x/tools v0.31.0
+	golang.org/x/text v0.24.0
+	golang.org/x/tools v0.32.0
 	howett.net/plist v1.0.1
 )
 
