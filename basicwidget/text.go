@@ -31,7 +31,7 @@ func isKeyRepeating(key ebiten.Key) bool {
 	if d == 2 {
 		return true
 	}
-	repeat := ebiten.TPS() * 24 / 60
+	repeat := ebiten.TPS() * 20 / 60
 	if d < repeat {
 		return false
 	}
