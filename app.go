@@ -316,10 +316,12 @@ func (a *app) layout() error {
 func (a *app) doLayout(widget Widget) error {
 	widgetState := widget.widgetState()
 	widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
-	widget.Layout(&a.context, &ChildWidgetAppender{
+	if err := widget.Layout(&a.context, &ChildWidgetAppender{
 		app:    a,
 		widget: widget,
-	})
+	}); err != nil {
+		return err
+	}
 	for _, child := range widgetState.children {
 		if err := a.doLayout(child); err != nil {
 			return err

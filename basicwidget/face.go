@@ -48,7 +48,9 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 	f, err := text.NewGoTextFaceSource(r)
 	if err != nil {
 		panic(err)

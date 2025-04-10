@@ -42,7 +42,9 @@ func (i *resourceImages) Get(name string, colorMode guigui.ColorMode) (*ebiten.I
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 	pImg, err := png.Decode(f)
 	if err != nil {
 		return nil, err
