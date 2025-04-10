@@ -5,7 +5,6 @@ package basicwidget
 
 import (
 	"image"
-	"image/color"
 	"runtime"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -305,13 +304,7 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	opacity := float64(s.barOpacity) / float64(barMaxOpacity()) * 3 / 4
-	r, g, b, a := Color(context.ColorMode(), ColorTypeBase, 0.2).RGBA()
-	barColor := color.RGBA64{
-		R: uint16(float64(r) * opacity),
-		G: uint16(float64(g) * opacity),
-		B: uint16(float64(b) * opacity),
-		A: uint16(float64(a) * opacity),
-	}
+	barColor := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 0.2), opacity)
 
 	hb, vb := s.barBounds(context)
 
