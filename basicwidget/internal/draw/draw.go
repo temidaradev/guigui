@@ -60,7 +60,6 @@ func appendRectVectorPath(path *vector.Path, rx0, ry0, rx1, ry1 float32, radius 
 type imageKey struct {
 	radius      int
 	borderWidth float32
-	scale       float64
 	borderType  RoundedRectBorderType
 }
 
@@ -69,10 +68,9 @@ var (
 	whiteRoundedRectBorders = map[imageKey]*ebiten.Image{}
 )
 
-func ensureWhiteRoundedRect(radius int, scale float64) *ebiten.Image {
+func ensureWhiteRoundedRect(radius int) *ebiten.Image {
 	key := imageKey{
 		radius: radius,
-		scale:  scale,
 	}
 	if img, ok := whiteRoundedRects[key]; ok {
 		return img
@@ -99,11 +97,10 @@ func ensureWhiteRoundedRect(radius int, scale float64) *ebiten.Image {
 	return img
 }
 
-func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, scale float64, borderType RoundedRectBorderType) *ebiten.Image {
+func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, borderType RoundedRectBorderType) *ebiten.Image {
 	key := imageKey{
 		radius:      radius,
 		borderWidth: borderWidth,
-		scale:       scale,
 		borderType:  borderType,
 	}
 	if img, ok := whiteRoundedRectBorders[key]; ok {
@@ -163,7 +160,7 @@ func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, bounds image.Re
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius, context.Scale()), clr)
+	drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius), clr)
 }
 
 func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int, borderWidth float32, borderType RoundedRectBorderType) {
@@ -176,7 +173,7 @@ func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, bounds im
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, context.Scale(), borderType), clr)
+	drawNinePatch(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, borderType), clr)
 }
 
 func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image, clr color.Color) {
