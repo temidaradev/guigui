@@ -130,7 +130,7 @@ func (t *TextField) Size(context *guigui.Context) (int, int) {
 }
 
 func textFieldFocusBorderWidth(context *guigui.Context) int {
-	return int(3 * context.Scale())
+	return int(4 * context.Scale())
 }
 
 type textFieldFocus struct {
@@ -142,7 +142,7 @@ func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(textField)
 	w := textFieldFocusBorderWidth(context)
 	bounds = bounds.Inset(-w)
-	DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeAccent, 0.8), int(4*context.Scale())+RoundedCornerRadius(context), float32(4*context.Scale()), RoundedRectBorderTypeRegular)
+	DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeAccent, 0.8), w+RoundedCornerRadius(context), float32(w), RoundedRectBorderTypeRegular)
 }
 
 func (t *textFieldFocus) Z() int {
