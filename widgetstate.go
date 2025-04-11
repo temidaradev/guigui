@@ -248,13 +248,13 @@ func RequestRedraw(widget Widget) {
 
 func (w *widgetState) ensureOffscreen(bounds image.Rectangle) *ebiten.Image {
 	if w.offscreen != nil {
-		if !w.offscreen.Bounds().In(bounds) {
+		if !bounds.In(w.offscreen.Bounds()) {
 			w.offscreen.Deallocate()
 			w.offscreen = nil
 		}
 	}
 	if w.offscreen == nil {
-		w.offscreen = ebiten.NewImage(bounds.Max.X, bounds.Max.Y)
+		w.offscreen = ebiten.NewImageWithOptions(bounds, nil)
 	}
 	return w.offscreen.SubImage(bounds).(*ebiten.Image)
 }
