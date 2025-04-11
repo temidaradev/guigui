@@ -25,6 +25,14 @@ func popupMaxOpacityCount() int {
 	return ebiten.TPS() / 10
 }
 
+type PopupClosedReason int
+
+const (
+	PopupClosedReasonFuncCall PopupClosedReason = iota
+	PopupClosedReasonClickOutside
+	PopupClosedReasonReopen
+)
+
 type Popup struct {
 	guigui.DefaultWidget
 
@@ -35,6 +43,7 @@ type Popup struct {
 	opacityCount           int
 	showing                bool
 	hiding                 bool
+	closedReason           PopupClosedReason
 	backgroundBlurred      bool
 	closeByClickingOutside bool
 	animateOnFading        bool
@@ -44,7 +53,7 @@ type Popup struct {
 
 	initOnce sync.Once
 
-	onClosed func()
+	onClosed func(reason PopupClosedReason)
 }
 
 func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)) {
@@ -87,7 +96,7 @@ func (p *Popup) SetAnimationDuringFade(animateOnFading bool) {
 	p.animateOnFading = animateOnFading
 }
 
-func (p *Popup) SetOnClosed(f func()) {
+func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 	p.onClosed = f
 }
 
@@ -119,7 +128,7 @@ func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputR
 	if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(p)) {
 		if p.closeByClickingOutside {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-				p.Close()
+				p.close(PopupClosedReasonClickOutside)
 				// Continue handling inputs so that clicking a right button can be handled by other widgets.
 				if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 					return guigui.HandleInputResult{}
@@ -135,7 +144,7 @@ func (p *Popup) Open() {
 		return
 	}
 	if p.opacityCount > 0 {
-		p.Close()
+		p.close(PopupClosedReasonReopen)
 		p.openAfterClose = true
 		return
 	}
@@ -145,9 +154,15 @@ func (p *Popup) Open() {
 }
 
 func (p *Popup) Close() {
+	p.close(PopupClosedReasonFuncCall)
+}
+
+func (p *Popup) close(reason PopupClosedReason) {
 	if p.hiding {
 		return
 	}
+
+	p.closedReason = reason
 	p.showing = false
 	p.hiding = true
 	p.openAfterClose = false
@@ -177,7 +192,7 @@ func (p *Popup) Update(context *guigui.Context) error {
 		if p.opacityCount == 0 {
 			p.hiding = false
 			if p.onClosed != nil {
-				p.onClosed()
+				p.onClosed(p.closedReason)
 			}
 			if p.openAfterClose {
 				if !p.nextContentBounds.Empty() {
