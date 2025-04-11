@@ -153,34 +153,34 @@ func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, scale float64
 	return img
 }
 
-func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, rect image.Rectangle, clr color.Color, radius int) {
-	if !dst.Bounds().Overlaps(rect) {
+func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int) {
+	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	if rect.Dx()/2-1 < radius {
-		radius = rect.Dx()/2 - 1
+	if bounds.Dx()/2-1 < radius {
+		radius = bounds.Dx()/2 - 1
 	}
-	if rect.Dy()/2-1 < radius {
-		radius = rect.Dy()/2 - 1
+	if bounds.Dy()/2-1 < radius {
+		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, rect, ensureWhiteRoundedRect(radius, context.Scale()), clr)
+	drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius, context.Scale()), clr)
 }
 
-func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, rect image.Rectangle, clr color.Color, radius int, borderWidth float32, borderType RoundedRectBorderType) {
-	if !dst.Bounds().Overlaps(rect) {
+func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int, borderWidth float32, borderType RoundedRectBorderType) {
+	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	if rect.Dx()/2-1 < radius {
-		radius = rect.Dx()/2 - 1
+	if bounds.Dx()/2-1 < radius {
+		radius = bounds.Dx()/2 - 1
 	}
-	if rect.Dy()/2-1 < radius {
-		radius = rect.Dy()/2 - 1
+	if bounds.Dy()/2-1 < radius {
+		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, rect, ensureWhiteRoundedRectBorder(radius, borderWidth, context.Scale(), borderType), clr)
+	drawNinePatch(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, context.Scale(), borderType), clr)
 }
 
-func drawNinePatch(dst *ebiten.Image, rect image.Rectangle, src *ebiten.Image, clr color.Color) {
-	if dst.Bounds().Intersect(rect).Empty() {
+func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image, clr color.Color) {
+	if dst.Bounds().Intersect(bounds).Empty() {
 		return
 	}
 	partW, partH := src.Bounds().Dx()/3, src.Bounds().Dy()/3
@@ -196,21 +196,21 @@ func drawNinePatch(dst *ebiten.Image, rect image.Rectangle, src *ebiten.Image, c
 
 			switch i {
 			case 0:
-				tx = rect.Min.X
+				tx = bounds.Min.X
 			case 1:
-				sx = float64(rect.Dx()-2*partW) / float64(partW)
-				tx = rect.Min.X + partW
+				sx = float64(bounds.Dx()-2*partW) / float64(partW)
+				tx = bounds.Min.X + partW
 			case 2:
-				tx = rect.Max.X - partW
+				tx = bounds.Max.X - partW
 			}
 			switch j {
 			case 0:
-				ty = rect.Min.Y
+				ty = bounds.Min.Y
 			case 1:
-				sy = float64(rect.Dy()-2*partH) / float64(partH)
-				ty = rect.Min.Y + partH
+				sy = float64(bounds.Dy()-2*partH) / float64(partH)
+				ty = bounds.Min.Y + partH
 			case 2:
-				ty = rect.Max.Y - partH
+				ty = bounds.Max.Y - partH
 			}
 
 			op.GeoM.Reset()
