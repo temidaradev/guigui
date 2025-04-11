@@ -3,17 +3,23 @@
 
 package draw
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"strconv"
+	"strings"
 
-var blurShader *ebiten.Shader
+	"github.com/hajimehoshi/ebiten/v2"
 
-const blurShaderSource = `//kage:unit pixels
+	"github.com/hajimehoshi/guigui"
+)
+
+const blurShaderSourceTmpl = `//kage:unit pixels
 
 package main
 
-const blurSize = 5
+const blurSize = {{.BlurSize}}
 
 var Rate float
+var Scale float
 
 func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
 	minPos := imageSrc0Origin()
@@ -33,25 +39,33 @@ func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
 }
 `
 
-func init() {
-	s, err := ebiten.NewShader([]byte(blurShaderSource))
-	if err != nil {
-		panic(err)
-	}
-	blurShader = s
-}
+var blurShaders = map[int]*ebiten.Shader{}
 
-func DrawBlurredImage(dst *ebiten.Image, src *ebiten.Image, rate float64) {
+func DrawBlurredImage(context *guigui.Context, dst *ebiten.Image, src *ebiten.Image, rate float64) {
 	if rate == 0 {
 		return
+	}
+
+	const baseBlurSize = 3
+	blurSize := int(baseBlurSize * context.Scale())
+	shader, ok := blurShaders[blurSize]
+	if !ok {
+		src := strings.Replace(blurShaderSourceTmpl, "{{.BlurSize}}", strconv.Itoa(blurSize), -1)
+		s, err := ebiten.NewShader([]byte(src))
+		if err != nil {
+			panic(err)
+		}
+		shader = s
+		blurShaders[blurSize] = shader
 	}
 
 	op := &ebiten.DrawRectShaderOptions{}
 	op.Images[0] = src
 	op.GeoM.Translate(float64(src.Bounds().Min.X), float64(src.Bounds().Min.Y))
 	op.Uniforms = map[string]any{
-		"Rate": rate,
+		"Rate":  rate,
+		"Scale": context.Scale(),
 	}
 	op.Blend = ebiten.BlendCopy
-	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), blurShader, op)
+	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), shader, op)
 }

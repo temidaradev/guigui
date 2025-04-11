@@ -304,5 +304,5 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
 	p.backgroundCache.DrawImage(dst, op)
 
-	draw.DrawBlurredImage(dst, p.backgroundCache, rate)
+	draw.DrawBlurredImage(context, dst, p.backgroundCache, rate)
 }
