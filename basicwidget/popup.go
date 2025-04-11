@@ -23,7 +23,7 @@ func easeOutQuad(t float64) float64 {
 	return t * (2 - t)
 }
 
-func popupMaxOpacityCount() int {
+func popupMaxOpeningCount() int {
 	return ebiten.TPS() / 10
 }
 
@@ -43,7 +43,7 @@ type Popup struct {
 	content    popupContent
 	frame      popupFrame
 
-	opacityCount           int
+	openingCount           int
 	showing                bool
 	hiding                 bool
 	closedReason           PopupClosedReason
@@ -63,22 +63,22 @@ func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *Contai
 	p.content.setContent(f)
 }
 
-func (p *Popup) opacity() float64 {
-	return easeOutQuad(float64(p.opacityCount) / float64(popupMaxOpacityCount()))
+func (p *Popup) openingRate() float64 {
+	return easeOutQuad(float64(p.openingCount) / float64(popupMaxOpeningCount()))
 }
 
 func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
 	if !p.animateOnFading {
 		return p.contentBounds
 	}
-	rate := p.opacity()
+	rate := p.openingRate()
 	bounds := p.contentBounds
 	dy := int(-float64(UnitSize(context)) * (1 - rate))
 	return bounds.Add(image.Pt(0, dy))
 }
 
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
-	if (p.showing || p.hiding) && p.opacityCount > 0 {
+	if (p.showing || p.hiding) && p.openingCount > 0 {
 		p.nextContentBounds = bounds
 		return
 	}
@@ -107,6 +107,8 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	p.initOnce.Do(func() {
 		guigui.Hide(p)
 	})
+
+	guigui.SetOpacity(p, p.openingRate())
 
 	if p.backgroundBlurred {
 		appender.AppendChildWidget(&p.background)
@@ -148,7 +150,7 @@ func (p *Popup) Open() {
 	if p.showing {
 		return
 	}
-	if p.opacityCount > 0 {
+	if p.openingCount > 0 {
 		p.close(PopupClosedReasonReopen)
 		p.openAfterClose = true
 		return
@@ -175,12 +177,10 @@ func (p *Popup) close(reason PopupClosedReason) {
 
 func (p *Popup) Update(context *guigui.Context) error {
 	if p.showing {
-		if p.opacityCount < popupMaxOpacityCount() {
-			p.opacityCount++
+		if p.openingCount < popupMaxOpeningCount() {
+			p.openingCount++
 		}
-		guigui.SetOpacity(&p.content, p.opacity())
-		guigui.RequestRedraw(&p.background)
-		if p.opacityCount == popupMaxOpacityCount() {
+		if p.openingCount == popupMaxOpeningCount() {
 			p.showing = false
 			if !p.nextContentBounds.Empty() {
 				p.contentBounds = p.nextContentBounds
@@ -189,12 +189,10 @@ func (p *Popup) Update(context *guigui.Context) error {
 		}
 	}
 	if p.hiding {
-		if 0 < p.opacityCount {
-			p.opacityCount--
+		if 0 < p.openingCount {
+			p.openingCount--
 		}
-		guigui.SetOpacity(&p.content, p.opacity())
-		guigui.RequestRedraw(&p.background)
-		if p.opacityCount == 0 {
+		if p.openingCount == 0 {
 			p.hiding = false
 			if p.onClosed != nil {
 				p.onClosed(p.closedReason)
@@ -262,7 +260,7 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 1), popup.opacity())
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
@@ -282,7 +280,7 @@ type popupFrame struct {
 func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.75), popup.opacity())
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.75)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 
@@ -303,7 +301,7 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	popup := guigui.Parent(p).(*Popup)
-	rate := popup.opacity()
+	rate := popup.openingRate()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
 	p.backgroundCache.DrawImage(dst, op)
@@ -322,6 +320,6 @@ func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds.Max.X += int(16 * context.Scale())
 	bounds.Min.Y -= int(8 * context.Scale())
 	bounds.Max.Y += int(16 * context.Scale())
-	clr := draw.ScaleAlpha(color.Black, popup.opacity()*0.2)
+	clr := draw.ScaleAlpha(color.Black, 0.2)
 	draw.DrawRoundedShadowRect(context, dst, bounds, clr, int(16*context.Scale())+RoundedCornerRadius(context))
 }

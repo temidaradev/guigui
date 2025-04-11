@@ -272,6 +272,11 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 	return false
 }
 
+func (s *ScrollOverlay) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	guigui.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
+	return nil
+}
+
 func (s *ScrollOverlay) Update(context *guigui.Context) error {
 	if s.contentSizeChanged {
 		s.barVisibleTime = barShowingTime()
@@ -305,9 +310,7 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 
-	opacity := float64(s.barOpacity) / float64(barMaxOpacity()) * 3 / 4
-	barColor := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.2), opacity)
-
+	barColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.2)
 	hb, vb := s.barBounds(context)
 
 	// Show a horizontal bar.
