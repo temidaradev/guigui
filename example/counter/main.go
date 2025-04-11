@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 )
@@ -16,6 +14,7 @@ import (
 type Root struct {
 	guigui.DefaultWidget
 
+	background  basicwidget.Background
 	resetButton basicwidget.TextButton
 	incButton   basicwidget.TextButton
 	decButton   basicwidget.TextButton
@@ -25,6 +24,8 @@ type Root struct {
 }
 
 func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidget(&r.background)
+
 	{
 		w, h := r.Size(context)
 		w -= 2 * basicwidget.UnitSize(context)
@@ -93,10 +94,6 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	}
 
 	return nil
-}
-
-func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {
-	basicwidget.FillBackground(dst, context)
 }
 
 func main() {

@@ -97,28 +97,28 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(t)
 
 	cm := context.ColorMode()
-	backgroundColor := Color(context.ColorMode(), ColorTypeBase, 0.8)
-	thumbColor := Color2(cm, ColorTypeBase, 1, 0.6)
-	borderColor := Color2(cm, ColorTypeBase, 0.7, 0)
+	backgroundColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
+	thumbColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.6)
+	borderColor := draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	if t.isActive() {
-		thumbColor = Color2(cm, ColorTypeBase, 0.95, 0.55)
-		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
+		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
+		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if t.canPress() {
-		thumbColor = Color2(cm, ColorTypeBase, 0.975, 0.575)
-		borderColor = Color2(cm, ColorTypeBase, 0.7, 0)
+		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.575)
+		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if !guigui.IsEnabled(t) {
-		thumbColor = Color2(cm, ColorTypeBase, 0.95, 0.55)
-		borderColor = Color2(cm, ColorTypeBase, 0.8, 0.1)
+		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
+		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.8, 0.1)
 	}
 
 	// Background
 	bgColorOff := backgroundColor
-	bgColorOn := Color(context.ColorMode(), ColorTypeAccent, 0.5)
+	bgColorOn := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	var bgColor color.Color
 	if t.value {
-		bgColor = mixColor(bgColorOff, bgColorOn, rate)
+		bgColor = draw.MixColor(bgColorOff, bgColorOn, rate)
 	} else {
-		bgColor = mixColor(bgColorOn, bgColorOff, rate)
+		bgColor = draw.MixColor(bgColorOn, bgColorOff, rate)
 	}
 	r := bounds.Dy() / 2
 	draw.DrawRoundedRect(context, dst, bounds, bgColor, r)

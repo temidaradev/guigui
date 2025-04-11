@@ -120,7 +120,7 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(f)
 	bounds.Max.Y = bounds.Min.Y + f.height(context)
-	draw.DrawRoundedRect(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.925), RoundedCornerRadius(context))
+	draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.925), RoundedCornerRadius(context))
 
 	if len(f.items) > 0 {
 		paddingX, paddingY := formItemPadding(context)
@@ -141,12 +141,12 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 			x1 := float32(bounds.Max.X - paddingX)
 			y := float32(y) + float32(paddingY)
 			width := 1 * float32(context.Scale())
-			clr := Color(context.ColorMode(), ColorTypeBase, 0.875)
+			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
 			vector.StrokeLine(dst, x0, y, x1, y, width, clr, false)
 		}
 	}
 
-	draw.DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
+	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
 func (f *Form) SetWidth(context *guigui.Context, width int) {

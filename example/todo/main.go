@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -41,6 +40,7 @@ type TaskWidgets struct {
 type Root struct {
 	guigui.DefaultWidget
 
+	background   basicwidget.Background
 	createButton basicwidget.TextButton
 	textField    basicwidget.TextField
 	taskWidgets  map[uuid.UUID]*TaskWidgets
@@ -50,6 +50,8 @@ type Root struct {
 }
 
 func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidget(&r.background)
+
 	u := float64(basicwidget.UnitSize(context))
 
 	width, _ := r.Size(context)
@@ -146,10 +148,6 @@ func (r *Root) tryCreateTask() {
 		r.tasks = slices.Insert(r.tasks, 0, NewTask(str))
 		r.textField.SetText("")
 	}
-}
-
-func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {
-	basicwidget.FillBackground(dst, context)
 }
 
 func main() {

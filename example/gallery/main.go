@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	_ "github.com/hajimehoshi/guigui/basicwidget/cjkfont"
@@ -17,15 +15,17 @@ import (
 type Root struct {
 	guigui.DefaultWidget
 
-	sidebar  Sidebar
-	settings Settings
-	basic    Basic
-	buttons  Buttons
-	lists    Lists
-	popups   Popups
+	background basicwidget.Background
+	sidebar    Sidebar
+	settings   Settings
+	basic      Basic
+	buttons    Buttons
+	lists      Lists
+	popups     Popups
 }
 
 func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidget(&r.background)
 	appender.AppendChildWidget(&r.sidebar)
 
 	guigui.SetPosition(&r.sidebar, guigui.Position(r))
@@ -52,10 +52,6 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	}
 
 	return nil
-}
-
-func (r *Root) Draw(context *guigui.Context, dst *ebiten.Image) {
-	basicwidget.FillBackground(dst, context)
 }
 
 func main() {

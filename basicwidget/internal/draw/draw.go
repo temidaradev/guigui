@@ -13,18 +13,6 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
-func EqualColor(c0, c1 color.Color) bool {
-	if c0 == c1 {
-		return true
-	}
-	if c0 == nil || c1 == nil {
-		return false
-	}
-	r0, g0, b0, a0 := c0.RGBA()
-	r1, g1, b1, a1 := c1.RGBA()
-	return r0 == r1 && g0 == g1 && b0 == b1 && a0 == a1
-}
-
 type RoundedRectBorderType int
 
 const (

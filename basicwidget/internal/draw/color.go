@@ -1,17 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 Hajime Hoshi
 
-package basicwidget
+package draw
 
 import (
 	"fmt"
 	"image/color"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/oklab"
 
 	"github.com/hajimehoshi/guigui"
 )
+
+func EqualColor(c0, c1 color.Color) bool {
+	if c0 == c1 {
+		return true
+	}
+	if c0 == nil || c1 == nil {
+		return false
+	}
+	r0, g0, b0, a0 := c0.RGBA()
+	r1, g1, b1, a1 := c1.RGBA()
+	return r0 == r1 && g0 == g1 && b0 == b1 && a0 == a1
+}
 
 var (
 	blue   = oklab.OklchModel.Convert(color.RGBA{R: 0x00, G: 0x5a, B: 0xff, A: 0xff}).(oklab.Oklch)
@@ -77,13 +88,13 @@ func getColor(base color.Color, lightness float64, back, front color.Color) colo
 	l2 := c0.L*(1-lightness) + c1.L*lightness
 	if l2 < l {
 		rate := (l2 - c0.L) / (l - c0.L)
-		return mixColor(c0, base, rate)
+		return MixColor(c0, base, rate)
 	}
 	rate := (l2 - l) / (c1.L - l)
-	return mixColor(base, c1, rate)
+	return MixColor(base, c1, rate)
 }
 
-func mixColor(clr0, clr1 color.Color, rate float64) color.Color {
+func MixColor(clr0, clr1 color.Color, rate float64) color.Color {
 	if rate == 0 {
 		return clr0
 	}
@@ -98,10 +109,6 @@ func mixColor(clr0, clr1 color.Color, rate float64) color.Color {
 		B:     okClr0.B*(1-rate) + okClr1.B*rate,
 		Alpha: okClr0.Alpha*(1-rate) + okClr1.Alpha*rate,
 	}
-}
-
-func FillBackground(dst *ebiten.Image, context *guigui.Context) {
-	dst.Fill(Color(context.ColorMode(), ColorTypeBase, 0.95))
 }
 
 func ScaleAlpha(clr color.Color, alpha float64) color.Color {

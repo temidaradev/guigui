@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type ScrollablePanel struct {
@@ -94,9 +95,9 @@ func (s *scrollablePanelBorder) Draw(context *guigui.Context, dst *ebiten.Image)
 	y1 := float32(bounds.Max.Y)
 	offsetX, offsetY := s.scrollOverlay.Offset()
 	if offsetX < 0 {
-		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, Color(context.ColorMode(), ColorTypeBase, 0.85), false)
+		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
 	}
 	if offsetY < 0 {
-		vector.StrokeLine(dst, x0, y0+strokeWidth/2, x1, y0+strokeWidth/2, strokeWidth, Color(context.ColorMode(), ColorTypeBase, 0.85), false)
+		vector.StrokeLine(dst, x0, y0+strokeWidth/2, x1, y0+strokeWidth/2, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
 	}
 }

@@ -258,7 +258,7 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	clr := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 1), popup.opacity())
+	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 1), popup.opacity())
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
@@ -278,7 +278,7 @@ type popupFrame struct {
 func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	clr := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 0.7), popup.opacity())
+	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.7), popup.opacity())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 

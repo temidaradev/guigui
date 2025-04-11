@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type Sidebar struct {
@@ -32,10 +33,10 @@ func (s *Sidebar) SetContent(context *guigui.Context, f func(context *guigui.Con
 }
 
 func (s *Sidebar) Draw(context *guigui.Context, dst *ebiten.Image) {
-	dst.Fill(Color(context.ColorMode(), ColorTypeBase, 0.875))
+	dst.Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875))
 	b := guigui.Bounds(s)
 	b.Min.X = b.Max.X - int(1*context.Scale())
-	dst.SubImage(b).(*ebiten.Image).Fill(Color(context.ColorMode(), ColorTypeBase, 0.85))
+	dst.SubImage(b).(*ebiten.Image).Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85))
 }
 
 func defaultSidebarWidth(context *guigui.Context) (int, int) {

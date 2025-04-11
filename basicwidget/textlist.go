@@ -278,7 +278,7 @@ func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 		x1 := float32(p.X + w)
 		y := float32(p.Y) + float32(h)/2
 		width := float32(1 * context.Scale())
-		vector.StrokeLine(dst, x0, y, x1, y, width, Color(context.ColorMode(), ColorTypeBase, 0.8), false)
+		vector.StrokeLine(dst, x0, y, x1, y, width, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), false)
 		return
 	}
 	if t.textListItem.Header {
@@ -288,7 +288,7 @@ func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 			Min: p,
 			Max: p.Add(image.Pt(w, h)),
 		}
-		draw.DrawRoundedRect(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.6), RoundedCornerRadius(context))
+		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.6), RoundedCornerRadius(context))
 	}
 }
 

@@ -34,11 +34,11 @@ type ListItem struct {
 }
 
 func DefaultActiveListItemTextColor(context *guigui.Context) color.Color {
-	return Color2(context.ColorMode(), ColorTypeBase, 1, 1)
+	return draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 1)
 }
 
 func DefaultDisabledListItemTextColor(context *guigui.Context) color.Color {
-	return Color(context.ColorMode(), ColorTypeBase, 0.5)
+	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5)
 }
 
 type List struct {
@@ -414,16 +414,16 @@ func (l *List) selectedItemColor(context *guigui.Context) color.Color {
 		return nil
 	}
 	if guigui.IsFocused(l) || l.style == ListStyleSidebar {
-		return Color(context.ColorMode(), ColorTypeAccent, 0.5)
+		return draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	}
-	return Color(context.ColorMode(), ColorTypeBase, 0.8)
+	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 }
 
 func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if l.style != ListStyleSidebar {
-		clr := Color(context.ColorMode(), ColorTypeBase, 1)
+		clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 		if l.style == ListStyleMenu {
-			clr = Color(context.ColorMode(), ColorTypeBase, 0.95)
+			clr = draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95)
 		}
 		p := guigui.Position(l)
 		w, h := l.Size(context)
@@ -452,7 +452,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 			x0 := p.X + RoundedCornerRadius(context)
 			x1 := p.X + w - RoundedCornerRadius(context)
 			width := 1 * float32(context.Scale())
-			clr := Color(context.ColorMode(), ColorTypeBase, 0.5)
+			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5)
 			vector.StrokeLine(dst, float32(x0), y, float32(x1), y, width, clr, false)
 		}
 	}
@@ -472,9 +472,9 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
 		if r.Overlaps(guigui.VisibleBounds(l)) {
-			clr := Color(context.ColorMode(), ColorTypeBase, 0.9)
+			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.9)
 			if l.style == ListStyleMenu {
-				clr = Color(context.ColorMode(), ColorTypeAccent, 0.5)
+				clr = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 			}
 			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
 		}
@@ -501,7 +501,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		y += float32(l.itemYFromIndex(context, l.dropDstIndexPlus1-1))
 		_, offsetY := l.scrollOverlay.Offset()
 		y += float32(offsetY)
-		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), Color(context.ColorMode(), ColorTypeBase, 0.1), false)
+		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.1), false)
 	}
 }
 
@@ -599,7 +599,7 @@ func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 		Min: p,
 		Max: p.Add(image.Pt(w, h)),
 	}
-	clr := Color2(context.ColorMode(), ColorTypeBase, 0.7, 0)
+	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0)
 	borderWidth := float32(1 * context.Scale())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)
 }

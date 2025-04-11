@@ -63,7 +63,7 @@ func findWordBoundaries(text string, idx int) (start, end int) {
 type TextFilter func(text string, start, end int) (string, int, int)
 
 func DefaultTextColor(context *guigui.Context) color.Color {
-	return Color(context.ColorMode(), ColorTypeBase, 0.1)
+	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.1)
 }
 
 type Text struct {
@@ -805,7 +805,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 				y := float32(top0)
 				width := float32(x1 - x0)
 				height := float32(bottom0 - top0)
-				vector.DrawFilledRect(dst, x, y, width, height, Color(context.ColorMode(), ColorTypeAccent, 0.8), false)
+				vector.DrawFilledRect(dst, x, y, width, height, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), false)
 			}
 			headIdx = idx + 1
 		}
@@ -824,7 +824,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 				y := float32(bottom0) - float32(cursorWidth(context))
 				w := float32(x1 - x0)
 				h := float32(cursorWidth(context))
-				vector.DrawFilledRect(dst, x, y, w, h, Color(context.ColorMode(), ColorTypeAccent, 0.8), false)
+				vector.DrawFilledRect(dst, x, y, w, h, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), false)
 			}
 		}
 		{
@@ -835,7 +835,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 				y := float32(bottom0) - float32(cursorWidth(context))
 				w := float32(x1 - x0)
 				h := float32(cursorWidth(context))
-				vector.DrawFilledRect(dst, x, y, w, h, Color(context.ColorMode(), ColorTypeAccent, 0.4), false)
+				vector.DrawFilledRect(dst, x, y, w, h, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
 			}
 		}
 	}
@@ -1021,7 +1021,7 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 	b := textWidget.(*Text).cursorBounds(context)
-	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), Color(context.ColorMode(), ColorTypeAccent, 0.4), false)
+	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
 }
 
 func (t *textCursor) Z() int {

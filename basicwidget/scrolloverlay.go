@@ -306,7 +306,7 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	opacity := float64(s.barOpacity) / float64(barMaxOpacity()) * 3 / 4
-	barColor := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 0.2), opacity)
+	barColor := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.2), opacity)
 
 	hb, vb := s.barBounds(context)
 

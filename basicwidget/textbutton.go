@@ -64,7 +64,7 @@ func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidge
 	tw, _ := t.text.TextSize(context)
 	t.text.SetSize(tw, h)
 	if !guigui.IsEnabled(&t.button) {
-		t.text.SetColor(Color(context.ColorMode(), ColorTypeBase, 0.5))
+		t.text.SetColor(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
 	} else {
 		t.text.SetColor(t.textColor)
 	}
