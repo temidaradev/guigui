@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type Button struct {
@@ -99,17 +100,17 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 	if border || b.isActive() || b.forcePressed {
 		bounds := bounds.Inset(int(1 * context.Scale()))
-		DrawRoundedRect(context, dst, bounds, backgroundColor, r)
+		draw.DrawRoundedRect(context, dst, bounds, backgroundColor, r)
 	}
 
 	if border {
-		borderType := RoundedRectBorderTypeOutset
+		borderType := draw.RoundedRectBorderTypeOutset
 		if b.isActive() || b.forcePressed {
-			borderType = RoundedRectBorderTypeInset
+			borderType = draw.RoundedRectBorderTypeInset
 		} else if !guigui.IsEnabled(b) {
-			borderType = RoundedRectBorderTypeRegular
+			borderType = draw.RoundedRectBorderTypeRegular
 		}
-		DrawRoundedRectBorder(context, dst, bounds, borderColor, r, float32(1*context.Scale()), borderType)
+		draw.DrawRoundedRectBorder(context, dst, bounds, borderColor, r, float32(1*context.Scale()), borderType)
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type ListStyle int
@@ -430,7 +431,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 			Min: p,
 			Max: p.Add(image.Pt(w, h)),
 		}
-		DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
+		draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 	}
 
 	// Draw item borders.
@@ -461,7 +462,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
 		if r.Overlaps(guigui.VisibleBounds(l)) {
-			DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
+			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
 		}
 	}
 
@@ -475,7 +476,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 			if l.style == ListStyleMenu {
 				clr = Color(context.ColorMode(), ColorTypeAccent, 0.5)
 			}
-			DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
+			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
 		}
 	}
 
@@ -588,9 +589,9 @@ type listFrame struct {
 }
 
 func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
-	border := RoundedRectBorderTypeInset
+	border := draw.RoundedRectBorderTypeInset
 	if guigui.Parent(l).(*List).style != ListStyleNormal {
-		border = RoundedRectBorderTypeOutset
+		border = draw.RoundedRectBorderTypeOutset
 	}
 	p := guigui.Position(l)
 	w, h := l.Size(context)
@@ -600,7 +601,7 @@ func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 	clr := Color2(context.ColorMode(), ColorTypeBase, 0.7, 0)
 	borderWidth := float32(1 * context.Scale())
-	DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)
 }
 
 func moveItemInSlice[T any](slice []T, from int, count int, to int) {

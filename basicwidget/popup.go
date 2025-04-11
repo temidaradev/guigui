@@ -11,6 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 const popupZ = 16
@@ -258,7 +259,7 @@ func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
 	clr := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 1), popup.opacity())
-	DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
+	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
 func (p *popupContent) setSize(width, height int) {
@@ -278,7 +279,7 @@ func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
 	clr := ScaleAlpha(Color(context.ColorMode(), ColorTypeBase, 0.7), popup.opacity())
-	DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), RoundedRectBorderTypeOutset)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 
 type popupBackground struct {
@@ -303,5 +304,5 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
 	p.backgroundCache.DrawImage(dst, op)
 
-	DrawBlurredImage(dst, p.backgroundCache, rate)
+	draw.DrawBlurredImage(dst, p.backgroundCache, rate)
 }

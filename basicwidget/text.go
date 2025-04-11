@@ -21,6 +21,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 	"github.com/hajimehoshi/guigui/internal/clipboard"
 )
 
@@ -254,7 +255,7 @@ func (t *Text) SetVerticalAlign(align VerticalAlign) {
 }
 
 func (t *Text) SetColor(color color.Color) {
-	if equalColor(t.color, color) {
+	if draw.EqualColor(t.color, color) {
 		return
 	}
 

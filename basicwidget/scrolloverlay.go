@@ -9,7 +9,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 func barMaxOpacity() int {
@@ -310,12 +312,12 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	// Show a horizontal bar.
 	if !hb.Empty() {
-		DrawRoundedRect(context, dst, hb, barColor, RoundedCornerRadius(context))
+		draw.DrawRoundedRect(context, dst, hb, barColor, RoundedCornerRadius(context))
 	}
 
 	// Show a vertical bar.
 	if !vb.Empty() {
-		DrawRoundedRect(context, dst, vb, barColor, RoundedCornerRadius(context))
+		draw.DrawRoundedRect(context, dst, vb, barColor, RoundedCornerRadius(context))
 	}
 
 	s.onceRendered = true

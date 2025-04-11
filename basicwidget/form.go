@@ -9,7 +9,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type FormItem struct {
@@ -118,7 +120,7 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := guigui.Bounds(f)
 	bounds.Max.Y = bounds.Min.Y + f.height(context)
-	DrawRoundedRect(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.925), RoundedCornerRadius(context))
+	draw.DrawRoundedRect(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.925), RoundedCornerRadius(context))
 
 	if len(f.items) > 0 {
 		paddingX, paddingY := formItemPadding(context)
@@ -144,7 +146,7 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), RoundedRectBorderTypeRegular)
+	draw.DrawRoundedRectBorder(context, dst, bounds, Color(context.ColorMode(), ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
 func (f *Form) SetWidth(context *guigui.Context, width int) {

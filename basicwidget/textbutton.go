@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type TextButton struct {
@@ -41,7 +42,7 @@ func (t *TextButton) SetImage(image *ebiten.Image) {
 }
 
 func (t *TextButton) SetTextColor(clr color.Color) {
-	if equalColor(t.textColor, clr) {
+	if draw.EqualColor(t.textColor, clr) {
 		return
 	}
 	t.textColor = clr

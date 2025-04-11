@@ -11,6 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type ToggleButton struct {
@@ -120,12 +121,12 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 		bgColor = mixColor(bgColorOn, bgColorOff, rate)
 	}
 	r := bounds.Dy() / 2
-	DrawRoundedRect(context, dst, bounds, bgColor, r)
+	draw.DrawRoundedRect(context, dst, bounds, bgColor, r)
 
 	// Border (upper)
 	b := bounds
 	b.Max.Y = b.Min.Y + b.Dy()/2
-	DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), RoundedRectBorderTypeInset)
+	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
 	// Thumb
 	cxOff := float64(bounds.Min.X) + float64(r)
@@ -137,13 +138,13 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 		cx = int((1-rate)*cxOn + rate*cxOff)
 	}
 	cy := bounds.Min.Y + r
-	DrawRoundedRect(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbColor, r)
-	DrawRoundedRectBorder(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), borderColor, r, float32(1*context.Scale()), RoundedRectBorderTypeOutset)
+	draw.DrawRoundedRect(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbColor, r)
+	draw.DrawRoundedRectBorder(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 
 	// Border (lower)
 	b = bounds
 	b.Min.Y = b.Max.Y - b.Dy()/2
-	DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), RoundedRectBorderTypeInset)
+	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
 	t.onceRendered = true
 }

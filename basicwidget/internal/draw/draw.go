@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 Hajime Hoshi
 
-package basicwidget
+package draw
 
 import (
 	"image"
@@ -13,7 +13,7 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
-func equalColor(c0, c1 color.Color) bool {
+func EqualColor(c0, c1 color.Color) bool {
 	if c0 == c1 {
 		return true
 	}
