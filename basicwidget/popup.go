@@ -318,8 +318,10 @@ type popupShadow struct {
 func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	w := int(16 * context.Scale())
-	bounds = bounds.Inset(-w)
+	bounds.Min.X -= int(16 * context.Scale())
+	bounds.Max.X += int(16 * context.Scale())
+	bounds.Min.Y -= int(8 * context.Scale())
+	bounds.Max.Y += int(16 * context.Scale())
 	clr := draw.ScaleAlpha(color.Black, popup.opacity()*0.2)
-	draw.DrawRoundedShadowRect(context, dst, bounds, clr, w+RoundedCornerRadius(context))
+	draw.DrawRoundedShadowRect(context, dst, bounds, clr, int(16*context.Scale())+RoundedCornerRadius(context))
 }
