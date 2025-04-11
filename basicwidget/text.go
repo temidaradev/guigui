@@ -26,9 +26,7 @@ import (
 
 func isKeyRepeating(key ebiten.Key) bool {
 	d := inpututil.KeyPressDuration(key)
-	// In the current implementation of text, d == 1 might be skipped especially for backspace key.
-	// TODO: Fix this.
-	if d == 2 {
+	if d == 1 {
 		return true
 	}
 	delay := ebiten.TPS() * 24 / 60
