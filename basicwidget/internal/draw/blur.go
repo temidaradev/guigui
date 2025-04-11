@@ -19,7 +19,6 @@ package main
 const blurSize = {{.BlurSize}}
 
 var Rate float
-var Scale float
 
 func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
 	minPos := imageSrc0Origin()
@@ -63,8 +62,7 @@ func DrawBlurredImage(context *guigui.Context, dst *ebiten.Image, src *ebiten.Im
 	op.Images[0] = src
 	op.GeoM.Translate(float64(src.Bounds().Min.X), float64(src.Bounds().Min.Y))
 	op.Uniforms = map[string]any{
-		"Rate":  rate,
-		"Scale": context.Scale(),
+		"Rate": rate,
 	}
 	op.Blend = ebiten.BlendCopy
 	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), shader, op)
