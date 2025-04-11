@@ -24,7 +24,7 @@ func easeOutQuad(t float64) float64 {
 }
 
 func popupMaxOpeningCount() int {
-	return ebiten.TPS() / 10
+	return ebiten.TPS() / 5
 }
 
 type PopupClosedReason int
@@ -184,7 +184,8 @@ func (p *Popup) close(reason PopupClosedReason) {
 func (p *Popup) Update(context *guigui.Context) error {
 	if p.showing {
 		if p.openingCount < popupMaxOpeningCount() {
-			p.openingCount++
+			p.openingCount += 3
+			p.openingCount = min(p.openingCount, popupMaxOpeningCount())
 		}
 		if p.openingCount == popupMaxOpeningCount() {
 			p.showing = false
@@ -196,7 +197,12 @@ func (p *Popup) Update(context *guigui.Context) error {
 	}
 	if p.hiding {
 		if 0 < p.openingCount {
-			p.openingCount--
+			if p.closedReason == PopupClosedReasonReopen {
+				p.openingCount -= 3
+			} else {
+				p.openingCount--
+			}
+			p.openingCount = max(p.openingCount, 0)
 		}
 		if p.openingCount == 0 {
 			p.hiding = false
