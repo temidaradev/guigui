@@ -5,6 +5,7 @@ package basicwidget
 
 import (
 	"image"
+	"image/color"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -38,6 +39,7 @@ type Popup struct {
 	guigui.DefaultWidget
 
 	background popupBackground
+	shadow     popupShadow
 	content    popupContent
 	frame      popupFrame
 
@@ -109,6 +111,8 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	if p.backgroundBlurred {
 		appender.AppendChildWidget(&p.background)
 	}
+
+	appender.AppendChildWidget(&p.shadow)
 
 	bounds := p.ContentBounds(context)
 	guigui.SetPosition(&p.content, bounds.Min)
@@ -305,4 +309,17 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	p.backgroundCache.DrawImage(dst, op)
 
 	draw.DrawBlurredImage(context, dst, p.backgroundCache, rate)
+}
+
+type popupShadow struct {
+	guigui.DefaultWidget
+}
+
+func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
+	popup := guigui.Parent(p).(*Popup)
+	bounds := popup.ContentBounds(context)
+	w := int(16 * context.Scale())
+	bounds = bounds.Inset(-w)
+	clr := draw.ScaleAlpha(color.Black, popup.opacity()*0.2)
+	draw.DrawRoundedShadowRect(context, dst, bounds, clr, w+RoundedCornerRadius(context))
 }
