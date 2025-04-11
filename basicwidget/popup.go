@@ -282,7 +282,7 @@ type popupFrame struct {
 func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	popup := guigui.Parent(p).(*Popup)
 	bounds := popup.ContentBounds(context)
-	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.7), popup.opacity())
+	clr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.75), popup.opacity())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 
