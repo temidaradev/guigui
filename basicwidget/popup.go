@@ -108,7 +108,12 @@ func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		guigui.Hide(p)
 	})
 
-	guigui.SetOpacity(p, p.openingRate())
+	// SetOpacity cannot be called for p.background so far.
+	// If opacity is less than 1, the dst argument of Draw will an empty image in the current implementation.
+	// TODO: This is too tricky. Refactor this.
+	guigui.SetOpacity(&p.shadow, p.openingRate())
+	guigui.SetOpacity(&p.content, p.openingRate())
+	guigui.SetOpacity(&p.frame, p.openingRate())
 
 	if p.backgroundBlurred {
 		appender.AppendChildWidget(&p.background)
@@ -302,8 +307,10 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	popup := guigui.Parent(p).(*Popup)
 	rate := popup.openingRate()
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
+	op.Blend = ebiten.BlendCopy
 	p.backgroundCache.DrawImage(dst, op)
 
 	draw.DrawBlurredImage(context, dst, p.backgroundCache, rate)
