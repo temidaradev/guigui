@@ -170,11 +170,12 @@ func (p *Popup) Close() {
 }
 
 func (p *Popup) close(reason PopupClosedReason) {
+	p.closedReason = reason
+
 	if p.hiding {
 		return
 	}
 
-	p.closedReason = reason
 	p.showing = false
 	p.hiding = true
 	p.openAfterClose = false
