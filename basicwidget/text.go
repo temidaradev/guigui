@@ -164,6 +164,9 @@ func (t *Text) SetSelectable(selectable bool) {
 	t.selectable = selectable
 	t.selectionDragStart = -1
 	t.selectionShiftIndex = -1
+	if !t.selectable {
+		t.setTextAndSelection(t.field.Text(), 0, 0, -1)
+	}
 	guigui.RequestRedraw(t)
 }
 

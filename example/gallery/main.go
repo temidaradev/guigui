@@ -21,6 +21,7 @@ type Root struct {
 	settings   Settings
 	basic      Basic
 	buttons    Buttons
+	texts      Texts
 	lists      Lists
 	popups     Popups
 }
@@ -46,6 +47,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				appender.AppendChildWidgetWithBounds(&r.basic, bounds)
 			case "buttons":
 				appender.AppendChildWidgetWithBounds(&r.buttons, bounds)
+			case "texts":
+				appender.AppendChildWidgetWithBounds(&r.texts, bounds)
 			case "lists":
 				appender.AppendChildWidgetWithBounds(&r.lists, bounds)
 			case "popups":
