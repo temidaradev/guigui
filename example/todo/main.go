@@ -117,11 +117,11 @@ type taskWidget struct {
 	doneButton basicwidget.TextButton
 	text       basicwidget.Text
 
-	onDeleteButtonPressed func()
+	onDoneButtonPressed func()
 }
 
-func (t *taskWidget) SetOnDeleted(f func()) {
-	t.onDeleteButtonPressed = f
+func (t *taskWidget) SetOnDoneButtonPressed(f func()) {
+	t.onDoneButtonPressed = f
 }
 
 func (t *taskWidget) SetText(text string) {
@@ -135,8 +135,8 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.doneButton.SetText("Done")
 	t.doneButton.SetWidth(int(3 * u))
 	t.doneButton.SetOnUp(func() {
-		if t.onDeleteButtonPressed != nil {
-			t.onDeleteButtonPressed()
+		if t.onDoneButtonPressed != nil {
+			t.onDoneButtonPressed()
 		}
 	})
 	guigui.SetPosition(&t.doneButton, p)
@@ -177,7 +177,7 @@ func (t *tasksPanelContent) SetTasks(tasks []Task) {
 		}
 	}
 	for i, task := range tasks {
-		t.taskWidgets[i].SetOnDeleted(func() {
+		t.taskWidgets[i].SetOnDoneButtonPressed(func() {
 			if t.onDeleted != nil {
 				t.onDeleted(task.ID)
 			}
