@@ -9,7 +9,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -24,16 +23,14 @@ func nextTaskID() int {
 }
 
 type Task struct {
-	ID        int
-	Text      string
-	CreatedAt time.Time
+	ID   int
+	Text string
 }
 
 func NewTask(text string) Task {
 	return Task{
-		ID:        nextTaskID(),
-		Text:      text,
-		CreatedAt: time.Now(),
+		ID:   nextTaskID(),
+		Text: text,
 	}
 }
 
@@ -130,6 +127,11 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	return nil
 }
 
+func (t *taskWidget) Size(context *guigui.Context) (int, int) {
+	w, _ := guigui.Parent(t).Size(context)
+	return w, int(basicwidget.UnitSize(context))
+}
+
 type tasksPanelContent struct {
 	guigui.DefaultWidget
 
@@ -143,7 +145,6 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 
 	root := t.root
 	p := guigui.Position(t)
-	w, _ := t.Size(context)
 	minX := p.X + int(0.5*u)
 	y := p.Y
 	for i, task := range root.tasks {
@@ -166,12 +167,8 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 		if i > 0 {
 			y += int(u / 4)
 		}
-		guigui.SetPosition(&t.taskWidgets[task.ID].doneButton, image.Pt(minX, y))
-		appender.AppendChildWidget(&t.taskWidgets[task.ID].doneButton)
-
-		t.taskWidgets[task.ID].text.SetSize(w-int(4.5*u), int(u))
-		guigui.SetPosition(&t.taskWidgets[task.ID].text, image.Pt(minX+int(3.5*u), y))
-		appender.AppendChildWidget(&t.taskWidgets[task.ID].text)
+		guigui.SetPosition(t.taskWidgets[task.ID], image.Pt(minX, y))
+		appender.AppendChildWidget(t.taskWidgets[task.ID])
 		y += int(u)
 	}
 
