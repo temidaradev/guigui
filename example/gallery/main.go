@@ -24,7 +24,7 @@ type Root struct {
 	popups     Popups
 }
 
-func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidget(&r.background)
 	appender.AppendChildWidget(&r.sidebar)
 

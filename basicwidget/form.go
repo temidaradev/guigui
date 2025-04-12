@@ -38,7 +38,7 @@ func (f *Form) SetItems(items []*FormItem) {
 	f.items = append(f.items, items...)
 }
 
-func (f *Form) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (f *Form) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	f.calcItemBounds(context)
 
 	for i, item := range f.items {

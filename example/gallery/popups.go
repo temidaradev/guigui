@@ -32,7 +32,7 @@ type Popups struct {
 	contextMenuPopup basicwidget.PopupMenu
 }
 
-func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.blurBackgroundText.SetText("Blur Background")
 	p.closeByClickingOutsideText.SetText("Close by Clicking Outside")
 	p.showButton.SetText("Show")
@@ -128,7 +128,7 @@ type simplePopupContent struct {
 	closeButton basicwidget.TextButton
 }
 
-func (s *simplePopupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
 	s.titleText.SetText("Hello!")

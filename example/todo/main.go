@@ -50,7 +50,7 @@ type Root struct {
 	tasks []Task
 }
 
-func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidget(&r.background)
 
 	u := float64(basicwidget.UnitSize(context))
@@ -126,7 +126,7 @@ type tasksPanelContent struct {
 	root *Root
 }
 
-func (t *tasksPanelContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
 	root := t.root

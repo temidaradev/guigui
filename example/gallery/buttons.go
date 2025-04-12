@@ -22,7 +22,7 @@ type Buttons struct {
 	toggleButton        basicwidget.ToggleButton
 }
 
-func (b *Buttons) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Button")
 	b.textImageButtonText.SetText("Text w/ Image Button")

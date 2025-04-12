@@ -276,7 +276,7 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 	return false
 }
 
-func (s *ScrollOverlay) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := s.Size(context)
 	if s.lastWidth != w || s.lastHeight != h {
 		s.adjustOffset()

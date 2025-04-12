@@ -148,7 +148,7 @@ func (a *app) Update() error {
 	a.context.setDeviceScale(ebiten.Monitor().DeviceScaleFactor())
 
 	// Construct the widget tree.
-	if err := a.layout(); err != nil {
+	if err := a.build(); err != nil {
 		return err
 	}
 
@@ -166,7 +166,7 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree again to reflect the latest state.
-	if err := a.layout(); err != nil {
+	if err := a.build(); err != nil {
 		return err
 	}
 
@@ -299,8 +299,8 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 	}
 }
 
-func (a *app) layout() error {
-	if err := a.doLayout(a.root); err != nil {
+func (a *app) build() error {
+	if err := a.doBuild(a.root); err != nil {
 		return err
 	}
 
@@ -324,17 +324,17 @@ func (a *app) layout() error {
 	return nil
 }
 
-func (a *app) doLayout(widget Widget) error {
+func (a *app) doBuild(widget Widget) error {
 	widgetState := widget.widgetState()
 	widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
-	if err := widget.Layout(&a.context, &ChildWidgetAppender{
+	if err := widget.Build(&a.context, &ChildWidgetAppender{
 		app:    a,
 		widget: widget,
 	}); err != nil {
 		return err
 	}
 	for _, child := range widgetState.children {
-		if err := a.doLayout(child); err != nil {
+		if err := a.doBuild(child); err != nil {
 			return err
 		}
 	}

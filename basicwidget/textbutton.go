@@ -53,7 +53,7 @@ func (t *TextButton) SetForcePressed(forcePressed bool) {
 	t.button.SetForcePressed(forcePressed)
 }
 
-func (t *TextButton) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := t.Size(context)
 	t.button.SetSize(context, w, h)
 	guigui.SetPosition(&t.button, guigui.Position(t))

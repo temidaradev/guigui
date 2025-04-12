@@ -31,7 +31,7 @@ func (d *DropdownList) updateButtonImage(context *guigui.Context) {
 	d.textButton.SetImage(img)
 }
 
-func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	d.updateButtonImage(context)
 	d.updateText()
 

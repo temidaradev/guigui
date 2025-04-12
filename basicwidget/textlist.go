@@ -90,7 +90,7 @@ func (t *TextList) SetCheckmarkIndex(index int) {
 	t.list.SetCheckmarkIndex(index)
 }
 
-func (t *TextList) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	// To use HasFocusedChildWidget correctly, create the tree first.
 	guigui.SetPosition(&t.list, guigui.Position(t))
 	appender.AppendChildWidget(&t.list)
@@ -248,7 +248,7 @@ func (t *textListItemWidget) setTextListItem(textListItem TextListItem) {
 	t.text.SetText(t.textString())
 }
 
-func (t *textListItemWidget) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p := guigui.Position(t)
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2

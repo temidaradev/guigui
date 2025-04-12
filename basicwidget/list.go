@@ -100,7 +100,7 @@ func (l *List) contentSize(context *guigui.Context) (int, int) {
 	return w, h
 }
 
-func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
 		guigui.SetPosition(&l.listFrame, guigui.Position(l))
 		appender.AppendChildWidget(&l.listFrame)

@@ -122,7 +122,7 @@ func (t *Text) resetCachedSize() {
 	t.cachedTextHeightPlus1 = 0
 }
 
-func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if f := t.face(context); t.lastFace != f {
 		t.lastFace = f
 		t.resetCachedSize()

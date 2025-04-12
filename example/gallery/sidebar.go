@@ -21,7 +21,7 @@ func sidebarWidth(context *guigui.Context) int {
 	return 8 * basicwidget.UnitSize(context)
 }
 
-func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	_, h := s.Size(context)
 	s.sidebar.SetSize(context, sidebarWidth(context), h)
 	s.sidebar.SetContent(&s.sidebarContent)
@@ -53,7 +53,7 @@ type sidebarContent struct {
 	initOnce sync.Once
 }
 
-func (s *sidebarContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
 

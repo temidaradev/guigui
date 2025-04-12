@@ -24,7 +24,7 @@ type Basic struct {
 	textList         basicwidget.TextList
 }
 
-func (b *Basic) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Click Me!")
 	b.toggleButtonText.SetText("Toggle Button")

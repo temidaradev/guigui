@@ -27,7 +27,7 @@ type Settings struct {
 	initOnce sync.Once
 }
 
-func (s *Settings) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
 	s.colorModeDropdownList.SetItemsByStrings([]string{"Light", "Dark"})
 	s.colorModeDropdownList.SetOnValueChanged(func(index int) {

@@ -55,7 +55,7 @@ func toggleButtonMaxCount() int {
 	return ebiten.TPS() / 12
 }
 
-func (t *ToggleButton) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	hovered := t.isHovered()
 	if t.prevHovered != hovered {
 		t.prevHovered = hovered

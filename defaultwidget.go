@@ -9,7 +9,9 @@ type DefaultWidget struct {
 	widgetState_ widgetState
 }
 
-func (*DefaultWidget) Layout(context *Context, appender *ChildWidgetAppender) error {
+var _ Widget = (*DefaultWidget)(nil)
+
+func (*DefaultWidget) Build(context *Context, appender *ChildWidgetAppender) error {
 	return nil
 }
 

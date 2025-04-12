@@ -28,7 +28,7 @@ func (s *ScrollablePanel) SetContent(widget guigui.Widget) {
 	s.content = widget
 }
 
-func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if s.content == nil {
 		return nil
 	}

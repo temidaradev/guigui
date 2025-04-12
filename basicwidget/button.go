@@ -35,7 +35,7 @@ func (b *Button) SetOnUp(f func()) {
 	b.onUp = f
 }
 
-func (b *Button) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	hovered := b.isHovered()
 	if b.prevHovered != hovered {
 		b.prevHovered = hovered

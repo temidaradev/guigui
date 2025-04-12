@@ -103,7 +103,7 @@ func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 	p.onClosed = f
 }
 
-func (p *Popup) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.initOnce.Do(func() {
 		guigui.Hide(p)
 	})
@@ -249,7 +249,7 @@ func (p *popupContent) setContent(widget guigui.Widget) {
 	p.content = widget
 }
 
-func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content != nil {
 		guigui.SetPosition(p.content, guigui.Position(p))
 		appender.AppendChildWidget(p.content)

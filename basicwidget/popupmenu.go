@@ -26,7 +26,7 @@ func (p *PopupMenu) SetCheckmarkIndex(index int) {
 	p.textList.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.textList.SetStyle(ListStyleMenu)
 	p.textList.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
