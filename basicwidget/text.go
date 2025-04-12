@@ -436,6 +436,10 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 	if !ok {
 		return
 	}
+
+	// Update the contet size of the scroll overlay to adjust the scroll offset correctly.
+	t.scrollOverlay.SetContentSize(t.TextSize(context))
+
 	text := t.textToDraw()
 
 	tb := t.textBounds(context)
@@ -534,8 +538,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	}
 	if processed {
 		guigui.RequestRedraw(t)
-		t.adjustScrollOffset(context)
+		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
 		t.resetCachedSize()
+		t.adjustScrollOffset(context)
 		return guigui.HandleInputByWidget(t)
 	}
 
