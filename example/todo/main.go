@@ -170,7 +170,8 @@ func (t *tasksPanelContent) SetOnDeleted(f func(id int)) {
 func (t *tasksPanelContent) SetTasks(tasks []Task) {
 	if len(tasks) != len(t.taskWidgets) {
 		if len(tasks) > len(t.taskWidgets) {
-			t.taskWidgets = append(t.taskWidgets, make([]taskWidget, len(tasks)-len(t.taskWidgets))...)
+			t.taskWidgets = slices.Grow(t.taskWidgets, len(tasks)-len(t.taskWidgets))
+			t.taskWidgets = t.taskWidgets[:len(tasks)]
 		} else {
 			t.taskWidgets = slices.Delete(t.taskWidgets, len(tasks), len(t.taskWidgets))
 		}
