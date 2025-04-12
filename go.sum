@@ -14,8 +14,6 @@ github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066 h1:qCuYC
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
-github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/hajimehoshi/bitmapfont/v3 v3.3.0-alpha.5 h1:xk7KQvJTwoKLgkKBlcG/0H7FKLVbY7LVhhx7dEZKFjU=
 github.com/hajimehoshi/bitmapfont/v3 v3.3.0-alpha.5/go.mod h1:GsEgTraq3r5Z8JuWS3gjeCnC81cVeJd4Cojw3OSJkrg=
 github.com/hajimehoshi/ebiten/v2 v2.9.0-alpha.5.0.20250409182445-65714dc4c721 h1:AhghGWIVVpS+6fnChOJDxQAeGsxxPNdrbu7RmcJ1l6U=

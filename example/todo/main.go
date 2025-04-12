@@ -11,30 +11,30 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	_ "github.com/hajimehoshi/guigui/basicwidget/cjkfont"
 )
 
+var theCurrentID int
+
+func nextTaskID() int {
+	theCurrentID++
+	return theCurrentID
+}
+
 type Task struct {
-	ID        uuid.UUID
+	ID        int
 	Text      string
 	CreatedAt time.Time
 }
 
 func NewTask(text string) Task {
 	return Task{
-		ID:        uuid.New(),
+		ID:        nextTaskID(),
 		Text:      text,
 		CreatedAt: time.Now(),
 	}
-}
-
-type TaskWidgets struct {
-	doneButton basicwidget.TextButton
-	text       basicwidget.Text
 }
 
 type Root struct {
@@ -43,7 +43,6 @@ type Root struct {
 	background        basicwidget.Background
 	createButton      basicwidget.TextButton
 	textField         basicwidget.TextField
-	taskWidgets       map[uuid.UUID]*TaskWidgets
 	tasksPanel        basicwidget.ScrollablePanel
 	tasksPanelContent tasksPanelContent
 
@@ -92,16 +91,6 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	guigui.SetPosition(&r.tasksPanel, guigui.Position(r).Add(image.Pt(0, int(2*u))))
 	appender.AppendChildWidget(&r.tasksPanel)
 
-	// GC widgets
-	for id := range r.taskWidgets {
-		if slices.IndexFunc(r.tasks, func(t Task) bool {
-			return t.ID == id
-		}) >= 0 {
-			continue
-		}
-		delete(r.taskWidgets, id)
-	}
-
 	return nil
 }
 
@@ -120,10 +109,33 @@ func (r *Root) tryCreateTask() {
 	}
 }
 
+type taskWidget struct {
+	guigui.DefaultWidget
+
+	doneButton basicwidget.TextButton
+	text       basicwidget.Text
+}
+
+func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	u := float64(basicwidget.UnitSize(context))
+
+	p := guigui.Position(t)
+	guigui.SetPosition(&t.doneButton, p)
+	appender.AppendChildWidget(&t.doneButton)
+
+	w, _ := t.Size(context)
+	t.text.SetSize(w-int(4.5*u), int(u))
+	guigui.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
+	appender.AppendChildWidget(&t.text)
+	return nil
+}
+
 type tasksPanelContent struct {
 	guigui.DefaultWidget
 
 	root *Root
+
+	taskWidgets map[int]*taskWidget
 }
 
 func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -134,34 +146,45 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 	w, _ := t.Size(context)
 	minX := p.X + int(0.5*u)
 	y := p.Y
-	for i, t := range root.tasks {
-		if _, ok := root.taskWidgets[t.ID]; !ok {
-			var tw TaskWidgets
+	for i, task := range root.tasks {
+		if _, ok := t.taskWidgets[task.ID]; !ok {
+			var tw taskWidget
 			tw.doneButton.SetText("Done")
 			tw.doneButton.SetWidth(int(3 * u))
 			tw.doneButton.SetOnUp(func() {
-				root.tasks = slices.DeleteFunc(root.tasks, func(task Task) bool {
-					return task.ID == t.ID
+				root.tasks = slices.DeleteFunc(root.tasks, func(tt Task) bool {
+					return task.ID == tt.ID
 				})
 			})
-			tw.text.SetText(t.Text)
+			tw.text.SetText(task.Text)
 			tw.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-			if root.taskWidgets == nil {
-				root.taskWidgets = map[uuid.UUID]*TaskWidgets{}
+			if t.taskWidgets == nil {
+				t.taskWidgets = map[int]*taskWidget{}
 			}
-			root.taskWidgets[t.ID] = &tw
+			t.taskWidgets[task.ID] = &tw
 		}
 		if i > 0 {
 			y += int(u / 4)
 		}
-		guigui.SetPosition(&root.taskWidgets[t.ID].doneButton, image.Pt(minX, y))
-		appender.AppendChildWidget(&root.taskWidgets[t.ID].doneButton)
+		guigui.SetPosition(&t.taskWidgets[task.ID].doneButton, image.Pt(minX, y))
+		appender.AppendChildWidget(&t.taskWidgets[task.ID].doneButton)
 
-		root.taskWidgets[t.ID].text.SetSize(w-int(4.5*u), int(u))
-		guigui.SetPosition(&root.taskWidgets[t.ID].text, image.Pt(minX+int(3.5*u), y))
-		appender.AppendChildWidget(&root.taskWidgets[t.ID].text)
+		t.taskWidgets[task.ID].text.SetSize(w-int(4.5*u), int(u))
+		guigui.SetPosition(&t.taskWidgets[task.ID].text, image.Pt(minX+int(3.5*u), y))
+		appender.AppendChildWidget(&t.taskWidgets[task.ID].text)
 		y += int(u)
 	}
+
+	// GC widgets
+	for id := range t.taskWidgets {
+		if slices.IndexFunc(t.root.tasks, func(t Task) bool {
+			return t.ID == id
+		}) >= 0 {
+			continue
+		}
+		delete(t.taskWidgets, id)
+	}
+
 	return nil
 }
 
