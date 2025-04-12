@@ -77,11 +77,13 @@ func (s *ScrollOverlay) SetContentSize(contentWidth, contentHeight int) {
 	}
 }
 
-func (s *ScrollOverlay) SetOffsetByDelta(dx, dy float64) {
-	s.SetOffset(s.offsetX+dx, s.offsetY+dy)
+func (s *ScrollOverlay) SetOffsetByDelta(contentWidth, contentHeight int, dx, dy float64) {
+	s.SetOffset(contentWidth, contentHeight, s.offsetX+dx, s.offsetY+dy)
 }
 
-func (s *ScrollOverlay) SetOffset(x, y float64) {
+func (s *ScrollOverlay) SetOffset(contentWidth, contentHeight int, x, y float64) {
+	s.SetContentSize(contentWidth, contentHeight)
+
 	if s.offsetX == x && s.offsetY == y {
 		return
 	}

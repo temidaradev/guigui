@@ -437,9 +437,6 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		return
 	}
 
-	// Update the contet size of the scroll overlay to adjust the scroll offset correctly.
-	t.scrollOverlay.SetContentSize(t.TextSize(context))
-
 	text := t.textToDraw()
 
 	tb := t.textBounds(context)
@@ -453,7 +450,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if max := float64(bounds.Max.Y); y > max {
 			dy = max - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(tb.Dx(), tb.Dy(), dx, dy)
 	}
 	if x, y, _, ok := textPosition(tb, text, start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var dx, dy float64
@@ -463,7 +460,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if min := float64(bounds.Min.Y); y < min {
 			dy = min - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(tb.Dx(), tb.Dy(), dx, dy)
 	}
 }
 

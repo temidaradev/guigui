@@ -94,20 +94,27 @@ func (l *List) SetCheckmarkIndex(index int) {
 	guigui.RequestRedraw(l)
 }
 
+func (l *List) contentSize(context *guigui.Context) (int, int) {
+	w, _ := l.Size(context)
+	h := l.defaultHeight(context)
+	return w, h
+}
+
 func (l *List) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
 		guigui.SetPosition(&l.listFrame, guigui.Position(l))
 		appender.AppendChildWidget(&l.listFrame)
 	}
 
+	l.scrollOverlay.SetContentSize(l.contentSize(context))
+
 	if idx := l.indexToJumpPlus1 - 1; idx >= 0 {
 		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
-		l.scrollOverlay.SetOffset(0, float64(-y))
+		w, h := l.contentSize(context)
+		l.scrollOverlay.SetOffset(w, h, 0, float64(-y))
 		l.indexToJumpPlus1 = 0
 	}
 
-	w, _ := l.Size(context)
-	l.scrollOverlay.SetContentSize(w, l.defaultHeight(context))
 	guigui.SetPosition(&l.scrollOverlay, guigui.Position(l))
 	appender.AppendChildWidget(&l.scrollOverlay)
 
@@ -294,7 +301,8 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 		if lowerY := p.Y + h - UnitSize(context); y >= lowerY {
 			dy = float64(lowerY-y) / 4
 		}
-		l.scrollOverlay.SetOffsetByDelta(0, dy)
+		w, h := l.contentSize(context)
+		l.scrollOverlay.SetOffsetByDelta(w, h, 0, dy)
 		i := l.calcDropDstIndex(context)
 		if l.dropDstIndexPlus1-1 != i {
 			l.dropDstIndexPlus1 = i + 1
