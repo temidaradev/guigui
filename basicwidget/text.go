@@ -107,7 +107,6 @@ type Text struct {
 
 	cachedTextWidthPlus1  int
 	cachedTextHeightPlus1 int
-	lastTextToDraw        string
 	lastFace              text.Face
 	lastAppScale          float64
 
@@ -124,10 +123,6 @@ func (t *Text) resetCachedSize() {
 }
 
 func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	if text := t.textToDraw(); t.lastTextToDraw != text {
-		t.lastTextToDraw = text
-		t.resetCachedSize()
-	}
 	if f := t.face(context); t.lastFace != f {
 		t.lastFace = f
 		t.resetCachedSize()
@@ -540,6 +535,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	if processed {
 		guigui.RequestRedraw(t)
 		t.adjustScrollOffset(context)
+		t.resetCachedSize()
 		return guigui.HandleInputByWidget(t)
 	}
 
