@@ -44,8 +44,6 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 		pt.Y += int((float64(y) - LineHeight(context)) / 2)
 		pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
 		pt.Y = max(pt.Y, 0)
-		// TODO: Chaning the position here might be too late here.
-		// A glitch is visible when the dropdown list is reopened.
 		guigui.SetPosition(&d.popupMenu, pt)
 		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
 		d.popupMenu.Open()
