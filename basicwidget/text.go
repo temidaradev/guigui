@@ -177,7 +177,6 @@ func (t *Text) SetText(text string) {
 	start = min(start, len(text))
 	end = min(end, len(text))
 	t.setTextAndSelection(text, start, end, -1)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetFilter(filter TextFilter) {
