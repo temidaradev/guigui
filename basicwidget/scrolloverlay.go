@@ -30,6 +30,8 @@ type ScrollOverlay struct {
 	offsetX       float64
 	offsetY       float64
 
+	lastWidth            int
+	lastHeight           int
 	lastCursorX          int
 	lastCursorY          int
 	lastWheelX           float64
@@ -273,6 +275,13 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 }
 
 func (s *ScrollOverlay) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	w, h := s.Size(context)
+	if s.lastWidth != w || s.lastHeight != h {
+		s.adjustOffset()
+		s.lastWidth = w
+		s.lastHeight = h
+	}
+
 	guigui.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
 	return nil
 }

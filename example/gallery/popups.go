@@ -26,9 +26,8 @@ type Popups struct {
 	contextMenuPopupText          basicwidget.Text
 	contextMenuPopupClickHereText basicwidget.Text
 
-	simplePopup            basicwidget.Popup
-	simplePopupTitleText   basicwidget.Text
-	simplePopupCloseButton basicwidget.TextButton
+	simplePopup        basicwidget.Popup
+	simplePopupContent simplePopupContent
 
 	contextMenuPopup basicwidget.PopupMenu
 }
@@ -77,22 +76,8 @@ func (p *Popups) Layout(context *guigui.Context, appender *guigui.ChildWidgetApp
 	guigui.SetPosition(&p.forms[1], pt)
 	appender.AppendChildWidget(&p.forms[1])
 
-	p.simplePopup.SetContent(func(context *guigui.Context, appender *basicwidget.ContainerChildWidgetAppender) {
-		p.simplePopupTitleText.SetText("Hello!")
-		p.simplePopupTitleText.SetBold(true)
-		pt := p.simplePopup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
-		guigui.SetPosition(&p.simplePopupTitleText, pt)
-		appender.AppendChildWidget(&p.simplePopupTitleText)
-
-		p.simplePopupCloseButton.SetText("Close")
-		p.simplePopupCloseButton.SetOnUp(func() {
-			p.simplePopup.Close()
-		})
-		w, h := p.simplePopupCloseButton.Size(context)
-		pt = p.simplePopup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-w, -int(0.5*u)-h))
-		guigui.SetPosition(&p.simplePopupCloseButton, pt)
-		appender.AppendChildWidget(&p.simplePopupCloseButton)
-	})
+	p.simplePopupContent.popup = &p.simplePopup
+	p.simplePopup.SetContent(&p.simplePopupContent)
 	contentWidth := int(12 * u)
 	contentHeight := int(6 * u)
 	bounds := guigui.Bounds(&p.simplePopup)
@@ -132,4 +117,34 @@ func (p *Popups) Size(context *guigui.Context) (int, int) {
 	w, h := guigui.Parent(p).Size(context)
 	w -= sidebarWidth(context)
 	return w, h
+}
+
+type simplePopupContent struct {
+	guigui.DefaultWidget
+
+	popup *basicwidget.Popup
+
+	titleText   basicwidget.Text
+	closeButton basicwidget.TextButton
+}
+
+func (s *simplePopupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	u := float64(basicwidget.UnitSize(context))
+
+	s.titleText.SetText("Hello!")
+	s.titleText.SetBold(true)
+	pt := s.popup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
+	guigui.SetPosition(&s.titleText, pt)
+	appender.AppendChildWidget(&s.titleText)
+
+	s.closeButton.SetText("Close")
+	s.closeButton.SetOnUp(func() {
+		s.popup.Close()
+	})
+	w, h := s.closeButton.Size(context)
+	pt = s.popup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-w, -int(0.5*u)-h))
+	guigui.SetPosition(&s.closeButton, pt)
+	appender.AppendChildWidget(&s.closeButton)
+
+	return nil
 }

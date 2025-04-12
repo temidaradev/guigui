@@ -4,7 +4,6 @@
 package main
 
 import (
-	"image"
 	"sync"
 
 	"github.com/hajimehoshi/guigui"
@@ -14,11 +13,8 @@ import (
 type Sidebar struct {
 	guigui.DefaultWidget
 
-	sidebar         basicwidget.Sidebar
-	list            basicwidget.List
-	listItemWidgets []basicwidget.Text
-
-	initOnce sync.Once
+	sidebar        basicwidget.Sidebar
+	sidebarContent sidebarContent
 }
 
 func sidebarWidth(context *guigui.Context) int {
@@ -28,14 +24,36 @@ func sidebarWidth(context *guigui.Context) int {
 func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	_, h := s.Size(context)
 	s.sidebar.SetSize(context, sidebarWidth(context), h)
-	s.sidebar.SetContent(context, func(context *guigui.Context, childAppender *basicwidget.ContainerChildWidgetAppender, offsetX, offsetY float64) {
-		s.list.SetWidth(sidebarWidth(context))
-		s.list.SetHeight(h)
-		guigui.SetPosition(&s.list, guigui.Position(s).Add(image.Pt(int(offsetX), int(offsetY))))
-		childAppender.AppendChildWidget(&s.list)
-	})
+	s.sidebar.SetContent(&s.sidebarContent)
 	guigui.SetPosition(&s.sidebar, guigui.Position(s))
 	appender.AppendChildWidget(&s.sidebar)
+
+	return nil
+}
+
+func (s *Sidebar) Size(context *guigui.Context) (int, int) {
+	_, h := guigui.Parent(s).Size(context)
+	return sidebarWidth(context), h
+}
+
+func (s *Sidebar) SelectedItemTag() string {
+	return s.sidebarContent.SelectedItemTag()
+}
+
+func (s *Sidebar) SetSelectedItemIndex(index int) {
+	s.sidebarContent.SetSelectedItemIndex(index)
+}
+
+type sidebarContent struct {
+	guigui.DefaultWidget
+
+	list            basicwidget.List
+	listItemWidgets []basicwidget.Text
+
+	initOnce sync.Once
+}
+
+func (s *sidebarContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
 
@@ -95,15 +113,16 @@ func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 		s.list.SetSelectedItemIndex(0)
 	})
 
+	_, h := s.Size(context)
+	s.list.SetWidth(sidebarWidth(context))
+	s.list.SetHeight(h)
+	guigui.SetPosition(&s.list, guigui.Position(s))
+	appender.AppendChildWidget(&s.list)
+
 	return nil
 }
 
-func (s *Sidebar) Size(context *guigui.Context) (int, int) {
-	_, h := guigui.Parent(s).Size(context)
-	return sidebarWidth(context), h
-}
-
-func (s *Sidebar) SelectedItemTag() string {
+func (s *sidebarContent) SelectedItemTag() string {
 	item, ok := s.list.SelectedItem()
 	if !ok {
 		return ""
@@ -111,6 +130,6 @@ func (s *Sidebar) SelectedItemTag() string {
 	return item.Tag.(string)
 }
 
-func (s *Sidebar) SetSelectedItemIndex(index int) {
+func (s *sidebarContent) SetSelectedItemIndex(index int) {
 	s.list.SetSelectedItemIndex(index)
 }

@@ -40,11 +40,12 @@ type TaskWidgets struct {
 type Root struct {
 	guigui.DefaultWidget
 
-	background   basicwidget.Background
-	createButton basicwidget.TextButton
-	textField    basicwidget.TextField
-	taskWidgets  map[uuid.UUID]*TaskWidgets
-	tasksPanel   basicwidget.ScrollablePanel
+	background        basicwidget.Background
+	createButton      basicwidget.TextButton
+	textField         basicwidget.TextField
+	taskWidgets       map[uuid.UUID]*TaskWidgets
+	tasksPanel        basicwidget.ScrollablePanel
+	tasksPanelContent tasksPanelContent
 
 	tasks []Task
 }
@@ -86,39 +87,8 @@ func (r *Root) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 
 	w, h := r.Size(context)
 	r.tasksPanel.SetSize(context, w, h-int(2*u))
-	r.tasksPanel.SetContent(func(context *guigui.Context, childAppender *basicwidget.ContainerChildWidgetAppender, offsetX, offsetY float64) {
-		p := guigui.Position(&r.tasksPanel).Add(image.Pt(int(offsetX), int(offsetY)))
-		minX := p.X + int(0.5*u)
-		y := p.Y
-		for i, t := range r.tasks {
-			if _, ok := r.taskWidgets[t.ID]; !ok {
-				var tw TaskWidgets
-				tw.doneButton.SetText("Done")
-				tw.doneButton.SetWidth(int(3 * u))
-				tw.doneButton.SetOnUp(func() {
-					r.tasks = slices.DeleteFunc(r.tasks, func(task Task) bool {
-						return task.ID == t.ID
-					})
-				})
-				tw.text.SetText(t.Text)
-				tw.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-				if r.taskWidgets == nil {
-					r.taskWidgets = map[uuid.UUID]*TaskWidgets{}
-				}
-				r.taskWidgets[t.ID] = &tw
-			}
-			if i > 0 {
-				y += int(u / 4)
-			}
-			guigui.SetPosition(&r.taskWidgets[t.ID].doneButton, image.Pt(minX, y))
-			childAppender.AppendChildWidget(&r.taskWidgets[t.ID].doneButton)
-			r.taskWidgets[t.ID].text.SetSize(w-int(4.5*u), int(u))
-			guigui.SetPosition(&r.taskWidgets[t.ID].text, image.Pt(minX+int(3.5*u), y))
-			childAppender.AppendChildWidget(&r.taskWidgets[t.ID].text)
-			y += int(u)
-		}
-	})
-	r.tasksPanel.SetPadding(0, int(0.5*u))
+	r.tasksPanelContent.root = r
+	r.tasksPanel.SetContent(&r.tasksPanelContent)
 	guigui.SetPosition(&r.tasksPanel, guigui.Position(r).Add(image.Pt(0, int(2*u))))
 	appender.AppendChildWidget(&r.tasksPanel)
 
@@ -148,6 +118,60 @@ func (r *Root) tryCreateTask() {
 		r.tasks = slices.Insert(r.tasks, 0, NewTask(str))
 		r.textField.SetText("")
 	}
+}
+
+type tasksPanelContent struct {
+	guigui.DefaultWidget
+
+	root *Root
+}
+
+func (t *tasksPanelContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	u := float64(basicwidget.UnitSize(context))
+
+	root := t.root
+	p := guigui.Position(t)
+	w, _ := t.Size(context)
+	minX := p.X + int(0.5*u)
+	y := p.Y
+	for i, t := range root.tasks {
+		if _, ok := root.taskWidgets[t.ID]; !ok {
+			var tw TaskWidgets
+			tw.doneButton.SetText("Done")
+			tw.doneButton.SetWidth(int(3 * u))
+			tw.doneButton.SetOnUp(func() {
+				root.tasks = slices.DeleteFunc(root.tasks, func(task Task) bool {
+					return task.ID == t.ID
+				})
+			})
+			tw.text.SetText(t.Text)
+			tw.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
+			if root.taskWidgets == nil {
+				root.taskWidgets = map[uuid.UUID]*TaskWidgets{}
+			}
+			root.taskWidgets[t.ID] = &tw
+		}
+		if i > 0 {
+			y += int(u / 4)
+		}
+		guigui.SetPosition(&root.taskWidgets[t.ID].doneButton, image.Pt(minX, y))
+		appender.AppendChildWidget(&root.taskWidgets[t.ID].doneButton)
+
+		root.taskWidgets[t.ID].text.SetSize(w-int(4.5*u), int(u))
+		guigui.SetPosition(&root.taskWidgets[t.ID].text, image.Pt(minX+int(3.5*u), y))
+		appender.AppendChildWidget(&root.taskWidgets[t.ID].text)
+		y += int(u)
+	}
+	return nil
+}
+
+func (t *tasksPanelContent) Size(context *guigui.Context) (int, int) {
+	u := basicwidget.UnitSize(context)
+
+	w, _ := guigui.Parent(t).Size(context)
+	c := len(t.root.tasks)
+	h := c * (u + u/4)
+	return w, h
 }
 
 func main() {

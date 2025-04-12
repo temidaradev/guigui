@@ -59,8 +59,8 @@ type Popup struct {
 	onClosed func(reason PopupClosedReason)
 }
 
-func (p *Popup) SetContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)) {
-	p.content.setContent(f)
+func (p *Popup) SetContent(widget guigui.Widget) {
+	p.content.setContent(widget)
 }
 
 func (p *Popup) openingRate() float64 {
@@ -239,26 +239,21 @@ func (p *Popup) Size(context *guigui.Context) (int, int) {
 type popupContent struct {
 	guigui.DefaultWidget
 
-	setContentFunc func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)
-	childWidgets   ContainerChildWidgetAppender
+	content guigui.Widget
 
 	width  int
 	height int
 }
 
-func (p *popupContent) setContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender)) {
-	p.setContentFunc = f
+func (p *popupContent) setContent(widget guigui.Widget) {
+	p.content = widget
 }
 
 func (p *popupContent) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.childWidgets.reset()
-	if p.setContentFunc != nil {
-		p.setContentFunc(context, &p.childWidgets)
+	if p.content != nil {
+		guigui.SetPosition(p.content, guigui.Position(p))
+		appender.AppendChildWidget(p.content)
 	}
-	for _, childWidget := range p.childWidgets.iter() {
-		appender.AppendChildWidget(childWidget)
-	}
-
 	return nil
 }
 

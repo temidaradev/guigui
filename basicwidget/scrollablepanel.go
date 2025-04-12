@@ -4,6 +4,8 @@
 package basicwidget
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
@@ -14,51 +16,36 @@ import (
 type ScrollablePanel struct {
 	guigui.DefaultWidget
 
-	setContentFunc func(context *guigui.Context, childAppender *ContainerChildWidgetAppender, offsetX, offsetY float64)
-	childWidgets   ContainerChildWidgetAppender
-	scollOverlay   ScrollOverlay
-	border         scrollablePanelBorder
+	content      guigui.Widget
+	scollOverlay ScrollOverlay
+	border       scrollablePanelBorder
 
-	paddingX           int
-	paddingY           int
 	widthMinusDefault  int
 	heightMinusDefault int
 }
 
-func (s *ScrollablePanel) SetContent(f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender, offsetX, offsetY float64)) {
-	s.setContentFunc = f
-}
-
-func (s *ScrollablePanel) SetPadding(paddingX, paddingY int) {
-	s.paddingX = paddingX
-	s.paddingY = paddingY
+func (s *ScrollablePanel) SetContent(widget guigui.Widget) {
+	s.content = widget
 }
 
 func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	s.childWidgets.reset()
-	if s.setContentFunc != nil {
-		offsetX, offsetY := s.scollOverlay.Offset()
-		s.setContentFunc(context, &s.childWidgets, offsetX, offsetY)
-	}
-
-	for _, childWidget := range s.childWidgets.iter() {
-		appender.AppendChildWidget(childWidget)
+	if s.content == nil {
+		return nil
 	}
 
 	p := guigui.Position(s)
-	var w, h int
 	offsetX, offsetY := s.scollOverlay.Offset()
-	for _, childWidget := range s.childWidgets.iter() {
-		b := guigui.Bounds(childWidget)
-		w = max(w, b.Max.X-int(offsetX)-p.X+s.paddingX)
-		h = max(h, b.Max.Y-int(offsetY)-p.Y+s.paddingY)
-	}
+	p = p.Add(image.Pt(int(offsetX), int(offsetY)))
+	guigui.SetPosition(s.content, p)
+	appender.AppendChildWidget(s.content)
+
+	w, h := s.content.Size(context)
 	s.scollOverlay.SetContentSize(w, h)
-	guigui.SetPosition(&s.scollOverlay, p)
+	guigui.SetPosition(&s.scollOverlay, guigui.Position(s))
 	appender.AppendChildWidget(&s.scollOverlay)
 
 	s.border.scrollOverlay = &s.scollOverlay
-	guigui.SetPosition(&s.border, p)
+	guigui.SetPosition(&s.border, guigui.Position(s))
 	appender.AppendChildWidget(&s.border)
 
 	return nil

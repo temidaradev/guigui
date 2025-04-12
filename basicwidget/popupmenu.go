@@ -27,17 +27,15 @@ func (p *PopupMenu) SetCheckmarkIndex(index int) {
 }
 
 func (p *PopupMenu) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.popup.SetContent(func(context *guigui.Context, childAppender *ContainerChildWidgetAppender) {
-		p.textList.SetStyle(ListStyleMenu)
-		p.textList.list.SetOnItemSelected(func(index int) {
-			p.popup.Close()
-			if p.onClosed != nil {
-				p.onClosed(index)
-			}
-		})
-		guigui.SetPosition(&p.textList, p.popup.ContentBounds(context).Min)
-		childAppender.AppendChildWidget(&p.textList)
+	p.textList.SetStyle(ListStyleMenu)
+	p.textList.list.SetOnItemSelected(func(index int) {
+		p.popup.Close()
+		if p.onClosed != nil {
+			p.onClosed(index)
+		}
 	})
+
+	p.popup.SetContent(&p.textList)
 	p.popup.SetCloseByClickingOutside(true)
 	p.popup.SetOnClosed(func(reason PopupClosedReason) {
 		if p.onClosed != nil {

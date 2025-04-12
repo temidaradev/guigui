@@ -28,8 +28,8 @@ func (s *Sidebar) Layout(context *guigui.Context, appender *guigui.ChildWidgetAp
 	return nil
 }
 
-func (s *Sidebar) SetContent(context *guigui.Context, f func(context *guigui.Context, childAppender *ContainerChildWidgetAppender, offsetX, offsetY float64)) {
-	s.scrollablePanel.SetContent(f)
+func (s *Sidebar) SetContent(widget guigui.Widget) {
+	s.scrollablePanel.SetContent(widget)
 }
 
 func (s *Sidebar) Draw(context *guigui.Context, dst *ebiten.Image) {
