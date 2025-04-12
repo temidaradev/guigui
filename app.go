@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"iter"
 	"log/slog"
 	"maps"
 	"math"
@@ -48,11 +49,17 @@ func invalidatedRegionForDebugMaxTime() int {
 
 var theApp *app
 
+type hitTestCacheItem struct {
+	point   image.Point
+	widgets []Widget
+}
+
 type app struct {
-	root      Widget
-	context   Context
-	visitedZs map[int]struct{}
-	zs        []int
+	root         Widget
+	context      Context
+	visitedZs    map[int]struct{}
+	zs           []int
+	hitTestCache []hitTestCacheItem
 
 	invalidatedRegions image.Rectangle
 	invalidatedWidgets []Widget
@@ -310,6 +317,10 @@ func (a *app) layout() error {
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
 	slices.Sort(a.zs)
 
+	if !a.invalidatedRegions.Empty() || len(a.invalidatedWidgets) != 0 {
+		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
+	}
+
 	return nil
 }
 
@@ -552,60 +563,74 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 		return false
 	}
 
-	z := widget.Z()
-	for i := len(a.zs) - 1; i >= 0 && a.zs[i] >= z; i-- {
-		z := a.zs[i]
-		switch a.hitTestWidgetAt(a.root, widget, point, z) {
-		case hitTestResultNone:
-			continue
-		case hitTestResultOtherHits:
+	var widgets []Widget
+	idx := slices.IndexFunc(a.hitTestCache, func(i hitTestCacheItem) bool {
+		return i.point.Eq(point)
+	})
+	if idx >= 0 {
+		widgets = a.hitTestCache[idx].widgets
+	} else {
+		widgets = slices.Collect(a.widgetsAt(point))
+		a.hitTestCache = slices.Insert(a.hitTestCache, 0, hitTestCacheItem{
+			point:   point,
+			widgets: widgets,
+		})
+		const maxCacheSize = 4
+		if len(a.hitTestCache) > maxCacheSize {
+			a.hitTestCache = slices.Delete(a.hitTestCache, maxCacheSize, len(a.hitTestCache))
+		}
+	}
+
+	for _, w := range widgets {
+		if w.Z() != widget.Z() {
 			return false
-		case hitTestResultTargetHits:
+		}
+		if w.widgetState() == widget.widgetState() {
 			return true
 		}
 	}
 	return false
 }
 
-type hitTestResult int
-
-const (
-	hitTestResultNone hitTestResult = 1 << iota
-	hitTestResultOtherHits
-	hitTestResultTargetHits
-)
-
-func (a *app) hitTestWidgetAt(widget Widget, targetWidget Widget, point image.Point, zToHandle int) hitTestResult {
-	widgetState := widget.widgetState()
-	if !widget.widgetState().isVisible() {
-		return hitTestResultNone
-	}
-	if !widget.widgetState().isEnabled() {
-		return hitTestResultNone
-	}
-
-	// Iterate the children in the reverse order of rendering.
-	var result hitTestResult
-	for i := len(widgetState.children) - 1; i >= 0; i-- {
-		child := widgetState.children[i]
-		switch a.hitTestWidgetAt(child, targetWidget, point, zToHandle) {
-		case hitTestResultNone:
-			continue
-		case hitTestResultOtherHits:
-			result = hitTestResultOtherHits
-		case hitTestResultTargetHits:
-			return hitTestResultTargetHits
+func (a *app) widgetsAt(point image.Point) iter.Seq[Widget] {
+	return func(yield func(w Widget) bool) {
+		for i := len(a.zs) - 1; i >= 0; i-- {
+			z := a.zs[i]
+			for widget := range a.doWidgetsAt(point, z, a.root) {
+				if !yield(widget) {
+					return
+				}
+			}
 		}
 	}
+}
 
-	if zToHandle != widget.Z() {
-		return result
+func (a *app) doWidgetsAt(point image.Point, z int, widget Widget) iter.Seq[Widget] {
+	return func(yield func(w Widget) bool) {
+		if !widget.widgetState().isVisible() {
+			return
+		}
+		if !widget.widgetState().isEnabled() {
+			return
+		}
+
+		children := widget.widgetState().children
+		for i := len(children) - 1; i >= 0; i-- {
+			child := children[i]
+			for widget := range a.doWidgetsAt(point, z, child) {
+				if !yield(widget) {
+					return
+				}
+			}
+		}
+		if widget.Z() != z {
+			return
+		}
+		if !point.In(VisibleBounds(widget)) {
+			return
+		}
+		if !yield(widget) {
+			return
+		}
 	}
-	if !point.In(VisibleBounds(widget)) {
-		return result
-	}
-	if widget.widgetState() != targetWidget.widgetState() {
-		return hitTestResultOtherHits
-	}
-	return hitTestResultTargetHits
 }
