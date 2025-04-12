@@ -107,6 +107,7 @@ type Text struct {
 
 	cachedTextWidthPlus1  int
 	cachedTextHeightPlus1 int
+	lastFace              text.Face
 	lastAppScale          float64
 
 	onEnterPressed func(text string)
@@ -122,6 +123,10 @@ func (t *Text) resetCachedSize() {
 }
 
 func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	if f := t.face(context); t.lastFace != f {
+		t.lastFace = f
+		t.resetCachedSize()
+	}
 	if t.lastAppScale != context.AppScale() {
 		t.lastAppScale = context.AppScale()
 		t.resetCachedSize()
@@ -194,13 +199,16 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 		start, end = end, start
 	}
 
+	textChanged := t.field.Text() != text
 	if s, e := t.field.Selection(); t.field.Text() == text && s == start && e == end {
 		return
 	}
 	t.field.SetTextAndSelection(text, start, end)
 	t.toAdjustScrollOffset = true
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
+	if textChanged {
+		t.resetCachedSize()
+	}
 }
 
 func (t *Text) SetLocales(locales []language.Tag) {
@@ -210,7 +218,6 @@ func (t *Text) SetLocales(locales []language.Tag) {
 
 	t.locales = append([]language.Tag(nil), locales...)
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetBold(bold bool) {
@@ -220,7 +227,6 @@ func (t *Text) SetBold(bold bool) {
 
 	t.bold = bold
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetScale(scale float64) {
@@ -230,7 +236,6 @@ func (t *Text) SetScale(scale float64) {
 
 	t.scaleMinus1 = scale - 1
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetHorizontalAlign(align HorizontalAlign) {
@@ -240,7 +245,6 @@ func (t *Text) SetHorizontalAlign(align HorizontalAlign) {
 
 	t.hAlign = align
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetVerticalAlign(align VerticalAlign) {
@@ -250,7 +254,6 @@ func (t *Text) SetVerticalAlign(align VerticalAlign) {
 
 	t.vAlign = align
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) SetColor(color color.Color) {
@@ -303,7 +306,6 @@ func (t *Text) SetMultiline(multiline bool) {
 
 	t.multiline = multiline
 	guigui.RequestRedraw(t)
-	t.resetCachedSize()
 }
 
 func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
