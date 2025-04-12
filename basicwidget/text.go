@@ -132,6 +132,8 @@ func (t *Text) Layout(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		t.resetCachedSize()
 	}
 
+	t.scrollOverlay.SetContentSize(t.TextSize(context))
+
 	if !t.prevFocused && guigui.IsFocused(t) {
 		t.field.Focus()
 		t.cursor.resetCounter()
@@ -313,12 +315,11 @@ func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 
 	b := guigui.Bounds(t)
 
-	tw, _ := text.Measure(t.textToDraw(), t.face(context), t.lineHeight(context))
+	tw, th := t.TextSize(context)
 	if b.Dx() < int(tw) {
 		b.Max.X = b.Min.X + int(tw)
 	}
 
-	th := t.textHeight(context, t.textToDraw())
 	switch t.vAlign {
 	case VerticalAlignTop:
 		b.Max.Y = b.Min.Y + th
@@ -431,8 +432,6 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 }
 
 func (t *Text) adjustScrollOffset(context *guigui.Context) {
-	t.updateContentSize(context)
-
 	start, end, ok := t.selectionToDraw()
 	if !ok {
 		return
@@ -771,11 +770,6 @@ func (t *Text) applyFilter() {
 		text, start, end := t.filter(t.field.Text(), start, end)
 		t.setTextAndSelection(text, start, end, -1)
 	}
-}
-
-func (t *Text) updateContentSize(context *guigui.Context) {
-	w, h := t.TextSize(context)
-	t.scrollOverlay.SetContentSize(w, h)
 }
 
 func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
