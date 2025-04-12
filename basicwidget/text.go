@@ -841,20 +841,14 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	var clr color.RGBA
+	var clr color.Color
 	if t.color != nil {
-		clr = color.RGBAModel.Convert(t.color).(color.RGBA)
+		clr = t.color
 	} else {
-		clr = color.RGBAModel.Convert(DefaultTextColor(context)).(color.RGBA)
+		clr = DefaultTextColor(context)
 	}
 	if t.transparent > 0 {
-		opacity := 1 - t.transparent
-		clr = color.RGBA{
-			R: byte(float64(clr.R) * opacity),
-			G: byte(float64(clr.G) * opacity),
-			B: byte(float64(clr.B) * opacity),
-			A: byte(float64(clr.A) * opacity),
-		}
+		clr = draw.ScaleAlpha(clr, 1-t.transparent)
 	}
 	drawText(textBounds, dst, text, face, t.lineHeight(context), t.hAlign, t.vAlign, clr)
 }
