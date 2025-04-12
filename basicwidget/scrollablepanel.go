@@ -39,8 +39,7 @@ func (s *ScrollablePanel) Layout(context *guigui.Context, appender *guigui.Child
 	guigui.SetPosition(s.content, p)
 	appender.AppendChildWidget(s.content)
 
-	w, h := s.content.Size(context)
-	s.scollOverlay.SetContentSize(w, h)
+	s.scollOverlay.SetContentSize(s.content.Size(context))
 	guigui.SetPosition(&s.scollOverlay, guigui.Position(s))
 	appender.AppendChildWidget(&s.scollOverlay)
 

@@ -44,7 +44,7 @@ type ScrollOverlay struct {
 	draggingStartY       int
 	draggingStartOffsetX float64
 	draggingStartOffsetY float64
-	onceRendered         bool
+	onceUpdated          bool
 
 	barOpacity     int
 	barVisibleTime int
@@ -71,7 +71,7 @@ func (s *ScrollOverlay) SetContentSize(contentWidth, contentHeight int) {
 	s.contentWidth = contentWidth
 	s.contentHeight = contentHeight
 	s.adjustOffset()
-	if s.onceRendered {
+	if s.onceUpdated {
 		s.contentSizeChanged = true
 		guigui.RequestRedraw(s)
 	}
@@ -90,7 +90,7 @@ func (s *ScrollOverlay) SetOffset(contentWidth, contentHeight int, x, y float64)
 	s.offsetX = x
 	s.offsetY = y
 	s.adjustOffset()
-	if s.onceRendered {
+	if s.onceUpdated {
 		guigui.RequestRedraw(s)
 	}
 }
@@ -313,6 +313,8 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 	s.lastOffsetX = s.offsetX
 	s.lastOffsetY = s.offsetY
 
+	s.onceUpdated = true
+
 	return nil
 }
 
@@ -333,8 +335,6 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if !vb.Empty() {
 		draw.DrawRoundedRect(context, dst, vb, barColor, RoundedCornerRadius(context))
 	}
-
-	s.onceRendered = true
 }
 
 func (s *ScrollOverlay) barWidth(scale float64) float64 {
