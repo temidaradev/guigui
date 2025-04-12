@@ -9,31 +9,42 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type bounds3D struct {
+	bounds image.Rectangle
+	z      int
+}
+
 type widgetsAndBounds struct {
-	bounds map[Widget]image.Rectangle
+	bounds3Ds map[Widget]bounds3D
 }
 
 func (w *widgetsAndBounds) reset() {
-	clear(w.bounds)
+	clear(w.bounds3Ds)
 }
 
 func (w *widgetsAndBounds) append(widget Widget, bounds image.Rectangle) {
-	if w.bounds == nil {
-		w.bounds = map[Widget]image.Rectangle{}
+	if w.bounds3Ds == nil {
+		w.bounds3Ds = map[Widget]bounds3D{}
 	}
-	w.bounds[widget] = bounds
+	w.bounds3Ds[widget] = bounds3D{
+		bounds: bounds,
+		z:      widget.Z(),
+	}
 }
 
 func (w *widgetsAndBounds) equals(currentWidgets []Widget) bool {
-	if len(w.bounds) != len(currentWidgets) {
+	if len(w.bounds3Ds) != len(currentWidgets) {
 		return false
 	}
 	for _, widget := range currentWidgets {
-		b, ok := w.bounds[widget]
+		b, ok := w.bounds3Ds[widget]
 		if !ok {
 			return false
 		}
-		if b != Bounds(widget) {
+		if b.bounds != Bounds(widget) {
+			return false
+		}
+		if b.z != widget.Z() {
 			return false
 		}
 	}
@@ -41,9 +52,9 @@ func (w *widgetsAndBounds) equals(currentWidgets []Widget) bool {
 }
 
 func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
-	for widget, bounds := range w.bounds {
+	for widget, bounds3D := range w.bounds3Ds {
 		if isDifferentParentZ(widget) {
-			app.requestRedraw(bounds)
+			app.requestRedraw(bounds3D.bounds)
 			RequestRedraw(widget)
 		}
 	}
