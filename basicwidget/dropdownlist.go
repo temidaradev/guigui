@@ -36,27 +36,29 @@ func (d *DropdownList) Layout(context *guigui.Context, appender *guigui.ChildWid
 	d.updateText()
 
 	d.textButton.SetOnDown(func() {
-		pt := guigui.Position(d)
-		pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
-		pt.X = max(pt.X, 0)
-		pt.Y -= listItemPadding(context)
-		_, y := d.Size(context)
-		pt.Y += int((float64(y) - LineHeight(context)) / 2)
-		pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
-		pt.Y = max(pt.Y, 0)
-		guigui.SetPosition(&d.popupMenu, pt)
-		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
 		d.popupMenu.Open()
-	})
-	d.popupMenu.SetOnClosed(func(index int) {
-		if d.onValueChanged != nil {
-			d.onValueChanged(index)
-		}
 	})
 	d.textButton.SetForcePressed(guigui.IsVisible(&d.popupMenu))
 
 	guigui.SetPosition(&d.textButton, guigui.Position(d))
 	appender.AppendChildWidget(&d.textButton)
+
+	d.popupMenu.SetOnClosed(func(index int) {
+		if d.onValueChanged != nil {
+			d.onValueChanged(index)
+		}
+	})
+	d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
+
+	pt := guigui.Position(d)
+	pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
+	pt.X = max(pt.X, 0)
+	pt.Y -= listItemPadding(context)
+	_, y := d.Size(context)
+	pt.Y += int((float64(y) - LineHeight(context)) / 2)
+	pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
+	pt.Y = max(pt.Y, 0)
+	guigui.SetPosition(&d.popupMenu, pt)
 	appender.AppendChildWidget(&d.popupMenu)
 
 	return nil
