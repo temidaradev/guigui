@@ -35,7 +35,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := guigui.Size(b)
-	b.form.SetWidth(context, w-int(1*u))
+	guigui.SetSize(&b.form, w-int(1*u), guigui.AutoSize)
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,

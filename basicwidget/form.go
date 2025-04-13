@@ -22,8 +22,7 @@ type FormItem struct {
 type Form struct {
 	guigui.DefaultWidget
 
-	items             []*FormItem
-	widthMinusDefault int
+	items []*FormItem
 
 	primaryBounds   []image.Rectangle
 	secondaryBounds []image.Rectangle
@@ -149,16 +148,9 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
-func (f *Form) SetWidth(context *guigui.Context, width int) {
-	f.widthMinusDefault = width - defaultFormWidth(context)
-}
-
 func (f *Form) DefaultSize(context *guigui.Context) (int, int) {
-	return f.widthMinusDefault + defaultFormWidth(context), f.height(context)
-}
-
-func defaultFormWidth(context *guigui.Context) int {
-	return 6 * UnitSize(context)
+	w, _ := guigui.Size(guigui.Parent(f))
+	return w, f.height(context)
 }
 
 func (f *Form) height(context *guigui.Context) int {
