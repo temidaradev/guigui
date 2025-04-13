@@ -261,9 +261,6 @@ func (a *app) Draw(screen *ebiten.Image) {
 	a.drawWidget(screen)
 	a.drawDebugIfNeeded(origScreen)
 	a.invalidatedRegions = image.Rectangle{}
-	traverseWidget(a.root, func(widget Widget) {
-		widget.widgetState().dirty = false
-	})
 }
 
 func (a *app) Layout(outsideWidth, outsideHeight int) (int, int) {
