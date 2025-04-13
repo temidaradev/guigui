@@ -63,7 +63,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	r.createButton.SetText("Create")
-	r.createButton.SetWidth(int(5 * u))
+	guigui.SetSize(&r.createButton, int(5*u), guigui.AutoSize)
 	r.createButton.SetOnUp(func() {
 		r.tryCreateTask()
 	})
@@ -133,7 +133,7 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 	p := guigui.Position(t)
 	t.doneButton.SetText("Done")
-	t.doneButton.SetWidth(int(3 * u))
+	guigui.SetSize(&t.doneButton, int(3*u), guigui.AutoSize)
 	t.doneButton.SetOnUp(func() {
 		if t.onDoneButtonPressed != nil {
 			t.onDoneButtonPressed()

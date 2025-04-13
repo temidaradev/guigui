@@ -47,7 +47,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	r.resetButton.SetText("Reset")
-	r.resetButton.SetWidth(6 * basicwidget.UnitSize(context))
+	guigui.SetSize(&r.resetButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
 	})
@@ -66,7 +66,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	r.incButton.SetText("Increment")
-	r.incButton.SetWidth(6 * basicwidget.UnitSize(context))
+	guigui.SetSize(&r.incButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.incButton.SetOnUp(func() {
 		r.counter++
 	})
@@ -80,7 +80,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	r.decButton.SetText("Decrement")
-	r.decButton.SetWidth(6 * basicwidget.UnitSize(context))
+	guigui.SetSize(&r.decButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.decButton.SetOnUp(func() {
 		r.counter--
 	})

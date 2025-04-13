@@ -16,12 +16,10 @@ import (
 type Button struct {
 	guigui.DefaultWidget
 
-	pressed            bool
-	forcePressed       bool
-	widthMinusDefault  int
-	heightMinusDefault int
-	borderInvisible    bool
-	prevHovered        bool
+	pressed         bool
+	forcePressed    bool
+	borderInvisible bool
+	prevHovered     bool
 
 	onDown func()
 	onUp   func()
@@ -134,13 +132,6 @@ func defaultButtonSize(context *guigui.Context) (int, int) {
 	return 6 * UnitSize(context), UnitSize(context)
 }
 
-func (b *Button) SetSize(context *guigui.Context, width, height int) {
-	dw, dh := defaultButtonSize(context)
-	b.widthMinusDefault = width - dw
-	b.heightMinusDefault = height - dh
-}
-
 func (b *Button) DefaultSize(context *guigui.Context) (int, int) {
-	dw, dh := defaultButtonSize(context)
-	return b.widthMinusDefault + dw, b.heightMinusDefault + dh
+	return defaultButtonSize(context)
 }

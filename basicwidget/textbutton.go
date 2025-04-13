@@ -20,9 +20,6 @@ type TextButton struct {
 	image  Image
 
 	textColor color.Color
-
-	width    int
-	widthSet bool
 }
 
 func (t *TextButton) SetOnDown(f func()) {
@@ -55,7 +52,7 @@ func (t *TextButton) SetForcePressed(forcePressed bool) {
 
 func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := guigui.Size(t)
-	t.button.SetSize(context, w, h)
+	guigui.SetSize(&t.button, w, h)
 	guigui.SetPosition(&t.button, guigui.Position(t))
 	appender.AppendChildWidget(&t.button)
 
@@ -98,25 +95,12 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 func (t *TextButton) DefaultSize(context *guigui.Context) (int, int) {
 	_, dh := defaultButtonSize(context)
-	if t.widthSet {
-		return t.width, dh
-	}
 	w, _ := t.text.TextSize(context)
 	if t.image.HasImage() {
 		imgSize := textButtonImageSize(context)
 		return w + textButtonTextAndImagePadding(context) + imgSize + UnitSize(context)*3/4, dh
 	}
 	return w + UnitSize(context), dh
-}
-
-func (t *TextButton) SetWidth(width int) {
-	t.width = width
-	t.widthSet = true
-}
-
-func (t *TextButton) ResetWidth() {
-	t.width = 0
-	t.widthSet = false
 }
 
 func textButtonImageSize(context *guigui.Context) int {
