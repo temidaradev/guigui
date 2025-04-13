@@ -136,7 +136,7 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			l.checkmark.SetImage(img)
 
 			imgSize := listItemCheckmarkSize(context)
-			l.checkmark.SetSize(context, imgSize, imgSize)
+			guigui.SetSize(&l.checkmark, imgSize, imgSize)
 			imgP := p
 			_, itemH := guigui.Size(item.Content)
 			imgP.Y += (itemH - imgSize) * 3 / 4

@@ -80,7 +80,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	guigui.SetPosition(&t.text, textP)
 	appender.AppendChildWidget(&t.text)
 
-	t.image.SetSize(context, imgSize, imgSize)
+	guigui.SetSize(&t.image, imgSize, imgSize)
 	imgP := guigui.Position(t)
 	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
 	imgP.Y += (h - imgSize) / 2

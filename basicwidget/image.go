@@ -13,9 +13,6 @@ type Image struct {
 	guigui.DefaultWidget
 
 	image *ebiten.Image
-
-	widthMinusDefault  int
-	heightMinusDefault int
 }
 
 func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
@@ -50,17 +47,6 @@ func (i *Image) SetImage(image *ebiten.Image) {
 	guigui.RequestRedraw(i)
 }
 
-func defaultImageSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), 6 * UnitSize(context)
-}
-
 func (i *Image) DefaultSize(context *guigui.Context) (int, int) {
-	dw, dh := defaultImageSize(context)
-	return i.widthMinusDefault + dw, i.heightMinusDefault + dh
-}
-
-func (i *Image) SetSize(context *guigui.Context, width, height int) {
-	dw, dh := defaultImageSize(context)
-	i.widthMinusDefault = width - dw
-	i.heightMinusDefault = height - dh
+	return 6 * UnitSize(context), 6 * UnitSize(context)
 }
