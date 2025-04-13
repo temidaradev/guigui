@@ -3,7 +3,9 @@
 
 package guigui
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type DefaultWidget struct {
 	widgetState_ widgetState
@@ -45,7 +47,7 @@ func (d *DefaultWidget) DefaultSize(context *Context) (int, int) {
 	if d.widgetState_.parent == nil {
 		return context.app.bounds().Dx(), context.app.bounds().Dy()
 	}
-	return Size(d.widgetState_.parent)
+	return context.Size(d.widgetState_.parent)
 }
 
 func (d *DefaultWidget) widgetState() *widgetState {

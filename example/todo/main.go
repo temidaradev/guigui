@@ -51,46 +51,46 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	u := float64(basicwidget.UnitSize(context))
 
-	width, _ := guigui.Size(r)
+	width, _ := context.Size(r)
 	w := width - int(6.5*u)
-	guigui.SetSize(&r.textField, w, int(u))
+	context.SetSize(&r.textField, w, int(u))
 	r.textField.SetOnEnterPressed(func(text string) {
-		r.tryCreateTask()
+		r.tryCreateTask(context)
 	})
 	{
-		guigui.SetPosition(&r.textField, guigui.Position(r).Add(image.Pt(int(0.5*u), int(0.5*u))))
+		context.SetPosition(&r.textField, context.Position(r).Add(image.Pt(int(0.5*u), int(0.5*u))))
 		appender.AppendChildWidget(&r.textField)
 	}
 
-	r.createButton.SetText("Create")
-	guigui.SetSize(&r.createButton, int(5*u), guigui.AutoSize)
+	r.createButton.SetText(context, "Create")
+	context.SetSize(&r.createButton, int(5*u), guigui.AutoSize)
 	r.createButton.SetOnUp(func() {
-		r.tryCreateTask()
+		r.tryCreateTask(context)
 	})
 	if r.canCreateTask() {
-		guigui.Enable(&r.createButton)
+		context.Enable(&r.createButton)
 	} else {
-		guigui.Disable(&r.createButton)
+		context.Disable(&r.createButton)
 	}
 	{
-		p := guigui.Position(r)
-		w, _ := guigui.Size(r)
+		p := context.Position(r)
+		w, _ := context.Size(r)
 		p.X += w - int(0.5*u) - int(5*u)
 		p.Y += int(0.5 * u)
-		guigui.SetPosition(&r.createButton, p)
+		context.SetPosition(&r.createButton, p)
 		appender.AppendChildWidget(&r.createButton)
 	}
 
-	w, h := guigui.Size(r)
-	guigui.SetSize(&r.tasksPanel, w, h-int(2*u))
-	r.tasksPanelContent.SetTasks(r.tasks)
+	w, h := context.Size(r)
+	context.SetSize(&r.tasksPanel, w, h-int(2*u))
+	r.tasksPanelContent.SetTasks(context, r.tasks)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
 		r.tasks = slices.DeleteFunc(r.tasks, func(t Task) bool {
 			return t.ID == id
 		})
 	})
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
-	guigui.SetPosition(&r.tasksPanel, guigui.Position(r).Add(image.Pt(0, int(2*u))))
+	context.SetPosition(&r.tasksPanel, context.Position(r).Add(image.Pt(0, int(2*u))))
 	appender.AppendChildWidget(&r.tasksPanel)
 
 	return nil
@@ -102,12 +102,12 @@ func (r *Root) canCreateTask() bool {
 	return str != ""
 }
 
-func (r *Root) tryCreateTask() {
+func (r *Root) tryCreateTask(context *guigui.Context) {
 	str := r.textField.Text()
 	str = strings.TrimSpace(str)
 	if str != "" {
 		r.tasks = slices.Insert(r.tasks, 0, NewTask(str))
-		r.textField.SetText("")
+		r.textField.SetText(context, "")
 	}
 }
 
@@ -124,34 +124,34 @@ func (t *taskWidget) SetOnDoneButtonPressed(f func()) {
 	t.onDoneButtonPressed = f
 }
 
-func (t *taskWidget) SetText(text string) {
-	t.text.SetText(text)
+func (t *taskWidget) SetText(context *guigui.Context, text string) {
+	t.text.SetText(context, text)
 }
 
 func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
-	p := guigui.Position(t)
-	t.doneButton.SetText("Done")
-	guigui.SetSize(&t.doneButton, int(3*u), guigui.AutoSize)
+	p := context.Position(t)
+	t.doneButton.SetText(context, "Done")
+	context.SetSize(&t.doneButton, int(3*u), guigui.AutoSize)
 	t.doneButton.SetOnUp(func() {
 		if t.onDoneButtonPressed != nil {
 			t.onDoneButtonPressed()
 		}
 	})
-	guigui.SetPosition(&t.doneButton, p)
+	context.SetPosition(&t.doneButton, p)
 	appender.AppendChildWidget(&t.doneButton)
 
-	w, _ := guigui.Size(t)
-	guigui.SetSize(&t.text, w-int(4.5*u), int(u))
-	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-	guigui.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
+	w, _ := context.Size(t)
+	context.SetSize(&t.text, w-int(4.5*u), int(u))
+	t.text.SetVerticalAlign(context, basicwidget.VerticalAlignMiddle)
+	context.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
 	appender.AppendChildWidget(&t.text)
 	return nil
 }
 
 func (t *taskWidget) DefaultSize(context *guigui.Context) (int, int) {
-	w, _ := guigui.Size(guigui.Parent(t))
+	w, _ := context.Size(guigui.Parent(t))
 	return w, int(basicwidget.UnitSize(context))
 }
 
@@ -167,7 +167,7 @@ func (t *tasksPanelContent) SetOnDeleted(f func(id int)) {
 	t.onDeleted = f
 }
 
-func (t *tasksPanelContent) SetTasks(tasks []Task) {
+func (t *tasksPanelContent) SetTasks(context *guigui.Context, tasks []Task) {
 	if len(tasks) != len(t.taskWidgets) {
 		if len(tasks) > len(t.taskWidgets) {
 			t.taskWidgets = slices.Grow(t.taskWidgets, len(tasks)-len(t.taskWidgets))
@@ -182,14 +182,14 @@ func (t *tasksPanelContent) SetTasks(tasks []Task) {
 				t.onDeleted(task.ID)
 			}
 		})
-		t.taskWidgets[i].SetText(task.Text)
+		t.taskWidgets[i].SetText(context, task.Text)
 	}
 }
 
 func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
-	p := guigui.Position(t)
+	p := context.Position(t)
 	x := p.X + int(0.5*u)
 	y := p.Y
 	for i := range t.taskWidgets {
@@ -198,7 +198,7 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 		if i > 0 {
 			y += int(u / 4)
 		}
-		guigui.SetPosition(&t.taskWidgets[i], image.Pt(x, y))
+		context.SetPosition(&t.taskWidgets[i], image.Pt(x, y))
 		appender.AppendChildWidget(&t.taskWidgets[i])
 		y += int(u)
 	}
@@ -209,7 +209,7 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 func (t *tasksPanelContent) DefaultSize(context *guigui.Context) (int, int) {
 	u := basicwidget.UnitSize(context)
 
-	w, _ := guigui.Size(guigui.Parent(t))
+	w, _ := context.Size(guigui.Parent(t))
 	c := len(t.taskWidgets)
 	h := c * (u + u/4)
 	return w, h

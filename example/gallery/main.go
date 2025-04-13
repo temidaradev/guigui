@@ -28,22 +28,22 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	appender.AppendChildWidget(&r.background)
 	appender.AppendChildWidget(&r.sidebar)
 
-	guigui.SetPosition(&r.sidebar, guigui.Position(r))
-	rw, _ := guigui.Size(r)
-	sw, _ := guigui.Size(&r.sidebar)
-	p := guigui.Position(r)
+	context.SetPosition(&r.sidebar, context.Position(r))
+	rw, _ := context.Size(r)
+	sw, _ := context.Size(&r.sidebar)
+	p := context.Position(r)
 	p.X += sw
 	pw := rw - sw
-	guigui.SetPosition(&r.settings, p)
-	guigui.SetSize(&r.settings, pw, guigui.AutoSize)
-	guigui.SetPosition(&r.basic, p)
-	guigui.SetSize(&r.basic, pw, guigui.AutoSize)
-	guigui.SetPosition(&r.buttons, p)
-	guigui.SetSize(&r.buttons, pw, guigui.AutoSize)
-	guigui.SetPosition(&r.lists, p)
-	guigui.SetSize(&r.lists, pw, guigui.AutoSize)
-	guigui.SetPosition(&r.popups, p)
-	guigui.SetSize(&r.popups, pw, guigui.AutoSize)
+	context.SetPosition(&r.settings, p)
+	context.SetSize(&r.settings, pw, guigui.AutoSize)
+	context.SetPosition(&r.basic, p)
+	context.SetSize(&r.basic, pw, guigui.AutoSize)
+	context.SetPosition(&r.buttons, p)
+	context.SetSize(&r.buttons, pw, guigui.AutoSize)
+	context.SetPosition(&r.lists, p)
+	context.SetSize(&r.lists, pw, guigui.AutoSize)
+	context.SetPosition(&r.popups, p)
+	context.SetSize(&r.popups, pw, guigui.AutoSize)
 
 	switch r.sidebar.SelectedItemTag() {
 	case "settings":

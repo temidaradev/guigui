@@ -22,16 +22,16 @@ func sidebarWidth(context *guigui.Context) int {
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	guigui.SetSize(&s.sidebar, sidebarWidth(context), guigui.AutoSize)
+	context.SetSize(&s.sidebar, sidebarWidth(context), guigui.AutoSize)
 	s.sidebar.SetContent(&s.sidebarContent)
-	guigui.SetPosition(&s.sidebar, guigui.Position(s))
+	context.SetPosition(&s.sidebar, context.Position(s))
 	appender.AppendChildWidget(&s.sidebar)
 
 	return nil
 }
 
 func (s *Sidebar) DefaultSize(context *guigui.Context) (int, int) {
-	_, h := guigui.Size(guigui.Parent(s))
+	_, h := context.Size(guigui.Parent(s))
 	return sidebarWidth(context), h
 }
 
@@ -39,8 +39,8 @@ func (s *Sidebar) SelectedItemTag() string {
 	return s.sidebarContent.SelectedItemTag()
 }
 
-func (s *Sidebar) SetSelectedItemIndex(index int) {
-	s.sidebarContent.SetSelectedItemIndex(index)
+func (s *Sidebar) SetSelectedItemIndex(context *guigui.Context, index int) {
+	s.sidebarContent.SetSelectedItemIndex(context, index)
 }
 
 type sidebarContent struct {
@@ -53,7 +53,7 @@ type sidebarContent struct {
 }
 
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	s.list.SetStyle(basicwidget.ListStyleSidebar)
+	s.list.SetStyle(context, basicwidget.ListStyleSidebar)
 
 	type item struct {
 		text string
@@ -88,7 +88,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	listItems := make([]basicwidget.ListItem, len(items))
 	for i, item := range items {
 		t := &s.listItemWidgets[i]
-		t.SetText(item.text)
+		t.SetText(context, item.text)
 		listItems[i] = basicwidget.ListItem{
 			Content:    t,
 			Selectable: true,
@@ -97,23 +97,23 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	}
 	for i := range s.listItemWidgets {
 		t := &s.listItemWidgets[i]
-		t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-		guigui.SetSize(t, guigui.AutoSize, basicwidget.UnitSize(context))
+		t.SetVerticalAlign(context, basicwidget.VerticalAlignMiddle)
+		context.SetSize(t, guigui.AutoSize, basicwidget.UnitSize(context))
 		if s.list.SelectedItemIndex() == i {
-			t.SetColor(basicwidget.DefaultActiveListItemTextColor(context))
+			t.SetColor(context, basicwidget.DefaultActiveListItemTextColor(context))
 		} else {
-			t.SetColor(basicwidget.DefaultTextColor(context))
+			t.SetColor(context, basicwidget.DefaultTextColor(context))
 		}
 	}
 	s.list.SetItems(listItems)
 
 	s.initOnce.Do(func() {
-		s.list.SetSelectedItemIndex(0)
+		s.list.SetSelectedItemIndex(context, 0)
 	})
 
-	_, h := guigui.Size(s)
-	guigui.SetSize(&s.list, sidebarWidth(context), h)
-	guigui.SetPosition(&s.list, guigui.Position(s))
+	_, h := context.Size(s)
+	context.SetSize(&s.list, sidebarWidth(context), h)
+	context.SetPosition(&s.list, context.Position(s))
 	appender.AppendChildWidget(&s.list)
 
 	return nil
@@ -127,6 +127,6 @@ func (s *sidebarContent) SelectedItemTag() string {
 	return item.Tag.(string)
 }
 
-func (s *sidebarContent) SetSelectedItemIndex(index int) {
-	s.list.SetSelectedItemIndex(index)
+func (s *sidebarContent) SetSelectedItemIndex(context *guigui.Context, index int) {
+	s.list.SetSelectedItemIndex(context, index)
 }

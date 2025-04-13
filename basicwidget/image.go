@@ -20,13 +20,13 @@ func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 
-	p := guigui.Position(i)
-	w, h := guigui.Size(i)
+	p := context.Position(i)
+	w, h := context.Size(i)
 	imgScale := min(float64(w)/float64(i.image.Bounds().Dx()), float64(h)/float64(i.image.Bounds().Dy()))
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(imgScale, imgScale)
 	op.GeoM.Translate(float64(p.X), float64(p.Y))
-	if !guigui.IsEnabled(i) {
+	if !context.IsEnabled(i) {
 		// TODO: Reduce the saturation?
 		op.ColorScale.ScaleAlpha(0.25)
 	}
@@ -39,12 +39,12 @@ func (i *Image) HasImage() bool {
 	return i.image != nil
 }
 
-func (i *Image) SetImage(image *ebiten.Image) {
+func (i *Image) SetImage(context *guigui.Context, image *ebiten.Image) {
 	if i.image == image {
 		return
 	}
 	i.image = image
-	guigui.RequestRedraw(i)
+	context.RequestRedraw(i)
 }
 
 func (i *Image) DefaultSize(context *guigui.Context) (int, int) {

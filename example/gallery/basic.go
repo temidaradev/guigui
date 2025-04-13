@@ -25,17 +25,17 @@ type Basic struct {
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetText("Text Button")
-	b.textButton.SetText("Click Me!")
-	b.toggleButtonText.SetText("Toggle Button")
-	b.textFieldText.SetText("Text Field")
-	b.textField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
-	b.textListText.SetText("Text List")
-	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
+	b.textButtonText.SetText(context, "Text Button")
+	b.textButton.SetText(context, "Click Me!")
+	b.toggleButtonText.SetText(context, "Toggle Button")
+	b.textFieldText.SetText(context, "Text Field")
+	b.textField.SetHorizontalAlign(context, basicwidget.HorizontalAlignEnd)
+	b.textListText.SetText(context, "Text List")
+	b.textList.SetItemsByStrings(context, []string{"Item 1", "Item 2", "Item 3"})
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := guigui.Size(b)
-	guigui.SetSize(&b.form, w-int(1*u), guigui.AutoSize)
+	w, _ := context.Size(b)
+	context.SetSize(&b.form, w-int(1*u), guigui.AutoSize)
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
@@ -55,8 +55,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		},
 	})
 	{
-		p := guigui.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
-		guigui.SetPosition(&b.form, p)
+		p := context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
+		context.SetPosition(&b.form, p)
 		appender.AppendChildWidget(&b.form)
 	}
 

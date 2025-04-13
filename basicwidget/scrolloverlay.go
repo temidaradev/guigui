@@ -63,40 +63,40 @@ func (s *ScrollOverlay) Reset() {
 	s.offsetY = 0
 }
 
-func (s *ScrollOverlay) SetContentSize(contentWidth, contentHeight int) {
+func (s *ScrollOverlay) SetContentSize(context *guigui.Context, contentWidth, contentHeight int) {
 	if s.contentWidth == contentWidth && s.contentHeight == contentHeight {
 		return
 	}
 
 	s.contentWidth = contentWidth
 	s.contentHeight = contentHeight
-	s.adjustOffset()
+	s.adjustOffset(context)
 	if s.onceUpdated {
 		s.contentSizeChanged = true
-		guigui.RequestRedraw(s)
+		context.RequestRedraw(s)
 	}
 }
 
-func (s *ScrollOverlay) SetOffsetByDelta(contentWidth, contentHeight int, dx, dy float64) {
-	s.SetOffset(contentWidth, contentHeight, s.offsetX+dx, s.offsetY+dy)
+func (s *ScrollOverlay) SetOffsetByDelta(context *guigui.Context, contentWidth, contentHeight int, dx, dy float64) {
+	s.SetOffset(context, contentWidth, contentHeight, s.offsetX+dx, s.offsetY+dy)
 }
 
-func (s *ScrollOverlay) SetOffset(contentWidth, contentHeight int, x, y float64) {
-	s.SetContentSize(contentWidth, contentHeight)
+func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentWidth, contentHeight int, x, y float64) {
+	s.SetContentSize(context, contentWidth, contentHeight)
 
 	if s.offsetX == x && s.offsetY == y {
 		return
 	}
 	s.offsetX = x
 	s.offsetY = y
-	s.adjustOffset()
+	s.adjustOffset(context)
 	if s.onceUpdated {
-		guigui.RequestRedraw(s)
+		context.RequestRedraw(s)
 	}
 }
 
-func (s *ScrollOverlay) isHovered() bool {
-	return guigui.IsWidgetHitAt(s, image.Pt(ebiten.CursorPosition()))
+func (s *ScrollOverlay) isHovered(context *guigui.Context) bool {
+	return context.IsWidgetHitAt(s, image.Pt(ebiten.CursorPosition()))
 }
 
 func (s *ScrollOverlay) setDragging(draggingX, draggingY bool) {
@@ -119,7 +119,7 @@ func adjustedWheel() (float64, float64) {
 }
 
 func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	hovered := s.isHovered()
+	hovered := s.isHovered(context)
 	if hovered {
 		x, y := ebiten.CursorPosition()
 		dx, dy := adjustedWheel()
@@ -168,7 +168,7 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 			prevOffsetX := s.offsetX
 			prevOffsetY := s.offsetY
 
-			w, h := guigui.Size(s)
+			w, h := context.Size(s)
 			barWidth, barHeight := s.barSize(context)
 			if s.draggingX && barWidth > 0 && s.contentWidth-w > 0 {
 				offsetPerPixel := float64(s.contentWidth-w) / (float64(w) - barWidth)
@@ -178,12 +178,12 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 				offsetPerPixel := float64(s.contentHeight-h) / (float64(h) - barHeight)
 				s.offsetY = s.draggingStartOffsetY + float64(-dy)*offsetPerPixel
 			}
-			s.adjustOffset()
+			s.adjustOffset(context)
 			if prevOffsetX != s.offsetX || prevOffsetY != s.offsetY {
 				if s.onScroll != nil {
 					s.onScroll(s.offsetX, s.offsetY)
 				}
-				guigui.RequestRedraw(s)
+				context.RequestRedraw(s)
 			}
 		}
 		return guigui.HandleInputByWidget(s)
@@ -203,12 +203,12 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 		prevOffsetY := s.offsetY
 		s.offsetX += dx * 4 * context.Scale()
 		s.offsetY += dy * 4 * context.Scale()
-		s.adjustOffset()
+		s.adjustOffset(context)
 		if prevOffsetX != s.offsetX || prevOffsetY != s.offsetY {
 			if s.onScroll != nil {
 				s.onScroll(s.offsetX, s.offsetY)
 			}
-			guigui.RequestRedraw(s)
+			context.RequestRedraw(s)
 			return guigui.HandleInputByWidget(s)
 		}
 		return guigui.HandleInputResult{}
@@ -230,8 +230,8 @@ func (s *ScrollOverlay) Offset() (float64, float64) {
 	return s.offsetX, s.offsetY
 }
 
-func (s *ScrollOverlay) adjustOffset() {
-	bounds := guigui.Bounds(s)
+func (s *ScrollOverlay) adjustOffset(context *guigui.Context) {
+	bounds := context.Bounds(s)
 
 	// Adjust offsets.
 	if s.offsetX > 0 {
@@ -266,7 +266,7 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 		return true
 	}
 
-	bounds := guigui.Bounds(s)
+	bounds := context.Bounds(s)
 	if s.contentWidth > bounds.Dx() && bounds.Max.Y-UnitSize(context) <= s.lastCursorY {
 		return true
 	}
@@ -277,14 +277,14 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 }
 
 func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	w, h := guigui.Size(s)
+	w, h := context.Size(s)
 	if s.lastWidth != w || s.lastHeight != h {
-		s.adjustOffset()
+		s.adjustOffset(context)
 		s.lastWidth = w
 		s.lastHeight = h
 	}
 
-	guigui.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
+	context.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
 	return nil
 }
 
@@ -297,7 +297,7 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 	if s.isBarVisible(context) || (s.barVisibleTime == barShowingTime() && s.barOpacity < barMaxOpacity()) {
 		if s.barOpacity < barMaxOpacity() {
 			s.barOpacity++
-			guigui.RequestRedraw(s)
+			context.RequestRedraw(s)
 		}
 		s.barVisibleTime = barShowingTime()
 	} else {
@@ -306,7 +306,7 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 		}
 		if s.barVisibleTime == 0 && s.barOpacity > 0 {
 			s.barOpacity--
-			guigui.RequestRedraw(s)
+			context.RequestRedraw(s)
 		}
 	}
 
@@ -343,7 +343,7 @@ func (s *ScrollOverlay) barWidth(scale float64) float64 {
 }
 
 func (s *ScrollOverlay) barSize(context *guigui.Context) (float64, float64) {
-	bounds := guigui.Bounds(s)
+	bounds := context.Bounds(s)
 
 	var w, h float64
 	if s.contentWidth > bounds.Dx() {
@@ -362,7 +362,7 @@ func (s *ScrollOverlay) barSize(context *guigui.Context) (float64, float64) {
 }
 
 func (s *ScrollOverlay) barBounds(context *guigui.Context) (image.Rectangle, image.Rectangle) {
-	bounds := guigui.Bounds(s)
+	bounds := context.Bounds(s)
 
 	offsetX, offsetY := s.Offset()
 	barWidth, barHeight := s.barSize(context)

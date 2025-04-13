@@ -30,20 +30,20 @@ func (t *TextButton) SetOnUp(f func()) {
 	t.button.SetOnUp(f)
 }
 
-func (t *TextButton) SetText(text string) {
-	t.text.SetText(text)
+func (t *TextButton) SetText(context *guigui.Context, text string) {
+	t.text.SetText(context, text)
 }
 
-func (t *TextButton) SetImage(image *ebiten.Image) {
-	t.image.SetImage(image)
+func (t *TextButton) SetImage(context *guigui.Context, image *ebiten.Image) {
+	t.image.SetImage(context, image)
 }
 
-func (t *TextButton) SetTextColor(clr color.Color) {
+func (t *TextButton) SetTextColor(context *guigui.Context, clr color.Color) {
 	if draw.EqualColor(t.textColor, clr) {
 		return
 	}
 	t.textColor = clr
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
 func (t *TextButton) SetForcePressed(forcePressed bool) {
@@ -51,43 +51,43 @@ func (t *TextButton) SetForcePressed(forcePressed bool) {
 }
 
 func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	w, h := guigui.Size(t)
-	guigui.SetSize(&t.button, w, h)
-	guigui.SetPosition(&t.button, guigui.Position(t))
+	w, h := context.Size(t)
+	context.SetSize(&t.button, w, h)
+	context.SetPosition(&t.button, context.Position(t))
 	appender.AppendChildWidget(&t.button)
 
 	imgSize := textButtonImageSize(context)
 
 	tw, _ := t.text.TextSize(context)
-	guigui.SetSize(&t.text, tw, h)
-	if !guigui.IsEnabled(&t.button) {
-		t.text.SetColor(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
+	context.SetSize(&t.text, tw, h)
+	if !context.IsEnabled(&t.button) {
+		t.text.SetColor(context, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
 	} else {
-		t.text.SetColor(t.textColor)
+		t.text.SetColor(context, t.textColor)
 	}
-	t.text.SetHorizontalAlign(HorizontalAlignCenter)
-	t.text.SetVerticalAlign(VerticalAlignMiddle)
-	textP := guigui.Position(t)
+	t.text.SetHorizontalAlign(context, HorizontalAlignCenter)
+	t.text.SetVerticalAlign(context, VerticalAlignMiddle)
+	textP := context.Position(t)
 	if t.image.HasImage() {
 		textP.X += (w - tw + UnitSize(context)/4) / 2
 		textP.X -= (textButtonTextAndImagePadding(context) + imgSize) / 2
 	} else {
 		textP.X += (w - tw) / 2
 	}
-	if t.button.isActive() {
+	if t.button.isActive(context) {
 		textP.Y += int(1 * context.Scale())
 	}
-	guigui.SetPosition(&t.text, textP)
+	context.SetPosition(&t.text, textP)
 	appender.AppendChildWidget(&t.text)
 
-	guigui.SetSize(&t.image, imgSize, imgSize)
-	imgP := guigui.Position(t)
+	context.SetSize(&t.image, imgSize, imgSize)
+	imgP := context.Position(t)
 	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
 	imgP.Y += (h - imgSize) / 2
-	if t.button.isActive() {
+	if t.button.isActive(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
-	guigui.SetPosition(&t.image, imgP)
+	context.SetPosition(&t.image, imgP)
 	appender.AppendChildWidget(&t.image)
 
 	return nil

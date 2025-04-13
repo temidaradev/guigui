@@ -33,17 +33,17 @@ type Popups struct {
 }
 
 func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.blurBackgroundText.SetText("Blur Background")
-	p.closeByClickingOutsideText.SetText("Close by Clicking Outside")
-	p.showButton.SetText("Show")
+	p.blurBackgroundText.SetText(context, "Blur Background")
+	p.closeByClickingOutsideText.SetText(context, "Close by Clicking Outside")
+	p.showButton.SetText(context, "Show")
 	p.showButton.SetOnUp(func() {
-		p.simplePopup.Open()
+		p.simplePopup.Open(context)
 	})
 
 	u := float64(basicwidget.UnitSize(context))
 
-	w, _ := guigui.Size(p)
-	guigui.SetSize(&p.forms[0], w-int(1*u), guigui.AutoSize)
+	w, _ := context.Size(p)
+	context.SetSize(&p.forms[0], w-int(1*u), guigui.AutoSize)
 	p.forms[0].SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.blurBackgroundText,
@@ -57,30 +57,30 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 			SecondaryWidget: &p.showButton,
 		},
 	})
-	pt := guigui.Position(p).Add(image.Pt(int(0.5*u), int(0.5*u)))
-	guigui.SetPosition(&p.forms[0], pt)
+	pt := context.Position(p).Add(image.Pt(int(0.5*u), int(0.5*u)))
+	context.SetPosition(&p.forms[0], pt)
 	appender.AppendChildWidget(&p.forms[0])
 
-	p.contextMenuPopupText.SetText("Context Menu")
-	p.contextMenuPopupClickHereText.SetText("Click Here by the Right Button")
+	p.contextMenuPopupText.SetText(context, "Context Menu")
+	p.contextMenuPopupClickHereText.SetText(context, "Click Here by the Right Button")
 
-	guigui.SetSize(&p.forms[1], w-int(1*u), guigui.AutoSize)
+	context.SetSize(&p.forms[1], w-int(1*u), guigui.AutoSize)
 	p.forms[1].SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.contextMenuPopupText,
 			SecondaryWidget: &p.contextMenuPopupClickHereText,
 		},
 	})
-	_, h := guigui.Size(&p.forms[0])
+	_, h := context.Size(&p.forms[0])
 	pt.Y += h + int(0.5*u)
-	guigui.SetPosition(&p.forms[1], pt)
+	context.SetPosition(&p.forms[1], pt)
 	appender.AppendChildWidget(&p.forms[1])
 
 	p.simplePopupContent.popup = &p.simplePopup
 	p.simplePopup.SetContent(&p.simplePopupContent)
 	contentWidth := int(12 * u)
 	contentHeight := int(6 * u)
-	bounds := guigui.Bounds(&p.simplePopup)
+	bounds := context.Bounds(&p.simplePopup)
 	contentPosition := image.Point{
 		X: bounds.Min.X + (bounds.Dx()-contentWidth)/2,
 		Y: bounds.Min.Y + (bounds.Dy()-contentHeight)/2,
@@ -96,7 +96,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 	appender.AppendChildWidget(&p.simplePopup)
 
-	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
+	p.contextMenuPopup.SetItemsByStrings(context, []string{"Item 1", "Item 2", "Item 3"})
 	appender.AppendChildWidget(&p.contextMenuPopup)
 
 	return nil
@@ -105,9 +105,9 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 		pt := image.Pt(ebiten.CursorPosition())
-		if pt.In(guigui.VisibleBounds(&p.contextMenuPopupClickHereText)) {
-			guigui.SetPosition(&p.contextMenuPopup, pt)
-			p.contextMenuPopup.Open()
+		if pt.In(context.VisibleBounds(&p.contextMenuPopupClickHereText)) {
+			context.SetPosition(&p.contextMenuPopup, pt)
+			p.contextMenuPopup.Open(context)
 		}
 	}
 	return guigui.HandleInputResult{}
@@ -125,19 +125,19 @@ type simplePopupContent struct {
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
-	s.titleText.SetText("Hello!")
-	s.titleText.SetBold(true)
+	s.titleText.SetText(context, "Hello!")
+	s.titleText.SetBold(context, true)
 	pt := s.popup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
-	guigui.SetPosition(&s.titleText, pt)
+	context.SetPosition(&s.titleText, pt)
 	appender.AppendChildWidget(&s.titleText)
 
-	s.closeButton.SetText("Close")
+	s.closeButton.SetText(context, "Close")
 	s.closeButton.SetOnUp(func() {
 		s.popup.Close()
 	})
-	w, h := guigui.Size(&s.closeButton)
+	w, h := context.Size(&s.closeButton)
 	pt = s.popup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-w, -int(0.5*u)-h))
-	guigui.SetPosition(&s.closeButton, pt)
+	context.SetPosition(&s.closeButton, pt)
 	appender.AppendChildWidget(&s.closeButton)
 
 	return nil

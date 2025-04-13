@@ -47,8 +47,6 @@ func invalidatedRegionForDebugMaxTime() int {
 	return ebiten.TPS() / 5
 }
 
-var theApp *app
-
 type hitTestCacheItem struct {
 	point   image.Point
 	widgets []Widget
@@ -119,7 +117,6 @@ func Run(root Widget, options *RunOptions) error {
 	a := &app{
 		root: root,
 	}
-	theApp = a
 	a.root.widgetState().root = true
 	a.context.app = a
 	if options.AppScale > 0 {
@@ -207,7 +204,7 @@ func (a *app) Update() error {
 	// Resolve invalidatedWidgets.
 	if len(a.invalidatedWidgets) > 0 {
 		for _, widget := range a.invalidatedWidgets {
-			vb := VisibleBounds(widget)
+			vb := a.context.VisibleBounds(widget)
 			if vb.Empty() {
 				continue
 			}
@@ -285,7 +282,7 @@ func (a *app) requestRedraw(region image.Rectangle) {
 func (a *app) requestRedrawWidget(widget Widget) {
 	a.invalidatedWidgets = append(a.invalidatedWidgets, widget)
 	for _, child := range widget.widgetState().children {
-		theApp.requestRedrawIfDifferentParentZ(child)
+		a.requestRedrawIfDifferentParentZ(child)
 	}
 }
 
@@ -414,7 +411,7 @@ func (a *app) doCursorShape(widget Widget, zToHandle int) bool {
 		return false
 	}
 
-	if !image.Pt(ebiten.CursorPosition()).In(VisibleBounds(widget)) {
+	if !image.Pt(ebiten.CursorPosition()).In(a.context.VisibleBounds(widget)) {
 		return false
 	}
 
@@ -451,14 +448,14 @@ func clearEventQueues(widget Widget) {
 func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 	widgetState := widget.widgetState()
 	// If the children and/or children's bounds are changed, request redraw.
-	if !widgetState.prev.equals(widgetState.children) {
-		a.requestRedraw(VisibleBounds(widget))
+	if !widgetState.prev.equals(&a.context, widgetState.children) {
+		a.requestRedraw(a.context.VisibleBounds(widget))
 
 		// Widgets with different Z from their parent's Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
 		widgetState.prev.redrawIfDifferentParentZ(a)
 		for _, child := range widgetState.children {
 			if isDifferentParentZ(child) {
-				a.requestRedraw(VisibleBounds(child))
+				a.requestRedraw(a.context.VisibleBounds(child))
 			}
 		}
 	}
@@ -472,7 +469,7 @@ func (a *app) resetPrevWidgets(widget Widget) {
 	// Reset the states.
 	widgetState.prev.reset()
 	for _, child := range widgetState.children {
-		widgetState.prev.append(child, Bounds(child))
+		widgetState.prev.append(child, a.context.Bounds(child))
 	}
 	for _, child := range widgetState.children {
 		a.resetPrevWidgets(child)
@@ -490,7 +487,7 @@ func (a *app) drawWidget(screen *ebiten.Image) {
 }
 
 func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
-	vb := VisibleBounds(widget)
+	vb := a.context.VisibleBounds(widget)
 	if vb.Empty() {
 		return
 	}
@@ -626,7 +623,7 @@ func (a *app) doWidgetsAt(point image.Point, z int, widget Widget) iter.Seq[Widg
 		if widget.Z() != z {
 			return
 		}
-		if !point.In(VisibleBounds(widget)) {
+		if !point.In(a.context.VisibleBounds(widget)) {
 			return
 		}
 		if !yield(widget) {

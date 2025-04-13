@@ -30,18 +30,19 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 		return nil
 	}
 
-	p := guigui.Position(s)
+	p := context.Position(s)
 	offsetX, offsetY := s.scollOverlay.Offset()
 	p = p.Add(image.Pt(int(offsetX), int(offsetY)))
-	guigui.SetPosition(s.content, p)
+	context.SetPosition(s.content, p)
 	appender.AppendChildWidget(s.content)
 
-	s.scollOverlay.SetContentSize(guigui.Size(s.content))
-	guigui.SetPosition(&s.scollOverlay, guigui.Position(s))
+	w, h := context.Size(s.content)
+	s.scollOverlay.SetContentSize(context, w, h)
+	context.SetPosition(&s.scollOverlay, context.Position(s))
 	appender.AppendChildWidget(&s.scollOverlay)
 
 	s.border.scrollOverlay = &s.scollOverlay
-	guigui.SetPosition(&s.border, guigui.Position(s))
+	context.SetPosition(&s.border, context.Position(s))
 	appender.AppendChildWidget(&s.border)
 
 	return nil
@@ -60,7 +61,7 @@ type scrollablePanelBorder struct {
 func (s *scrollablePanelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// Render borders.
 	strokeWidth := float32(1 * context.Scale())
-	bounds := guigui.Bounds(s)
+	bounds := context.Bounds(s)
 	x0 := float32(bounds.Min.X)
 	x1 := float32(bounds.Max.X)
 	y0 := float32(bounds.Min.Y)

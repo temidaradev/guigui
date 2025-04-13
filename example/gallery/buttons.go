@@ -23,22 +23,22 @@ type Buttons struct {
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetText("Text Button")
-	b.textButton.SetText("Button")
-	b.textImageButtonText.SetText("Text w/ Image Button")
-	b.textImageButton.SetText("Button")
+	b.textButtonText.SetText(context, "Text Button")
+	b.textButton.SetText(context, "Button")
+	b.textImageButtonText.SetText(context, "Text w/ Image Button")
+	b.textImageButton.SetText(context, "Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	b.textImageButton.SetImage(img)
-	b.toggleButtonText.SetText("Toggle Button")
+	b.textImageButton.SetImage(context, img)
+	b.toggleButtonText.SetText(context, "Toggle Button")
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := guigui.Size(b)
-	guigui.SetSize(&b.form, w-int(1*u), guigui.AutoSize)
-	p := guigui.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
-	guigui.SetPosition(&b.form, p)
+	w, _ := context.Size(b)
+	context.SetSize(&b.form, w-int(1*u), guigui.AutoSize)
+	p := context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
+	context.SetPosition(&b.form, p)
 
 	b.form.SetItems([]*basicwidget.FormItem{
 		{

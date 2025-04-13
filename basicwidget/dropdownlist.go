@@ -28,19 +28,19 @@ func (d *DropdownList) updateButtonImage(context *guigui.Context) {
 		slog.Error(err.Error())
 		return
 	}
-	d.textButton.SetImage(img)
+	d.textButton.SetImage(context, img)
 }
 
 func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	d.updateButtonImage(context)
-	d.updateText()
+	d.updateText(context)
 
 	d.textButton.SetOnDown(func() {
-		d.popupMenu.Open()
+		d.popupMenu.Open(context)
 	})
-	d.textButton.SetForcePressed(guigui.IsVisible(&d.popupMenu))
+	d.textButton.SetForcePressed(context.IsVisible(&d.popupMenu))
 
-	guigui.SetPosition(&d.textButton, guigui.Position(d))
+	context.SetPosition(&d.textButton, context.Position(d))
 	appender.AppendChildWidget(&d.textButton)
 
 	d.popupMenu.SetOnClosed(func(index int) {
@@ -48,46 +48,46 @@ func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidg
 			d.onValueChanged(index)
 		}
 	})
-	d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
+	d.popupMenu.SetCheckmarkIndex(context, d.SelectedItemIndex())
 
-	pt := guigui.Position(d)
+	pt := context.Position(d)
 	pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 	pt.X = max(pt.X, 0)
 	pt.Y -= listItemPadding(context)
-	_, y := guigui.Size(d)
+	_, y := context.Size(d)
 	pt.Y += int((float64(y) - LineHeight(context)) / 2)
 	pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
 	pt.Y = max(pt.Y, 0)
-	guigui.SetPosition(&d.popupMenu, pt)
+	context.SetPosition(&d.popupMenu, pt)
 	appender.AppendChildWidget(&d.popupMenu)
 
 	return nil
 }
 
-func (d *DropdownList) updateText() {
+func (d *DropdownList) updateText(context *guigui.Context) {
 	if item, ok := d.popupMenu.SelectedItem(); ok {
-		d.textButton.SetText(item.Text)
+		d.textButton.SetText(context, item.Text)
 	} else {
-		d.textButton.SetText("")
+		d.textButton.SetText(context, "")
 	}
 }
 
-func (d *DropdownList) SetItemsByStrings(items []string) {
-	d.popupMenu.SetItemsByStrings(items)
-	d.updateText()
+func (d *DropdownList) SetItemsByStrings(context *guigui.Context, items []string) {
+	d.popupMenu.SetItemsByStrings(context, items)
+	d.updateText(context)
 }
 
 func (d *DropdownList) SelectedItemIndex() int {
 	return d.popupMenu.SelectedItemIndex()
 }
 
-func (d *DropdownList) SetSelectedItemIndex(index int) {
-	d.popupMenu.SetSelectedItemIndex(index)
-	d.updateText()
+func (d *DropdownList) SetSelectedItemIndex(context *guigui.Context, index int) {
+	d.popupMenu.SetSelectedItemIndex(context, index)
+	d.updateText(context)
 }
 
 func (d *DropdownList) DefaultSize(context *guigui.Context) (int, int) {
 	// The button image affects the size.
 	d.updateButtonImage(context)
-	return guigui.Size(&d.textButton)
+	return context.Size(&d.textButton)
 }

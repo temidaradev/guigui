@@ -35,7 +35,7 @@ func (t *ToggleButton) Value() bool {
 	return t.value
 }
 
-func (t *ToggleButton) SetValue(value bool) {
+func (t *ToggleButton) SetValue(context *guigui.Context, value bool) {
 	if t.value == value {
 		return
 	}
@@ -44,7 +44,7 @@ func (t *ToggleButton) SetValue(value bool) {
 	if t.onceRendered {
 		t.count = toggleButtonMaxCount() - t.count
 	}
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 
 	if t.onValueChanged != nil {
 		t.onValueChanged(value)
@@ -56,21 +56,21 @@ func toggleButtonMaxCount() int {
 }
 
 func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	hovered := t.isHovered()
+	hovered := t.isHovered(context)
 	if t.prevHovered != hovered {
 		t.prevHovered = hovered
-		guigui.RequestRedraw(t)
+		context.RequestRedraw(t)
 	}
 	return nil
 }
 
 func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if guigui.IsEnabled(t) && t.isHovered() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	if context.IsEnabled(t) && t.isHovered(context) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		t.pressed = true
-		t.SetValue(!t.value)
+		t.SetValue(context, !t.value)
 		return guigui.HandleInputByWidget(t)
 	}
-	if !guigui.IsEnabled(t) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if !context.IsEnabled(t) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		t.pressed = false
 	}
 	return guigui.HandleInputResult{}
@@ -79,13 +79,13 @@ func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.Handl
 func (t *ToggleButton) Update(context *guigui.Context) error {
 	if t.count > 0 {
 		t.count--
-		guigui.RequestRedraw(t)
+		context.RequestRedraw(t)
 	}
 	return nil
 }
 
 func (t *ToggleButton) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if t.canPress() || t.pressed {
+	if t.canPress(context) || t.pressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -94,19 +94,19 @@ func (t *ToggleButton) CursorShape(context *guigui.Context) (ebiten.CursorShapeT
 func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	rate := 1 - float64(t.count)/float64(toggleButtonMaxCount())
 
-	bounds := guigui.Bounds(t)
+	bounds := context.Bounds(t)
 
 	cm := context.ColorMode()
 	backgroundColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 	thumbColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.6)
 	borderColor := draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
-	if t.isActive() {
+	if t.isActive(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
 		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
-	} else if t.canPress() {
+	} else if t.canPress(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.575)
 		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
-	} else if !guigui.IsEnabled(t) {
+	} else if !context.IsEnabled(t) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
 		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.8, 0.1)
 	}
@@ -149,16 +149,16 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	t.onceRendered = true
 }
 
-func (t *ToggleButton) canPress() bool {
-	return guigui.IsEnabled(t) && t.isHovered() && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+func (t *ToggleButton) canPress(context *guigui.Context) bool {
+	return context.IsEnabled(t) && t.isHovered(context) && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 }
 
-func (t *ToggleButton) isHovered() bool {
-	return guigui.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition()))
+func (t *ToggleButton) isHovered(context *guigui.Context) bool {
+	return context.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition()))
 }
 
-func (t *ToggleButton) isActive() bool {
-	return guigui.IsEnabled(t) && t.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && t.pressed
+func (t *ToggleButton) isActive(context *guigui.Context) bool {
+	return context.IsEnabled(t) && t.isHovered(context) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && t.pressed
 }
 
 func (t *ToggleButton) DefaultSize(context *guigui.Context) (int, int) {

@@ -79,7 +79,7 @@ func (l *List) SetOnItemSelected(f func(index int)) {
 	l.onItemSelected = f
 }
 
-func (l *List) SetCheckmarkIndex(index int) {
+func (l *List) SetCheckmarkIndex(context *guigui.Context, index int) {
 	if index < 0 {
 		index = -1
 	}
@@ -87,35 +87,36 @@ func (l *List) SetCheckmarkIndex(index int) {
 		return
 	}
 	l.checkmarkIndexPlus1 = index + 1
-	guigui.RequestRedraw(l)
+	context.RequestRedraw(l)
 }
 
 func (l *List) contentSize(context *guigui.Context) (int, int) {
-	w, _ := guigui.Size(l)
+	w, _ := context.Size(l)
 	h := l.defaultHeight(context)
 	return w, h
 }
 
 func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
-		guigui.SetPosition(&l.listFrame, guigui.Position(l))
+		context.SetPosition(&l.listFrame, context.Position(l))
 		appender.AppendChildWidget(&l.listFrame)
 	}
 
-	l.scrollOverlay.SetContentSize(l.contentSize(context))
+	w, h := l.contentSize(context)
+	l.scrollOverlay.SetContentSize(context, w, h)
 
 	if idx := l.indexToJumpPlus1 - 1; idx >= 0 {
 		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
 		w, h := l.contentSize(context)
-		l.scrollOverlay.SetOffset(w, h, 0, float64(-y))
+		l.scrollOverlay.SetOffset(context, w, h, 0, float64(-y))
 		l.indexToJumpPlus1 = 0
 	}
 
-	guigui.SetPosition(&l.scrollOverlay, guigui.Position(l))
+	context.SetPosition(&l.scrollOverlay, context.Position(l))
 	appender.AppendChildWidget(&l.scrollOverlay)
 
 	hoveredItemIndex := l.HoveredItemIndex(context)
-	p := guigui.Position(l)
+	p := context.Position(l)
 	_, offsetY := l.scrollOverlay.Offset()
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
 	p.Y += RoundedCornerRadius(context) + int(offsetY)
@@ -129,14 +130,14 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			if err != nil {
 				return err
 			}
-			l.checkmark.SetImage(img)
+			l.checkmark.SetImage(context, img)
 
 			imgSize := listItemCheckmarkSize(context)
-			guigui.SetSize(&l.checkmark, imgSize, imgSize)
+			context.SetSize(&l.checkmark, imgSize, imgSize)
 			imgP := p
-			_, itemH := guigui.Size(item.Content)
+			_, itemH := context.Size(item.Content)
 			imgP.Y += (itemH - imgSize) * 3 / 4
-			guigui.SetPosition(&l.checkmark, imgP)
+			context.SetPosition(&l.checkmark, imgP)
 			appender.AppendChildWidget(&l.checkmark)
 		}
 
@@ -144,19 +145,19 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		if l.checkmarkIndexPlus1 > 0 {
 			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		}
-		guigui.SetPosition(item.Content, itemP)
+		context.SetPosition(item.Content, itemP)
 		appender.AppendChildWidget(item.Content)
-		_, h := guigui.Size(item.Content)
+		_, h := context.Size(item.Content)
 		p.Y += h
 	}
 
-	guigui.SetPosition(&l.dragDropOverlay, guigui.Position(l))
+	context.SetPosition(&l.dragDropOverlay, context.Position(l))
 	appender.AppendChildWidget(&l.dragDropOverlay)
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
 		if l.isHoveringVisible() {
-			guigui.RequestRedraw(l)
+			context.RequestRedraw(l)
 		}
 	}
 
@@ -183,18 +184,18 @@ func (l *List) SelectedItemIndex() int {
 }
 
 func (l *List) HoveredItemIndex(context *guigui.Context) int {
-	if !guigui.IsWidgetHitAt(l, image.Pt(ebiten.CursorPosition())) {
+	if !context.IsWidgetHitAt(l, image.Pt(ebiten.CursorPosition())) {
 		return -1
 	}
 	_, y := ebiten.CursorPosition()
 	_, offsetY := l.scrollOverlay.Offset()
 	y -= RoundedCornerRadius(context)
-	y -= guigui.Position(l).Y
+	y -= context.Position(l).Y
 	y -= int(offsetY)
 	index := -1
 	var cy int
 	for i, item := range l.items {
-		_, h := guigui.Size(item.Content)
+		_, h := context.Size(item.Content)
 		if cy <= y && y < cy+h {
 			index = i
 			break
@@ -230,13 +231,13 @@ func (l *List) MoveItem(from int, to int) {
 	// TODO: Send an event.
 }
 
-func (l *List) SetSelectedItemIndex(index int) {
+func (l *List) SetSelectedItemIndex(context *guigui.Context, index int) {
 	if index < 0 || index >= len(l.items) {
 		index = -1
 	}
 	if l.SelectedItemIndex() != index {
 		l.selectedItemIndexPlus1 = index + 1
-		guigui.RequestRedraw(l)
+		context.RequestRedraw(l)
 	}
 	if l.onItemSelected != nil {
 		l.onItemSelected(index)
@@ -250,12 +251,12 @@ func (l *List) JumpToItemIndex(index int) {
 	l.indexToJumpPlus1 = index + 1
 }
 
-func (l *List) ShowItemBorders(show bool) {
+func (l *List) ShowItemBorders(context *guigui.Context, show bool) {
 	if l.showItemBorders == show {
 		return
 	}
 	l.showItemBorders = true
-	guigui.RequestRedraw(l)
+	context.RequestRedraw(l)
 }
 
 func (l *List) isHoveringVisible() bool {
@@ -266,12 +267,12 @@ func (l *List) Style() ListStyle {
 	return l.style
 }
 
-func (l *List) SetStyle(style ListStyle) {
+func (l *List) SetStyle(context *guigui.Context, style ListStyle) {
 	if l.style == style {
 		return
 	}
 	l.style = style
-	guigui.RequestRedraw(l)
+	context.RequestRedraw(l)
 }
 
 func (l *List) calcDropDstIndex(context *guigui.Context) int {
@@ -288,8 +289,8 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	// Process dragging.
 	if l.dragDropOverlay.IsDragging() {
 		_, y := ebiten.CursorPosition()
-		p := guigui.Position(l)
-		_, h := guigui.Size(l)
+		p := context.Position(l)
+		_, h := context.Size(l)
 		var dy float64
 		if upperY := p.Y + UnitSize(context); y < upperY {
 			dy = float64(upperY-y) / 4
@@ -298,11 +299,11 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 			dy = float64(lowerY-y) / 4
 		}
 		w, h := l.contentSize(context)
-		l.scrollOverlay.SetOffsetByDelta(w, h, 0, dy)
+		l.scrollOverlay.SetOffsetByDelta(context, w, h, 0, dy)
 		i := l.calcDropDstIndex(context)
 		if l.dropDstIndexPlus1-1 != i {
 			l.dropDstIndexPlus1 = i + 1
-			guigui.RequestRedraw(l)
+			context.RequestRedraw(l)
 		}
 		return guigui.HandleInputByWidget(l)
 	}
@@ -319,7 +320,7 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	l.dropSrcIndexPlus1 = 0
 	if l.dropDstIndexPlus1 != 0 {
 		l.dropDstIndexPlus1 = 0
-		guigui.RequestRedraw(l)
+		context.RequestRedraw(l)
 	}
 
 	if dropped {
@@ -338,10 +339,10 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 				return guigui.HandleInputByWidget(l)
 			}
 
-			wasFocused := guigui.IsFocused(l)
-			guigui.Focus(l)
+			wasFocused := context.IsFocused(l)
+			context.Focus(l)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
-				l.SetSelectedItemIndex(index)
+				l.SetSelectedItemIndex(context, index)
 				l.lastSelectingItemTime = time.Now()
 			}
 			l.pressStartX = x
@@ -388,7 +389,7 @@ func (l *List) itemYFromIndex(context *guigui.Context, index int) int {
 		if i == index {
 			break
 		}
-		_, wh := guigui.Size(item.Content)
+		_, wh := context.Size(item.Content)
 		y += wh
 	}
 	return y
@@ -396,13 +397,13 @@ func (l *List) itemYFromIndex(context *guigui.Context, index int) int {
 
 func (l *List) itemRect(context *guigui.Context, index int) image.Rectangle {
 	_, offsetY := l.scrollOverlay.Offset()
-	b := guigui.Bounds(l)
+	b := context.Bounds(l)
 	padding := listItemPadding(context)
 	b.Min.X += RoundedCornerRadius(context) + padding
 	b.Max.X -= RoundedCornerRadius(context) + padding
 	b.Min.Y += l.itemYFromIndex(context, index)
 	b.Min.Y += int(offsetY)
-	_, ih := guigui.Size(l.items[index].Content)
+	_, ih := context.Size(l.items[index].Content)
 	b.Max.Y = b.Min.Y + ih
 	return b
 }
@@ -414,7 +415,7 @@ func (l *List) selectedItemColor(context *guigui.Context) color.Color {
 	if l.style == ListStyleMenu {
 		return nil
 	}
-	if guigui.IsFocused(l) || l.style == ListStyleSidebar {
+	if context.IsFocused(l) || l.style == ListStyleSidebar {
 		return draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	}
 	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
@@ -426,18 +427,18 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		if l.style == ListStyleMenu {
 			clr = draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95)
 		}
-		bounds := guigui.Bounds(l)
+		bounds := context.Bounds(l)
 		draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 	}
 
 	// Draw item borders.
 	if l.showItemBorders && len(l.items) > 0 {
 		_, offsetY := l.scrollOverlay.Offset()
-		p := guigui.Position(l)
-		w, _ := guigui.Size(l)
+		p := context.Position(l)
+		w, _ := context.Size(l)
 		y := float32(p.Y) + float32(RoundedCornerRadius(context)) + float32(offsetY)
 		for i, item := range l.items {
-			_, ih := guigui.Size(item.Content)
+			_, ih := context.Size(item.Content)
 			y += float32(ih)
 			if i == l.SelectedItemIndex() || i+1 == l.SelectedItemIndex() {
 				continue
@@ -457,7 +458,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r := l.itemRect(context, l.SelectedItemIndex())
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
-		if r.Overlaps(guigui.VisibleBounds(l)) {
+		if r.Overlaps(context.VisibleBounds(l)) {
 			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
 		}
 	}
@@ -467,7 +468,7 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r := l.itemRect(context, hoveredItemIndex)
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
-		if r.Overlaps(guigui.VisibleBounds(l)) {
+		if r.Overlaps(context.VisibleBounds(l)) {
 			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.9)
 			if l.style == ListStyleMenu {
 				clr = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
@@ -489,8 +490,8 @@ func (l *List) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	// Draw a dragging guideline.
 	if l.dropDstIndexPlus1 > 0 {
-		p := guigui.Position(l)
-		w, _ := guigui.Size(l)
+		p := context.Position(l)
+		w, _ := context.Size(l)
 		x0 := float32(p.X) + float32(RoundedCornerRadius(context))
 		x1 := float32(p.X+w) - float32(RoundedCornerRadius(context))
 		y := float32(p.Y)
@@ -511,7 +512,7 @@ func (l *List) defaultWidth(context *guigui.Context) int {
 	}
 	var w int
 	for _, item := range l.items {
-		iw, _ := guigui.Size(item.Content)
+		iw, _ := context.Size(item.Content)
 		w = max(w, iw)
 	}
 	w += 2*RoundedCornerRadius(context) + 2*listItemPadding(context)
@@ -527,7 +528,7 @@ func (l *List) defaultHeight(context *guigui.Context) int {
 	var h int
 	h += RoundedCornerRadius(context)
 	for _, w := range l.items {
-		_, wh := guigui.Size(w.Content)
+		_, wh := context.Size(w.Content)
 		h += wh
 	}
 	h += RoundedCornerRadius(context)
@@ -553,7 +554,7 @@ func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if guigui.Parent(l).(*List).style != ListStyleNormal {
 		border = draw.RoundedRectBorderTypeOutset
 	}
-	bounds := guigui.Bounds(l)
+	bounds := context.Bounds(l)
 	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0)
 	borderWidth := float32(1 * context.Scale())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)

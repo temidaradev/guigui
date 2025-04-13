@@ -32,48 +32,48 @@ func (t *TextField) Text() string {
 	return t.text.Text()
 }
 
-func (t *TextField) SetText(text string) {
-	t.text.SetText(text)
+func (t *TextField) SetText(context *guigui.Context, text string) {
+	t.text.SetText(context, text)
 }
 
-func (t *TextField) SetMultiline(multiline bool) {
-	t.text.SetMultiline(multiline)
+func (t *TextField) SetMultiline(context *guigui.Context, multiline bool) {
+	t.text.SetMultiline(context, multiline)
 }
 
-func (t *TextField) SetHorizontalAlign(halign HorizontalAlign) {
-	t.text.SetHorizontalAlign(halign)
+func (t *TextField) SetHorizontalAlign(context *guigui.Context, halign HorizontalAlign) {
+	t.text.SetHorizontalAlign(context, halign)
 }
 
-func (t *TextField) SetVerticalAlign(valign VerticalAlign) {
-	t.text.SetVerticalAlign(valign)
+func (t *TextField) SetVerticalAlign(context *guigui.Context, valign VerticalAlign) {
+	t.text.SetVerticalAlign(context, valign)
 }
 
-func (t *TextField) SetEditable(editable bool) {
-	t.text.SetEditable(editable)
+func (t *TextField) SetEditable(context *guigui.Context, editable bool) {
+	t.text.SetEditable(context, editable)
 	t.readonly = !editable
 }
 
-func (t *TextField) SelectAll() {
-	t.text.selectAll()
+func (t *TextField) SelectAll(context *guigui.Context) {
+	t.text.selectAll(context)
 }
 
 func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	t.text.SetEditable(true)
-	b := guigui.Bounds(t)
+	t.text.SetEditable(context, true)
+	b := context.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
 	b.Max.X -= UnitSize(context) / 2
-	guigui.SetSize(&t.text, b.Dx(), b.Dy())
+	context.SetSize(&t.text, b.Dx(), b.Dy())
 	// TODO: Consider multiline.
 	if !t.text.IsMultiline() {
-		t.text.SetVerticalAlign(VerticalAlignMiddle)
+		t.text.SetVerticalAlign(context, VerticalAlignMiddle)
 	}
-	guigui.SetPosition(&t.text, b.Min)
+	context.SetPosition(&t.text, b.Min)
 	appender.AppendChildWidget(&t.text)
 
-	if guigui.HasFocusedChildWidget(t) {
+	if context.HasFocusedChildWidget(t) {
 		w := textFieldFocusBorderWidth(context)
-		p := guigui.Position(t).Add(image.Pt(-w, -w))
-		guigui.SetPosition(&t.focus, p)
+		p := context.Position(t).Add(image.Pt(-w, -w))
+		context.SetPosition(&t.focus, p)
 		appender.AppendChildWidget(&t.focus)
 	}
 
@@ -81,10 +81,10 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 }
 
 func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if guigui.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition())) {
+	if context.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition())) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			guigui.Focus(&t.text)
-			t.text.selectAll()
+			context.Focus(&t.text)
+			t.text.selectAll(context)
 			return guigui.HandleInputByWidget(t)
 		}
 	}
@@ -92,19 +92,19 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 }
 
 func (t *TextField) Update(context *guigui.Context) error {
-	if t.prevFocused != guigui.HasFocusedChildWidget(t) {
-		t.prevFocused = guigui.HasFocusedChildWidget(t)
-		guigui.RequestRedraw(t)
+	if t.prevFocused != context.HasFocusedChildWidget(t) {
+		t.prevFocused = context.HasFocusedChildWidget(t)
+		context.RequestRedraw(t)
 	}
-	if guigui.IsFocused(t) {
-		guigui.Focus(&t.text)
-		guigui.RequestRedraw(t)
+	if context.IsFocused(t) {
+		context.Focus(&t.text)
+		context.RequestRedraw(t)
 	}
 	return nil
 }
 
 func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
-	bounds := guigui.Bounds(t)
+	bounds := context.Bounds(t)
 	draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), RoundedCornerRadius(context))
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0), RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
@@ -129,7 +129,7 @@ type textFieldFocus struct {
 
 func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
 	textField := guigui.Parent(t).(*TextField)
-	bounds := guigui.Bounds(textField)
+	bounds := context.Bounds(textField)
 	w := textFieldFocusBorderWidth(context)
 	bounds = bounds.Inset(-w)
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)
@@ -140,7 +140,7 @@ func (t *textFieldFocus) Z() int {
 }
 
 func (t *textFieldFocus) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := guigui.Size(guigui.Parent(t))
+	w, h := context.Size(guigui.Parent(t))
 	w += 2 * textFieldFocusBorderWidth(context)
 	h += 2 * textFieldFocusBorderWidth(context)
 	return w, h

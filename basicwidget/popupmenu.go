@@ -22,12 +22,12 @@ func (p *PopupMenu) SetOnClosed(f func(index int)) {
 	p.onClosed = f
 }
 
-func (p *PopupMenu) SetCheckmarkIndex(index int) {
-	p.textList.SetCheckmarkIndex(index)
+func (p *PopupMenu) SetCheckmarkIndex(context *guigui.Context, index int) {
+	p.textList.SetCheckmarkIndex(context, index)
 }
 
 func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.textList.SetStyle(ListStyleMenu)
+	p.textList.SetStyle(context, ListStyleMenu)
 	p.textList.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
 		if p.onClosed != nil {
@@ -47,21 +47,21 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 	// Sync the visibility with the popup.
 	// TODO: This is tricky. Refactor this. Perhaps, introducing Widget.PassThrough might be a good idea.
-	if guigui.IsVisible(&p.popup) {
-		guigui.Show(p)
+	if context.IsVisible(&p.popup) {
+		context.Show(p)
 	} else {
-		guigui.Hide(p)
+		context.Hide(p)
 	}
 
 	return nil
 }
 
 func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
-	pos := guigui.Position(p)
-	w, h := guigui.Size(&p.textList)
+	pos := context.Position(p)
+	w, h := context.Size(&p.textList)
 	if h > 24*UnitSize(context) {
 		h = 24 * UnitSize(context)
-		guigui.SetSize(&p.textList, guigui.AutoSize, h)
+		context.SetSize(&p.textList, guigui.AutoSize, h)
 	}
 	r := image.Rectangle{
 		Min: pos,
@@ -91,17 +91,17 @@ func (p *PopupMenu) Z() int {
 	return guigui.Parent(p).Z() + popupZ
 }
 
-func (p *PopupMenu) Open() {
-	guigui.Show(p)
-	p.popup.Open()
+func (p *PopupMenu) Open(context *guigui.Context) {
+	context.Show(p)
+	p.popup.Open(context)
 }
 
 func (p *PopupMenu) Close() {
 	p.popup.Close()
 }
 
-func (p *PopupMenu) SetItemsByStrings(items []string) {
-	p.textList.SetItemsByStrings(items)
+func (p *PopupMenu) SetItemsByStrings(context *guigui.Context, items []string) {
+	p.textList.SetItemsByStrings(context, items)
 }
 
 func (p *PopupMenu) SelectedItem() (TextListItem, bool) {
@@ -112,6 +112,6 @@ func (p *PopupMenu) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
-func (p *PopupMenu) SetSelectedItemIndex(index int) {
-	p.textList.SetSelectedItemIndex(index)
+func (p *PopupMenu) SetSelectedItemIndex(context *guigui.Context, index int) {
+	p.textList.SetSelectedItemIndex(context, index)
 }

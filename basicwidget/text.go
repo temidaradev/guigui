@@ -127,70 +127,71 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetCachedSize()
 	}
 
-	t.scrollOverlay.SetContentSize(t.TextSize(context))
+	w, h := t.TextSize(context)
+	t.scrollOverlay.SetContentSize(context, w, h)
 
-	if !t.prevFocused && guigui.IsFocused(t) {
+	if !t.prevFocused && context.IsFocused(t) {
 		t.field.Focus()
 		t.cursor.resetCounter()
 		start, end := t.field.Selection()
 		if start < 0 || end < 0 {
-			t.selectAll()
+			t.selectAll(context)
 		}
-	} else if t.prevFocused && !guigui.IsFocused(t) {
-		t.applyFilter()
+	} else if t.prevFocused && !context.IsFocused(t) {
+		t.applyFilter(context)
 	}
-	t.prevFocused = guigui.IsFocused(t)
+	t.prevFocused = context.IsFocused(t)
 
-	if t.toAdjustScrollOffset && !guigui.VisibleBounds(t).Empty() {
+	if t.toAdjustScrollOffset && !context.VisibleBounds(t).Empty() {
 		t.adjustScrollOffset(context)
 		t.toAdjustScrollOffset = false
 	}
 
 	if t.selectable || t.editable {
-		p := guigui.Position(t)
+		p := context.Position(t)
 		p.X -= cursorWidth(context)
-		guigui.SetPosition(&t.cursor, p)
+		context.SetPosition(&t.cursor, p)
 		appender.AppendChildWidget(&t.cursor)
 	}
 
-	guigui.Hide(&t.scrollOverlay)
-	guigui.SetPosition(&t.scrollOverlay, guigui.Position(t))
+	context.Hide(&t.scrollOverlay)
+	context.SetPosition(&t.scrollOverlay, context.Position(t))
 	appender.AppendChildWidget(&t.scrollOverlay)
 
 	return nil
 }
 
-func (t *Text) SetSelectable(selectable bool) {
+func (t *Text) SetSelectable(context *guigui.Context, selectable bool) {
 	if t.selectable == selectable {
 		return
 	}
 	t.selectable = selectable
 	t.selectionDragStart = -1
 	t.selectionShiftIndex = -1
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
 func (t *Text) Text() string {
 	return t.field.Text()
 }
 
-func (t *Text) SetText(text string) {
+func (t *Text) SetText(context *guigui.Context, text string) {
 	start, end := t.field.Selection()
 	start = min(start, len(text))
 	end = min(end, len(text))
-	t.setTextAndSelection(text, start, end, -1)
+	t.setTextAndSelection(context, text, start, end, -1)
 }
 
-func (t *Text) SetFilter(filter TextFilter) {
+func (t *Text) SetFilter(context *guigui.Context, filter TextFilter) {
 	t.filter = filter
-	t.applyFilter()
+	t.applyFilter(context)
 }
 
-func (t *Text) selectAll() {
-	t.setTextAndSelection(t.field.Text(), 0, len(t.field.Text()), -1)
+func (t *Text) selectAll(context *guigui.Context) {
+	t.setTextAndSelection(context, t.field.Text(), 0, len(t.field.Text()), -1)
 }
 
-func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) {
+func (t *Text) setTextAndSelection(context *guigui.Context, text string, start, end int, shiftIndex int) {
 	t.selectionShiftIndex = shiftIndex
 	if start > end {
 		start, end = end, start
@@ -202,76 +203,76 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 	}
 	t.field.SetTextAndSelection(text, start, end)
 	t.toAdjustScrollOffset = true
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 	if textChanged {
 		t.resetCachedSize()
 	}
 }
 
-func (t *Text) SetLocales(locales []language.Tag) {
+func (t *Text) SetLocales(context *guigui.Context, locales []language.Tag) {
 	if slices.Equal(t.locales, locales) {
 		return
 	}
 
 	t.locales = append([]language.Tag(nil), locales...)
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetBold(bold bool) {
+func (t *Text) SetBold(context *guigui.Context, bold bool) {
 	if t.bold == bold {
 		return
 	}
 
 	t.bold = bold
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetScale(scale float64) {
+func (t *Text) SetScale(context *guigui.Context, scale float64) {
 	if t.scaleMinus1 == scale-1 {
 		return
 	}
 
 	t.scaleMinus1 = scale - 1
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetHorizontalAlign(align HorizontalAlign) {
+func (t *Text) SetHorizontalAlign(context *guigui.Context, align HorizontalAlign) {
 	if t.hAlign == align {
 		return
 	}
 
 	t.hAlign = align
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetVerticalAlign(align VerticalAlign) {
+func (t *Text) SetVerticalAlign(context *guigui.Context, align VerticalAlign) {
 	if t.vAlign == align {
 		return
 	}
 
 	t.vAlign = align
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetColor(color color.Color) {
+func (t *Text) SetColor(context *guigui.Context, color color.Color) {
 	if draw.EqualColor(t.color, color) {
 		return
 	}
 
 	t.color = color
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetOpacity(opacity float64) {
+func (t *Text) SetOpacity(context *guigui.Context, opacity float64) {
 	if 1-t.transparent == opacity {
 		return
 	}
 
 	t.transparent = 1 - opacity
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
-func (t *Text) SetEditable(editable bool) {
+func (t *Text) SetEditable(context *guigui.Context, editable bool) {
 	if t.editable == editable {
 		return
 	}
@@ -281,14 +282,14 @@ func (t *Text) SetEditable(editable bool) {
 		t.selectionShiftIndex = -1
 	}
 	t.editable = editable
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
 func (t *Text) SetScrollable(context *guigui.Context, scrollable bool) {
 	if scrollable {
-		guigui.Show(&t.scrollOverlay)
+		context.Show(&t.scrollOverlay)
 	} else {
-		guigui.Hide(&t.scrollOverlay)
+		context.Hide(&t.scrollOverlay)
 	}
 }
 
@@ -296,19 +297,19 @@ func (t *Text) IsMultiline() bool {
 	return t.multiline
 }
 
-func (t *Text) SetMultiline(multiline bool) {
+func (t *Text) SetMultiline(context *guigui.Context, multiline bool) {
 	if t.multiline == multiline {
 		return
 	}
 
 	t.multiline = multiline
-	guigui.RequestRedraw(t)
+	context.RequestRedraw(t)
 }
 
 func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 	offsetX, offsetY := t.scrollOverlay.Offset()
 
-	b := guigui.Bounds(t)
+	b := context.Bounds(t)
 
 	tw, th := t.TextSize(context)
 	if b.Dx() < int(tw) {
@@ -363,9 +364,9 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
 			if idx < t.selectionDragStart {
-				t.setTextAndSelection(t.field.Text(), idx, t.selectionDragStart, -1)
+				t.setTextAndSelection(context, t.field.Text(), idx, t.selectionDragStart, -1)
 			} else {
-				t.setTextAndSelection(t.field.Text(), t.selectionDragStart, idx, -1)
+				t.setTextAndSelection(context, t.field.Text(), t.selectionDragStart, idx, -1)
 			}
 		}
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
@@ -376,7 +377,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if cursorPosition.In(guigui.VisibleBounds(t)) {
+		if cursorPosition.In(context.VisibleBounds(t)) {
 			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
 
 			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
@@ -390,30 +391,30 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 				t.dragging = true
 				t.selectionDragStart = idx
 				if start, end := t.field.Selection(); start != idx || end != idx {
-					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+					t.setTextAndSelection(context, t.field.Text(), idx, idx, -1)
 				}
 			case 2:
 				text := t.field.Text()
 				start, end := findWordBoundaries(text, idx)
 				// TODO: `selectionDragEnd` needed to emulate Chrome's behavior.
 				t.selectionDragStart = start
-				t.setTextAndSelection(text, start, end, -1)
+				t.setTextAndSelection(context, text, start, end, -1)
 			case 3:
-				t.selectAll()
+				t.selectAll(context)
 			}
 
-			guigui.Focus(t)
+			context.Focus(t)
 			t.lastClickTick = ebiten.Tick()
 			t.lastClickTextIndex = idx
 			return guigui.HandleInputByWidget(t)
 		}
-		guigui.Blur(t)
+		context.Blur(t)
 	}
 
-	if !guigui.IsFocused(t) {
+	if !context.IsFocused(t) {
 		if t.field.IsFocused() {
 			t.field.Blur()
-			guigui.RequestRedraw(t)
+			context.RequestRedraw(t)
 		}
 		return guigui.HandleInputResult{}
 	}
@@ -427,7 +428,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 }
 
 func (t *Text) adjustScrollOffset(context *guigui.Context) {
-	start, end, ok := t.selectionToDraw()
+	start, end, ok := t.selectionToDraw(context)
 	if !ok {
 		return
 	}
@@ -436,7 +437,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 
 	tb := t.textBounds(context)
 	face := t.face(context)
-	bounds := guigui.Bounds(t)
+	bounds := context.Bounds(t)
 	if x, _, y, ok := textPosition(tb, text, end, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var dx, dy float64
 		if max := float64(bounds.Max.X); x > max {
@@ -445,7 +446,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if max := float64(bounds.Max.Y); y > max {
 			dy = max - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(tb.Dx(), tb.Dy(), dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(context, tb.Dx(), tb.Dy(), dx, dy)
 	}
 	if x, y, _, ok := textPosition(tb, text, start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var dx, dy float64
@@ -455,7 +456,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if min := float64(bounds.Min.Y); y < min {
 			dy = min - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(tb.Dx(), tb.Dy(), dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(context, tb.Dx(), tb.Dy(), dx, dy)
 	}
 }
 
@@ -463,12 +464,12 @@ func (t *Text) textToDraw() string {
 	return t.field.TextForRendering()
 }
 
-func (t *Text) selectionToDraw() (start, end int, ok bool) {
+func (t *Text) selectionToDraw(context *guigui.Context) (start, end int, ok bool) {
 	s, e := t.field.Selection()
 	if !t.editable {
 		return s, e, true
 	}
-	if !guigui.IsFocused(t) {
+	if !context.IsFocused(t) {
 		return s, e, true
 	}
 	cs, ce, ok := t.field.CompositionSelection()
@@ -484,11 +485,11 @@ func (t *Text) selectionToDraw() (start, end int, ok bool) {
 	return 0, 0, false
 }
 
-func (t *Text) compositionSelectionToDraw() (uStart, cStart, cEnd, uEnd int, ok bool) {
+func (t *Text) compositionSelectionToDraw(context *guigui.Context) (uStart, cStart, cEnd, uEnd int, ok bool) {
 	if !t.editable {
 		return 0, 0, 0, 0, false
 	}
-	if !guigui.IsFocused(t) {
+	if !context.IsFocused(t) {
 		return 0, 0, 0, 0, false
 	}
 	s, _ := t.field.Selection()
@@ -507,7 +508,7 @@ func (t *Text) compositionSelectionToDraw() (uStart, cStart, cEnd, uEnd int, ok 
 }
 
 func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
-	if !guigui.IsFocused(t) || !guigui.IsEnabled(t) {
+	if !context.IsFocused(t) || !context.IsEnabled(t) {
 		return guigui.HandleInputResult{}
 	}
 
@@ -529,7 +530,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		}
 	}
 	if processed {
-		guigui.RequestRedraw(t)
+		context.RequestRedraw(t)
 		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
 		t.resetCachedSize()
 		t.adjustScrollOffset(context)
@@ -553,9 +554,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			if t.multiline {
 				start, end := t.field.Selection()
 				text := t.field.Text()[:start] + "\n" + t.field.Text()[end:]
-				t.setTextAndSelection(text, start+len("\n"), start+len("\n"), -1)
+				t.setTextAndSelection(context, text, start+len("\n"), start+len("\n"), -1)
 			}
-			t.applyFilter()
+			t.applyFilter(context)
 			// TODO: This is not reached on browsers. Fix this.
 			if t.onEnterPressed != nil {
 				t.onEnterPressed(t.field.Text())
@@ -565,10 +566,10 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			start, end := t.field.Selection()
 			if start != end {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
-				t.setTextAndSelection(text, start, start, -1)
+				t.setTextAndSelection(context, text, start, start, -1)
 			} else if start > 0 {
 				text, pos := backspaceOnGraphemes(t.field.Text(), start)
-				t.setTextAndSelection(text, pos, pos, -1)
+				t.setTextAndSelection(context, text, pos, pos, -1)
 			}
 		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD) ||
 			isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD):
@@ -576,16 +577,16 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			start, end := t.field.Selection()
 			if start != end {
 				text := t.field.Text()[:start] + t.field.Text()[end:]
-				t.setTextAndSelection(text, start, start, -1)
+				t.setTextAndSelection(context, text, start, start, -1)
 			} else if isDarwin && end < len(t.field.Text()) {
 				text, pos := deleteOnGraphemes(t.field.Text(), end)
-				t.setTextAndSelection(text, pos, pos, -1)
+				t.setTextAndSelection(context, text, pos, pos, -1)
 			}
 		case isKeyRepeating(ebiten.KeyDelete):
 			// Delete one cluster
 			if _, end := t.field.Selection(); end < len(t.field.Text()) {
 				text, pos := deleteOnGraphemes(t.field.Text(), end)
-				t.setTextAndSelection(text, pos, pos, -1)
+				t.setTextAndSelection(context, text, pos, pos, -1)
 			}
 
 		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyX) ||
@@ -598,7 +599,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 					return guigui.AbortHandlingInputByWidget(t)
 				}
 				text := t.field.Text()[:start] + t.field.Text()[end:]
-				t.setTextAndSelection(text, start, start, -1)
+				t.setTextAndSelection(context, text, start, start, -1)
 			}
 		case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyV) ||
 			isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyV):
@@ -610,7 +611,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				return guigui.AbortHandlingInputByWidget(t)
 			}
 			text := t.field.Text()[:start] + ct + t.field.Text()[end:]
-			t.setTextAndSelection(text, start+len(ct), start+len(ct), -1)
+			t.setTextAndSelection(context, text, start+len(ct), start+len(ct), -1)
 		}
 	}
 
@@ -621,17 +622,17 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
 			if t.selectionShiftIndex == end {
 				pos := prevPositionOnGraphemes(t.field.Text(), end)
-				t.setTextAndSelection(t.field.Text(), start, pos, pos)
+				t.setTextAndSelection(context, t.field.Text(), start, pos, pos)
 			} else {
 				pos := prevPositionOnGraphemes(t.field.Text(), start)
-				t.setTextAndSelection(t.field.Text(), pos, end, pos)
+				t.setTextAndSelection(context, t.field.Text(), pos, end, pos)
 			}
 		} else {
 			if start != end {
-				t.setTextAndSelection(t.field.Text(), start, start, -1)
+				t.setTextAndSelection(context, t.field.Text(), start, start, -1)
 			} else if start > 0 {
 				pos := prevPositionOnGraphemes(t.field.Text(), start)
-				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
+				t.setTextAndSelection(context, t.field.Text(), pos, pos, -1)
 			}
 		}
 	case isKeyRepeating(ebiten.KeyRight) ||
@@ -640,17 +641,17 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
 			if t.selectionShiftIndex == start {
 				pos := nextPositionOnGraphemes(t.field.Text(), start)
-				t.setTextAndSelection(t.field.Text(), pos, end, pos)
+				t.setTextAndSelection(context, t.field.Text(), pos, end, pos)
 			} else {
 				pos := nextPositionOnGraphemes(t.field.Text(), end)
-				t.setTextAndSelection(t.field.Text(), start, pos, pos)
+				t.setTextAndSelection(context, t.field.Text(), start, pos, pos)
 			}
 		} else {
 			if start != end {
-				t.setTextAndSelection(t.field.Text(), end, end, -1)
+				t.setTextAndSelection(context, t.field.Text(), end, end, -1)
 			} else if start < len(t.field.Text()) {
 				pos := nextPositionOnGraphemes(t.field.Text(), start)
-				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
+				t.setTextAndSelection(context, t.field.Text(), pos, pos, -1)
 			}
 		}
 	case isKeyRepeating(ebiten.KeyUp) ||
@@ -669,12 +670,12 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), t.field.Text(), face, lh, t.hAlign, t.vAlign)
 			if shift {
 				if moveEnd {
-					t.setTextAndSelection(t.field.Text(), start, idx, idx)
+					t.setTextAndSelection(context, t.field.Text(), start, idx, idx)
 				} else {
-					t.setTextAndSelection(t.field.Text(), idx, end, idx)
+					t.setTextAndSelection(context, t.field.Text(), idx, end, idx)
 				}
 			} else {
-				t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+				t.setTextAndSelection(context, t.field.Text(), idx, idx, -1)
 			}
 		}
 	case isKeyRepeating(ebiten.KeyDown) ||
@@ -693,12 +694,12 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), t.field.Text(), face, lh, t.hAlign, t.vAlign)
 			if shift {
 				if moveStart {
-					t.setTextAndSelection(t.field.Text(), idx, end, idx)
+					t.setTextAndSelection(context, t.field.Text(), idx, end, idx)
 				} else {
-					t.setTextAndSelection(t.field.Text(), start, idx, idx)
+					t.setTextAndSelection(context, t.field.Text(), start, idx, idx)
 				}
 			} else {
-				t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+				t.setTextAndSelection(context, t.field.Text(), idx, idx, -1)
 			}
 		}
 	case isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA):
@@ -708,9 +709,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = i + 1
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			t.setTextAndSelection(t.field.Text(), idx, end, idx)
+			t.setTextAndSelection(context, t.field.Text(), idx, end, idx)
 		} else {
-			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+			t.setTextAndSelection(context, t.field.Text(), idx, idx, -1)
 		}
 	case isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyE):
 		idx := len(t.field.Text())
@@ -719,13 +720,13 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = end + i
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			t.setTextAndSelection(t.field.Text(), start, idx, idx)
+			t.setTextAndSelection(context, t.field.Text(), start, idx, idx)
 		} else {
-			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+			t.setTextAndSelection(context, t.field.Text(), idx, idx, -1)
 		}
 	case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA) ||
 		isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyA):
-		t.selectAll()
+		t.selectAll(context)
 	case !isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyC) ||
 		isDarwin && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyC):
 		// Copy
@@ -749,37 +750,37 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		}
 		t.temporaryClipboard = t.field.Text()[start:end]
 		text := t.field.Text()[:start] + t.field.Text()[end:]
-		t.setTextAndSelection(text, start, start, -1)
+		t.setTextAndSelection(context, text, start, start, -1)
 	case isDarwin && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyY):
 		// 'Yank' the killed text.
 		if t.temporaryClipboard != "" {
 			start, _ := t.field.Selection()
 			text := t.field.Text()[:start] + t.temporaryClipboard + t.field.Text()[start:]
-			t.setTextAndSelection(text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
+			t.setTextAndSelection(context, text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
 		}
 	}
 
 	return guigui.HandleInputByWidget(t)
 }
 
-func (t *Text) applyFilter() {
+func (t *Text) applyFilter(context *guigui.Context) {
 	if t.filter != nil {
 		start, end := t.field.Selection()
 		text, start, end := t.filter(t.field.Text(), start, end)
-		t.setTextAndSelection(text, start, end, -1)
+		t.setTextAndSelection(context, text, start, end, -1)
 	}
 }
 
 func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	textBounds := t.textBounds(context)
-	if !textBounds.Overlaps(guigui.VisibleBounds(t)) {
+	if !textBounds.Overlaps(context.VisibleBounds(t)) {
 		return
 	}
 
 	text := t.textToDraw()
 	face := t.face(context)
 
-	if start, end, ok := t.selectionToDraw(); ok {
+	if start, end, ok := t.selectionToDraw(context); ok {
 		var tailIndices []int
 		for i, r := range text[start:end] {
 			if r != '\n' {
@@ -804,7 +805,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	if uStart, cStart, cEnd, uEnd, ok := t.compositionSelectionToDraw(); ok {
+	if uStart, cStart, cEnd, uEnd, ok := t.compositionSelectionToDraw(context); ok {
 		// Assume that the composition is always in the same line.
 		if strings.Contains(text[uStart:uEnd], "\n") {
 			slog.Error("composition text must not contain '\\n'")
@@ -875,7 +876,7 @@ func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, boo
 }
 
 func (t *Text) cursorPosition(context *guigui.Context) (x, top, bottom float64, ok bool) {
-	if !guigui.IsFocused(t) {
+	if !context.IsFocused(t) {
 		return 0, 0, 0, false
 	}
 	if !t.editable {
@@ -890,11 +891,11 @@ func (t *Text) cursorPosition(context *guigui.Context) (x, top, bottom float64, 
 	}
 
 	textBounds := t.textBounds(context)
-	if !textBounds.Overlaps(guigui.VisibleBounds(t)) {
+	if !textBounds.Overlaps(context.VisibleBounds(t)) {
 		return 0, 0, 0, false
 	}
 
-	_, e, ok := t.selectionToDraw()
+	_, e, ok := t.selectionToDraw(context)
 	if !ok {
 		return 0, 0, 0, false
 	}
@@ -947,7 +948,7 @@ func (t *textCursor) Update(context *guigui.Context) error {
 	if r := t.shouldRenderCursor(context, text); t.prevShown != r {
 		t.prevShown = r
 		// TODO: This is not efficient. Improve this.
-		guigui.RequestRedraw(t)
+		context.RequestRedraw(t)
 	}
 	return nil
 }
@@ -960,7 +961,7 @@ func (t *textCursor) shouldRenderCursor(context *guigui.Context, text *Text) boo
 	if _, _, _, ok := text.cursorPosition(context); !ok {
 		return false
 	}
-	s, e, ok := text.selectionToDraw()
+	s, e, ok := text.selectionToDraw(context)
 	if !ok {
 		return false
 	}
@@ -984,6 +985,6 @@ func (t *textCursor) Z() int {
 }
 
 func (t *textCursor) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := guigui.Size(guigui.Parent(t))
+	w, h := context.Size(guigui.Parent(t))
 	return w + 2*cursorWidth(context), h
 }

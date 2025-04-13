@@ -105,15 +105,15 @@ func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 
 func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.initOnce.Do(func() {
-		guigui.Hide(p)
+		context.Hide(p)
 	})
 
 	// SetOpacity cannot be called for p.background so far.
 	// If opacity is less than 1, the dst argument of Draw will an empty image in the current implementation.
 	// TODO: This is too tricky. Refactor this.
-	guigui.SetOpacity(&p.shadow, p.openingRate())
-	guigui.SetOpacity(&p.content, p.openingRate())
-	guigui.SetOpacity(&p.frame, p.openingRate())
+	context.SetOpacity(&p.shadow, p.openingRate())
+	context.SetOpacity(&p.content, p.openingRate())
+	context.SetOpacity(&p.frame, p.openingRate())
 
 	if p.backgroundBlurred {
 		appender.AppendChildWidget(&p.background)
@@ -122,7 +122,7 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	appender.AppendChildWidget(&p.shadow)
 
 	bounds := p.ContentBounds(context)
-	guigui.SetPosition(&p.content, bounds.Min)
+	context.SetPosition(&p.content, bounds.Min)
 	p.content.setSize(bounds.Dx(), bounds.Dy())
 	appender.AppendChildWidget(&p.content)
 
@@ -137,7 +137,7 @@ func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputR
 	}
 
 	// As this editor is a modal dialog, do not let other widgets to handle inputs.
-	if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(p)) {
+	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
 		if p.closeByClickingOutside {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 				p.close(PopupClosedReasonClickOutside)
@@ -151,7 +151,7 @@ func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputR
 	return guigui.AbortHandlingInputByWidget(p)
 }
 
-func (p *Popup) Open() {
+func (p *Popup) Open(context *guigui.Context) {
 	if p.showing {
 		return
 	}
@@ -160,7 +160,7 @@ func (p *Popup) Open() {
 		p.openAfterClose = true
 		return
 	}
-	guigui.Show(p)
+	context.Show(p)
 	p.showing = true
 	p.hiding = false
 }
@@ -214,10 +214,10 @@ func (p *Popup) Update(context *guigui.Context) error {
 					p.contentBounds = p.nextContentBounds
 					p.nextContentBounds = image.Rectangle{}
 				}
-				p.Open()
+				p.Open(context)
 				p.openAfterClose = false
 			} else {
-				guigui.Hide(p)
+				context.Hide(p)
 			}
 		}
 	}
@@ -251,14 +251,14 @@ func (p *popupContent) setContent(widget guigui.Widget) {
 
 func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content != nil {
-		guigui.SetPosition(p.content, guigui.Position(p))
+		context.SetPosition(p.content, context.Position(p))
 		appender.AppendChildWidget(p.content)
 	}
 	return nil
 }
 
 func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if image.Pt(ebiten.CursorPosition()).In(guigui.VisibleBounds(p)) {
+	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 	return guigui.HandleInputResult{}
@@ -298,7 +298,7 @@ type popupBackground struct {
 }
 
 func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
-	bounds := guigui.Bounds(p)
+	bounds := context.Bounds(p)
 	if p.backgroundCache != nil && !bounds.In(p.backgroundCache.Bounds()) {
 		p.backgroundCache.Deallocate()
 		p.backgroundCache = nil

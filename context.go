@@ -5,6 +5,7 @@ package guigui
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 	"os"
 	"slices"
@@ -168,4 +169,188 @@ func (c *Context) SetAppLocales(locales []language.Tag) {
 
 func (c *Context) AppSize() (int, int) {
 	return c.app.bounds().Dx(), c.app.bounds().Dy()
+}
+
+func (c *Context) Position(widget Widget) image.Point {
+	return widget.widgetState().position
+}
+
+func (c *Context) SetPosition(widget Widget, position image.Point) {
+	widget.widgetState().position = position
+	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
+}
+
+const AutoSize = -1
+
+func (c *Context) SetSize(widget Widget, width, height int) {
+	widget.widgetState().widthPlus1 = width + 1
+	widget.widgetState().heightPlus1 = height + 1
+}
+
+func (c *Context) Size(widget Widget) (int, int) {
+	widgetState := widget.widgetState()
+	dw, dh := widget.DefaultSize(c)
+	var w, h int
+	if widgetState.widthPlus1 == 0 {
+		w = dw
+	} else {
+		w = widgetState.widthPlus1 - 1
+	}
+	if widgetState.heightPlus1 == 0 {
+		h = dh
+	} else {
+		h = widgetState.heightPlus1 - 1
+	}
+	return w, h
+}
+
+func (c *Context) Bounds(widget Widget) image.Rectangle {
+	widgetState := widget.widgetState()
+	width, height := c.Size(widget)
+	return image.Rectangle{
+		Min: widgetState.position,
+		Max: widgetState.position.Add(image.Point{width, height}),
+	}
+}
+
+func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
+	parent := widget.widgetState().parent
+	if parent == nil {
+		return c.app.bounds()
+	}
+	if isDifferentParentZ(widget) {
+		return c.Bounds(widget)
+	}
+	return c.VisibleBounds(parent).Intersect(c.Bounds(widget))
+}
+
+func (c *Context) Show(widget Widget) {
+	widgetState := widget.widgetState()
+	if !widgetState.hidden {
+		return
+	}
+	widgetState.hidden = false
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) Hide(widget Widget) {
+	widgetState := widget.widgetState()
+	if widgetState.hidden {
+		return
+	}
+	widgetState.hidden = true
+	c.Blur(widget)
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) IsVisible(widget Widget) bool {
+	return widget.widgetState().isVisible()
+}
+
+func (c *Context) Enable(widget Widget) {
+	widgetState := widget.widgetState()
+	if !widgetState.disabled {
+		return
+	}
+	widgetState.disabled = false
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) Disable(widget Widget) {
+	widgetState := widget.widgetState()
+	if widgetState.disabled {
+		return
+	}
+	widgetState.disabled = true
+	c.Blur(widget)
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) IsEnabled(widget Widget) bool {
+	return widget.widgetState().isEnabled()
+}
+
+func (c *Context) Focus(widget Widget) {
+	widgetState := widget.widgetState()
+	if !widgetState.isVisible() {
+		return
+	}
+	if !widgetState.isEnabled() {
+		return
+	}
+
+	if !widgetState.isInTree() {
+		return
+	}
+	if c.app.focusedWidget == widget {
+		return
+	}
+
+	var oldWidget Widget
+	if c.app.focusedWidget != nil {
+		oldWidget = c.app.focusedWidget
+	}
+
+	c.app.focusedWidget = widget
+	c.RequestRedraw(c.app.focusedWidget)
+	if oldWidget != nil {
+		c.RequestRedraw(oldWidget)
+	}
+}
+
+func (c *Context) Blur(widget Widget) {
+	widgetState := widget.widgetState()
+	if !widgetState.isInTree() {
+		return
+	}
+	if c.app.focusedWidget != widget {
+		return
+	}
+	c.app.focusedWidget = nil
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) IsFocused(widget Widget) bool {
+	widgetState := widget.widgetState()
+	return widgetState.isInTree() && c.app.focusedWidget == widget && widgetState.isVisible()
+}
+
+func (c *Context) HasFocusedChildWidget(widget Widget) bool {
+	widgetState := widget.widgetState()
+	if c.IsFocused(widget) {
+		return true
+	}
+	for _, child := range widgetState.children {
+		if c.HasFocusedChildWidget(child) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Context) Opacity(widget Widget) float64 {
+	return widget.widgetState().opacity()
+}
+
+func (c *Context) SetOpacity(widget Widget, opacity float64) {
+	if opacity < 0 {
+		opacity = 0
+	}
+	if opacity > 1 {
+		opacity = 1
+	}
+	widgetState := widget.widgetState()
+	if widgetState.transparency == 1-opacity {
+		return
+	}
+	widgetState.transparency = 1 - opacity
+	c.RequestRedraw(widget)
+}
+
+func (c *Context) RequestRedraw(widget Widget) {
+	c.app.requestRedrawWidget(widget)
+}
+
+func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
+	return c.app.isWidgetHitAt(widget, point)
 }
