@@ -53,7 +53,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	width, _ := guigui.Size(r)
 	w := width - int(6.5*u)
-	r.textField.SetSize(context, w, int(u))
+	guigui.SetSize(&r.textField, w, int(u))
 	r.textField.SetOnEnterPressed(func(text string) {
 		r.tryCreateTask()
 	})

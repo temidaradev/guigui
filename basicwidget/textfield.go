@@ -19,9 +19,6 @@ type TextField struct {
 	text  Text
 	focus textFieldFocus
 
-	widthMinusDefault  int
-	heightMinusDefault int
-
 	readonly bool
 
 	prevFocused bool
@@ -117,18 +114,9 @@ func defaultTextFieldSize(context *guigui.Context) (int, int) {
 	return 6 * UnitSize(context), UnitSize(context)
 }
 
-func (t *TextField) SetSize(context *guigui.Context, width, height int) {
-	dw, dh := defaultTextFieldSize(context)
-	t.widthMinusDefault = width - dw
-	t.heightMinusDefault = height - dh
-}
-
 func (t *TextField) DefaultSize(context *guigui.Context) (int, int) {
-	dw, dh := defaultTextFieldSize(context)
-	if t.text.multiline {
-		return t.widthMinusDefault + dw, t.heightMinusDefault + dh
-	}
-	return t.widthMinusDefault + dw, dh
+	// TODO: Increase the height for multiple lines.
+	return 6 * UnitSize(context), UnitSize(context)
 }
 
 func textFieldFocusBorderWidth(context *guigui.Context) int {
