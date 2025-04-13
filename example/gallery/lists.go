@@ -31,7 +31,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	l.textList.SetHeight(6 * basicwidget.UnitSize(context))
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := l.Size(context)
+	w, _ := guigui.Size(l)
 	l.form.SetWidth(context, w-int(1*u))
 	l.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -46,10 +46,4 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	}
 
 	return nil
-}
-
-func (l *Lists) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(l).Size(context)
-	w -= sidebarWidth(context)
-	return w, h
 }

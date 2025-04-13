@@ -51,7 +51,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	u := float64(basicwidget.UnitSize(context))
 
-	width, _ := r.Size(context)
+	width, _ := guigui.Size(r)
 	w := width - int(6.5*u)
 	r.textField.SetSize(context, w, int(u))
 	r.textField.SetOnEnterPressed(func(text string) {
@@ -74,14 +74,14 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	{
 		p := guigui.Position(r)
-		w, _ := r.Size(context)
+		w, _ := guigui.Size(r)
 		p.X += w - int(0.5*u) - int(5*u)
 		p.Y += int(0.5 * u)
 		guigui.SetPosition(&r.createButton, p)
 		appender.AppendChildWidget(&r.createButton)
 	}
 
-	w, h := r.Size(context)
+	w, h := guigui.Size(r)
 	r.tasksPanel.SetSize(context, w, h-int(2*u))
 	r.tasksPanelContent.SetTasks(r.tasks)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
@@ -142,7 +142,7 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	guigui.SetPosition(&t.doneButton, p)
 	appender.AppendChildWidget(&t.doneButton)
 
-	w, _ := t.Size(context)
+	w, _ := guigui.Size(t)
 	t.text.SetSize(w-int(4.5*u), int(u))
 	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 	guigui.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
@@ -150,8 +150,8 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	return nil
 }
 
-func (t *taskWidget) Size(context *guigui.Context) (int, int) {
-	w, _ := guigui.Parent(t).Size(context)
+func (t *taskWidget) DefaultSize(context *guigui.Context) (int, int) {
+	w, _ := guigui.Size(guigui.Parent(t))
 	return w, int(basicwidget.UnitSize(context))
 }
 
@@ -206,10 +206,10 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 	return nil
 }
 
-func (t *tasksPanelContent) Size(context *guigui.Context) (int, int) {
+func (t *tasksPanelContent) DefaultSize(context *guigui.Context) (int, int) {
 	u := basicwidget.UnitSize(context)
 
-	w, _ := guigui.Parent(t).Size(context)
+	w, _ := guigui.Size(guigui.Parent(t))
 	c := len(t.taskWidgets)
 	h := c * (u + u/4)
 	return w, h

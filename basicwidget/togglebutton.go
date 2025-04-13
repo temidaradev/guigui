@@ -161,6 +161,6 @@ func (t *ToggleButton) isActive() bool {
 	return guigui.IsEnabled(t) && t.isHovered() && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && t.pressed
 }
 
-func (t *ToggleButton) Size(context *guigui.Context) (int, int) {
+func (t *ToggleButton) DefaultSize(context *guigui.Context) (int, int) {
 	return int(LineHeight(context) * 1.75), int(LineHeight(context))
 }

@@ -140,7 +140,7 @@ func (b *Button) SetSize(context *guigui.Context, width, height int) {
 	b.heightMinusDefault = height - dh
 }
 
-func (b *Button) Size(context *guigui.Context) (int, int) {
+func (b *Button) DefaultSize(context *guigui.Context) (int, int) {
 	dw, dh := defaultButtonSize(context)
 	return b.widthMinusDefault + dw, b.heightMinusDefault + dh
 }

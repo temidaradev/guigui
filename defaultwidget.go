@@ -41,11 +41,11 @@ func (d *DefaultWidget) Z() int {
 	return d.widgetState_.parent.Z()
 }
 
-func (d *DefaultWidget) Size(context *Context) (int, int) {
+func (d *DefaultWidget) DefaultSize(context *Context) (int, int) {
 	if d.widgetState_.parent == nil {
 		return context.app.bounds().Dx(), context.app.bounds().Dy()
 	}
-	return d.widgetState_.parent.Size(context)
+	return Size(d.widgetState_.parent)
 }
 
 func (d *DefaultWidget) widgetState() *widgetState {

@@ -123,7 +123,7 @@ func (t *TextField) SetSize(context *guigui.Context, width, height int) {
 	t.heightMinusDefault = height - dh
 }
 
-func (t *TextField) Size(context *guigui.Context) (int, int) {
+func (t *TextField) DefaultSize(context *guigui.Context) (int, int) {
 	dw, dh := defaultTextFieldSize(context)
 	if t.text.multiline {
 		return t.widthMinusDefault + dw, t.heightMinusDefault + dh
@@ -151,8 +151,8 @@ func (t *textFieldFocus) Z() int {
 	return guigui.Parent(t).Z() + 1
 }
 
-func (t *textFieldFocus) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(t).Size(context)
+func (t *textFieldFocus) DefaultSize(context *guigui.Context) (int, int) {
+	w, h := guigui.Size(guigui.Parent(t))
 	w += 2 * textFieldFocusBorderWidth(context)
 	h += 2 * textFieldFocusBorderWidth(context)
 	return w, h

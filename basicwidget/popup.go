@@ -232,7 +232,7 @@ func (p *Popup) Z() int {
 	return guigui.Parent(p).Z() + popupZ
 }
 
-func (p *Popup) Size(context *guigui.Context) (int, int) {
+func (p *Popup) DefaultSize(context *guigui.Context) (int, int) {
 	return context.AppSize()
 }
 
@@ -276,7 +276,7 @@ func (p *popupContent) setSize(width, height int) {
 	p.height = height
 }
 
-func (p *popupContent) Size(context *guigui.Context) (int, int) {
+func (p *popupContent) DefaultSize(context *guigui.Context) (int, int) {
 	return p.width, p.height
 }
 

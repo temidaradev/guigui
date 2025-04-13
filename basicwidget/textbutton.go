@@ -54,7 +54,7 @@ func (t *TextButton) SetForcePressed(forcePressed bool) {
 }
 
 func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	w, h := t.Size(context)
+	w, h := guigui.Size(t)
 	t.button.SetSize(context, w, h)
 	guigui.SetPosition(&t.button, guigui.Position(t))
 	appender.AppendChildWidget(&t.button)
@@ -96,7 +96,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	return nil
 }
 
-func (t *TextButton) Size(context *guigui.Context) (int, int) {
+func (t *TextButton) DefaultSize(context *guigui.Context) (int, int) {
 	_, dh := defaultButtonSize(context)
 	if t.widthSet {
 		return t.width, dh

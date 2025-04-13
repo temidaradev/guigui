@@ -35,7 +35,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.toggleButtonText.SetText("Toggle Button")
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := b.Size(context)
+	w, _ := guigui.Size(b)
 	b.form.SetWidth(context, w-int(1*u))
 	p := guigui.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
 	guigui.SetPosition(&b.form, p)
@@ -57,10 +57,4 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	appender.AppendChildWidget(&b.form)
 
 	return nil
-}
-
-func (b *Buttons) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(b).Size(context)
-	w -= sidebarWidth(context)
-	return w, h
 }

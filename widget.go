@@ -15,7 +15,7 @@ type Widget interface {
 	CursorShape(context *Context) (ebiten.CursorShapeType, bool)
 	Draw(context *Context, dst *ebiten.Image)
 	Z() int
-	Size(context *Context) (int, int)
+	DefaultSize(context *Context) (int, int)
 
 	widgetState() *widgetState
 }

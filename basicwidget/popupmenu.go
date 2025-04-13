@@ -58,7 +58,7 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	pos := guigui.Position(p)
-	w, h := p.textList.Size(context)
+	w, h := guigui.Size(&p.textList)
 	if h > 24*UnitSize(context) {
 		h = 24 * UnitSize(context)
 		p.textList.SetHeight(h)

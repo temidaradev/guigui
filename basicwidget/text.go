@@ -850,7 +850,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	drawText(textBounds, dst, text, face, t.lineHeight(context), t.hAlign, t.vAlign, clr)
 }
 
-func (t *Text) Size(context *guigui.Context) (int, int) {
+func (t *Text) DefaultSize(context *guigui.Context) (int, int) {
 	w, h := t.width, t.height
 	if !t.widthSet || !t.heightSet {
 		tw, th := t.TextSize(context)
@@ -1020,7 +1020,7 @@ func (t *textCursor) Z() int {
 	return guigui.Parent(t).Z() + 1
 }
 
-func (t *textCursor) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(t).Size(context)
+func (t *textCursor) DefaultSize(context *guigui.Context) (int, int) {
+	w, h := guigui.Size(guigui.Parent(t))
 	return w + 2*cursorWidth(context), h
 }

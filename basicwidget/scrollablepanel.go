@@ -39,7 +39,7 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	guigui.SetPosition(s.content, p)
 	appender.AppendChildWidget(s.content)
 
-	s.scollOverlay.SetContentSize(s.content.Size(context))
+	s.scollOverlay.SetContentSize(guigui.Size(s.content))
 	guigui.SetPosition(&s.scollOverlay, guigui.Position(s))
 	appender.AppendChildWidget(&s.scollOverlay)
 
@@ -54,7 +54,7 @@ func defaultScrollablePanelSize(context *guigui.Context) (int, int) {
 	return 6 * UnitSize(context), 6 * UnitSize(context)
 }
 
-func (s *ScrollablePanel) Size(context *guigui.Context) (int, int) {
+func (s *ScrollablePanel) DefaultSize(context *guigui.Context) (int, int) {
 	dw, dh := defaultScrollablePanelSize(context)
 	return s.widthMinusDefault + dw, s.heightMinusDefault + dh
 }

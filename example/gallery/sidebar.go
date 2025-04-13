@@ -22,7 +22,7 @@ func sidebarWidth(context *guigui.Context) int {
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	_, h := s.Size(context)
+	_, h := guigui.Size(s)
 	s.sidebar.SetSize(context, sidebarWidth(context), h)
 	s.sidebar.SetContent(&s.sidebarContent)
 	guigui.SetPosition(&s.sidebar, guigui.Position(s))
@@ -31,8 +31,8 @@ func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	return nil
 }
 
-func (s *Sidebar) Size(context *guigui.Context) (int, int) {
-	_, h := guigui.Parent(s).Size(context)
+func (s *Sidebar) DefaultSize(context *guigui.Context) (int, int) {
+	_, h := guigui.Size(guigui.Parent(s))
 	return sidebarWidth(context), h
 }
 
@@ -54,7 +54,6 @@ type sidebarContent struct {
 }
 
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
 
 	type item struct {
@@ -113,7 +112,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 		s.list.SetSelectedItemIndex(0)
 	})
 
-	_, h := s.Size(context)
+	_, h := guigui.Size(s)
 	s.list.SetWidth(sidebarWidth(context))
 	s.list.SetHeight(h)
 	guigui.SetPosition(&s.list, guigui.Position(s))

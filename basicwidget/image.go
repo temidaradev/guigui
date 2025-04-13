@@ -24,7 +24,7 @@ func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	p := guigui.Position(i)
-	w, h := i.Size(context)
+	w, h := guigui.Size(i)
 	imgScale := min(float64(w)/float64(i.image.Bounds().Dx()), float64(h)/float64(i.image.Bounds().Dy()))
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(imgScale, imgScale)
@@ -54,7 +54,7 @@ func defaultImageSize(context *guigui.Context) (int, int) {
 	return 6 * UnitSize(context), 6 * UnitSize(context)
 }
 
-func (i *Image) Size(context *guigui.Context) (int, int) {
+func (i *Image) DefaultSize(context *guigui.Context) (int, int) {
 	dw, dh := defaultImageSize(context)
 	return i.widthMinusDefault + dw, i.heightMinusDefault + dh
 }

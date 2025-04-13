@@ -27,7 +27,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	appender.AppendChildWidget(&r.background)
 
 	{
-		w, h := r.Size(context)
+		w, h := guigui.Size(r)
 		w -= 2 * basicwidget.UnitSize(context)
 		h -= 4 * basicwidget.UnitSize(context)
 		r.counterText.SetSize(w, h)
@@ -58,7 +58,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	{
 		p := guigui.Position(r)
-		_, h := r.Size(context)
+		_, h := guigui.Size(r)
 		p.X += basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		guigui.SetPosition(&r.resetButton, p)
@@ -72,7 +72,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	{
 		p := guigui.Position(r)
-		w, h := r.Size(context)
+		w, h := guigui.Size(r)
 		p.X += w - 7*basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		guigui.SetPosition(&r.incButton, p)
@@ -86,7 +86,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	{
 		p := guigui.Position(r)
-		w, h := r.Size(context)
+		w, h := guigui.Size(r)
 		p.X += w - int(13.5*float64(basicwidget.UnitSize(context)))
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		guigui.SetPosition(&r.decButton, p)

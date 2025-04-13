@@ -4,7 +4,6 @@
 package basicwidget
 
 import (
-	"image"
 	"image/color"
 	"slices"
 
@@ -201,8 +200,8 @@ func (t *TextList) MoveItem(from, to int) {
 	t.list.MoveItem(from, to)
 }
 
-func (t *TextList) Size(context *guigui.Context) (int, int) {
-	return t.list.Size(context)
+func (t *TextList) DefaultSize(context *guigui.Context) (int, int) {
+	return guigui.Size(&t.list)
 }
 
 func (t *TextList) SetSize(width, height int) {
@@ -252,7 +251,7 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 	p := guigui.Position(t)
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2
-		w, h := t.Size(context)
+		w, h := guigui.Size(t)
 		t.text.SetSize(w-UnitSize(context), h)
 	}
 	t.text.SetText(t.textString())
@@ -273,7 +272,7 @@ func (t *textListItemWidget) textString() string {
 func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.textListItem.Border {
 		p := guigui.Position(t)
-		w, h := t.Size(context)
+		w, h := guigui.Size(t)
 		x0 := float32(p.X)
 		x1 := float32(p.X + w)
 		y := float32(p.Y) + float32(h)/2
@@ -282,17 +281,12 @@ func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 	if t.textListItem.Header {
-		p := guigui.Position(t)
-		w, h := t.Size(context)
-		bounds := image.Rectangle{
-			Min: p,
-			Max: p.Add(image.Pt(w, h)),
-		}
+		bounds := guigui.Bounds(t)
 		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.6), RoundedCornerRadius(context))
 	}
 }
 
-func (t *textListItemWidget) Size(context *guigui.Context) (int, int) {
+func (t *textListItemWidget) DefaultSize(context *guigui.Context) (int, int) {
 	w, _ := t.text.TextSize(context)
 	if t.textListItem.Border {
 		return w, UnitSize(context) / 2

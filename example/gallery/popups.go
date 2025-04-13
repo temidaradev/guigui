@@ -42,7 +42,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 	u := float64(basicwidget.UnitSize(context))
 
-	w, _ := p.Size(context)
+	w, _ := guigui.Size(p)
 	p.forms[0].SetWidth(context, w-int(1*u))
 	p.forms[0].SetItems([]*basicwidget.FormItem{
 		{
@@ -71,7 +71,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 			SecondaryWidget: &p.contextMenuPopupClickHereText,
 		},
 	})
-	_, h := p.forms[0].Size(context)
+	_, h := guigui.Size(&p.forms[0])
 	pt.Y += h + int(0.5*u)
 	guigui.SetPosition(&p.forms[1], pt)
 	appender.AppendChildWidget(&p.forms[1])
@@ -113,8 +113,8 @@ func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 	return guigui.HandleInputResult{}
 }
 
-func (p *Popups) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(p).Size(context)
+func (p *Popups) DefaultSize(context *guigui.Context) (int, int) {
+	w, h := guigui.Size(guigui.Parent(p))
 	w -= sidebarWidth(context)
 	return w, h
 }
@@ -141,7 +141,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 	s.closeButton.SetOnUp(func() {
 		s.popup.Close()
 	})
-	w, h := s.closeButton.Size(context)
+	w, h := guigui.Size(&s.closeButton)
 	pt = s.popup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-w, -int(0.5*u)-h))
 	guigui.SetPosition(&s.closeButton, pt)
 	appender.AppendChildWidget(&s.closeButton)

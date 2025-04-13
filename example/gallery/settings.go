@@ -77,7 +77,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := s.Size(context)
+	w, _ := guigui.Size(s)
 	s.form.SetWidth(context, w-int(1*u))
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -100,10 +100,4 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	}
 
 	return nil
-}
-
-func (s *Settings) Size(context *guigui.Context) (int, int) {
-	w, h := guigui.Parent(s).Size(context)
-	w -= sidebarWidth(context)
-	return w, h
 }

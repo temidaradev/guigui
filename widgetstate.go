@@ -63,7 +63,9 @@ func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
 type widgetState struct {
 	root bool
 
-	position image.Point
+	position    image.Point
+	widthPlus1  int
+	heightPlus1 int
 
 	parent   Widget
 	children []Widget
@@ -85,9 +87,33 @@ func SetPosition(widget Widget, position image.Point) {
 	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
 }
 
+const AutoSize = -1
+
+func SetSize(widget Widget, width, height int) {
+	widget.widgetState().widthPlus1 = width + 1
+	widget.widgetState().heightPlus1 = height + 1
+}
+
+func Size(widget Widget) (int, int) {
+	widgetState := widget.widgetState()
+	dw, dh := widget.DefaultSize(&theApp.context)
+	var w, h int
+	if widgetState.widthPlus1 == 0 {
+		w = dw
+	} else {
+		w = widgetState.widthPlus1 - 1
+	}
+	if widgetState.heightPlus1 == 0 {
+		h = dh
+	} else {
+		h = widgetState.heightPlus1 - 1
+	}
+	return w, h
+}
+
 func Bounds(widget Widget) image.Rectangle {
 	widgetState := widget.widgetState()
-	width, height := widget.Size(&theApp.context)
+	width, height := Size(widget)
 	return image.Rectangle{
 		Min: widgetState.position,
 		Max: widgetState.position.Add(image.Point{width, height}),
