@@ -113,12 +113,6 @@ func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 	return guigui.HandleInputResult{}
 }
 
-func (p *Popups) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := guigui.Size(guigui.Parent(p))
-	w -= sidebarWidth(context)
-	return w, h
-}
-
 type simplePopupContent struct {
 	guigui.DefaultWidget
 
