@@ -314,7 +314,7 @@ func (a *app) build() error {
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
 	slices.Sort(a.zs)
 
-	if !a.invalidatedRegions.Empty() || len(a.invalidatedWidgets) != 0 {
+	if !a.invalidatedRegions.Empty() {
 		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
 	}
 
