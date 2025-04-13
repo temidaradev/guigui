@@ -112,8 +112,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	})
 
 	_, h := guigui.Size(s)
-	s.list.SetWidth(sidebarWidth(context))
-	s.list.SetHeight(h)
+	guigui.SetSize(&s.list, sidebarWidth(context), h)
 	guigui.SetPosition(&s.list, guigui.Position(s))
 	appender.AppendChildWidget(&s.list)
 

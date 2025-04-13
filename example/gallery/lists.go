@@ -28,7 +28,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		})
 	}
 	l.textList.SetItems(items)
-	l.textList.SetHeight(6 * basicwidget.UnitSize(context))
+	guigui.SetSize(&l.textList, guigui.AutoSize, 6*basicwidget.UnitSize(context))
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := guigui.Size(l)

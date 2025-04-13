@@ -61,7 +61,7 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	w, h := guigui.Size(&p.textList)
 	if h > 24*UnitSize(context) {
 		h = 24 * UnitSize(context)
-		p.textList.SetHeight(h)
+		guigui.SetSize(&p.textList, guigui.AutoSize, h)
 	}
 	r := image.Rectangle{
 		Min: pos,

@@ -65,10 +65,6 @@ type List struct {
 	startPressingIndexPlus1 int
 	startPressingLeft       bool
 
-	widthSet            bool
-	heightSet           bool
-	width               int
-	height              int
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
 
@@ -540,48 +536,12 @@ func (l *List) defaultHeight(context *guigui.Context) int {
 }
 
 func (l *List) DefaultSize(context *guigui.Context) (int, int) {
-	var w, h int
-	if l.widthSet {
-		w = l.width
-	} else {
-		w = l.defaultWidth(context)
-	}
+	w := l.defaultWidth(context)
 	if l.checkmarkIndexPlus1 > 0 {
 		w += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 	}
-	if l.heightSet {
-		h = l.height
-	} else {
-		h = l.defaultHeight(context)
-	}
+	h := l.defaultHeight(context)
 	return w, h
-}
-
-func (l *List) SetSize(width, height int) {
-	l.width = width
-	l.widthSet = true
-	l.height = height
-	l.heightSet = true
-}
-
-func (l *List) SetWidth(width int) {
-	l.width = width
-	l.widthSet = true
-}
-
-func (l *List) SetHeight(height int) {
-	l.height = height
-	l.heightSet = true
-}
-
-func (l *List) ResetWidth() {
-	l.widthSet = false
-	l.width = 0
-}
-
-func (l *List) ResetHeight() {
-	l.heightSet = false
-	l.height = 0
 }
 
 type listFrame struct {

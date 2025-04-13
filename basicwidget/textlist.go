@@ -90,6 +90,9 @@ func (t *TextList) SetCheckmarkIndex(index int) {
 }
 
 func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	w, h := guigui.Size(t)
+	guigui.SetSize(&t.list, w, h)
+
 	// To use HasFocusedChildWidget correctly, create the tree first.
 	guigui.SetPosition(&t.list, guigui.Position(t))
 	appender.AppendChildWidget(&t.list)
@@ -201,27 +204,7 @@ func (t *TextList) MoveItem(from, to int) {
 }
 
 func (t *TextList) DefaultSize(context *guigui.Context) (int, int) {
-	return guigui.Size(&t.list)
-}
-
-func (t *TextList) SetSize(width, height int) {
-	t.list.SetSize(width, height)
-}
-
-func (t *TextList) SetWidth(width int) {
-	t.list.SetWidth(width)
-}
-
-func (t *TextList) SetHeight(height int) {
-	t.list.SetHeight(height)
-}
-
-func (t *TextList) ResetWidth() {
-	t.list.ResetWidth()
-}
-
-func (t *TextList) ResetHeight() {
-	t.list.ResetHeight()
+	return t.list.DefaultSize(context)
 }
 
 type textListItemWidget struct {
