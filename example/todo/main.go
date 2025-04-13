@@ -143,7 +143,7 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	appender.AppendChildWidget(&t.doneButton)
 
 	w, _ := guigui.Size(t)
-	t.text.SetSize(w-int(4.5*u), int(u))
+	guigui.SetSize(&t.text, w-int(4.5*u), int(u))
 	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 	guigui.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
 	appender.AppendChildWidget(&t.text)

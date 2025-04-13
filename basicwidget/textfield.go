@@ -65,7 +65,7 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	b := guigui.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
 	b.Max.X -= UnitSize(context) / 2
-	t.text.SetSize(b.Dx(), b.Dy())
+	guigui.SetSize(&t.text, b.Dx(), b.Dy())
 	// TODO: Consider multiline.
 	if !t.text.IsMultiline() {
 		t.text.SetVerticalAlign(VerticalAlignMiddle)

@@ -80,11 +80,6 @@ type Text struct {
 	scaleMinus1 float64
 	bold        bool
 
-	widthSet  bool
-	width     int
-	heightSet bool
-	height    int
-
 	selectable           bool
 	editable             bool
 	multiline            bool
@@ -851,17 +846,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := t.width, t.height
-	if !t.widthSet || !t.heightSet {
-		tw, th := t.TextSize(context)
-		if !t.widthSet {
-			w = tw
-		}
-		if !t.heightSet {
-			h = th
-		}
-	}
-	return w, h
+	return t.TextSize(context)
 }
 
 func (t *Text) TextSize(context *guigui.Context) (int, int) {
@@ -880,28 +865,6 @@ func (t *Text) TextSize(context *guigui.Context) (int, int) {
 func (t *Text) textHeight(context *guigui.Context, str string) int {
 	// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
 	return int(t.lineHeight(context) * float64(strings.Count(str, "\n")+1))
-}
-
-func (t *Text) SetSize(width, height int) {
-	t.widthSet = true
-	t.heightSet = true
-	t.width = width
-	t.height = height
-}
-
-func (t *Text) SetWidth(width int) {
-	t.widthSet = true
-	t.width = width
-}
-
-func (t *Text) SetHeight(height int) {
-	t.heightSet = true
-	t.height = height
-}
-
-func (t *Text) ResetSize() {
-	t.widthSet = false
-	t.heightSet = false
 }
 
 func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {

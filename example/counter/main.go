@@ -30,7 +30,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		w, h := guigui.Size(r)
 		w -= 2 * basicwidget.UnitSize(context)
 		h -= 4 * basicwidget.UnitSize(context)
-		r.counterText.SetSize(w, h)
+		guigui.SetSize(&r.counterText, w, h)
 
 		r.counterText.SetSelectable(true)
 		r.counterText.SetBold(true)

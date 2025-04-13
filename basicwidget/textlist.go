@@ -252,7 +252,7 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2
 		w, h := guigui.Size(t)
-		t.text.SetSize(w-UnitSize(context), h)
+		guigui.SetSize(&t.text, w-UnitSize(context), h)
 	}
 	t.text.SetText(t.textString())
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
