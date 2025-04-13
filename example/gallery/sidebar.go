@@ -22,8 +22,7 @@ func sidebarWidth(context *guigui.Context) int {
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	_, h := guigui.Size(s)
-	s.sidebar.SetSize(context, sidebarWidth(context), h)
+	guigui.SetSize(&s.sidebar, sidebarWidth(context), guigui.AutoSize)
 	s.sidebar.SetContent(&s.sidebarContent)
 	guigui.SetPosition(&s.sidebar, guigui.Position(s))
 	appender.AppendChildWidget(&s.sidebar)
