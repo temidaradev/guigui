@@ -32,40 +32,40 @@ func (t *TextField) Text() string {
 	return t.text.Text()
 }
 
-func (t *TextField) SetText(context *guigui.Context, text string) {
-	t.text.SetText(context, text)
+func (t *TextField) SetText(text string) {
+	t.text.SetText(text)
 }
 
-func (t *TextField) SetMultiline(context *guigui.Context, multiline bool) {
-	t.text.SetMultiline(context, multiline)
+func (t *TextField) SetMultiline(multiline bool) {
+	t.text.SetMultiline(multiline)
 }
 
-func (t *TextField) SetHorizontalAlign(context *guigui.Context, halign HorizontalAlign) {
-	t.text.SetHorizontalAlign(context, halign)
+func (t *TextField) SetHorizontalAlign(halign HorizontalAlign) {
+	t.text.SetHorizontalAlign(halign)
 }
 
-func (t *TextField) SetVerticalAlign(context *guigui.Context, valign VerticalAlign) {
-	t.text.SetVerticalAlign(context, valign)
+func (t *TextField) SetVerticalAlign(valign VerticalAlign) {
+	t.text.SetVerticalAlign(valign)
 }
 
-func (t *TextField) SetEditable(context *guigui.Context, editable bool) {
-	t.text.SetEditable(context, editable)
+func (t *TextField) SetEditable(editable bool) {
+	t.text.SetEditable(editable)
 	t.readonly = !editable
 }
 
-func (t *TextField) SelectAll(context *guigui.Context) {
-	t.text.selectAll(context)
+func (t *TextField) SelectAll() {
+	t.text.selectAll()
 }
 
 func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	t.text.SetEditable(context, true)
+	t.text.SetEditable(true)
 	b := context.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
 	b.Max.X -= UnitSize(context) / 2
 	context.SetSize(&t.text, b.Dx(), b.Dy())
 	// TODO: Consider multiline.
 	if !t.text.IsMultiline() {
-		t.text.SetVerticalAlign(context, VerticalAlignMiddle)
+		t.text.SetVerticalAlign(VerticalAlignMiddle)
 	}
 	context.SetPosition(&t.text, b.Min)
 	appender.AppendChildWidget(&t.text)
@@ -84,7 +84,7 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 	if context.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition())) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			context.Focus(&t.text)
-			t.text.selectAll(context)
+			t.text.selectAll()
 			return guigui.HandleInputByWidget(t)
 		}
 	}
@@ -94,11 +94,11 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 func (t *TextField) Update(context *guigui.Context) error {
 	if t.prevFocused != context.HasFocusedChildWidget(t) {
 		t.prevFocused = context.HasFocusedChildWidget(t)
-		context.RequestRedraw(t)
+		guigui.RequestRedraw(t)
 	}
 	if context.IsFocused(t) {
 		context.Focus(&t.text)
-		context.RequestRedraw(t)
+		guigui.RequestRedraw(t)
 	}
 	return nil
 }

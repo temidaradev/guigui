@@ -39,12 +39,12 @@ func (i *Image) HasImage() bool {
 	return i.image != nil
 }
 
-func (i *Image) SetImage(context *guigui.Context, image *ebiten.Image) {
+func (i *Image) SetImage(image *ebiten.Image) {
 	if i.image == image {
 		return
 	}
 	i.image = image
-	context.RequestRedraw(i)
+	guigui.RequestRedraw(i)
 }
 
 func (i *Image) DefaultSize(context *guigui.Context) (int, int) {

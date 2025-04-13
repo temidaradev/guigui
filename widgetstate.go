@@ -55,7 +55,7 @@ func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
 	for widget, bounds3D := range w.bounds3Ds {
 		if isDifferentParentZ(widget) {
 			app.requestRedraw(bounds3D.bounds)
-			app.context.RequestRedraw(widget)
+			RequestRedraw(widget)
 		}
 	}
 }
@@ -76,6 +76,8 @@ type widgetState struct {
 	transparency float64
 
 	offscreen *ebiten.Image
+
+	dirty bool
 }
 
 func (w *widgetState) isInTree() bool {
@@ -135,4 +137,8 @@ func isDifferentParentZ(widget Widget) bool {
 		return false
 	}
 	return widget.Z() != parent.Z()
+}
+
+func RequestRedraw(widget Widget) {
+	widget.widgetState().dirty = true
 }

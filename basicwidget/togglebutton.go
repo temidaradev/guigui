@@ -35,7 +35,7 @@ func (t *ToggleButton) Value() bool {
 	return t.value
 }
 
-func (t *ToggleButton) SetValue(context *guigui.Context, value bool) {
+func (t *ToggleButton) SetValue(value bool) {
 	if t.value == value {
 		return
 	}
@@ -44,7 +44,7 @@ func (t *ToggleButton) SetValue(context *guigui.Context, value bool) {
 	if t.onceRendered {
 		t.count = toggleButtonMaxCount() - t.count
 	}
-	context.RequestRedraw(t)
+	guigui.RequestRedraw(t)
 
 	if t.onValueChanged != nil {
 		t.onValueChanged(value)
@@ -59,7 +59,7 @@ func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidg
 	hovered := t.isHovered(context)
 	if t.prevHovered != hovered {
 		t.prevHovered = hovered
-		context.RequestRedraw(t)
+		guigui.RequestRedraw(t)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidg
 func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if context.IsEnabled(t) && t.isHovered(context) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		t.pressed = true
-		t.SetValue(context, !t.value)
+		t.SetValue(!t.value)
 		return guigui.HandleInputByWidget(t)
 	}
 	if !context.IsEnabled(t) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -79,7 +79,7 @@ func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.Handl
 func (t *ToggleButton) Update(context *guigui.Context) error {
 	if t.count > 0 {
 		t.count--
-		context.RequestRedraw(t)
+		guigui.RequestRedraw(t)
 	}
 	return nil
 }

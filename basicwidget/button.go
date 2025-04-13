@@ -37,7 +37,7 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	hovered := b.isHovered(context)
 	if b.prevHovered != hovered {
 		b.prevHovered = hovered
-		context.RequestRedraw(b)
+		guigui.RequestRedraw(b)
 	}
 	return nil
 }

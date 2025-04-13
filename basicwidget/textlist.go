@@ -85,8 +85,8 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
-func (t *TextList) SetCheckmarkIndex(context *guigui.Context, index int) {
-	t.list.SetCheckmarkIndex(context, index)
+func (t *TextList) SetCheckmarkIndex(index int) {
+	t.list.SetCheckmarkIndex(index)
 }
 
 func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -98,15 +98,15 @@ func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	appender.AppendChildWidget(&t.list)
 
 	for i, item := range t.textListItemWidgets {
-		item.text.SetBold(context, item.textListItem.Header)
+		item.text.SetBold(item.textListItem.Header)
 		if t.list.style != ListStyleMenu && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable() {
-			item.text.SetColor(context, DefaultActiveListItemTextColor(context))
+			item.text.SetColor(DefaultActiveListItemTextColor(context))
 		} else if t.list.style == ListStyleMenu && t.list.isHoveringVisible() && t.list.HoveredItemIndex(context) == i && item.selectable() {
-			item.text.SetColor(context, DefaultActiveListItemTextColor(context))
+			item.text.SetColor(DefaultActiveListItemTextColor(context))
 		} else if !item.selectable() && !item.textListItem.Header {
-			item.text.SetColor(context, DefaultDisabledListItemTextColor(context))
+			item.text.SetColor(DefaultDisabledListItemTextColor(context))
 		} else {
-			item.text.SetColor(context, item.textListItem.Color)
+			item.text.SetColor(item.textListItem.Color)
 		}
 	}
 
@@ -131,15 +131,15 @@ func (t *TextList) ItemAt(index int) (TextListItem, bool) {
 	return t.textListItemWidgets[index].textListItem, true
 }
 
-func (t *TextList) SetItemsByStrings(context *guigui.Context, strs []string) {
+func (t *TextList) SetItemsByStrings(strs []string) {
 	items := make([]TextListItem, len(strs))
 	for i, str := range strs {
 		items[i].Text = str
 	}
-	t.SetItems(context, items)
+	t.SetItems(items)
 }
 
-func (t *TextList) SetItems(context *guigui.Context, items []TextListItem) {
+func (t *TextList) SetItems(items []TextListItem) {
 	if cap(t.textListItemWidgets) < len(items) {
 		t.textListItemWidgets = append(t.textListItemWidgets, make([]*textListItemWidget, len(items)-cap(t.textListItemWidgets))...)
 	}
@@ -148,9 +148,9 @@ func (t *TextList) SetItems(context *guigui.Context, items []TextListItem) {
 	listItems := make([]ListItem, len(items))
 	for i, item := range items {
 		if t.textListItemWidgets[i] == nil {
-			t.textListItemWidgets[i] = newTextListItemWidget(context, t, item)
+			t.textListItemWidgets[i] = newTextListItemWidget(t, item)
 		} else {
-			t.textListItemWidgets[i].setTextListItem(context, item)
+			t.textListItemWidgets[i].setTextListItem(item)
 		}
 		listItems[i] = t.textListItemWidgets[i].listItem()
 	}
@@ -165,16 +165,16 @@ func (t *TextList) Tag(index int) any {
 	return t.textListItemWidgets[index].textListItem.Tag
 }
 
-func (t *TextList) SetSelectedItemIndex(context *guigui.Context, index int) {
-	t.list.SetSelectedItemIndex(context, index)
+func (t *TextList) SetSelectedItemIndex(index int) {
+	t.list.SetSelectedItemIndex(index)
 }
 
 func (t *TextList) JumpToItemIndex(index int) {
 	t.list.JumpToItemIndex(index)
 }
 
-func (t *TextList) SetStyle(context *guigui.Context, style ListStyle) {
-	t.list.SetStyle(context, style)
+func (t *TextList) SetStyle(style ListStyle) {
+	t.list.SetStyle(style)
 }
 
 func (t *TextList) SetItemString(str string, index int) {
@@ -216,18 +216,18 @@ type textListItemWidget struct {
 	text Text
 }
 
-func newTextListItemWidget(context *guigui.Context, textList *TextList, textListItem TextListItem) *textListItemWidget {
+func newTextListItemWidget(textList *TextList, textListItem TextListItem) *textListItemWidget {
 	t := &textListItemWidget{
 		textList:     textList,
 		textListItem: textListItem,
 	}
-	t.text.SetText(context, t.textString())
+	t.text.SetText(t.textString())
 	return t
 }
 
-func (t *textListItemWidget) setTextListItem(context *guigui.Context, textListItem TextListItem) {
+func (t *textListItemWidget) setTextListItem(textListItem TextListItem) {
 	t.textListItem = textListItem
-	t.text.SetText(context, t.textString())
+	t.text.SetText(t.textString())
 }
 
 func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -237,8 +237,8 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 		w, h := context.Size(t)
 		context.SetSize(&t.text, w-UnitSize(context), h)
 	}
-	t.text.SetText(context, t.textString())
-	t.text.SetVerticalAlign(context, VerticalAlignMiddle)
+	t.text.SetText(t.textString())
+	t.text.SetVerticalAlign(VerticalAlignMiddle)
 	context.SetPosition(&t.text, p)
 	appender.AppendChildWidget(&t.text)
 

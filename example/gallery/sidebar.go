@@ -39,8 +39,8 @@ func (s *Sidebar) SelectedItemTag() string {
 	return s.sidebarContent.SelectedItemTag()
 }
 
-func (s *Sidebar) SetSelectedItemIndex(context *guigui.Context, index int) {
-	s.sidebarContent.SetSelectedItemIndex(context, index)
+func (s *Sidebar) SetSelectedItemIndex(index int) {
+	s.sidebarContent.SetSelectedItemIndex(index)
 }
 
 type sidebarContent struct {
@@ -53,7 +53,7 @@ type sidebarContent struct {
 }
 
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	s.list.SetStyle(context, basicwidget.ListStyleSidebar)
+	s.list.SetStyle(basicwidget.ListStyleSidebar)
 
 	type item struct {
 		text string
@@ -88,7 +88,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	listItems := make([]basicwidget.ListItem, len(items))
 	for i, item := range items {
 		t := &s.listItemWidgets[i]
-		t.SetText(context, item.text)
+		t.SetText(item.text)
 		listItems[i] = basicwidget.ListItem{
 			Content:    t,
 			Selectable: true,
@@ -97,18 +97,18 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	}
 	for i := range s.listItemWidgets {
 		t := &s.listItemWidgets[i]
-		t.SetVerticalAlign(context, basicwidget.VerticalAlignMiddle)
+		t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 		context.SetSize(t, guigui.AutoSize, basicwidget.UnitSize(context))
 		if s.list.SelectedItemIndex() == i {
-			t.SetColor(context, basicwidget.DefaultActiveListItemTextColor(context))
+			t.SetColor(basicwidget.DefaultActiveListItemTextColor(context))
 		} else {
-			t.SetColor(context, basicwidget.DefaultTextColor(context))
+			t.SetColor(basicwidget.DefaultTextColor(context))
 		}
 	}
 	s.list.SetItems(listItems)
 
 	s.initOnce.Do(func() {
-		s.list.SetSelectedItemIndex(context, 0)
+		s.list.SetSelectedItemIndex(0)
 	})
 
 	_, h := context.Size(s)
@@ -127,6 +127,6 @@ func (s *sidebarContent) SelectedItemTag() string {
 	return item.Tag.(string)
 }
 
-func (s *sidebarContent) SetSelectedItemIndex(context *guigui.Context, index int) {
-	s.list.SetSelectedItemIndex(context, index)
+func (s *sidebarContent) SetSelectedItemIndex(index int) {
+	s.list.SetSelectedItemIndex(index)
 }

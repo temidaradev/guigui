@@ -73,7 +73,7 @@ func (s *ScrollOverlay) SetContentSize(context *guigui.Context, contentWidth, co
 	s.adjustOffset(context)
 	if s.onceUpdated {
 		s.contentSizeChanged = true
-		context.RequestRedraw(s)
+		guigui.RequestRedraw(s)
 	}
 }
 
@@ -91,7 +91,7 @@ func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentWidth, content
 	s.offsetY = y
 	s.adjustOffset(context)
 	if s.onceUpdated {
-		context.RequestRedraw(s)
+		guigui.RequestRedraw(s)
 	}
 }
 
@@ -183,7 +183,7 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 				if s.onScroll != nil {
 					s.onScroll(s.offsetX, s.offsetY)
 				}
-				context.RequestRedraw(s)
+				guigui.RequestRedraw(s)
 			}
 		}
 		return guigui.HandleInputByWidget(s)
@@ -208,7 +208,7 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 			if s.onScroll != nil {
 				s.onScroll(s.offsetX, s.offsetY)
 			}
-			context.RequestRedraw(s)
+			guigui.RequestRedraw(s)
 			return guigui.HandleInputByWidget(s)
 		}
 		return guigui.HandleInputResult{}
@@ -297,7 +297,7 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 	if s.isBarVisible(context) || (s.barVisibleTime == barShowingTime() && s.barOpacity < barMaxOpacity()) {
 		if s.barOpacity < barMaxOpacity() {
 			s.barOpacity++
-			context.RequestRedraw(s)
+			guigui.RequestRedraw(s)
 		}
 		s.barVisibleTime = barShowingTime()
 	} else {
@@ -306,7 +306,7 @@ func (s *ScrollOverlay) Update(context *guigui.Context) error {
 		}
 		if s.barVisibleTime == 0 && s.barOpacity > 0 {
 			s.barOpacity--
-			context.RequestRedraw(s)
+			guigui.RequestRedraw(s)
 		}
 	}
 

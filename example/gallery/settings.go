@@ -28,8 +28,8 @@ type Settings struct {
 }
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	s.colorModeText.SetText(context, "Color Mode")
-	s.colorModeDropdownList.SetItemsByStrings(context, []string{"Light", "Dark"})
+	s.colorModeText.SetText("Color Mode")
+	s.colorModeDropdownList.SetItemsByStrings([]string{"Light", "Dark"})
 	s.colorModeDropdownList.SetOnValueChanged(func(index int) {
 		switch index {
 		case 0:
@@ -39,9 +39,9 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		}
 	})
 
-	s.localeText.SetText(context, "Locale")
+	s.localeText.SetText("Locale")
 	langs := []string{"(Default)", "en", "ja", "ko", "zh-Hans", "zh-Hant"}
-	s.localeDropdownList.SetItemsByStrings(context, langs)
+	s.localeDropdownList.SetItemsByStrings(langs)
 	s.localeDropdownList.SetOnValueChanged(func(index int) {
 		if index == 0 {
 			context.SetAppLocales(nil)
@@ -51,8 +51,8 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		context.SetAppLocales([]language.Tag{lang})
 	})
 
-	s.scaleText.SetText(context, "Scale")
-	s.scaleDropdownList.SetItemsByStrings(context, []string{"80%", "100%", "120%"})
+	s.scaleText.SetText("Scale")
+	s.scaleDropdownList.SetItemsByStrings([]string{"80%", "100%", "120%"})
 	s.scaleDropdownList.SetOnValueChanged(func(index int) {
 		switch index {
 		case 0:
@@ -67,13 +67,13 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.initOnce.Do(func() {
 		switch context.ColorMode() {
 		case guigui.ColorModeLight:
-			s.colorModeDropdownList.SetSelectedItemIndex(context, 0)
+			s.colorModeDropdownList.SetSelectedItemIndex(0)
 		case guigui.ColorModeDark:
-			s.colorModeDropdownList.SetSelectedItemIndex(context, 1)
+			s.colorModeDropdownList.SetSelectedItemIndex(1)
 		}
 
-		s.localeDropdownList.SetSelectedItemIndex(context, 0)
-		s.scaleDropdownList.SetSelectedItemIndex(context, 1)
+		s.localeDropdownList.SetSelectedItemIndex(0)
+		s.scaleDropdownList.SetSelectedItemIndex(1)
 	})
 
 	u := float64(basicwidget.UnitSize(context))

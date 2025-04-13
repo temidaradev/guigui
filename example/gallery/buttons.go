@@ -23,16 +23,16 @@ type Buttons struct {
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetText(context, "Text Button")
-	b.textButton.SetText(context, "Button")
-	b.textImageButtonText.SetText(context, "Text w/ Image Button")
-	b.textImageButton.SetText(context, "Button")
+	b.textButtonText.SetText("Text Button")
+	b.textButton.SetText("Button")
+	b.textImageButtonText.SetText("Text w/ Image Button")
+	b.textImageButton.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	b.textImageButton.SetImage(context, img)
-	b.toggleButtonText.SetText(context, "Toggle Button")
+	b.textImageButton.SetImage(img)
+	b.toggleButtonText.SetText("Toggle Button")
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := context.Size(b)

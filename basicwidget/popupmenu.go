@@ -22,12 +22,12 @@ func (p *PopupMenu) SetOnClosed(f func(index int)) {
 	p.onClosed = f
 }
 
-func (p *PopupMenu) SetCheckmarkIndex(context *guigui.Context, index int) {
-	p.textList.SetCheckmarkIndex(context, index)
+func (p *PopupMenu) SetCheckmarkIndex(index int) {
+	p.textList.SetCheckmarkIndex(index)
 }
 
 func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.textList.SetStyle(context, ListStyleMenu)
+	p.textList.SetStyle(ListStyleMenu)
 	p.textList.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
 		if p.onClosed != nil {
@@ -100,8 +100,8 @@ func (p *PopupMenu) Close() {
 	p.popup.Close()
 }
 
-func (p *PopupMenu) SetItemsByStrings(context *guigui.Context, items []string) {
-	p.textList.SetItemsByStrings(context, items)
+func (p *PopupMenu) SetItemsByStrings(items []string) {
+	p.textList.SetItemsByStrings(items)
 }
 
 func (p *PopupMenu) SelectedItem() (TextListItem, bool) {
@@ -112,6 +112,6 @@ func (p *PopupMenu) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
-func (p *PopupMenu) SetSelectedItemIndex(context *guigui.Context, index int) {
-	p.textList.SetSelectedItemIndex(context, index)
+func (p *PopupMenu) SetSelectedItemIndex(index int) {
+	p.textList.SetSelectedItemIndex(index)
 }

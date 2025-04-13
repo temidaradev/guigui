@@ -25,13 +25,13 @@ type Basic struct {
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetText(context, "Text Button")
-	b.textButton.SetText(context, "Click Me!")
-	b.toggleButtonText.SetText(context, "Toggle Button")
-	b.textFieldText.SetText(context, "Text Field")
-	b.textField.SetHorizontalAlign(context, basicwidget.HorizontalAlignEnd)
-	b.textListText.SetText(context, "Text List")
-	b.textList.SetItemsByStrings(context, []string{"Item 1", "Item 2", "Item 3"})
+	b.textButtonText.SetText("Text Button")
+	b.textButton.SetText("Click Me!")
+	b.toggleButtonText.SetText("Toggle Button")
+	b.textFieldText.SetText("Text Field")
+	b.textField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
+	b.textListText.SetText("Text List")
+	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := context.Size(b)

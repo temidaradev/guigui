@@ -32,12 +32,12 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		h -= 4 * basicwidget.UnitSize(context)
 		context.SetSize(&r.counterText, w, h)
 
-		r.counterText.SetSelectable(context, true)
-		r.counterText.SetBold(context, true)
-		r.counterText.SetHorizontalAlign(context, basicwidget.HorizontalAlignCenter)
-		r.counterText.SetVerticalAlign(context, basicwidget.VerticalAlignMiddle)
-		r.counterText.SetScale(context, 4)
-		r.counterText.SetText(context, fmt.Sprintf("%d", r.counter))
+		r.counterText.SetSelectable(true)
+		r.counterText.SetBold(true)
+		r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
+		r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
+		r.counterText.SetScale(4)
+		r.counterText.SetText(fmt.Sprintf("%d", r.counter))
 
 		p := context.Position(r)
 		p.X += basicwidget.UnitSize(context)
@@ -46,7 +46,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		appender.AppendChildWidget(&r.counterText)
 	}
 
-	r.resetButton.SetText(context, "Reset")
+	r.resetButton.SetText("Reset")
 	context.SetSize(&r.resetButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
@@ -65,7 +65,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		appender.AppendChildWidget(&r.resetButton)
 	}
 
-	r.incButton.SetText(context, "Increment")
+	r.incButton.SetText("Increment")
 	context.SetSize(&r.incButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.incButton.SetOnUp(func() {
 		r.counter++
@@ -79,7 +79,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		appender.AppendChildWidget(&r.incButton)
 	}
 
-	r.decButton.SetText(context, "Decrement")
+	r.decButton.SetText("Decrement")
 	context.SetSize(&r.decButton, 6*basicwidget.UnitSize(context), guigui.AutoSize)
 	r.decButton.SetOnUp(func() {
 		r.counter--

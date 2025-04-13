@@ -20,14 +20,14 @@ type Lists struct {
 }
 
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	l.textListText.SetText(context, "Text List")
+	l.textListText.SetText("Text List")
 	var items []basicwidget.TextListItem
 	for i := 0; i < 100; i++ {
 		items = append(items, basicwidget.TextListItem{
 			Text: fmt.Sprintf("Item %d", i),
 		})
 	}
-	l.textList.SetItems(context, items)
+	l.textList.SetItems(items)
 	context.SetSize(&l.textList, guigui.AutoSize, 6*basicwidget.UnitSize(context))
 
 	u := float64(basicwidget.UnitSize(context))

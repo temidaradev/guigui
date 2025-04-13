@@ -79,7 +79,7 @@ func (l *List) SetOnItemSelected(f func(index int)) {
 	l.onItemSelected = f
 }
 
-func (l *List) SetCheckmarkIndex(context *guigui.Context, index int) {
+func (l *List) SetCheckmarkIndex(index int) {
 	if index < 0 {
 		index = -1
 	}
@@ -87,7 +87,7 @@ func (l *List) SetCheckmarkIndex(context *guigui.Context, index int) {
 		return
 	}
 	l.checkmarkIndexPlus1 = index + 1
-	context.RequestRedraw(l)
+	guigui.RequestRedraw(l)
 }
 
 func (l *List) contentSize(context *guigui.Context) (int, int) {
@@ -130,7 +130,7 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			if err != nil {
 				return err
 			}
-			l.checkmark.SetImage(context, img)
+			l.checkmark.SetImage(img)
 
 			imgSize := listItemCheckmarkSize(context)
 			context.SetSize(&l.checkmark, imgSize, imgSize)
@@ -157,7 +157,7 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
 		if l.isHoveringVisible() {
-			context.RequestRedraw(l)
+			guigui.RequestRedraw(l)
 		}
 	}
 
@@ -231,13 +231,13 @@ func (l *List) MoveItem(from int, to int) {
 	// TODO: Send an event.
 }
 
-func (l *List) SetSelectedItemIndex(context *guigui.Context, index int) {
+func (l *List) SetSelectedItemIndex(index int) {
 	if index < 0 || index >= len(l.items) {
 		index = -1
 	}
 	if l.SelectedItemIndex() != index {
 		l.selectedItemIndexPlus1 = index + 1
-		context.RequestRedraw(l)
+		guigui.RequestRedraw(l)
 	}
 	if l.onItemSelected != nil {
 		l.onItemSelected(index)
@@ -251,12 +251,12 @@ func (l *List) JumpToItemIndex(index int) {
 	l.indexToJumpPlus1 = index + 1
 }
 
-func (l *List) ShowItemBorders(context *guigui.Context, show bool) {
+func (l *List) ShowItemBorders(show bool) {
 	if l.showItemBorders == show {
 		return
 	}
 	l.showItemBorders = true
-	context.RequestRedraw(l)
+	guigui.RequestRedraw(l)
 }
 
 func (l *List) isHoveringVisible() bool {
@@ -267,12 +267,12 @@ func (l *List) Style() ListStyle {
 	return l.style
 }
 
-func (l *List) SetStyle(context *guigui.Context, style ListStyle) {
+func (l *List) SetStyle(style ListStyle) {
 	if l.style == style {
 		return
 	}
 	l.style = style
-	context.RequestRedraw(l)
+	guigui.RequestRedraw(l)
 }
 
 func (l *List) calcDropDstIndex(context *guigui.Context) int {
@@ -303,7 +303,7 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 		i := l.calcDropDstIndex(context)
 		if l.dropDstIndexPlus1-1 != i {
 			l.dropDstIndexPlus1 = i + 1
-			context.RequestRedraw(l)
+			guigui.RequestRedraw(l)
 		}
 		return guigui.HandleInputByWidget(l)
 	}
@@ -320,7 +320,7 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	l.dropSrcIndexPlus1 = 0
 	if l.dropDstIndexPlus1 != 0 {
 		l.dropDstIndexPlus1 = 0
-		context.RequestRedraw(l)
+		guigui.RequestRedraw(l)
 	}
 
 	if dropped {
@@ -342,7 +342,7 @@ func (l *List) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 			wasFocused := context.IsFocused(l)
 			context.Focus(l)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
-				l.SetSelectedItemIndex(context, index)
+				l.SetSelectedItemIndex(index)
 				l.lastSelectingItemTime = time.Now()
 			}
 			l.pressStartX = x

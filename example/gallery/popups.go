@@ -33,9 +33,9 @@ type Popups struct {
 }
 
 func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.blurBackgroundText.SetText(context, "Blur Background")
-	p.closeByClickingOutsideText.SetText(context, "Close by Clicking Outside")
-	p.showButton.SetText(context, "Show")
+	p.blurBackgroundText.SetText("Blur Background")
+	p.closeByClickingOutsideText.SetText("Close by Clicking Outside")
+	p.showButton.SetText("Show")
 	p.showButton.SetOnUp(func() {
 		p.simplePopup.Open(context)
 	})
@@ -61,8 +61,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	context.SetPosition(&p.forms[0], pt)
 	appender.AppendChildWidget(&p.forms[0])
 
-	p.contextMenuPopupText.SetText(context, "Context Menu")
-	p.contextMenuPopupClickHereText.SetText(context, "Click Here by the Right Button")
+	p.contextMenuPopupText.SetText("Context Menu")
+	p.contextMenuPopupClickHereText.SetText("Click Here by the Right Button")
 
 	context.SetSize(&p.forms[1], w-int(1*u), guigui.AutoSize)
 	p.forms[1].SetItems([]*basicwidget.FormItem{
@@ -96,7 +96,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 	appender.AppendChildWidget(&p.simplePopup)
 
-	p.contextMenuPopup.SetItemsByStrings(context, []string{"Item 1", "Item 2", "Item 3"})
+	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 	appender.AppendChildWidget(&p.contextMenuPopup)
 
 	return nil
@@ -125,13 +125,13 @@ type simplePopupContent struct {
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := float64(basicwidget.UnitSize(context))
 
-	s.titleText.SetText(context, "Hello!")
-	s.titleText.SetBold(context, true)
+	s.titleText.SetText("Hello!")
+	s.titleText.SetBold(true)
 	pt := s.popup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
 	context.SetPosition(&s.titleText, pt)
 	appender.AppendChildWidget(&s.titleText)
 
-	s.closeButton.SetText(context, "Close")
+	s.closeButton.SetText("Close")
 	s.closeButton.SetOnUp(func() {
 		s.popup.Close()
 	})

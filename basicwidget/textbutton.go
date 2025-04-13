@@ -30,20 +30,20 @@ func (t *TextButton) SetOnUp(f func()) {
 	t.button.SetOnUp(f)
 }
 
-func (t *TextButton) SetText(context *guigui.Context, text string) {
-	t.text.SetText(context, text)
+func (t *TextButton) SetText(text string) {
+	t.text.SetText(text)
 }
 
-func (t *TextButton) SetImage(context *guigui.Context, image *ebiten.Image) {
-	t.image.SetImage(context, image)
+func (t *TextButton) SetImage(image *ebiten.Image) {
+	t.image.SetImage(image)
 }
 
-func (t *TextButton) SetTextColor(context *guigui.Context, clr color.Color) {
+func (t *TextButton) SetTextColor(clr color.Color) {
 	if draw.EqualColor(t.textColor, clr) {
 		return
 	}
 	t.textColor = clr
-	context.RequestRedraw(t)
+	guigui.RequestRedraw(t)
 }
 
 func (t *TextButton) SetForcePressed(forcePressed bool) {
@@ -61,12 +61,12 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	tw, _ := t.text.TextSize(context)
 	context.SetSize(&t.text, tw, h)
 	if !context.IsEnabled(&t.button) {
-		t.text.SetColor(context, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
+		t.text.SetColor(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
 	} else {
-		t.text.SetColor(context, t.textColor)
+		t.text.SetColor(t.textColor)
 	}
-	t.text.SetHorizontalAlign(context, HorizontalAlignCenter)
-	t.text.SetVerticalAlign(context, VerticalAlignMiddle)
+	t.text.SetHorizontalAlign(HorizontalAlignCenter)
+	t.text.SetVerticalAlign(VerticalAlignMiddle)
 	textP := context.Position(t)
 	if t.image.HasImage() {
 		textP.X += (w - tw + UnitSize(context)/4) / 2

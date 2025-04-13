@@ -60,7 +60,6 @@ type app struct {
 	hitTestCache []hitTestCacheItem
 
 	invalidatedRegions image.Rectangle
-	invalidatedWidgets []Widget
 
 	invalidatedRegionsForDebug []invalidatedRegionsForDebugItem
 
@@ -201,20 +200,21 @@ func (a *app) Update() error {
 	}
 	a.resetPrevWidgets(a.root)
 
-	// Resolve invalidatedWidgets.
-	if len(a.invalidatedWidgets) > 0 {
-		for _, widget := range a.invalidatedWidgets {
-			vb := a.context.VisibleBounds(widget)
-			if vb.Empty() {
-				continue
-			}
-			if theDebugMode.showRenderingRegions {
-				slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
-			}
-			a.invalidatedRegions = a.invalidatedRegions.Union(vb)
+	// Resolve dirty widgets.
+	traverseWidget(a.root, func(widget Widget) {
+		if !widget.widgetState().dirty {
+			return
 		}
-		a.invalidatedWidgets = slices.Delete(a.invalidatedWidgets, 0, len(a.invalidatedWidgets))
-	}
+		vb := a.context.VisibleBounds(widget)
+		if vb.Empty() {
+			return
+		}
+		if theDebugMode.showRenderingRegions {
+			slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
+		}
+		a.requestRedrawWidget(widget)
+		widget.widgetState().dirty = false
+	})
 
 	if theDebugMode.showRenderingRegions {
 		// Update the regions in the reversed order to remove items.
@@ -261,7 +261,9 @@ func (a *app) Draw(screen *ebiten.Image) {
 	a.drawWidget(screen)
 	a.drawDebugIfNeeded(origScreen)
 	a.invalidatedRegions = image.Rectangle{}
-	a.invalidatedWidgets = slices.Delete(a.invalidatedWidgets, 0, len(a.invalidatedWidgets))
+	traverseWidget(a.root, func(widget Widget) {
+		widget.widgetState().dirty = false
+	})
 }
 
 func (a *app) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -280,7 +282,7 @@ func (a *app) requestRedraw(region image.Rectangle) {
 }
 
 func (a *app) requestRedrawWidget(widget Widget) {
-	a.invalidatedWidgets = append(a.invalidatedWidgets, widget)
+	a.requestRedraw(a.context.VisibleBounds(widget))
 	for _, child := range widget.widgetState().children {
 		a.requestRedrawIfDifferentParentZ(child)
 	}

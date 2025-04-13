@@ -230,7 +230,7 @@ func (c *Context) Show(widget Widget) {
 		return
 	}
 	widgetState.hidden = false
-	c.RequestRedraw(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) Hide(widget Widget) {
@@ -240,7 +240,7 @@ func (c *Context) Hide(widget Widget) {
 	}
 	widgetState.hidden = true
 	c.Blur(widget)
-	c.RequestRedraw(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) IsVisible(widget Widget) bool {
@@ -253,7 +253,7 @@ func (c *Context) Enable(widget Widget) {
 		return
 	}
 	widgetState.disabled = false
-	c.RequestRedraw(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) Disable(widget Widget) {
@@ -263,7 +263,7 @@ func (c *Context) Disable(widget Widget) {
 	}
 	widgetState.disabled = true
 	c.Blur(widget)
-	c.RequestRedraw(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) IsEnabled(widget Widget) bool {
@@ -292,9 +292,9 @@ func (c *Context) Focus(widget Widget) {
 	}
 
 	c.app.focusedWidget = widget
-	c.RequestRedraw(c.app.focusedWidget)
+	RequestRedraw(c.app.focusedWidget)
 	if oldWidget != nil {
-		c.RequestRedraw(oldWidget)
+		RequestRedraw(oldWidget)
 	}
 }
 
@@ -307,7 +307,7 @@ func (c *Context) Blur(widget Widget) {
 		return
 	}
 	c.app.focusedWidget = nil
-	c.RequestRedraw(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) IsFocused(widget Widget) bool {
@@ -344,11 +344,7 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 		return
 	}
 	widgetState.transparency = 1 - opacity
-	c.RequestRedraw(widget)
-}
-
-func (c *Context) RequestRedraw(widget Widget) {
-	c.app.requestRedrawWidget(widget)
+	RequestRedraw(widget)
 }
 
 func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
