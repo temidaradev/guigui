@@ -82,7 +82,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	w, h := guigui.Size(r)
-	r.tasksPanel.SetSize(context, w, h-int(2*u))
+	guigui.SetSize(&r.tasksPanel, w, h-int(2*u))
 	r.tasksPanelContent.SetTasks(r.tasks)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
 		r.tasks = slices.DeleteFunc(r.tasks, func(t Task) bool {

@@ -19,9 +19,6 @@ type ScrollablePanel struct {
 	content      guigui.Widget
 	scollOverlay ScrollOverlay
 	border       scrollablePanelBorder
-
-	widthMinusDefault  int
-	heightMinusDefault int
 }
 
 func (s *ScrollablePanel) SetContent(widget guigui.Widget) {
@@ -50,19 +47,8 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	return nil
 }
 
-func defaultScrollablePanelSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), 6 * UnitSize(context)
-}
-
 func (s *ScrollablePanel) DefaultSize(context *guigui.Context) (int, int) {
-	dw, dh := defaultScrollablePanelSize(context)
-	return s.widthMinusDefault + dw, s.heightMinusDefault + dh
-}
-
-func (s *ScrollablePanel) SetSize(context *guigui.Context, width, height int) {
-	dw, dh := defaultScrollablePanelSize(context)
-	s.widthMinusDefault = width - dw
-	s.heightMinusDefault = height - dh
+	return 6 * UnitSize(context), 6 * UnitSize(context)
 }
 
 type scrollablePanelBorder struct {
