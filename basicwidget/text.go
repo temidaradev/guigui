@@ -974,11 +974,10 @@ func (t *textCursor) shouldRenderCursor(context *guigui.Context, text *Text) boo
 }
 
 func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
-	textWidget := guigui.Parent(t)
-	if !t.shouldRenderCursor(context, textWidget.(*Text)) {
+	if !t.shouldRenderCursor(context, t.text) {
 		return
 	}
-	b := textWidget.(*Text).cursorBounds(context)
+	b := t.text.cursorBounds(context)
 	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
 }
 
