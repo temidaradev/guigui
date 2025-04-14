@@ -138,7 +138,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			t.selectAll()
 		}
 	} else if t.prevFocused && !context.IsFocused(t) {
-		t.applyFilter(context)
+		t.applyFilter()
 	}
 	t.prevFocused = context.IsFocused(t)
 
@@ -148,6 +148,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	if t.selectable || t.editable {
+		t.cursor.text = t
 		p := context.Position(t)
 		p.X -= cursorWidth(context)
 		context.SetPosition(&t.cursor, p)
@@ -182,9 +183,9 @@ func (t *Text) SetText(text string) {
 	t.setTextAndSelection(text, start, end, -1)
 }
 
-func (t *Text) SetFilter(context *guigui.Context, filter TextFilter) {
+func (t *Text) SetFilter(filter TextFilter) {
 	t.filter = filter
-	t.applyFilter(context)
+	t.applyFilter()
 }
 
 func (t *Text) selectAll() {
@@ -556,7 +557,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				text := t.field.Text()[:start] + "\n" + t.field.Text()[end:]
 				t.setTextAndSelection(text, start+len("\n"), start+len("\n"), -1)
 			}
-			t.applyFilter(context)
+			t.applyFilter()
 			// TODO: This is not reached on browsers. Fix this.
 			if t.onEnterPressed != nil {
 				t.onEnterPressed(t.field.Text())
@@ -763,7 +764,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	return guigui.HandleInputByWidget(t)
 }
 
-func (t *Text) applyFilter(context *guigui.Context) {
+func (t *Text) applyFilter() {
 	if t.filter != nil {
 		start, end := t.field.Selection()
 		text, start, end := t.filter(t.field.Text(), start, end)
