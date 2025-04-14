@@ -256,6 +256,8 @@ func (p *popupContent) setContent(widget guigui.Widget) {
 func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content != nil {
 		context.SetPosition(p.content, context.Position(p))
+		w, h := context.Size(p)
+		context.SetSize(p.content, w, h)
 		appender.AppendChildWidget(p.content)
 	}
 	return nil
@@ -286,6 +288,10 @@ func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 
+func (p *popupFrame) DefaultSize(context *guigui.Context) (int, int) {
+	return context.Size(p.popup)
+}
+
 type popupBackground struct {
 	guigui.DefaultWidget
 
@@ -314,6 +320,10 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawBlurredImage(context, dst, p.backgroundCache, rate)
 }
 
+func (p *popupBackground) DefaultSize(context *guigui.Context) (int, int) {
+	return context.Size(p.popup)
+}
+
 type popupShadow struct {
 	guigui.DefaultWidget
 
@@ -328,4 +338,8 @@ func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds.Max.Y += int(16 * context.Scale())
 	clr := draw.ScaleAlpha(color.Black, 0.2)
 	draw.DrawRoundedShadowRect(context, dst, bounds, clr, int(16*context.Scale())+RoundedCornerRadius(context))
+}
+
+func (p *popupShadow) DefaultSize(context *guigui.Context) (int, int) {
+	return context.Size(p.popup)
 }

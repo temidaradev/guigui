@@ -46,7 +46,3 @@ func (i *Image) SetImage(image *ebiten.Image) {
 	i.image = image
 	guigui.RequestRedraw(i)
 }
-
-func (i *Image) DefaultSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), 6 * UnitSize(context)
-}

@@ -13,7 +13,7 @@ import (
 )
 
 type Root struct {
-	guigui.DefaultWidget
+	guigui.RootWidget
 
 	background basicwidget.Background
 	sidebar    Sidebar
@@ -25,11 +25,12 @@ type Root struct {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	rw, rh := context.Size(r)
+	context.SetSize(&r.background, rw, rh)
 	appender.AppendChildWidget(&r.background)
 	appender.AppendChildWidget(&r.sidebar)
 
 	sw := 8 * basicwidget.UnitSize(context)
-	rw, rh := context.Size(r)
 	context.SetSize(&r.sidebar, sw, rh)
 	context.SetPosition(&r.sidebar, context.Position(r))
 	p := context.Position(r)

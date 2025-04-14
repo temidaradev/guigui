@@ -127,8 +127,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetCachedSize()
 	}
 
-	w, h := t.TextSize(context)
-	t.scrollOverlay.SetContentSize(context, w, h)
+	cw, ch := t.TextSize(context)
+	t.scrollOverlay.SetContentSize(context, cw, ch)
 
 	if !t.prevFocused && context.IsFocused(t) {
 		t.field.Focus()
@@ -157,6 +157,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	context.Hide(&t.scrollOverlay)
 	context.SetPosition(&t.scrollOverlay, context.Position(t))
+	w, h := context.Size(t)
+	context.SetSize(&t.scrollOverlay, w, h)
 	appender.AppendChildWidget(&t.scrollOverlay)
 
 	return nil

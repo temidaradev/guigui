@@ -85,6 +85,10 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
+func (t *TextList) SetOnItemSelected(callback func(index int)) {
+	t.list.SetOnItemSelected(callback)
+}
+
 func (t *TextList) SetCheckmarkIndex(index int) {
 	t.list.SetCheckmarkIndex(index)
 }

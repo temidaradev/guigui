@@ -103,8 +103,8 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		appender.AppendChildWidget(&l.listFrame)
 	}
 
-	w, h := l.contentSize(context)
-	l.scrollOverlay.SetContentSize(context, w, h)
+	cw, ch := l.contentSize(context)
+	l.scrollOverlay.SetContentSize(context, cw, ch)
 
 	if idx := l.indexToJumpPlus1 - 1; idx >= 0 {
 		y := l.itemYFromIndex(context, idx) - RoundedCornerRadius(context)
@@ -114,6 +114,8 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 
 	context.SetPosition(&l.scrollOverlay, context.Position(l))
+	w, h := context.Size(l)
+	context.SetSize(&l.scrollOverlay, w, h)
 	appender.AppendChildWidget(&l.scrollOverlay)
 
 	hoveredItemIndex := l.HoveredItemIndex(context)
@@ -561,6 +563,10 @@ func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0)
 	borderWidth := float32(1 * context.Scale())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)
+}
+
+func (l *listFrame) DefaultSize(context *guigui.Context) (int, int) {
+	return context.Size(l.list)
 }
 
 func moveItemInSlice[T any](slice []T, from int, count int, to int) {

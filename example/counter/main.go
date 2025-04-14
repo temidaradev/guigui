@@ -12,7 +12,7 @@ import (
 )
 
 type Root struct {
-	guigui.DefaultWidget
+	guigui.RootWidget
 
 	background  basicwidget.Background
 	resetButton basicwidget.TextButton
@@ -24,6 +24,8 @@ type Root struct {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	w, h := context.Size(r)
+	context.SetSize(&r.background, w, h)
 	appender.AppendChildWidget(&r.background)
 
 	{
@@ -58,7 +60,6 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	{
 		p := context.Position(r)
-		_, h := context.Size(r)
 		p.X += basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		context.SetPosition(&r.resetButton, p)
@@ -72,7 +73,6 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	{
 		p := context.Position(r)
-		w, h := context.Size(r)
 		p.X += w - 7*basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		context.SetPosition(&r.incButton, p)
@@ -86,7 +86,6 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	{
 		p := context.Position(r)
-		w, h := context.Size(r)
 		p.X += w - int(13.5*float64(basicwidget.UnitSize(context)))
 		p.Y += h - 2*basicwidget.UnitSize(context)
 		context.SetPosition(&r.decButton, p)

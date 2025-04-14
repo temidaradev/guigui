@@ -41,12 +41,17 @@ func (d *DefaultWidget) ZDelta() int {
 }
 
 func (d *DefaultWidget) DefaultSize(context *Context) (int, int) {
-	if d.widgetState_.parent == nil {
-		return context.app.bounds().Dx(), context.app.bounds().Dy()
-	}
-	return context.Size(d.widgetState_.parent)
+	return int(144 * context.Scale()), int(144 * context.Scale())
 }
 
 func (d *DefaultWidget) widgetState() *widgetState {
 	return &d.widgetState_
+}
+
+type RootWidget struct {
+	DefaultWidget
+}
+
+func (d *RootWidget) DefaultSize(context *Context) (int, int) {
+	return context.app.bounds().Dx(), context.app.bounds().Dy()
 }

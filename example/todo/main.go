@@ -35,7 +35,7 @@ func NewTask(text string) Task {
 }
 
 type Root struct {
-	guigui.DefaultWidget
+	guigui.RootWidget
 
 	background        basicwidget.Background
 	createButton      basicwidget.TextButton
@@ -47,13 +47,13 @@ type Root struct {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	w, h := context.Size(r)
+	context.SetSize(&r.background, w, h)
 	appender.AppendChildWidget(&r.background)
 
 	u := float64(basicwidget.UnitSize(context))
 
-	width, _ := context.Size(r)
-	w := width - int(6.5*u)
-	context.SetSize(&r.textField, w, int(u))
+	context.SetSize(&r.textField, w-int(6.5*u), int(u))
 	r.textField.SetOnEnterPressed(func(text string) {
 		r.tryCreateTask()
 	})
@@ -74,14 +74,12 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	{
 		p := context.Position(r)
-		w, _ := context.Size(r)
 		p.X += w - int(0.5*u) - int(5*u)
 		p.Y += int(0.5 * u)
 		context.SetPosition(&r.createButton, p)
 		appender.AppendChildWidget(&r.createButton)
 	}
 
-	w, h := context.Size(r)
 	context.SetSize(&r.tasksPanel, w, h-int(2*u))
 	r.tasksPanelContent.SetTasks(context, r.tasks)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {

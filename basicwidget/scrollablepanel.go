@@ -34,11 +34,14 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	offsetX, offsetY := s.scollOverlay.Offset()
 	p = p.Add(image.Pt(int(offsetX), int(offsetY)))
 	context.SetPosition(s.content, p)
+	w, h := context.Size(s)
+	context.SetSize(s.content, w, h)
 	appender.AppendChildWidget(s.content)
 
-	w, h := context.Size(s.content)
-	s.scollOverlay.SetContentSize(context, w, h)
+	cw, ch := context.Size(s.content)
+	s.scollOverlay.SetContentSize(context, cw, ch)
 	context.SetPosition(&s.scollOverlay, context.Position(s))
+	context.SetSize(&s.scollOverlay, w, h)
 	appender.AppendChildWidget(&s.scollOverlay)
 
 	s.border.scrollOverlay = &s.scollOverlay
@@ -46,10 +49,6 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	appender.AppendChildWidget(&s.border)
 
 	return nil
-}
-
-func (s *ScrollablePanel) DefaultSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), 6 * UnitSize(context)
 }
 
 type scrollablePanelBorder struct {
