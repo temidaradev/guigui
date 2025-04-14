@@ -78,7 +78,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := context.Size(s)
-	context.SetSize(&s.form, w-int(1*u), guigui.AutoSize)
+	context.SetSize(&s.form, w-int(1*u), guigui.DefaultSize)
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &s.colorModeText,

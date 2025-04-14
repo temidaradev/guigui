@@ -180,7 +180,7 @@ func (c *Context) SetPosition(widget Widget, position image.Point) {
 	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
 }
 
-const AutoSize = -1
+const DefaultSize = -1
 
 func (c *Context) SetSize(widget Widget, width, height int) {
 	widget.widgetState().widthPlus1 = width + 1

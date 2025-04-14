@@ -28,11 +28,11 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		})
 	}
 	l.textList.SetItems(items)
-	context.SetSize(&l.textList, guigui.AutoSize, 6*basicwidget.UnitSize(context))
+	context.SetSize(&l.textList, guigui.DefaultSize, 6*basicwidget.UnitSize(context))
 
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := context.Size(l)
-	context.SetSize(&l.form, w-int(1*u), guigui.AutoSize)
+	context.SetSize(&l.form, w-int(1*u), guigui.DefaultSize)
 	l.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &l.textListText,

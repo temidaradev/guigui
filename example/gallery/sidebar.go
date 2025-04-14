@@ -90,7 +90,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	for i := range s.listItemWidgets {
 		t := &s.listItemWidgets[i]
 		t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-		context.SetSize(t, guigui.AutoSize, basicwidget.UnitSize(context))
+		context.SetSize(t, guigui.DefaultSize, basicwidget.UnitSize(context))
 		if s.list.SelectedItemIndex() == i {
 			t.SetColor(basicwidget.DefaultActiveListItemTextColor(context))
 		} else {
