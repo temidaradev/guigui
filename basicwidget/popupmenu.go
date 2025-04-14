@@ -29,7 +29,7 @@ func (p *PopupMenu) SetCheckmarkIndex(index int) {
 func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.content.popupMenu = p
 
-	// Do not set a text list as a content directly, or the text list size will be modified.
+	// Do not set a text list as a content directly, or the text list size will be fixed by guigui.SetSize.
 	p.popup.SetContent(&p.content)
 	p.popup.SetCloseByClickingOutside(true)
 	p.popup.SetOnClosed(func(reason PopupClosedReason) {

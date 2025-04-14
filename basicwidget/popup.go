@@ -78,6 +78,7 @@ func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
 }
 
 func (p *Popup) SetContentBounds(bounds image.Rectangle) {
+	// TODO: Why not using the original content bounds?
 	if (p.showing || p.hiding) && p.openingCount > 0 {
 		p.nextContentBounds = bounds
 		return
