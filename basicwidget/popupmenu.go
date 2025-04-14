@@ -42,7 +42,9 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 			p.onClosed(p.textList.SelectedItemIndex())
 		}
 	})
-	p.popup.SetContentPosition(p.contentBounds(context).Min)
+	bounds := p.contentBounds(context)
+	p.popup.SetContentPosition(bounds.Min)
+	context.SetSize(&p.textList, guigui.AutoSize, bounds.Dy())
 	appender.AppendChildWidget(&p.popup)
 
 	// Sync the visibility with the popup.
@@ -58,10 +60,11 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	pos := context.Position(p)
-	w, h := context.Size(&p.textList)
+	// textList's size is updated at Build so do not call guigui.Size to determine the content size.
+	// Call DefaultSize instead.
+	w, h := p.textList.DefaultSize(context)
 	if h > 24*UnitSize(context) {
 		h = 24 * UnitSize(context)
-		context.SetSize(&p.textList, guigui.AutoSize, h)
 	}
 	r := image.Rectangle{
 		Min: pos,
