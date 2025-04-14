@@ -128,7 +128,7 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 
 	bounds := p.ContentBounds(context)
 	context.SetPosition(&p.content, bounds.Min)
-	p.content.setSize(bounds.Dx(), bounds.Dy())
+	context.SetSize(&p.content, bounds.Dx(), bounds.Dy())
 	appender.AppendChildWidget(&p.content)
 
 	appender.AppendChildWidget(&p.frame)
@@ -247,9 +247,6 @@ type popupContent struct {
 	popup *Popup
 
 	content guigui.Widget
-
-	width  int
-	height int
 }
 
 func (p *popupContent) setContent(widget guigui.Widget) {
@@ -275,15 +272,6 @@ func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := p.popup.ContentBounds(context)
 	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
-}
-
-func (p *popupContent) setSize(width, height int) {
-	p.width = width
-	p.height = height
-}
-
-func (p *popupContent) DefaultSize(context *guigui.Context) (int, int) {
-	return p.width, p.height
 }
 
 type popupFrame struct {
