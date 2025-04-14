@@ -85,12 +85,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		X: bounds.Min.X + (bounds.Dx()-contentWidth)/2,
 		Y: bounds.Min.Y + (bounds.Dy()-contentHeight)/2,
 	}
-	contentBounds := image.Rectangle{
-		Min: contentPosition,
-		Max: contentPosition.Add(image.Pt(contentWidth, contentHeight)),
-	}
 	context.SetSize(&p.simplePopupContent, contentWidth, contentHeight)
-	p.simplePopup.SetContentBounds(contentBounds)
+	p.simplePopup.SetContentPosition(contentPosition)
 	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleButton.Value())
 	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
 	p.simplePopup.SetAnimationDuringFade(true)

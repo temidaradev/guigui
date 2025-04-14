@@ -50,8 +50,9 @@ type Popup struct {
 	backgroundBlurred      bool
 	closeByClickingOutside bool
 	animateOnFading        bool
-	contentBounds          image.Rectangle
-	nextContentBounds      image.Rectangle
+	contentPosition        image.Point
+	nextContentPosition    image.Point
+	hasNextContentPosition bool
 	openAfterClose         bool
 
 	initOnce sync.Once
@@ -68,23 +69,31 @@ func (p *Popup) openingRate() float64 {
 }
 
 func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
-	if !p.animateOnFading {
-		return p.contentBounds
+	if p.content.content == nil {
+		return image.Rectangle{}
 	}
-	rate := p.openingRate()
-	bounds := p.contentBounds
-	dy := int(-float64(UnitSize(context)) * (1 - rate))
-	return bounds.Add(image.Pt(0, dy))
+	pt := p.contentPosition
+	if p.animateOnFading {
+		rate := p.openingRate()
+		dy := int(-float64(UnitSize(context)) * (1 - rate))
+		pt = pt.Add(image.Pt(0, dy))
+	}
+	w, h := context.Size(p.content.content)
+	return image.Rectangle{
+		Min: pt,
+		Max: pt.Add(image.Pt(w, h)),
+	}
 }
 
-func (p *Popup) SetContentBounds(bounds image.Rectangle) {
-	// TODO: Why not using the original content bounds?
+func (p *Popup) SetContentPosition(position image.Point) {
 	if (p.showing || p.hiding) && p.openingCount > 0 {
-		p.nextContentBounds = bounds
+		p.nextContentPosition = position
+		p.hasNextContentPosition = true
 		return
 	}
-	p.contentBounds = bounds
-	p.nextContentBounds = image.Rectangle{}
+	p.contentPosition = position
+	p.nextContentPosition = image.Point{}
+	p.hasNextContentPosition = false
 }
 
 func (p *Popup) SetBackgroundBlurred(blurBackground bool) {
@@ -195,9 +204,9 @@ func (p *Popup) Update(context *guigui.Context) error {
 		}
 		if p.openingCount == popupMaxOpeningCount() {
 			p.showing = false
-			if !p.nextContentBounds.Empty() {
-				p.contentBounds = p.nextContentBounds
-				p.nextContentBounds = image.Rectangle{}
+			if p.hasNextContentPosition {
+				p.contentPosition = p.nextContentPosition
+				p.hasNextContentPosition = false
 			}
 		}
 	}
@@ -216,9 +225,9 @@ func (p *Popup) Update(context *guigui.Context) error {
 				p.onClosed(p.closedReason)
 			}
 			if p.openAfterClose {
-				if !p.nextContentBounds.Empty() {
-					p.contentBounds = p.nextContentBounds
-					p.nextContentBounds = image.Rectangle{}
+				if p.hasNextContentPosition {
+					p.contentPosition = p.nextContentPosition
+					p.hasNextContentPosition = false
 				}
 				p.Open(context)
 				p.openAfterClose = false
