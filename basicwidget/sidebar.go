@@ -35,7 +35,3 @@ func (s *Sidebar) Draw(context *guigui.Context, dst *ebiten.Image) {
 	b.Min.X = b.Max.X - int(1*context.Scale())
 	dst.SubImage(b).(*ebiten.Image).Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85))
 }
-
-func (s *Sidebar) DefaultSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), 6 * UnitSize(context)
-}
