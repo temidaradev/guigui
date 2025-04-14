@@ -36,11 +36,8 @@ func (*DefaultWidget) CursorShape(context *Context) (ebiten.CursorShapeType, boo
 func (*DefaultWidget) Draw(context *Context, dst *ebiten.Image) {
 }
 
-func (d *DefaultWidget) Z() int {
-	if d.widgetState_.parent == nil {
-		return 0
-	}
-	return d.widgetState_.parent.Z()
+func (d *DefaultWidget) ZDelta() int {
+	return 0
 }
 
 func (d *DefaultWidget) DefaultSize(context *Context) (int, int) {

@@ -980,8 +980,8 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
 }
 
-func (t *textCursor) Z() int {
-	return guigui.Parent(t).Z() + 1
+func (t *textCursor) ZDelta() int {
+	return 1
 }
 
 func (t *textCursor) DefaultSize(context *guigui.Context) (int, int) {

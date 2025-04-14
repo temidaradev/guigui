@@ -228,8 +228,8 @@ func (p *Popup) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bo
 	return ebiten.CursorShapeDefault, true
 }
 
-func (p *Popup) Z() int {
-	return guigui.Parent(p).Z() + popupZ
+func (p *Popup) ZDelta() int {
+	return popupZ
 }
 
 func (p *Popup) DefaultSize(context *guigui.Context) (int, int) {

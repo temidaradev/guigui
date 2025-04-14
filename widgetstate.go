@@ -28,7 +28,7 @@ func (w *widgetsAndBounds) append(widget Widget, bounds image.Rectangle) {
 	}
 	w.bounds3Ds[widget] = bounds3D{
 		bounds: bounds,
-		z:      widget.Z(),
+		z:      z(widget),
 	}
 }
 
@@ -44,7 +44,7 @@ func (w *widgetsAndBounds) equals(context *Context, currentWidgets []Widget) boo
 		if b.bounds != context.Bounds(widget) {
 			return false
 		}
-		if b.z != widget.Z() {
+		if b.z != z(widget) {
 			return false
 		}
 	}
@@ -53,7 +53,7 @@ func (w *widgetsAndBounds) equals(context *Context, currentWidgets []Widget) boo
 
 func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
 	for widget, bounds3D := range w.bounds3Ds {
-		if isDifferentParentZ(widget) {
+		if widget.ZDelta() != 0 {
 			app.requestRedraw(bounds3D.bounds)
 			RequestRedraw(widget)
 		}
@@ -136,14 +136,15 @@ func traverseWidget(widget Widget, f func(widget Widget) error) error {
 	return nil
 }
 
-func isDifferentParentZ(widget Widget) bool {
-	parent := widget.widgetState().parent
-	if parent == nil {
-		return false
-	}
-	return widget.Z() != parent.Z()
-}
-
 func RequestRedraw(widget Widget) {
 	widget.widgetState().dirty = true
+}
+
+func z(widget Widget) int {
+	var r int
+	if parent := widget.widgetState().parent; parent != nil {
+		r = z(parent)
+	}
+	r += widget.ZDelta()
+	return r
 }

@@ -218,7 +218,7 @@ func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
 	if parent == nil {
 		return c.app.bounds()
 	}
-	if isDifferentParentZ(widget) {
+	if widget.ZDelta() != 0 {
 		return c.Bounds(widget)
 	}
 	return c.VisibleBounds(parent).Intersect(c.Bounds(widget))

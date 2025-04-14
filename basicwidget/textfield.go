@@ -135,8 +135,8 @@ func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)
 }
 
-func (t *textFieldFocus) Z() int {
-	return guigui.Parent(t).Z() + 1
+func (t *textFieldFocus) ZDelta() int {
+	return 1
 }
 
 func (t *textFieldFocus) DefaultSize(context *guigui.Context) (int, int) {

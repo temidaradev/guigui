@@ -287,7 +287,7 @@ func (a *app) requestRedrawWidget(widget Widget) {
 }
 
 func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
-	if isDifferentParentZ(widget) {
+	if widget.ZDelta() != 0 {
 		a.requestRedrawWidget(widget)
 		return
 	}
@@ -317,7 +317,7 @@ func (a *app) build() error {
 		if a.visitedZs == nil {
 			a.visitedZs = map[int]struct{}{}
 		}
-		a.visitedZs[widget.Z()] = struct{}{}
+		a.visitedZs[z(widget)] = struct{}{}
 		return nil
 	})
 
@@ -363,7 +363,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 		}
 	}
 
-	if zToHandle != widget.Z() {
+	if zToHandle != z(widget) {
 		return HandleInputResult{}
 	}
 
@@ -401,7 +401,7 @@ func (a *app) doCursorShape(widget Widget, zToHandle int) bool {
 		}
 	}
 
-	if zToHandle != widget.Z() {
+	if zToHandle != z(widget) {
 		return false
 	}
 
@@ -448,7 +448,7 @@ func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 		// Widgets with different Z from their parent's Z (e.g. popups) are outside of widget, so redraw the regions explicitly.
 		widgetState.prev.redrawIfDifferentParentZ(a)
 		for _, child := range widgetState.children {
-			if isDifferentParentZ(child) {
+			if child.ZDelta() != 0 {
 				a.requestRedraw(a.context.VisibleBounds(child))
 			}
 		}
@@ -495,7 +495,7 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 	}
 
 	var origDst *ebiten.Image
-	renderCurrent := zToRender == widget.Z()
+	renderCurrent := zToRender == z(widget)
 	if renderCurrent {
 		if widgetState.opacity() < 1 {
 			origDst = dst
@@ -573,7 +573,7 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 	}
 
 	for _, w := range widgets {
-		if w.Z() != widget.Z() {
+		if z(w) != z(widget) {
 			return false
 		}
 		if w.widgetState() == widget.widgetState() {
@@ -596,7 +596,7 @@ func (a *app) widgetsAt(point image.Point) iter.Seq[Widget] {
 	}
 }
 
-func (a *app) doWidgetsAt(point image.Point, z int, widget Widget) iter.Seq[Widget] {
+func (a *app) doWidgetsAt(point image.Point, targetZ int, widget Widget) iter.Seq[Widget] {
 	return func(yield func(w Widget) bool) {
 		if !widget.widgetState().isVisible() {
 			return
@@ -608,13 +608,13 @@ func (a *app) doWidgetsAt(point image.Point, z int, widget Widget) iter.Seq[Widg
 		children := widget.widgetState().children
 		for i := len(children) - 1; i >= 0; i-- {
 			child := children[i]
-			for widget := range a.doWidgetsAt(point, z, child) {
+			for widget := range a.doWidgetsAt(point, targetZ, child) {
 				if !yield(widget) {
 					return
 				}
 			}
 		}
-		if widget.Z() != z {
+		if z(widget) != targetZ {
 			return
 		}
 		if !point.In(a.context.VisibleBounds(widget)) {

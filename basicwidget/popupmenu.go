@@ -87,8 +87,8 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	return r
 }
 
-func (p *PopupMenu) Z() int {
-	return guigui.Parent(p).Z() + popupZ
+func (p *PopupMenu) ZDelta() int {
+	return popupZ
 }
 
 func (p *PopupMenu) Open(context *guigui.Context) {
