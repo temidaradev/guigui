@@ -201,19 +201,20 @@ func (a *app) Update() error {
 	a.resetPrevWidgets(a.root)
 
 	// Resolve dirty widgets.
-	traverseWidget(a.root, func(widget Widget) {
+	_ = traverseWidget(a.root, func(widget Widget) error {
 		if !widget.widgetState().dirty {
-			return
+			return nil
 		}
 		vb := a.context.VisibleBounds(widget)
 		if vb.Empty() {
-			return
+			return nil
 		}
 		if theDebugMode.showRenderingRegions {
 			slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
 		}
 		a.requestRedrawWidget(widget)
 		widget.widgetState().dirty = false
+		return nil
 	})
 
 	if theDebugMode.showRenderingRegions {
@@ -296,17 +297,28 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 }
 
 func (a *app) build() error {
-	if err := a.doBuild(a.root); err != nil {
+	if err := traverseWidget(a.root, func(widget Widget) error {
+		widgetState := widget.widgetState()
+		widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
+		if err := widget.Build(&a.context, &ChildWidgetAppender{
+			app:    a,
+			widget: widget,
+		}); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
 
 	// Calculate z values.
 	clear(a.visitedZs)
-	traverseWidget(a.root, func(widget Widget) {
+	_ = traverseWidget(a.root, func(widget Widget) error {
 		if a.visitedZs == nil {
 			a.visitedZs = map[int]struct{}{}
 		}
 		a.visitedZs[widget.Z()] = struct{}{}
+		return nil
 	})
 
 	a.zs = slices.Delete(a.zs, 0, len(a.zs))
@@ -317,23 +329,6 @@ func (a *app) build() error {
 		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
 	}
 
-	return nil
-}
-
-func (a *app) doBuild(widget Widget) error {
-	widgetState := widget.widgetState()
-	widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
-	if err := widget.Build(&a.context, &ChildWidgetAppender{
-		app:    a,
-		widget: widget,
-	}); err != nil {
-		return err
-	}
-	for _, child := range widgetState.children {
-		if err := a.doBuild(child); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

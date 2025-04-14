@@ -124,11 +124,16 @@ func (w *widgetState) ensureOffscreen(bounds image.Rectangle) *ebiten.Image {
 	return w.offscreen.SubImage(bounds).(*ebiten.Image)
 }
 
-func traverseWidget(widget Widget, f func(widget Widget)) {
-	f(widget)
-	for _, child := range widget.widgetState().children {
-		traverseWidget(child, f)
+func traverseWidget(widget Widget, f func(widget Widget) error) error {
+	if err := f(widget); err != nil {
+		return err
 	}
+	for _, child := range widget.widgetState().children {
+		if err := traverseWidget(child, f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func isDifferentParentZ(widget Widget) bool {
