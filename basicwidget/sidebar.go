@@ -37,6 +37,5 @@ func (s *Sidebar) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (s *Sidebar) DefaultSize(context *guigui.Context) (int, int) {
-	_, h := context.Size(guigui.Parent(s))
-	return 6 * UnitSize(context), h
+	return 6 * UnitSize(context), 6 * UnitSize(context)
 }

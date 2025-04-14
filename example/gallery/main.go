@@ -28,22 +28,23 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	appender.AppendChildWidget(&r.background)
 	appender.AppendChildWidget(&r.sidebar)
 
+	sw := 8 * basicwidget.UnitSize(context)
+	rw, rh := context.Size(r)
+	context.SetSize(&r.sidebar, sw, rh)
 	context.SetPosition(&r.sidebar, context.Position(r))
-	rw, _ := context.Size(r)
-	sw, _ := context.Size(&r.sidebar)
 	p := context.Position(r)
 	p.X += sw
 	pw := rw - sw
 	context.SetPosition(&r.settings, p)
-	context.SetSize(&r.settings, pw, guigui.AutoSize)
+	context.SetSize(&r.settings, pw, rh)
 	context.SetPosition(&r.basic, p)
-	context.SetSize(&r.basic, pw, guigui.AutoSize)
+	context.SetSize(&r.basic, pw, rh)
 	context.SetPosition(&r.buttons, p)
-	context.SetSize(&r.buttons, pw, guigui.AutoSize)
+	context.SetSize(&r.buttons, pw, rh)
 	context.SetPosition(&r.lists, p)
-	context.SetSize(&r.lists, pw, guigui.AutoSize)
+	context.SetSize(&r.lists, pw, rh)
 	context.SetPosition(&r.popups, p)
-	context.SetSize(&r.popups, pw, guigui.AutoSize)
+	context.SetSize(&r.popups, pw, rh)
 
 	switch r.sidebar.SelectedItemTag() {
 	case "settings":

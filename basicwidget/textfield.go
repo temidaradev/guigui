@@ -137,7 +137,7 @@ func (t *textFieldFocus) ZDelta() int {
 }
 
 func (t *textFieldFocus) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := context.Size(guigui.Parent(t))
+	w, h := context.Size(t.textField)
 	w += 2 * textFieldFocusBorderWidth(context)
 	h += 2 * textFieldFocusBorderWidth(context)
 	return w, h

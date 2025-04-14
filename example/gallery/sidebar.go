@@ -17,22 +17,14 @@ type Sidebar struct {
 	sidebarContent sidebarContent
 }
 
-func sidebarWidth(context *guigui.Context) int {
-	return 8 * basicwidget.UnitSize(context)
-}
-
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	context.SetSize(&s.sidebar, sidebarWidth(context), guigui.AutoSize)
+	w, h := context.Size(s)
+	context.SetSize(&s.sidebar, w, h)
 	s.sidebar.SetContent(&s.sidebarContent)
 	context.SetPosition(&s.sidebar, context.Position(s))
 	appender.AppendChildWidget(&s.sidebar)
 
 	return nil
-}
-
-func (s *Sidebar) DefaultSize(context *guigui.Context) (int, int) {
-	_, h := context.Size(guigui.Parent(s))
-	return sidebarWidth(context), h
 }
 
 func (s *Sidebar) SelectedItemTag() string {
@@ -111,8 +103,8 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 		s.list.SetSelectedItemIndex(0)
 	})
 
-	_, h := context.Size(s)
-	context.SetSize(&s.list, sidebarWidth(context), h)
+	w, h := context.Size(s)
+	context.SetSize(&s.list, w, h)
 	context.SetPosition(&s.list, context.Position(s))
 	appender.AppendChildWidget(&s.list)
 

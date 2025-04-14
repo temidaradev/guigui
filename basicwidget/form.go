@@ -149,8 +149,7 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (f *Form) DefaultSize(context *guigui.Context) (int, int) {
-	w, _ := context.Size(guigui.Parent(f))
-	return w, f.height(context)
+	return 6 * UnitSize(context), f.height(context)
 }
 
 func (f *Form) height(context *guigui.Context) int {

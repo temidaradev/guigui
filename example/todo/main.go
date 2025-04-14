@@ -91,6 +91,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
 	context.SetPosition(&r.tasksPanel, context.Position(r).Add(image.Pt(0, int(2*u))))
+	context.SetSize(&r.tasksPanelContent, w, guigui.AutoSize)
 	appender.AppendChildWidget(&r.tasksPanel)
 
 	return nil
@@ -142,8 +143,8 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetPosition(&t.doneButton, p)
 	appender.AppendChildWidget(&t.doneButton)
 
-	w, _ := context.Size(t)
-	context.SetSize(&t.text, w-int(4.5*u), int(u))
+	w, h := context.Size(t)
+	context.SetSize(&t.text, w-int(4.5*u), h)
 	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 	context.SetPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
 	appender.AppendChildWidget(&t.text)
@@ -151,8 +152,8 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 }
 
 func (t *taskWidget) DefaultSize(context *guigui.Context) (int, int) {
-	w, _ := context.Size(guigui.Parent(t))
-	return w, int(basicwidget.UnitSize(context))
+	_, h := context.Size(&t.doneButton)
+	return 6 * int(basicwidget.UnitSize(context)), h
 }
 
 type tasksPanelContent struct {
@@ -199,6 +200,8 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 			y += int(u / 4)
 		}
 		context.SetPosition(&t.taskWidgets[i], image.Pt(x, y))
+		w, _ := context.Size(t)
+		context.SetSize(&t.taskWidgets[i], w, int(u))
 		appender.AppendChildWidget(&t.taskWidgets[i])
 		y += int(u)
 	}
@@ -208,11 +211,13 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 
 func (t *tasksPanelContent) DefaultSize(context *guigui.Context) (int, int) {
 	u := basicwidget.UnitSize(context)
-
-	w, _ := context.Size(guigui.Parent(t))
-	c := len(t.taskWidgets)
-	h := c * (u + u/4)
-	return w, h
+	var h int
+	for i := range t.taskWidgets {
+		_, th := context.Size(&t.taskWidgets[i])
+		h += th
+		h += int(u / 4)
+	}
+	return 6 * int(u), h
 }
 
 func main() {

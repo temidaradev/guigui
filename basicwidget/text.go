@@ -152,6 +152,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p := context.Position(t)
 		p.X -= cursorWidth(context)
 		context.SetPosition(&t.cursor, p)
+		w, h := context.Size(t)
+		context.SetSize(&t.cursor, w+2*cursorWidth(context), h)
 		appender.AppendChildWidget(&t.cursor)
 	}
 
@@ -983,9 +985,4 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 func (t *textCursor) ZDelta() int {
 	return 1
-}
-
-func (t *textCursor) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := context.Size(guigui.Parent(t))
-	return w + 2*cursorWidth(context), h
 }

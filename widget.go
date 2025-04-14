@@ -41,7 +41,3 @@ func AbortHandlingInputByWidget(widget Widget) HandleInputResult {
 func (r *HandleInputResult) shouldRaise() bool {
 	return r.widget != nil || r.aborted
 }
-
-func Parent(widget Widget) Widget {
-	return widget.widgetState().parent
-}
