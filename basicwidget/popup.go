@@ -108,6 +108,11 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		context.Hide(p)
 	})
 
+	p.background.popup = p
+	p.shadow.popup = p
+	p.content.popup = p
+	p.frame.popup = p
+
 	// SetOpacity cannot be called for p.background so far.
 	// If opacity is less than 1, the dst argument of Draw will an empty image in the current implementation.
 	// TODO: This is too tricky. Refactor this.
@@ -239,6 +244,8 @@ func (p *Popup) DefaultSize(context *guigui.Context) (int, int) {
 type popupContent struct {
 	guigui.DefaultWidget
 
+	popup *Popup
+
 	content guigui.Widget
 
 	width  int
@@ -265,8 +272,7 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 }
 
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
-	popup := guigui.Parent(p).(*Popup)
-	bounds := popup.ContentBounds(context)
+	bounds := p.popup.ContentBounds(context)
 	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
@@ -282,17 +288,20 @@ func (p *popupContent) DefaultSize(context *guigui.Context) (int, int) {
 
 type popupFrame struct {
 	guigui.DefaultWidget
+
+	popup *Popup
 }
 
 func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
-	popup := guigui.Parent(p).(*Popup)
-	bounds := popup.ContentBounds(context)
+	bounds := p.popup.ContentBounds(context)
 	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.75)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 }
 
 type popupBackground struct {
 	guigui.DefaultWidget
+
+	popup *Popup
 
 	backgroundCache *ebiten.Image
 }
@@ -307,8 +316,7 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 		p.backgroundCache = ebiten.NewImageWithOptions(bounds, nil)
 	}
 
-	popup := guigui.Parent(p).(*Popup)
-	rate := popup.openingRate()
+	rate := p.popup.openingRate()
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
@@ -320,11 +328,12 @@ func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 type popupShadow struct {
 	guigui.DefaultWidget
+
+	popup *Popup
 }
 
 func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
-	popup := guigui.Parent(p).(*Popup)
-	bounds := popup.ContentBounds(context)
+	bounds := p.popup.ContentBounds(context)
 	bounds.Min.X -= int(16 * context.Scale())
 	bounds.Max.X += int(16 * context.Scale())
 	bounds.Min.Y -= int(8 * context.Scale())

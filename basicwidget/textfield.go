@@ -71,6 +71,7 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	appender.AppendChildWidget(&t.text)
 
 	if context.HasFocusedChildWidget(t) {
+		t.focus.textField = t
 		w := textFieldFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))
 		context.SetPosition(&t.focus, p)
@@ -109,11 +110,6 @@ func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0), RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
 
-func defaultTextFieldSize(context *guigui.Context) (int, int) {
-	// TODO: Increase the height for multiple lines.
-	return 6 * UnitSize(context), UnitSize(context)
-}
-
 func (t *TextField) DefaultSize(context *guigui.Context) (int, int) {
 	// TODO: Increase the height for multiple lines.
 	return 6 * UnitSize(context), UnitSize(context)
@@ -125,11 +121,12 @@ func textFieldFocusBorderWidth(context *guigui.Context) int {
 
 type textFieldFocus struct {
 	guigui.DefaultWidget
+
+	textField *TextField
 }
 
 func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
-	textField := guigui.Parent(t).(*TextField)
-	bounds := context.Bounds(textField)
+	bounds := context.Bounds(t.textField)
 	w := textFieldFocusBorderWidth(context)
 	bounds = bounds.Inset(-w)
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)

@@ -98,6 +98,7 @@ func (l *List) contentSize(context *guigui.Context) (int, int) {
 
 func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
+		l.listFrame.list = l
 		context.SetPosition(&l.listFrame, context.Position(l))
 		appender.AppendChildWidget(&l.listFrame)
 	}
@@ -547,11 +548,13 @@ func (l *List) DefaultSize(context *guigui.Context) (int, int) {
 
 type listFrame struct {
 	guigui.DefaultWidget
+
+	list *List
 }
 
 func (l *listFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	border := draw.RoundedRectBorderTypeInset
-	if guigui.Parent(l).(*List).style != ListStyleNormal {
+	if l.list.style != ListStyleNormal {
 		border = draw.RoundedRectBorderTypeOutset
 	}
 	bounds := context.Bounds(l)

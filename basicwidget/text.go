@@ -922,6 +922,8 @@ func (t *Text) cursorBounds(context *guigui.Context) image.Rectangle {
 type textCursor struct {
 	guigui.DefaultWidget
 
+	text *Text
+
 	counter    int
 	prevShown  bool
 	prevX      float64
@@ -935,8 +937,7 @@ func (t *textCursor) resetCounter() {
 }
 
 func (t *textCursor) Update(context *guigui.Context) error {
-	text := guigui.Parent(t).(*Text)
-	x, top, bottom, ok := text.cursorPosition(context)
+	x, top, bottom, ok := t.text.cursorPosition(context)
 	if t.prevX != x || t.prevTop != top || t.prevBottom != bottom || t.prevOK != ok {
 		t.resetCounter()
 	}
@@ -946,7 +947,7 @@ func (t *textCursor) Update(context *guigui.Context) error {
 	t.prevOK = ok
 
 	t.counter++
-	if r := t.shouldRenderCursor(context, text); t.prevShown != r {
+	if r := t.shouldRenderCursor(context, t.text); t.prevShown != r {
 		t.prevShown = r
 		// TODO: This is not efficient. Improve this.
 		guigui.RequestRedraw(t)
