@@ -12,8 +12,8 @@ import (
 type PopupMenu struct {
 	guigui.DefaultWidget
 
-	popup   Popup
-	content popupMenuContent
+	textList TextList
+	popup    Popup
 
 	onClosed func(index int)
 }
@@ -23,21 +23,26 @@ func (p *PopupMenu) SetOnClosed(f func(index int)) {
 }
 
 func (p *PopupMenu) SetCheckmarkIndex(index int) {
-	p.content.setCheckmarkIndex(index)
+	p.textList.SetCheckmarkIndex(index)
 }
 
 func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.content.popupMenu = p
+	p.textList.SetStyle(ListStyleMenu)
+	p.textList.list.SetOnItemSelected(func(index int) {
+		p.popup.Close()
+		if p.onClosed != nil {
+			p.onClosed(index)
+		}
+	})
 
-	// Do not set a text list as a content directly, or the text list size will be fixed by guigui.SetSize.
-	p.popup.SetContent(&p.content)
+	p.popup.SetContent(&p.textList)
 	p.popup.SetCloseByClickingOutside(true)
 	p.popup.SetOnClosed(func(reason PopupClosedReason) {
 		if p.onClosed != nil {
-			p.onClosed(p.content.selectedItemIndex())
+			p.onClosed(p.textList.SelectedItemIndex())
 		}
 	})
-	p.popup.SetContentBounds(p.content.contentBounds(context))
+	p.popup.SetContentBounds(p.contentBounds(context))
 	appender.AppendChildWidget(&p.popup)
 
 	// Sync the visibility with the popup.
@@ -51,59 +56,8 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	return nil
 }
 
-func (p *PopupMenu) ZDelta() int {
-	return popupZ
-}
-
-func (p *PopupMenu) Open(context *guigui.Context) {
-	context.Show(p)
-	p.popup.Open(context)
-}
-
-func (p *PopupMenu) Close() {
-	p.popup.Close()
-}
-
-func (p *PopupMenu) SetItemsByStrings(items []string) {
-	p.content.setItemsByStrings(items)
-}
-
-func (p *PopupMenu) SelectedItem() (TextListItem, bool) {
-	return p.content.selectedItem()
-}
-
-func (p *PopupMenu) SelectedItemIndex() int {
-	return p.content.selectedItemIndex()
-}
-
-func (p *PopupMenu) SetSelectedItemIndex(index int) {
-	p.content.setSelectedItemIndex(index)
-}
-
-type popupMenuContent struct {
-	guigui.DefaultWidget
-
-	popupMenu *PopupMenu
-
-	textList TextList
-}
-
-func (p *popupMenuContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.textList.SetStyle(ListStyleMenu)
-	p.textList.SetOnItemSelected(func(index int) {
-		p.popupMenu.Close()
-		if p.popupMenu.onClosed != nil {
-			p.popupMenu.onClosed(index)
-		}
-	})
-	pt := context.Position(p)
-	context.SetPosition(&p.textList, pt)
-	appender.AppendChildWidget(&p.textList)
-	return nil
-}
-
-func (p *popupMenuContent) contentBounds(context *guigui.Context) image.Rectangle {
-	pos := context.Position(p.popupMenu)
+func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
+	pos := context.Position(p)
 	w, h := context.Size(&p.textList)
 	if h > 24*UnitSize(context) {
 		h = 24 * UnitSize(context)
@@ -133,22 +87,31 @@ func (p *popupMenuContent) contentBounds(context *guigui.Context) image.Rectangl
 	return r
 }
 
-func (p *popupMenuContent) setCheckmarkIndex(index int) {
-	p.textList.SetCheckmarkIndex(index)
+func (p *PopupMenu) ZDelta() int {
+	return popupZ
 }
 
-func (p *popupMenuContent) setItemsByStrings(items []string) {
+func (p *PopupMenu) Open(context *guigui.Context) {
+	context.Show(p)
+	p.popup.Open(context)
+}
+
+func (p *PopupMenu) Close() {
+	p.popup.Close()
+}
+
+func (p *PopupMenu) SetItemsByStrings(items []string) {
 	p.textList.SetItemsByStrings(items)
 }
 
-func (p *popupMenuContent) selectedItem() (TextListItem, bool) {
+func (p *PopupMenu) SelectedItem() (TextListItem, bool) {
 	return p.textList.SelectedItem()
 }
 
-func (p *popupMenuContent) selectedItemIndex() int {
+func (p *PopupMenu) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
-func (p *popupMenuContent) setSelectedItemIndex(index int) {
+func (p *PopupMenu) SetSelectedItemIndex(index int) {
 	p.textList.SetSelectedItemIndex(index)
 }

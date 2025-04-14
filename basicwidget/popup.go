@@ -257,8 +257,6 @@ func (p *popupContent) setContent(widget guigui.Widget) {
 func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content != nil {
 		context.SetPosition(p.content, context.Position(p))
-		w, h := context.Size(p)
-		context.SetSize(p.content, w, h)
 		appender.AppendChildWidget(p.content)
 	}
 	return nil
