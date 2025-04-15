@@ -4,6 +4,7 @@
 package basicwidget
 
 import (
+	"image"
 	"image/color"
 	"slices"
 
@@ -94,8 +95,7 @@ func (t *TextList) SetCheckmarkIndex(index int) {
 }
 
 func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	w, h := context.Size(t)
-	context.SetSize(&t.list, w, h)
+	context.SetSize(&t.list, context.Size(t))
 
 	// To use HasFocusedChildWidget correctly, create the tree first.
 	appender.AppendChildWidgetWithPosition(&t.list, context.Position(t))
@@ -206,7 +206,7 @@ func (t *TextList) MoveItem(from, to int) {
 	t.list.MoveItem(from, to)
 }
 
-func (t *TextList) DefaultSize(context *guigui.Context) (int, int) {
+func (t *TextList) DefaultSize(context *guigui.Context) image.Point {
 	return t.list.DefaultSize(context)
 }
 
@@ -237,8 +237,7 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 	p := context.Position(t)
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2
-		w, h := context.Size(t)
-		context.SetSize(&t.text, w-UnitSize(context), h)
+		context.SetSize(&t.text, context.Size(t).Add(image.Pt(-UnitSize(context), 0)))
 	}
 	t.text.SetText(t.textString())
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
@@ -257,10 +256,10 @@ func (t *textListItemWidget) textString() string {
 func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.textListItem.Border {
 		p := context.Position(t)
-		w, h := context.Size(t)
+		s := context.Size(t)
 		x0 := float32(p.X)
-		x1 := float32(p.X + w)
-		y := float32(p.Y) + float32(h)/2
+		x1 := float32(p.X + s.X)
+		y := float32(p.Y) + float32(s.Y)/2
 		width := float32(1 * context.Scale())
 		vector.StrokeLine(dst, x0, y, x1, y, width, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), false)
 		return
@@ -271,12 +270,12 @@ func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
-func (t *textListItemWidget) DefaultSize(context *guigui.Context) (int, int) {
-	w, _ := t.text.TextSize(context)
+func (t *textListItemWidget) DefaultSize(context *guigui.Context) image.Point {
+	w := t.text.TextSize(context).X
 	if t.textListItem.Border {
-		return w, UnitSize(context) / 2
+		return image.Pt(w, UnitSize(context)/2)
 	}
-	return w, int(LineHeight(context))
+	return image.Pt(w, int(LineHeight(context)))
 }
 
 /*func (t *textListItemWidget) index() int {

@@ -128,10 +128,10 @@ func (b *Button) SetForcePressed(pressed bool) {
 	b.forcePressed = pressed
 }
 
-func defaultButtonSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), UnitSize(context)
+func defaultButtonSize(context *guigui.Context) image.Point {
+	return image.Pt(6*UnitSize(context), UnitSize(context))
 }
 
-func (b *Button) DefaultSize(context *guigui.Context) (int, int) {
+func (b *Button) DefaultSize(context *guigui.Context) image.Point {
 	return defaultButtonSize(context)
 }

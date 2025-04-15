@@ -25,13 +25,12 @@ type Root struct {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	w, h := context.Size(r)
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
 	{
-		w, h := context.Size(r)
-		w -= 2 * basicwidget.UnitSize(context)
-		h -= 4 * basicwidget.UnitSize(context)
+		s := context.Size(r)
+		s.X -= 2 * basicwidget.UnitSize(context)
+		s.Y -= 4 * basicwidget.UnitSize(context)
 
 		r.counterText.SetSelectable(true)
 		r.counterText.SetBold(true)
@@ -45,12 +44,12 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p.Y += basicwidget.UnitSize(context)
 		appender.AppendChildWidgetWithBounds(&r.counterText, image.Rectangle{
 			Min: p,
-			Max: p.Add(image.Pt(w, h)),
+			Max: p.Add(s),
 		})
 	}
 
 	r.resetButton.SetText("Reset")
-	context.SetSize(&r.resetButton, 6*basicwidget.UnitSize(context), guigui.DefaultSize)
+	context.SetSize(&r.resetButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
 	})
@@ -62,31 +61,31 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	{
 		p := context.Position(r)
 		p.X += basicwidget.UnitSize(context)
-		p.Y += h - 2*basicwidget.UnitSize(context)
+		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
 		appender.AppendChildWidgetWithPosition(&r.resetButton, p)
 	}
 
 	r.incButton.SetText("Increment")
-	context.SetSize(&r.incButton, 6*basicwidget.UnitSize(context), guigui.DefaultSize)
+	context.SetSize(&r.incButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.incButton.SetOnUp(func() {
 		r.counter++
 	})
 	{
 		p := context.Position(r)
-		p.X += w - 7*basicwidget.UnitSize(context)
-		p.Y += h - 2*basicwidget.UnitSize(context)
+		p.X += context.Size(r).X - 7*basicwidget.UnitSize(context)
+		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
 		appender.AppendChildWidgetWithPosition(&r.incButton, p)
 	}
 
 	r.decButton.SetText("Decrement")
-	context.SetSize(&r.decButton, 6*basicwidget.UnitSize(context), guigui.DefaultSize)
+	context.SetSize(&r.decButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.decButton.SetOnUp(func() {
 		r.counter--
 	})
 	{
 		p := context.Position(r)
-		p.X += w - int(13.5*float64(basicwidget.UnitSize(context)))
-		p.Y += h - 2*basicwidget.UnitSize(context)
+		p.X += context.Size(r).X - int(13.5*float64(basicwidget.UnitSize(context)))
+		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
 		appender.AppendChildWidgetWithPosition(&r.decButton, p)
 	}
 

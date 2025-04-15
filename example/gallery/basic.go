@@ -34,8 +34,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
 	u := float64(basicwidget.UnitSize(context))
-	w, _ := context.Size(b)
-	context.SetSize(&b.form, w-int(1*u), guigui.DefaultSize)
+	context.SetSize(&b.form, image.Pt(context.Size(b).X-int(1*u), guigui.DefaultSize))
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,

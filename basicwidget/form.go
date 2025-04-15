@@ -73,10 +73,10 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 		var primaryH int
 		var secondaryH int
 		if item.PrimaryWidget != nil {
-			_, primaryH = context.Size(item.PrimaryWidget)
+			primaryH = context.Size(item.PrimaryWidget).Y
 		}
 		if item.SecondaryWidget != nil {
-			_, secondaryH = context.Size(item.SecondaryWidget)
+			secondaryH = context.Size(item.SecondaryWidget).Y
 		}
 		h := max(primaryH, secondaryH, minFormItemHeight(context))
 		baseBounds := context.Bounds(f)
@@ -87,11 +87,11 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 
 		if item.PrimaryWidget != nil {
 			bounds := baseBounds
-			ww, wh := context.Size(item.PrimaryWidget)
-			bounds.Max.X = bounds.Min.X + ww
-			pY := (h + 2*paddingY - wh) / 2
-			if wh < UnitSize(context)+2*paddingY {
-				pY = min(pY, max(0, (UnitSize(context)+2*paddingY-wh)/2))
+			ws := context.Size(item.PrimaryWidget)
+			bounds.Max.X = bounds.Min.X + ws.X
+			pY := (h + 2*paddingY - ws.Y) / 2
+			if ws.Y < UnitSize(context)+2*paddingY {
+				pY = min(pY, max(0, (UnitSize(context)+2*paddingY-ws.Y)/2))
 			}
 			bounds.Min.Y += pY
 			bounds.Max.Y += pY
@@ -99,11 +99,11 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 		}
 		if item.SecondaryWidget != nil {
 			bounds := baseBounds
-			ww, wh := context.Size(item.SecondaryWidget)
-			bounds.Min.X = bounds.Max.X - ww
-			pY := (h + 2*paddingY - wh) / 2
-			if wh < UnitSize(context)+2*paddingY {
-				pY = min(pY, (UnitSize(context)+2*paddingY-wh)/2)
+			ws := context.Size(item.SecondaryWidget)
+			bounds.Min.X = bounds.Max.X - ws.X
+			pY := (h + 2*paddingY - ws.Y) / 2
+			if ws.Y < UnitSize(context)+2*paddingY {
+				pY = min(pY, (UnitSize(context)+2*paddingY-ws.Y)/2)
 			}
 			bounds.Min.Y += pY
 			bounds.Max.Y += pY
@@ -126,10 +126,10 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 			var primaryH int
 			var secondaryH int
 			if item.PrimaryWidget != nil {
-				_, primaryH = context.Size(item.PrimaryWidget)
+				primaryH = context.Size(item.PrimaryWidget).Y
 			}
 			if item.SecondaryWidget != nil {
-				_, secondaryH = context.Size(item.SecondaryWidget)
+				secondaryH = context.Size(item.SecondaryWidget).Y
 			}
 			h := max(primaryH, secondaryH, minFormItemHeight(context))
 			y += h + 2*paddingY
@@ -146,8 +146,8 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
-func (f *Form) DefaultSize(context *guigui.Context) (int, int) {
-	return 6 * UnitSize(context), f.height(context)
+func (f *Form) DefaultSize(context *guigui.Context) image.Point {
+	return image.Pt(6*UnitSize(context), f.height(context))
 }
 
 func (f *Form) height(context *guigui.Context) int {
@@ -162,10 +162,10 @@ func (f *Form) height(context *guigui.Context) int {
 		var primaryH int
 		var secondaryH int
 		if item.PrimaryWidget != nil {
-			_, primaryH = context.Size(item.PrimaryWidget)
+			primaryH = context.Size(item.PrimaryWidget).Y
 		}
 		if item.SecondaryWidget != nil {
-			_, secondaryH = context.Size(item.SecondaryWidget)
+			secondaryH = context.Size(item.SecondaryWidget).Y
 		}
 		h := max(primaryH, secondaryH, minFormItemHeight(context))
 		y += h + 2*paddingY

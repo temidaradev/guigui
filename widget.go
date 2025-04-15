@@ -4,6 +4,8 @@
 package guigui
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -15,7 +17,7 @@ type Widget interface {
 	CursorShape(context *Context) (ebiten.CursorShapeType, bool)
 	Draw(context *Context, dst *ebiten.Image)
 	ZDelta() int
-	DefaultSize(context *Context) (int, int)
+	DefaultSize(context *Context) image.Point
 
 	widgetState() *widgetState
 }

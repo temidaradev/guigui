@@ -4,6 +4,8 @@
 package guigui
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -40,8 +42,8 @@ func (d *DefaultWidget) ZDelta() int {
 	return 0
 }
 
-func (d *DefaultWidget) DefaultSize(context *Context) (int, int) {
-	return int(144 * context.Scale()), int(144 * context.Scale())
+func (d *DefaultWidget) DefaultSize(context *Context) image.Point {
+	return image.Pt(int(144*context.Scale()), int(144*context.Scale()))
 }
 
 func (d *DefaultWidget) widgetState() *widgetState {
@@ -52,6 +54,6 @@ type RootWidget struct {
 	DefaultWidget
 }
 
-func (d *RootWidget) DefaultSize(context *Context) (int, int) {
-	return context.app.bounds().Dx(), context.app.bounds().Dy()
+func (d *RootWidget) DefaultSize(context *Context) image.Point {
+	return context.app.bounds().Size()
 }

@@ -21,8 +21,8 @@ func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	p := context.Position(i)
-	w, h := context.Size(i)
-	imgScale := min(float64(w)/float64(i.image.Bounds().Dx()), float64(h)/float64(i.image.Bounds().Dy()))
+	s := context.Size(i)
+	imgScale := min(float64(s.X)/float64(i.image.Bounds().Dx()), float64(s.Y)/float64(i.image.Bounds().Dy()))
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(imgScale, imgScale)
 	op.GeoM.Translate(float64(p.X), float64(p.Y))

@@ -107,9 +107,9 @@ func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
 	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0), RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
 
-func (t *TextField) DefaultSize(context *guigui.Context) (int, int) {
+func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
 	// TODO: Increase the height for multiple lines.
-	return 6 * UnitSize(context), UnitSize(context)
+	return image.Pt(6*UnitSize(context), UnitSize(context))
 }
 
 func textFieldFocusBorderWidth(context *guigui.Context) int {
@@ -133,9 +133,6 @@ func (t *textFieldFocus) ZDelta() int {
 	return 1
 }
 
-func (t *textFieldFocus) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := context.Size(t.textField)
-	w += 2 * textFieldFocusBorderWidth(context)
-	h += 2 * textFieldFocusBorderWidth(context)
-	return w, h
+func (t *textFieldFocus) DefaultSize(context *guigui.Context) image.Point {
+	return context.Size(t.textField).Add(image.Pt(2*textFieldFocusBorderWidth(context), 2*textFieldFocusBorderWidth(context)))
 }

@@ -61,8 +61,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		Heights: []layout.Size{
 			layout.MaxContentSize(func(index int) int {
 				if index == 0 {
-					_, h := context.Size(&r.configForm)
-					return h
+					return context.Size(&r.configForm).Y
 				}
 				return 0
 			}),
@@ -78,8 +77,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			Bounds: bounds,
 			Widths: []layout.Size{
 				layout.MaxContentSize(func(index int) int {
-					w, _ := r.buttons[index].DefaultSize(context)
-					return w
+					return r.buttons[index].DefaultSize(context).X
 				}),
 				layout.FixedSize(200),
 				layout.FractionSize(1),
@@ -87,8 +85,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			},
 			Heights: []layout.Size{
 				layout.MaxContentSize(func(index int) int {
-					_, h := r.buttons[index].DefaultSize(context)
-					return h
+					return r.buttons[index].DefaultSize(context).Y
 				}),
 				layout.FixedSize(100),
 				layout.FractionSize(1),
@@ -112,12 +109,12 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				appender.AppendChildWidgetWithBounds(widget, bounds)
 			} else {
 				pt := bounds.Min
-				w, h := widget.DefaultSize(context)
-				pt.X += (bounds.Dx() - w) / 2
-				pt.Y += (bounds.Dy() - h) / 2
+				s := widget.DefaultSize(context)
+				pt.X += (bounds.Dx() - s.X) / 2
+				pt.Y += (bounds.Dy() - s.Y) / 2
 				appender.AppendChildWidgetWithBounds(widget, image.Rectangle{
 					Min: pt,
-					Max: pt.Add(image.Pt(w, h)),
+					Max: pt.Add(s),
 				})
 			}
 		}

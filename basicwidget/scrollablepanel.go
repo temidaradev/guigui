@@ -33,8 +33,7 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	offsetX, offsetY := s.scollOverlay.Offset()
 	appender.AppendChildWidgetWithPosition(s.content, context.Position(s).Add(image.Pt(int(offsetX), int(offsetY))))
 
-	cw, ch := context.Size(s.content)
-	s.scollOverlay.SetContentSize(context, cw, ch)
+	s.scollOverlay.SetContentSize(context, context.Size(s.content))
 	appender.AppendChildWidgetWithBounds(&s.scollOverlay, context.Bounds(s))
 
 	s.border.scrollOverlay = &s.scollOverlay

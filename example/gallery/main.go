@@ -28,18 +28,18 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	rw, rh := context.Size(r)
+	rs := context.Size(r)
 	sw := 8 * basicwidget.UnitSize(context)
 	appender.AppendChildWidgetWithBounds(&r.sidebar, image.Rectangle{
 		Min: context.Position(r),
-		Max: context.Position(r).Add(image.Pt(sw, rh)),
+		Max: context.Position(r).Add(image.Pt(sw, rs.Y)),
 	})
 	p := context.Position(r)
 	p.X += sw
-	pw := rw - sw
+	pw := rs.X - sw
 	contentBounds := image.Rectangle{
 		Min: p,
-		Max: p.Add(image.Pt(pw, rh)),
+		Max: p.Add(image.Pt(pw, rs.Y)),
 	}
 
 	switch r.sidebar.SelectedItemTag() {

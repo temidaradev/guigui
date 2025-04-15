@@ -43,7 +43,7 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		}
 	})
 	bounds := p.contentBounds(context)
-	context.SetSize(&p.textList, bounds.Dx(), bounds.Dy())
+	context.SetSize(&p.textList, bounds.Size())
 	appender.AppendChildWidgetWithBounds(&p.popup, bounds)
 
 	// Sync the visibility with the popup.
@@ -61,30 +61,30 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	pos := context.Position(p)
 	// textList's size is updated at Build so do not call guigui.Size to determine the content size.
 	// Call DefaultSize instead.
-	w, h := p.textList.DefaultSize(context)
-	if h > 24*UnitSize(context) {
-		h = 24 * UnitSize(context)
+	s := p.textList.DefaultSize(context)
+	if s.Y > 24*UnitSize(context) {
+		s.Y = 24 * UnitSize(context)
 	}
 	r := image.Rectangle{
 		Min: pos,
-		Max: pos.Add(image.Pt(w, h)),
+		Max: pos.Add(s),
 	}
-	aw, ah := context.AppSize()
-	if r.Max.X > aw {
-		r.Min.X = aw - w
-		r.Max.X = aw
+	as := context.AppSize()
+	if r.Max.X > as.X {
+		r.Min.X = as.X - s.X
+		r.Max.X = as.X
 	}
 	if r.Min.X < 0 {
 		r.Min.X = 0
-		r.Max.X = w
+		r.Max.X = s.X
 	}
-	if r.Max.Y > ah {
-		r.Min.Y = ah - h
-		r.Max.Y = ah
+	if r.Max.Y > as.Y {
+		r.Min.Y = as.Y - s.Y
+		r.Max.Y = as.Y
 	}
 	if r.Min.Y < 0 {
 		r.Min.Y = 0
-		r.Max.Y = h
+		r.Max.Y = s.Y
 	}
 	return r
 }

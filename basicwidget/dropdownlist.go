@@ -4,6 +4,7 @@
 package basicwidget
 
 import (
+	"image"
 	"log/slog"
 
 	"github.com/hajimehoshi/guigui"
@@ -53,8 +54,7 @@ func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidg
 	pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 	pt.X = max(pt.X, 0)
 	pt.Y -= listItemPadding(context)
-	_, y := context.Size(d)
-	pt.Y += int((float64(y) - LineHeight(context)) / 2)
+	pt.Y += int((float64(context.Size(d).Y) - LineHeight(context)) / 2)
 	pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
 	pt.Y = max(pt.Y, 0)
 	appender.AppendChildWidgetWithPosition(&d.popupMenu, pt)
@@ -84,7 +84,7 @@ func (d *DropdownList) SetSelectedItemIndex(index int) {
 	d.updateText()
 }
 
-func (d *DropdownList) DefaultSize(context *guigui.Context) (int, int) {
+func (d *DropdownList) DefaultSize(context *guigui.Context) image.Point {
 	// The button image affects the size.
 	d.updateButtonImage(context)
 	return context.Size(&d.textButton)

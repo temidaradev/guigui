@@ -100,10 +100,9 @@ type Text struct {
 
 	temporaryClipboard string
 
-	cachedTextWidthPlus1  int
-	cachedTextHeightPlus1 int
-	lastFace              text.Face
-	lastAppScale          float64
+	cachedTextSizePlus1 image.Point
+	lastFace            text.Face
+	lastAppScale        float64
 
 	onEnterPressed func(text string)
 }
@@ -113,8 +112,7 @@ func (t *Text) SetOnEnterPressed(f func(text string)) {
 }
 
 func (t *Text) resetCachedSize() {
-	t.cachedTextWidthPlus1 = 0
-	t.cachedTextHeightPlus1 = 0
+	t.cachedTextSizePlus1 = image.Point{}
 }
 
 func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -127,8 +125,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetCachedSize()
 	}
 
-	cw, ch := t.TextSize(context)
-	t.scrollOverlay.SetContentSize(context, cw, ch)
+	t.scrollOverlay.SetContentSize(context, t.TextSize(context))
 
 	if !t.prevFocused && context.IsFocused(t) {
 		t.field.Focus()
@@ -310,20 +307,20 @@ func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 
 	b := context.Bounds(t)
 
-	tw, th := t.TextSize(context)
-	if b.Dx() < int(tw) {
-		b.Max.X = b.Min.X + int(tw)
+	ts := t.TextSize(context)
+	if b.Dx() < ts.X {
+		b.Max.X = b.Min.X + ts.X
 	}
 
 	switch t.vAlign {
 	case VerticalAlignTop:
-		b.Max.Y = b.Min.Y + th
+		b.Max.Y = b.Min.Y + ts.Y
 	case VerticalAlignMiddle:
 		h := b.Dy()
-		b.Min.Y += (h - th) / 2
-		b.Max.Y = b.Min.Y + th
+		b.Min.Y += (h - ts.Y) / 2
+		b.Max.Y = b.Min.Y + ts.Y
 	case VerticalAlignBottom:
-		b.Min.Y = b.Max.Y - th
+		b.Min.Y = b.Max.Y - ts.Y
 	}
 
 	b = b.Add(image.Pt(int(offsetX), int(offsetY)))
@@ -445,7 +442,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if max := float64(bounds.Max.Y); y > max {
 			dy = max - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(context, tb.Dx(), tb.Dy(), dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
 	if x, y, _, ok := textPosition(tb, text, start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var dx, dy float64
@@ -455,7 +452,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		if min := float64(bounds.Min.Y); y < min {
 			dy = min - y
 		}
-		t.scrollOverlay.SetOffsetByDelta(context, tb.Dx(), tb.Dy(), dx, dy)
+		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
 }
 
@@ -845,21 +842,20 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	drawText(textBounds, dst, text, face, t.lineHeight(context), t.hAlign, t.vAlign, clr)
 }
 
-func (t *Text) DefaultSize(context *guigui.Context) (int, int) {
+func (t *Text) DefaultSize(context *guigui.Context) image.Point {
 	return t.TextSize(context)
 }
 
-func (t *Text) TextSize(context *guigui.Context) (int, int) {
-	if t.cachedTextWidthPlus1 > 0 && t.cachedTextHeightPlus1 > 0 {
-		return t.cachedTextWidthPlus1 - 1, t.cachedTextHeightPlus1 - 1
+func (t *Text) TextSize(context *guigui.Context) image.Point {
+	if t.cachedTextSizePlus1.X > 0 && t.cachedTextSizePlus1.Y > 0 {
+		return t.cachedTextSizePlus1.Add(image.Pt(-1, -1))
 	}
 
 	w, _ := text.Measure(t.textToDraw(), t.face(context), t.lineHeight(context))
 	w *= t.scaleMinus1 + 1
 	h := t.textHeight(context, t.textToDraw())
-	t.cachedTextWidthPlus1 = int(w) + 1
-	t.cachedTextHeightPlus1 = h + 1
-	return int(w), h
+	t.cachedTextSizePlus1 = image.Pt(int(w)+1, h+1)
+	return image.Pt(int(w), h)
 }
 
 func (t *Text) textHeight(context *guigui.Context, str string) int {
@@ -983,7 +979,6 @@ func (t *textCursor) ZDelta() int {
 	return 1
 }
 
-func (t *textCursor) DefaultSize(context *guigui.Context) (int, int) {
-	w, h := context.Size(t.text)
-	return w + 2*cursorWidth(context), h
+func (t *textCursor) DefaultSize(context *guigui.Context) image.Point {
+	return context.Size(t.text).Add(image.Pt(2*cursorWidth(context), 0))
 }

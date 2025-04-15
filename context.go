@@ -167,8 +167,8 @@ func (c *Context) SetAppLocales(locales []language.Tag) {
 	c.app.requestRedraw(c.app.bounds())
 }
 
-func (c *Context) AppSize() (int, int) {
-	return c.app.bounds().Dx(), c.app.bounds().Dy()
+func (c *Context) AppSize() image.Point {
+	return c.app.bounds().Size()
 }
 
 func (c *Context) AppBounds() image.Rectangle {
@@ -186,34 +186,33 @@ func (c *Context) SetPosition(widget Widget, position image.Point) {
 
 const DefaultSize = -1
 
-func (c *Context) SetSize(widget Widget, width, height int) {
-	widget.widgetState().widthPlus1 = width + 1
-	widget.widgetState().heightPlus1 = height + 1
+func (c *Context) SetSize(widget Widget, size image.Point) {
+	widget.widgetState().widthPlus1 = size.X + 1
+	widget.widgetState().heightPlus1 = size.Y + 1
 }
 
-func (c *Context) Size(widget Widget) (int, int) {
+func (c *Context) Size(widget Widget) image.Point {
 	widgetState := widget.widgetState()
-	dw, dh := widget.DefaultSize(c)
-	var w, h int
+	ds := widget.DefaultSize(c)
+	var s image.Point
 	if widgetState.widthPlus1 == 0 {
-		w = dw
+		s.X = ds.X
 	} else {
-		w = widgetState.widthPlus1 - 1
+		s.X = widgetState.widthPlus1 - 1
 	}
 	if widgetState.heightPlus1 == 0 {
-		h = dh
+		s.Y = ds.Y
 	} else {
-		h = widgetState.heightPlus1 - 1
+		s.Y = widgetState.heightPlus1 - 1
 	}
-	return w, h
+	return s
 }
 
 func (c *Context) Bounds(widget Widget) image.Rectangle {
 	widgetState := widget.widgetState()
-	width, height := c.Size(widget)
 	return image.Rectangle{
 		Min: widgetState.position,
-		Max: widgetState.position.Add(image.Point{width, height}),
+		Max: widgetState.position.Add(c.Size(widget)),
 	}
 }
 
