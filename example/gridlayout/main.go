@@ -56,7 +56,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.configForm.SetItems(formItems)
 
 	u := basicwidget.UnitSize(context)
-	for widget, bounds := range (layout.GridLayout{
+	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(int(u / 2)),
 		Heights: []layout.Size{
 			layout.DefaultSize(),
@@ -67,8 +67,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		&r.configForm,
 		nil,
 	}) {
-		if widget != nil {
-			appender.AppendChildWidgetWithBounds(widget, bounds)
+		if i == 0 {
+			appender.AppendChildWidgetWithBounds(&r.configForm, bounds)
 			continue
 		}
 		g := layout.GridLayout{
@@ -97,7 +97,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			t := r.buttons[i].(*basicwidget.TextButton)
 			t.SetText(fmt.Sprintf("Button %d", i))
 		}
-		for widget, bounds := range g.CellBounds(context, r.buttons[:]) {
+		for i, bounds := range g.CellBounds(context, r.buttons[:]) {
+			widget := r.buttons[i]
 			if r.fill {
 				appender.AppendChildWidgetWithBounds(widget, bounds)
 			} else {

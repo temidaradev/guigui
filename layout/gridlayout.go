@@ -57,8 +57,8 @@ type GridLayout struct {
 	RowGap    int
 }
 
-func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget) iter.Seq2[guigui.Widget, image.Rectangle] {
-	return func(yield func(w guigui.Widget, bounds image.Rectangle) bool) {
+func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget) iter.Seq2[int, image.Rectangle] {
+	return func(yield func(index int, bounds image.Rectangle) bool) {
 		widths := g.Widths
 		if len(widths) == 0 {
 			widths = defaultWidths
@@ -192,7 +192,7 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 				x := g.Bounds.Min.X
 				for i := 0; i < len(widths); i++ {
 					bounds := image.Rect(x, y, x+widthsInPixels[i], y+heightsInPixels[j])
-					if !yield(widgets[widgetIdx], bounds) {
+					if !yield(widgetIdx, bounds) {
 						return
 					}
 					x += widthsInPixels[i]
