@@ -35,7 +35,6 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	p = p.Add(image.Pt(int(offsetX), int(offsetY)))
 	context.SetPosition(s.content, p)
 	w, h := context.Size(s)
-	context.SetSize(s.content, w, h)
 	appender.AppendChildWidget(s.content)
 
 	cw, ch := context.Size(s.content)
