@@ -94,7 +94,7 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 					if widget == nil {
 						continue
 					}
-					w, _ := widgets[j*len(widths)+i].DefaultSize(context)
+					w, _ := widget.DefaultSize(context)
 					widthsInPixels[i] = max(widthsInPixels[i], w)
 				}
 			case sizeTypeFixed:
@@ -146,7 +146,7 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 					if widget == nil {
 						continue
 					}
-					_, h := widgets[j*len(widths)+i].DefaultSize(context)
+					_, h := widget.DefaultSize(context)
 					heightsInPixels[j] = max(heightsInPixels[j], h)
 				}
 			case sizeTypeFixed:
