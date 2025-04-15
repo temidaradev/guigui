@@ -38,7 +38,7 @@ func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildW
 	appender.AppendChildWidgetWithBounds(&s.scollOverlay, context.Bounds(s))
 
 	s.border.scrollOverlay = &s.scollOverlay
-	appender.AppendChildWidgetWithPosition(&s.border, context.Position(s))
+	appender.AppendChildWidgetWithBounds(&s.border, context.Bounds(s))
 
 	return nil
 }
