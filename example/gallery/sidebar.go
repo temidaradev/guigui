@@ -20,6 +20,7 @@ type Sidebar struct {
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := context.Size(s)
 	context.SetSize(&s.sidebar, w, h)
+	context.SetSize(&s.sidebarContent, w, h)
 	s.sidebar.SetContent(&s.sidebarContent)
 	context.SetPosition(&s.sidebar, context.Position(s))
 	appender.AppendChildWidget(&s.sidebar)
