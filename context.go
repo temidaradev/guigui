@@ -171,6 +171,10 @@ func (c *Context) AppSize() (int, int) {
 	return c.app.bounds().Dx(), c.app.bounds().Dy()
 }
 
+func (c *Context) AppBounds() image.Rectangle {
+	return c.app.bounds()
+}
+
 func (c *Context) Position(widget Widget) image.Point {
 	return widget.widgetState().position
 }

@@ -78,22 +78,11 @@ func (p *Popup) ContentBounds(context *guigui.Context) image.Rectangle {
 		dy := int(-float64(UnitSize(context)) * (1 - rate))
 		pt = pt.Add(image.Pt(0, dy))
 	}
-	w, h := context.Size(p.content.content)
+	w, h := context.Size(p)
 	return image.Rectangle{
 		Min: pt,
 		Max: pt.Add(image.Pt(w, h)),
 	}
-}
-
-func (p *Popup) SetContentPosition(position image.Point) {
-	if (p.showing || p.hiding) && p.openingCount > 0 {
-		p.nextContentPosition = position
-		p.hasNextContentPosition = true
-		return
-	}
-	p.contentPosition = position
-	p.nextContentPosition = image.Point{}
-	p.hasNextContentPosition = false
 }
 
 func (p *Popup) SetBackgroundBlurred(blurBackground bool) {
@@ -118,6 +107,15 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		context.Hide(p)
 	})
 
+	if (p.showing || p.hiding) && p.openingCount > 0 {
+		p.nextContentPosition = context.Position(p)
+		p.hasNextContentPosition = true
+	} else {
+		p.contentPosition = context.Position(p)
+		p.nextContentPosition = image.Point{}
+		p.hasNextContentPosition = false
+	}
+
 	p.background.popup = p
 	p.shadow.popup = p
 	p.content.popup = p
@@ -130,10 +128,10 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	context.SetOpacity(&p.content, p.openingRate())
 	context.SetOpacity(&p.frame, p.openingRate())
 
-	appender.AppendChildWidgetWithPosition(&p.background, context.Position(p))
-	appender.AppendChildWidgetWithPosition(&p.shadow, context.Position(p))
+	appender.AppendChildWidgetWithBounds(&p.background, context.AppBounds())
+	appender.AppendChildWidgetWithBounds(&p.shadow, context.AppBounds())
 	appender.AppendChildWidgetWithBounds(&p.content, p.ContentBounds(context))
-	appender.AppendChildWidgetWithPosition(&p.frame, context.Position(p))
+	appender.AppendChildWidgetWithBounds(&p.frame, context.AppBounds())
 
 	return nil
 }
@@ -250,9 +248,13 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 }
 
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
-	bounds := p.popup.ContentBounds(context)
+	bounds := context.Bounds(p)
 	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
+}
+
+func (p *popupContent) ZDelta() int {
+	return 1
 }
 
 type popupFrame struct {
@@ -269,6 +271,10 @@ func (p *popupFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 func (p *popupFrame) DefaultSize(context *guigui.Context) (int, int) {
 	return context.Size(p.popup)
+}
+
+func (p *popupFrame) ZDelta() int {
+	return 1
 }
 
 type popupBackground struct {
@@ -327,6 +333,10 @@ func (p *popupBackground) DefaultSize(context *guigui.Context) (int, int) {
 	return context.Size(p.popup)
 }
 
+func (p *popupBackground) ZDelta() int {
+	return 1
+}
+
 type popupShadow struct {
 	guigui.DefaultWidget
 
@@ -345,4 +355,8 @@ func (p *popupShadow) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 func (p *popupShadow) DefaultSize(context *guigui.Context) (int, int) {
 	return context.Size(p.popup)
+}
+
+func (p *popupShadow) ZDelta() int {
+	return 1
 }

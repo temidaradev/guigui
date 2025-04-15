@@ -84,13 +84,13 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		Y: bounds.Min.Y + (bounds.Dy()-contentHeight)/2,
 	}
 	context.SetSize(&p.simplePopupContent, contentWidth, contentHeight)
-	p.simplePopup.SetContentPosition(contentPosition)
 	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleButton.Value())
 	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
 	p.simplePopup.SetAnimationDuringFade(true)
-
-	// TODO: A popup's position should be set by context.SetPosition.
-	appender.AppendChildWidget(&p.simplePopup)
+	appender.AppendChildWidgetWithBounds(&p.simplePopup, image.Rectangle{
+		Min: contentPosition,
+		Max: contentPosition.Add(image.Pt(contentWidth, contentHeight)),
+	})
 
 	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 	// A context menu's position is updated at HandlePointingInput.
