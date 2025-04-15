@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
@@ -25,39 +26,33 @@ type Root struct {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	rw, rh := context.Size(r)
-	context.SetSize(&r.background, rw, rh)
-	appender.AppendChildWidget(&r.background)
-	appender.AppendChildWidget(&r.sidebar)
+	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
+	rw, rh := context.Size(r)
 	sw := 8 * basicwidget.UnitSize(context)
-	context.SetSize(&r.sidebar, sw, rh)
-	context.SetPosition(&r.sidebar, context.Position(r))
+	appender.AppendChildWidgetWithBounds(&r.sidebar, image.Rectangle{
+		Min: context.Position(r),
+		Max: context.Position(r).Add(image.Pt(sw, rh)),
+	})
 	p := context.Position(r)
 	p.X += sw
 	pw := rw - sw
-	context.SetPosition(&r.settings, p)
-	context.SetSize(&r.settings, pw, rh)
-	context.SetPosition(&r.basic, p)
-	context.SetSize(&r.basic, pw, rh)
-	context.SetPosition(&r.buttons, p)
-	context.SetSize(&r.buttons, pw, rh)
-	context.SetPosition(&r.lists, p)
-	context.SetSize(&r.lists, pw, rh)
-	context.SetPosition(&r.popups, p)
-	context.SetSize(&r.popups, pw, rh)
+	contentBounds := image.Rectangle{
+		Min: p,
+		Max: p.Add(image.Pt(pw, rh)),
+	}
 
 	switch r.sidebar.SelectedItemTag() {
 	case "settings":
-		appender.AppendChildWidget(&r.settings)
+		appender.AppendChildWidgetWithBounds(&r.settings, contentBounds)
 	case "basic":
-		appender.AppendChildWidget(&r.basic)
+		appender.AppendChildWidgetWithBounds(&r.basic, contentBounds)
 	case "buttons":
-		appender.AppendChildWidget(&r.buttons)
+		appender.AppendChildWidgetWithBounds(&r.buttons, contentBounds)
 	case "lists":
-		appender.AppendChildWidget(&r.lists)
+		appender.AppendChildWidgetWithBounds(&r.lists, contentBounds)
 	case "popups":
-		appender.AppendChildWidget(&r.popups)
+		appender.AppendChildWidgetWithBounds(&r.popups, contentBounds)
 	}
 
 	return nil

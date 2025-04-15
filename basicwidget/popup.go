@@ -131,17 +131,12 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	context.SetOpacity(&p.frame, p.openingRate())
 
 	if p.backgroundBlurred {
-		appender.AppendChildWidget(&p.background)
+		appender.AppendChildWidgetWithPosition(&p.background, context.Position(p))
 	}
 
-	appender.AppendChildWidget(&p.shadow)
-
-	bounds := p.ContentBounds(context)
-	context.SetPosition(&p.content, bounds.Min)
-	context.SetSize(&p.content, bounds.Dx(), bounds.Dy())
-	appender.AppendChildWidget(&p.content)
-
-	appender.AppendChildWidget(&p.frame)
+	appender.AppendChildWidgetWithPosition(&p.shadow, context.Position(p))
+	appender.AppendChildWidgetWithBounds(&p.content, p.ContentBounds(context))
+	appender.AppendChildWidgetWithPosition(&p.frame, context.Position(p))
 
 	return nil
 }
@@ -265,8 +260,7 @@ func (p *popupContent) setContent(widget guigui.Widget) {
 
 func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content != nil {
-		context.SetPosition(p.content, context.Position(p))
-		appender.AppendChildWidget(p.content)
+		appender.AppendChildWidgetWithPosition(p.content, context.Position(p))
 	}
 	return nil
 }

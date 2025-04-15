@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
@@ -25,14 +26,12 @@ type Root struct {
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := context.Size(r)
-	context.SetSize(&r.background, w, h)
-	appender.AppendChildWidget(&r.background)
+	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
 	{
 		w, h := context.Size(r)
 		w -= 2 * basicwidget.UnitSize(context)
 		h -= 4 * basicwidget.UnitSize(context)
-		context.SetSize(&r.counterText, w, h)
 
 		r.counterText.SetSelectable(true)
 		r.counterText.SetBold(true)
@@ -44,8 +43,10 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p := context.Position(r)
 		p.X += basicwidget.UnitSize(context)
 		p.Y += basicwidget.UnitSize(context)
-		context.SetPosition(&r.counterText, p)
-		appender.AppendChildWidget(&r.counterText)
+		appender.AppendChildWidgetWithBounds(&r.counterText, image.Rectangle{
+			Min: p,
+			Max: p.Add(image.Pt(w, h)),
+		})
 	}
 
 	r.resetButton.SetText("Reset")
@@ -62,8 +63,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p := context.Position(r)
 		p.X += basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
-		context.SetPosition(&r.resetButton, p)
-		appender.AppendChildWidget(&r.resetButton)
+		appender.AppendChildWidgetWithPosition(&r.resetButton, p)
 	}
 
 	r.incButton.SetText("Increment")
@@ -75,8 +75,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p := context.Position(r)
 		p.X += w - 7*basicwidget.UnitSize(context)
 		p.Y += h - 2*basicwidget.UnitSize(context)
-		context.SetPosition(&r.incButton, p)
-		appender.AppendChildWidget(&r.incButton)
+		appender.AppendChildWidgetWithPosition(&r.incButton, p)
 	}
 
 	r.decButton.SetText("Decrement")
@@ -88,8 +87,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		p := context.Position(r)
 		p.X += w - int(13.5*float64(basicwidget.UnitSize(context)))
 		p.Y += h - 2*basicwidget.UnitSize(context)
-		context.SetPosition(&r.decButton, p)
-		appender.AppendChildWidget(&r.decButton)
+		appender.AppendChildWidgetWithPosition(&r.decButton, p)
 	}
 
 	return nil

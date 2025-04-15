@@ -19,11 +19,10 @@ type Sidebar struct {
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	w, h := context.Size(s)
-	context.SetSize(&s.sidebar, w, h)
 	context.SetSize(&s.sidebarContent, w, h)
 	s.sidebar.SetContent(&s.sidebarContent)
-	context.SetPosition(&s.sidebar, context.Position(s))
-	appender.AppendChildWidget(&s.sidebar)
+
+	appender.AppendChildWidgetWithBounds(&s.sidebar, context.Bounds(s))
 
 	return nil
 }
@@ -104,10 +103,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 		s.list.SetSelectedItemIndex(0)
 	})
 
-	w, h := context.Size(s)
-	context.SetSize(&s.list, w, h)
-	context.SetPosition(&s.list, context.Position(s))
-	appender.AppendChildWidget(&s.list)
+	appender.AppendChildWidgetWithBounds(&s.list, context.Bounds(s))
 
 	return nil
 }

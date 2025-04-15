@@ -56,8 +56,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 	{
 		p := context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
-		context.SetPosition(&b.form, p)
-		appender.AppendChildWidget(&b.form)
+		appender.AppendChildWidgetWithPosition(&b.form, p)
 	}
 
 	return nil

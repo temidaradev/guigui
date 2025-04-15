@@ -98,8 +98,7 @@ func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	context.SetSize(&t.list, w, h)
 
 	// To use HasFocusedChildWidget correctly, create the tree first.
-	context.SetPosition(&t.list, context.Position(t))
-	appender.AppendChildWidget(&t.list)
+	appender.AppendChildWidgetWithPosition(&t.list, context.Position(t))
 
 	for i, item := range t.textListItemWidgets {
 		item.text.SetBold(item.textListItem.Header)
@@ -243,8 +242,7 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 	}
 	t.text.SetText(t.textString())
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
-	context.SetPosition(&t.text, p)
-	appender.AppendChildWidget(&t.text)
+	appender.AppendChildWidgetWithPosition(&t.text, p)
 
 	return nil
 }

@@ -42,12 +42,10 @@ func (f *Form) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	for i, item := range f.items {
 		if item.PrimaryWidget != nil {
-			context.SetPosition(item.PrimaryWidget, f.primaryBounds[i].Min)
-			appender.AppendChildWidget(item.PrimaryWidget)
+			appender.AppendChildWidgetWithPosition(item.PrimaryWidget, f.primaryBounds[i].Min)
 		}
 		if item.SecondaryWidget != nil {
-			context.SetPosition(item.SecondaryWidget, f.secondaryBounds[i].Min)
-			appender.AppendChildWidget(item.SecondaryWidget)
+			appender.AppendChildWidgetWithPosition(item.SecondaryWidget, f.secondaryBounds[i].Min)
 		}
 	}
 

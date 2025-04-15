@@ -4,6 +4,7 @@
 package basicwidget
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -51,15 +52,13 @@ func (t *TextButton) SetForcePressed(forcePressed bool) {
 }
 
 func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidgetWithBounds(&t.button, context.Bounds(t))
+
 	w, h := context.Size(t)
-	context.SetSize(&t.button, w, h)
-	context.SetPosition(&t.button, context.Position(t))
-	appender.AppendChildWidget(&t.button)
 
 	imgSize := textButtonImageSize(context)
 
 	tw, _ := t.text.TextSize(context)
-	context.SetSize(&t.text, tw, h)
 	if !context.IsEnabled(&t.button) {
 		t.text.SetColor(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5))
 	} else {
@@ -77,18 +76,21 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	if t.button.isActive(context) {
 		textP.Y += int(1 * context.Scale())
 	}
-	context.SetPosition(&t.text, textP)
-	appender.AppendChildWidget(&t.text)
+	appender.AppendChildWidgetWithBounds(&t.text, image.Rectangle{
+		Min: textP,
+		Max: textP.Add(image.Pt(tw, h)),
+	})
 
-	context.SetSize(&t.image, imgSize, imgSize)
 	imgP := context.Position(t)
 	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
 	imgP.Y += (h - imgSize) / 2
 	if t.button.isActive(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
-	context.SetPosition(&t.image, imgP)
-	appender.AppendChildWidget(&t.image)
+	appender.AppendChildWidgetWithBounds(&t.image, image.Rectangle{
+		Min: imgP,
+		Max: imgP.Add(image.Pt(imgSize, imgSize)),
+	})
 
 	return nil
 }

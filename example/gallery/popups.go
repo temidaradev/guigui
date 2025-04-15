@@ -58,8 +58,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		},
 	})
 	pt := context.Position(p).Add(image.Pt(int(0.5*u), int(0.5*u)))
-	context.SetPosition(&p.forms[0], pt)
-	appender.AppendChildWidget(&p.forms[0])
+	appender.AppendChildWidgetWithPosition(&p.forms[0], pt)
 
 	p.contextMenuPopupText.SetText("Context Menu")
 	p.contextMenuPopupClickHereText.SetText("Click Here by the Right Button")
@@ -73,8 +72,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	})
 	_, h := context.Size(&p.forms[0])
 	pt.Y += h + int(0.5*u)
-	context.SetPosition(&p.forms[1], pt)
-	appender.AppendChildWidget(&p.forms[1])
+	appender.AppendChildWidgetWithPosition(&p.forms[1], pt)
 
 	p.simplePopupContent.popup = &p.simplePopup
 	p.simplePopup.SetContent(&p.simplePopupContent)
@@ -91,9 +89,11 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
 	p.simplePopup.SetAnimationDuringFade(true)
 
+	// TODO: A popup's position should be set by context.SetPosition.
 	appender.AppendChildWidget(&p.simplePopup)
 
 	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
+	// A context menu's position is updated at HandlePointingInput.
 	appender.AppendChildWidget(&p.contextMenuPopup)
 
 	return nil
@@ -125,8 +125,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 	s.titleText.SetText("Hello!")
 	s.titleText.SetBold(true)
 	pt := s.popup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
-	context.SetPosition(&s.titleText, pt)
-	appender.AppendChildWidget(&s.titleText)
+	appender.AppendChildWidgetWithPosition(&s.titleText, pt)
 
 	s.closeButton.SetText("Close")
 	s.closeButton.SetOnUp(func() {
@@ -134,8 +133,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 	})
 	w, h := context.Size(&s.closeButton)
 	pt = s.popup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-w, -int(0.5*u)-h))
-	context.SetPosition(&s.closeButton, pt)
-	appender.AppendChildWidget(&s.closeButton)
+	appender.AppendChildWidgetWithPosition(&s.closeButton, pt)
 
 	return nil
 }

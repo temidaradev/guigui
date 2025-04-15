@@ -99,8 +99,7 @@ func (l *List) contentSize(context *guigui.Context) (int, int) {
 func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
 		l.listFrame.list = l
-		context.SetPosition(&l.listFrame, context.Position(l))
-		appender.AppendChildWidget(&l.listFrame)
+		appender.AppendChildWidgetWithPosition(&l.listFrame, context.Position(l))
 	}
 
 	cw, ch := l.contentSize(context)
@@ -113,10 +112,11 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		l.indexToJumpPlus1 = 0
 	}
 
-	context.SetPosition(&l.scrollOverlay, context.Position(l))
 	w, h := context.Size(l)
-	context.SetSize(&l.scrollOverlay, w, h)
-	appender.AppendChildWidget(&l.scrollOverlay)
+	appender.AppendChildWidgetWithBounds(&l.scrollOverlay, image.Rectangle{
+		Min: context.Position(l),
+		Max: context.Position(l).Add(image.Pt(w, h)),
+	})
 
 	hoveredItemIndex := l.HoveredItemIndex(context)
 	p := context.Position(l)
@@ -136,26 +136,25 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			l.checkmark.SetImage(img)
 
 			imgSize := listItemCheckmarkSize(context)
-			context.SetSize(&l.checkmark, imgSize, imgSize)
 			imgP := p
 			_, itemH := context.Size(item.Content)
 			imgP.Y += (itemH - imgSize) * 3 / 4
-			context.SetPosition(&l.checkmark, imgP)
-			appender.AppendChildWidget(&l.checkmark)
+			appender.AppendChildWidgetWithBounds(&l.checkmark, image.Rectangle{
+				Min: imgP,
+				Max: imgP.Add(image.Pt(imgSize, imgSize)),
+			})
 		}
 
 		itemP := p
 		if l.checkmarkIndexPlus1 > 0 {
 			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		}
-		context.SetPosition(item.Content, itemP)
-		appender.AppendChildWidget(item.Content)
+		appender.AppendChildWidgetWithPosition(item.Content, itemP)
 		_, h := context.Size(item.Content)
 		p.Y += h
 	}
 
-	context.SetPosition(&l.dragDropOverlay, context.Position(l))
-	appender.AppendChildWidget(&l.dragDropOverlay)
+	appender.AppendChildWidgetWithPosition(&l.dragDropOverlay, context.Position(l))
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1

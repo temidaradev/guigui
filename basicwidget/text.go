@@ -151,15 +151,11 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.cursor.text = t
 		p := context.Position(t)
 		p.X -= cursorWidth(context)
-		context.SetPosition(&t.cursor, p)
-		appender.AppendChildWidget(&t.cursor)
+		appender.AppendChildWidgetWithPosition(&t.cursor, p)
 	}
 
 	context.Hide(&t.scrollOverlay)
-	context.SetPosition(&t.scrollOverlay, context.Position(t))
-	w, h := context.Size(t)
-	context.SetSize(&t.scrollOverlay, w, h)
-	appender.AppendChildWidget(&t.scrollOverlay)
+	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	return nil
 }

@@ -37,9 +37,6 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	u := float64(basicwidget.UnitSize(context))
 	w, _ := context.Size(b)
 	context.SetSize(&b.form, w-int(1*u), guigui.DefaultSize)
-	p := context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
-	context.SetPosition(&b.form, p)
-
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
@@ -54,7 +51,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			SecondaryWidget: &b.toggleButton,
 		},
 	})
-	appender.AppendChildWidget(&b.form)
+	appender.AppendChildWidgetWithPosition(&b.form, context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u))))
 
 	return nil
 }

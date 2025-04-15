@@ -62,20 +62,17 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	b := context.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
 	b.Max.X -= UnitSize(context) / 2
-	context.SetSize(&t.text, b.Dx(), b.Dy())
 	// TODO: Consider multiline.
 	if !t.text.IsMultiline() {
 		t.text.SetVerticalAlign(VerticalAlignMiddle)
 	}
-	context.SetPosition(&t.text, b.Min)
-	appender.AppendChildWidget(&t.text)
+	appender.AppendChildWidgetWithBounds(&t.text, b)
 
 	if context.HasFocusedChildWidget(t) {
 		t.focus.textField = t
 		w := textFieldFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))
-		context.SetPosition(&t.focus, p)
-		appender.AppendChildWidget(&t.focus)
+		appender.AppendChildWidgetWithPosition(&t.focus, p)
 	}
 
 	return nil

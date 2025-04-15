@@ -40,9 +40,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		},
 	})
 	{
-		p := context.Position(l).Add(image.Pt(int(0.5*u), int(0.5*u)))
-		context.SetPosition(&l.form, p)
-		appender.AppendChildWidget(&l.form)
+		appender.AppendChildWidgetWithPosition(&l.form, context.Position(l).Add(image.Pt(int(0.5*u), int(0.5*u))))
 	}
 
 	return nil

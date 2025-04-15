@@ -40,8 +40,7 @@ func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidg
 	})
 	d.textButton.SetForcePressed(context.IsVisible(&d.popupMenu))
 
-	context.SetPosition(&d.textButton, context.Position(d))
-	appender.AppendChildWidget(&d.textButton)
+	appender.AppendChildWidgetWithPosition(&d.textButton, context.Position(d))
 
 	d.popupMenu.SetOnClosed(func(index int) {
 		if d.onValueChanged != nil {
@@ -58,8 +57,7 @@ func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidg
 	pt.Y += int((float64(y) - LineHeight(context)) / 2)
 	pt.Y -= int(float64(d.popupMenu.SelectedItemIndex()) * LineHeight(context))
 	pt.Y = max(pt.Y, 0)
-	context.SetPosition(&d.popupMenu, pt)
-	appender.AppendChildWidget(&d.popupMenu)
+	appender.AppendChildWidgetWithPosition(&d.popupMenu, pt)
 
 	return nil
 }

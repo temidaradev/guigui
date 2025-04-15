@@ -17,11 +17,7 @@ type Sidebar struct {
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	context.SetPosition(&s.scrollablePanel, context.Position(s))
-	w, h := context.Size(s)
-	context.SetSize(&s.scrollablePanel, w, h)
-	appender.AppendChildWidget(&s.scrollablePanel)
-
+	appender.AppendChildWidgetWithBounds(&s.scrollablePanel, context.Bounds(s))
 	return nil
 }
 
