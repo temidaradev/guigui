@@ -130,35 +130,12 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	context.SetOpacity(&p.content, p.openingRate())
 	context.SetOpacity(&p.frame, p.openingRate())
 
-	if p.backgroundBlurred {
-		appender.AppendChildWidgetWithPosition(&p.background, context.Position(p))
-	}
-
+	appender.AppendChildWidgetWithPosition(&p.background, context.Position(p))
 	appender.AppendChildWidgetWithPosition(&p.shadow, context.Position(p))
 	appender.AppendChildWidgetWithBounds(&p.content, p.ContentBounds(context))
 	appender.AppendChildWidgetWithPosition(&p.frame, context.Position(p))
 
 	return nil
-}
-
-func (p *Popup) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if p.showing || p.hiding {
-		return guigui.AbortHandlingInputByWidget(p)
-	}
-
-	// As this editor is a modal dialog, do not let other widgets to handle inputs.
-	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
-		if p.closeByClickingOutside {
-			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-				p.close(PopupClosedReasonClickOutside)
-				// Continue handling inputs so that clicking a right button can be handled by other widgets.
-				if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-					return guigui.HandleInputResult{}
-				}
-			}
-		}
-	}
-	return guigui.AbortHandlingInputByWidget(p)
 }
 
 func (p *Popup) Open(context *guigui.Context) {
@@ -302,7 +279,31 @@ type popupBackground struct {
 	backgroundCache *ebiten.Image
 }
 
+func (p *popupBackground) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+	if p.popup.showing || p.popup.hiding {
+		return guigui.AbortHandlingInputByWidget(p)
+	}
+
+	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
+		if p.popup.closeByClickingOutside {
+			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
+				p.popup.close(PopupClosedReasonClickOutside)
+				// Continue handling inputs so that clicking a right button can be handled by other widgets.
+				if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
+					return guigui.HandleInputResult{}
+				}
+			}
+		}
+	}
+
+	return guigui.AbortHandlingInputByWidget(p)
+}
+
 func (p *popupBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
+	if !p.popup.backgroundBlurred {
+		return
+	}
+
 	bounds := context.Bounds(p)
 	if p.backgroundCache != nil && !bounds.In(p.backgroundCache.Bounds()) {
 		p.backgroundCache.Deallocate()
