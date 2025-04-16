@@ -68,7 +68,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			layout.FractionSize(1),
 		},
 		RowGap: int(u / 2),
-	}).CellBounds(2) {
+	}).CellBounds() {
 		if i == 0 {
 			appender.AppendChildWidgetWithBounds(&r.configForm, bounds)
 			continue
@@ -103,7 +103,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			t := r.buttons[i].(*basicwidget.TextButton)
 			t.SetText(fmt.Sprintf("Button %d", i))
 		}
-		for i, bounds := range g.CellBounds(len(r.buttons)) {
+		for i, bounds := range g.CellBounds() {
 			widget := r.buttons[i]
 			if r.fill {
 				appender.AppendChildWidgetWithBounds(widget, bounds)

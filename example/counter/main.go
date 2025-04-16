@@ -63,7 +63,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			layout.FixedSize(u),
 		},
 		RowGap: u,
-	}).CellBounds(2) {
+	}).CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&r.counterText, bounds)
@@ -77,7 +77,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 					layout.FixedSize(6 * u),
 				},
 				ColumnGap: u / 2,
-			}).CellBounds(4) {
+			}).CellBounds() {
 				switch i {
 				case 0:
 					appender.AppendChildWidgetWithBounds(&r.resetButton, bounds)
