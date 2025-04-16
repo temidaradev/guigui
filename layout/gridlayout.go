@@ -6,13 +6,12 @@ package layout
 import (
 	"image"
 	"iter"
-
-	"github.com/hajimehoshi/guigui"
 )
 
 type Size struct {
 	typ   sizeType
 	value int
+	f     func(index int) int
 }
 
 type sizeType int
@@ -23,10 +22,11 @@ const (
 	sizeTypeFraction
 )
 
-func DefaultSize() Size {
+func DefaultSize(f func(index int) int) Size {
 	return Size{
 		typ:   sizeTypeDefault,
 		value: 0,
+		f:     f,
 	}
 }
 
@@ -57,7 +57,7 @@ type GridLayout struct {
 	RowGap    int
 }
 
-func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget) iter.Seq2[int, image.Rectangle] {
+func (g GridLayout) CellBounds(count int) iter.Seq2[int, image.Rectangle] {
 	return func(yield func(index int, bounds image.Rectangle) bool) {
 		widths := g.Widths
 		if len(widths) == 0 {
@@ -86,16 +86,14 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 			switch width.typ {
 			case sizeTypeDefault:
 				widthsInPixels[i] = 0
-				for j := range (len(widgets)-1)/len(widths) + 1 {
-					if j*len(widths)+i >= len(widgets) {
+				for j := range (count-1)/len(widths) + 1 {
+					if j*len(widths)+i >= count {
 						break
 					}
-					widget := widgets[j*len(widths)+i]
-					if widget == nil {
+					if width.f == nil {
 						continue
 					}
-					w, _ := widget.DefaultSize(context)
-					widthsInPixels[i] = max(widthsInPixels[i], w)
+					widthsInPixels[i] = max(widthsInPixels[i], width.f(j*len(widths)+i))
 				}
 			case sizeTypeFixed:
 				widthsInPixels[i] = width.value
@@ -139,15 +137,13 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 			case sizeTypeDefault:
 				heightsInPixels[j] = 0
 				for i := range widths {
-					if j*len(widths)+i >= len(widgets) {
+					if j*len(widths)+i >= count {
 						break
 					}
-					widget := widgets[j*len(widths)+i]
-					if widget == nil {
+					if height.f == nil {
 						continue
 					}
-					_, h := widget.DefaultSize(context)
-					heightsInPixels[j] = max(heightsInPixels[j], h)
+					heightsInPixels[j] = max(heightsInPixels[j], height.f(j*len(widths)+i))
 				}
 			case sizeTypeFixed:
 				heightsInPixels[j] = height.value
@@ -187,7 +183,7 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 
 		y := g.Bounds.Min.Y
 		var widgetIdx int
-		for idx := 0; idx < len(widgets); idx += len(widths) * len(heights) {
+		for idx := 0; idx < count; idx += len(widths) * len(heights) {
 			for j := 0; j < len(heights); j++ {
 				x := g.Bounds.Min.X
 				for i := 0; i < len(widths); i++ {
@@ -198,7 +194,7 @@ func (g GridLayout) CellBounds(context *guigui.Context, widgets []guigui.Widget)
 					x += widthsInPixels[i]
 					x += g.ColumnGap
 					widgetIdx++
-					if widgetIdx >= len(widgets) {
+					if widgetIdx >= count {
 						return
 					}
 				}
