@@ -10,7 +10,7 @@ import (
 )
 
 type DefaultWidget struct {
-	widgetState_ widgetState
+	s widgetState
 }
 
 var _ Widget = (*DefaultWidget)(nil)
@@ -47,7 +47,7 @@ func (d *DefaultWidget) DefaultSize(context *Context) image.Point {
 }
 
 func (d *DefaultWidget) widgetState() *widgetState {
-	return &d.widgetState_
+	return &d.s
 }
 
 type RootWidget struct {
