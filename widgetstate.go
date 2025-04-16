@@ -5,6 +5,7 @@ package guigui
 
 import (
 	"image"
+	"maps"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,7 +16,8 @@ type bounds3D struct {
 }
 
 type widgetsAndVisibleBounds struct {
-	bounds3Ds map[Widget]bounds3D
+	bounds3Ds       map[Widget]bounds3D
+	currentBounds3D map[Widget]bounds3D
 }
 
 func (w *widgetsAndVisibleBounds) reset() {
@@ -26,29 +28,32 @@ func (w *widgetsAndVisibleBounds) append(context *Context, widget Widget) {
 	if w.bounds3Ds == nil {
 		w.bounds3Ds = map[Widget]bounds3D{}
 	}
+	bounds := context.VisibleBounds(widget)
+	if bounds.Empty() {
+		return
+	}
 	w.bounds3Ds[widget] = bounds3D{
-		bounds: context.VisibleBounds(widget),
+		bounds: bounds,
 		z:      z(widget),
 	}
 }
 
 func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widget) bool {
-	if len(w.bounds3Ds) != len(currentWidgets) {
-		return false
+	if w.currentBounds3D == nil {
+		w.currentBounds3D = map[Widget]bounds3D{}
+	} else {
+		clear(w.currentBounds3D)
 	}
 	for _, widget := range currentWidgets {
-		b, ok := w.bounds3Ds[widget]
-		if !ok {
-			return false
+		if context.VisibleBounds(widget).Empty() {
+			continue
 		}
-		if b.bounds != context.VisibleBounds(widget) {
-			return false
-		}
-		if b.z != z(widget) {
-			return false
+		w.currentBounds3D[widget] = bounds3D{
+			bounds: context.VisibleBounds(widget),
+			z:      z(widget),
 		}
 	}
-	return true
+	return maps.Equal(w.bounds3Ds, w.currentBounds3D)
 }
 
 func (w *widgetsAndVisibleBounds) redrawIfDifferentParentZ(app *app) {
