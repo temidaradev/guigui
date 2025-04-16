@@ -13,6 +13,7 @@ import (
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	_ "github.com/hajimehoshi/guigui/basicwidget/cjkfont"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 var theCurrentID int
@@ -49,16 +50,11 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	u := float64(basicwidget.UnitSize(context))
-
-	context.SetSize(&r.textField, image.Pt(context.Size(r).X-int(6.5*u), int(u)))
 	r.textField.SetOnEnterPressed(func(text string) {
 		r.tryCreateTask()
 	})
-	appender.AppendChildWidgetWithPosition(&r.textField, context.Position(r).Add(image.Pt(int(0.5*u), int(0.5*u))))
 
 	r.createButton.SetText("Create")
-	context.SetSize(&r.createButton, image.Pt(int(5*u), guigui.DefaultSize))
 	r.createButton.SetOnUp(func() {
 		r.tryCreateTask()
 	})
@@ -67,14 +63,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	} else {
 		context.Disable(&r.createButton)
 	}
-	{
-		p := context.Position(r)
-		p.X += context.Size(r).X - int(0.5*u) - int(5*u)
-		p.Y += int(0.5 * u)
-		appender.AppendChildWidgetWithPosition(&r.createButton, p)
-	}
 
-	context.SetSize(&r.tasksPanel, context.Size(r).Add(image.Pt(0, -int(2*u))))
 	r.tasksPanelContent.SetTasks(context, r.tasks)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
 		r.tasks = slices.DeleteFunc(r.tasks, func(t Task) bool {
@@ -82,8 +71,37 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		})
 	})
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
-	context.SetSize(&r.tasksPanelContent, image.Pt(context.Size(r).X, guigui.DefaultSize))
-	appender.AppendChildWidgetWithPosition(&r.tasksPanel, context.Position(r).Add(image.Pt(0, int(2*u))))
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(r).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.FixedSize(u),
+			layout.FractionSize(1),
+		},
+		RowGap: u / 2,
+	}).CellBounds() {
+		switch i {
+		case 0:
+			for i, bounds := range (layout.GridLayout{
+				Bounds: bounds,
+				Widths: []layout.Size{
+					layout.FractionSize(1),
+					layout.FixedSize(5 * u),
+				},
+				ColumnGap: u / 2,
+			}).CellBounds() {
+				switch i {
+				case 0:
+					appender.AppendChildWidgetWithBounds(&r.textField, bounds)
+				case 1:
+					appender.AppendChildWidgetWithBounds(&r.createButton, bounds)
+				}
+			}
+		case 1:
+			appender.AppendChildWidgetWithBounds(&r.tasksPanel, bounds)
+		}
+	}
 
 	return nil
 }
@@ -121,21 +139,32 @@ func (t *taskWidget) SetText(text string) {
 }
 
 func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	u := float64(basicwidget.UnitSize(context))
-
-	p := context.Position(t)
 	t.doneButton.SetText("Done")
-	context.SetSize(&t.doneButton, image.Pt(int(3*u), guigui.DefaultSize))
 	t.doneButton.SetOnUp(func() {
 		if t.onDoneButtonPressed != nil {
 			t.onDoneButtonPressed()
 		}
 	})
-	appender.AppendChildWidgetWithPosition(&t.doneButton, p)
 
-	context.SetSize(&t.text, context.Size(t).Add(image.Pt(-int(4.5*u), 0)))
 	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-	appender.AppendChildWidgetWithPosition(&t.text, image.Pt(p.X+int(3.5*u), p.Y))
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(t),
+		Widths: []layout.Size{
+			layout.FixedSize(3 * u),
+			layout.FractionSize(1),
+		},
+		ColumnGap: u / 2,
+	}).CellBounds() {
+		switch i {
+		case 0:
+			appender.AppendChildWidgetWithBounds(&t.doneButton, bounds)
+		case 1:
+			appender.AppendChildWidgetWithBounds(&t.text, bounds)
+		}
+	}
+
 	return nil
 }
 
@@ -178,19 +207,17 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 	u := float64(basicwidget.UnitSize(context))
 
 	p := context.Position(t)
-	x := p.X + int(0.5*u)
-	y := p.Y
 	for i := range t.taskWidgets {
 		// Do not take a variable for the task widget in the for-range loop,
 		// since the pointer value of the task widget matters.
 		if i > 0 {
-			y += int(u / 4)
+			p.Y += int(u / 4)
 		}
 		appender.AppendChildWidgetWithBounds(&t.taskWidgets[i], image.Rectangle{
-			Min: image.Pt(x, y),
-			Max: image.Pt(x, y).Add(image.Pt(context.Size(t).X, int(u))),
+			Min: p,
+			Max: p.Add(image.Pt(context.Size(t).X, int(u))),
 		})
-		y += int(u)
+		p.Y += int(u)
 	}
 
 	return nil
