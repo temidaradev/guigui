@@ -204,20 +204,24 @@ func (t *tasksPanelContent) SetTasks(context *guigui.Context, tasks []Task) {
 }
 
 func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	u := float64(basicwidget.UnitSize(context))
+	u := basicwidget.UnitSize(context)
 
-	p := context.Position(t)
-	for i := range t.taskWidgets {
-		// Do not take a variable for the task widget in the for-range loop,
-		// since the pointer value of the task widget matters.
-		if i > 0 {
-			p.Y += int(u / 4)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(t),
+		Heights: []layout.Size{
+			layout.MaxContentSize(func(index int) int {
+				if index >= len(t.taskWidgets) {
+					return 0
+				}
+				return context.Size(&t.taskWidgets[index]).Y
+			}),
+		},
+		RowGap: u / 4,
+	}).RepeatingCellBounds() {
+		if i >= len(t.taskWidgets) {
+			break
 		}
-		appender.AppendChildWidgetWithBounds(&t.taskWidgets[i], image.Rectangle{
-			Min: p,
-			Max: p.Add(image.Pt(context.Size(t).X, int(u))),
-		})
-		p.Y += int(u)
+		appender.AppendChildWidgetWithBounds(&t.taskWidgets[i], bounds)
 	}
 
 	return nil

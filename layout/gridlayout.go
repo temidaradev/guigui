@@ -61,6 +61,10 @@ func (g GridLayout) CellBounds() iter.Seq2[int, image.Rectangle] {
 	return g.cellBounds(max(len(g.Widths), 1) * max(len(g.Heights), 1))
 }
 
+func (g GridLayout) RepeatingCellBounds() iter.Seq2[int, image.Rectangle] {
+	return g.cellBounds(-1)
+}
+
 func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 	return func(yield func(index int, bounds image.Rectangle) bool) {
 		widths := g.Widths
@@ -73,18 +77,14 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 		}
 
 		widthsInPixels := make([]int, len(widths))
-		heightsInPixels := make([]int, len(heights))
 
-		var denomW, denomH int
-		restW, restH := g.Bounds.Dx(), g.Bounds.Dy()
+		// Calculate widths in pixels.
+		restW := g.Bounds.Dx()
 		restW -= (len(widths) - 1) * g.ColumnGap
-		restH -= (len(heights) - 1) * g.RowGap
 		if restW < 0 {
 			restW = 0
 		}
-		if restH < 0 {
-			restH = 0
-		}
+		var denomW int
 
 		for i, width := range widths {
 			switch width.typ {
@@ -94,6 +94,9 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 				widthsInPixels[i] = 0
 				denomW += width.value
 			case sizeTypeMaxContent:
+				if count < 0 {
+					panic("layout: MaxContentSize is not supported with infinite count")
+				}
 				widthsInPixels[i] = 0
 				for j := range (count-1)/len(widths) + 1 {
 					if j*len(widths)+i >= count {
@@ -136,58 +139,68 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			}
 		}
 
-		for j, height := range heights {
-			switch height.typ {
-			case sizeTypeFixed:
-				heightsInPixels[j] = height.value
-			case sizeTypeFraction:
-				heightsInPixels[j] = 0
-				denomH += height.value
-			case sizeTypeMaxContent:
-				heightsInPixels[j] = 0
-				for i := range widths {
-					if j*len(widths)+i >= count {
-						break
-					}
-					if height.content == nil {
-						continue
-					}
-					heightsInPixels[j] = max(heightsInPixels[j], height.content(j*len(widths)+i))
-				}
+		y := g.Bounds.Min.Y
+		heightsInPixels := make([]int, len(heights))
+		var widgetIdx int
+		for widgetBaseIdx := 0; count < 0 || widgetBaseIdx < count; widgetBaseIdx += len(widths) * len(heights) {
+			// Calculate hights in pixels.
+			// This is needed for each loop since the index starts with widgetBaseIdx for sizeTypeMaxContent.
+			restH := g.Bounds.Dy()
+			if restH < 0 {
+				restH = 0
 			}
-			restH -= heightsInPixels[j]
-		}
+			restH -= (len(heights) - 1) * g.RowGap
+			var denomH int
 
-		if denomH > 0 {
-			origRestH := restH
 			for j, height := range heights {
-				if height.typ != sizeTypeFraction {
-					continue
+				switch height.typ {
+				case sizeTypeFixed:
+					heightsInPixels[j] = height.value
+				case sizeTypeFraction:
+					heightsInPixels[j] = 0
+					denomH += height.value
+				case sizeTypeMaxContent:
+					heightsInPixels[j] = 0
+					for i := range widths {
+						if count >= 0 && j*len(widths)+i >= count {
+							break
+						}
+						if height.content == nil {
+							continue
+						}
+						heightsInPixels[j] = max(heightsInPixels[j], height.content(widgetBaseIdx+j*len(widths)+i))
+					}
 				}
-				h := int(float64(origRestH) * float64(height.value) / float64(denomH))
-				heightsInPixels[j] = h
-				restH -= h
+				restH -= heightsInPixels[j]
 			}
-			for restH > 0 {
-				for j := len(heightsInPixels) - 1; j >= 0; j-- {
-					if heights[j].typ != sizeTypeFraction {
+
+			if denomH > 0 {
+				origRestH := restH
+				for j, height := range heights {
+					if height.typ != sizeTypeFraction {
 						continue
 					}
-					heightsInPixels[j]++
-					restH--
+					h := int(float64(origRestH) * float64(height.value) / float64(denomH))
+					heightsInPixels[j] = h
+					restH -= h
+				}
+				for restH > 0 {
+					for j := len(heightsInPixels) - 1; j >= 0; j-- {
+						if heights[j].typ != sizeTypeFraction {
+							continue
+						}
+						heightsInPixels[j]++
+						restH--
+						if restH <= 0 {
+							break
+						}
+					}
 					if restH <= 0 {
 						break
 					}
 				}
-				if restH <= 0 {
-					break
-				}
 			}
-		}
 
-		y := g.Bounds.Min.Y
-		var widgetIdx int
-		for idx := 0; idx < count; idx += len(widths) * len(heights) {
 			for j := 0; j < len(heights); j++ {
 				x := g.Bounds.Min.X
 				for i := 0; i < len(widths); i++ {
@@ -198,7 +211,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 					x += widthsInPixels[i]
 					x += g.ColumnGap
 					widgetIdx++
-					if widgetIdx >= count {
+					if count >= 0 && widgetIdx >= count {
 						return
 					}
 				}
