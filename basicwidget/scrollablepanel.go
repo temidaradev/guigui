@@ -57,10 +57,17 @@ func (s *scrollablePanelBorder) Draw(context *guigui.Context, dst *ebiten.Image)
 	y0 := float32(bounds.Min.Y)
 	y1 := float32(bounds.Max.Y)
 	offsetX, offsetY := s.scrollOverlay.Offset()
-	if offsetX < 0 {
+	r := s.scrollOverlay.scrollRange(context)
+	if offsetX < float64(r.Max.X) {
 		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
 	}
-	if offsetY < 0 {
+	if offsetY < float64(r.Max.Y) {
 		vector.StrokeLine(dst, x0, y0+strokeWidth/2, x1, y0+strokeWidth/2, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
+	}
+	if offsetX > float64(r.Min.X) {
+		vector.StrokeLine(dst, x1-strokeWidth/2, y0, x1-strokeWidth/2, y1, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
+	}
+	if offsetY > float64(r.Min.Y) {
+		vector.StrokeLine(dst, x0, y1-strokeWidth/2, x1, y1-strokeWidth/2, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
 	}
 }

@@ -224,27 +224,17 @@ func (s *ScrollOverlay) Offset() (float64, float64) {
 }
 
 func (s *ScrollOverlay) adjustOffset(context *guigui.Context) {
-	bounds := context.Bounds(s)
-
 	// Adjust offsets.
-	if s.offsetX > 0 {
-		s.offsetX = 0
-	}
-	if s.offsetY > 0 {
-		s.offsetY = 0
-	}
+	r := s.scrollRange(context)
+	s.offsetX = min(max(s.offsetX, float64(r.Min.X)), float64(r.Max.X))
+	s.offsetY = min(max(s.offsetY, float64(r.Min.Y)), float64(r.Max.Y))
+}
 
-	w := s.contentSize.X - bounds.Dx()
-	h := s.contentSize.Y - bounds.Dy()
-	if w < 0 {
-		s.offsetX = 0
-	} else if s.offsetX < -float64(w) {
-		s.offsetX = -float64(w)
-	}
-	if h < 0 {
-		s.offsetY = 0
-	} else if s.offsetY < -float64(h) {
-		s.offsetY = -float64(h)
+func (s *ScrollOverlay) scrollRange(context *guigui.Context) image.Rectangle {
+	bounds := context.Bounds(s)
+	return image.Rectangle{
+		Min: image.Pt(min(bounds.Dx()-s.contentSize.X, 0), min(bounds.Dy()-s.contentSize.Y, 0)),
+		Max: image.Pt(0, 0),
 	}
 }
 
