@@ -27,8 +27,6 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	u := basicwidget.UnitSize(context)
-
 	r.counterText.SetSelectable(true)
 	r.counterText.SetBold(true)
 	r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
@@ -56,6 +54,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		r.counter--
 	})
 
+	u := basicwidget.UnitSize(context)
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(u),
 		Heights: []layout.Size{
