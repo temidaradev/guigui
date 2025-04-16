@@ -463,7 +463,7 @@ func (a *app) resetPrevWidgets(widget Widget) {
 	// Reset the states.
 	widgetState.prev.reset()
 	for _, child := range widgetState.children {
-		widgetState.prev.append(child, a.context.Bounds(child))
+		widgetState.prev.append(&a.context, child)
 	}
 	for _, child := range widgetState.children {
 		a.resetPrevWidgets(child)

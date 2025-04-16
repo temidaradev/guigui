@@ -14,25 +14,25 @@ type bounds3D struct {
 	z      int
 }
 
-type widgetsAndBounds struct {
+type widgetsAndVisibleBounds struct {
 	bounds3Ds map[Widget]bounds3D
 }
 
-func (w *widgetsAndBounds) reset() {
+func (w *widgetsAndVisibleBounds) reset() {
 	clear(w.bounds3Ds)
 }
 
-func (w *widgetsAndBounds) append(widget Widget, bounds image.Rectangle) {
+func (w *widgetsAndVisibleBounds) append(context *Context, widget Widget) {
 	if w.bounds3Ds == nil {
 		w.bounds3Ds = map[Widget]bounds3D{}
 	}
 	w.bounds3Ds[widget] = bounds3D{
-		bounds: bounds,
+		bounds: context.VisibleBounds(widget),
 		z:      z(widget),
 	}
 }
 
-func (w *widgetsAndBounds) equals(context *Context, currentWidgets []Widget) bool {
+func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widget) bool {
 	if len(w.bounds3Ds) != len(currentWidgets) {
 		return false
 	}
@@ -41,7 +41,7 @@ func (w *widgetsAndBounds) equals(context *Context, currentWidgets []Widget) boo
 		if !ok {
 			return false
 		}
-		if b.bounds != context.Bounds(widget) {
+		if b.bounds != context.VisibleBounds(widget) {
 			return false
 		}
 		if b.z != z(widget) {
@@ -51,7 +51,7 @@ func (w *widgetsAndBounds) equals(context *Context, currentWidgets []Widget) boo
 	return true
 }
 
-func (w *widgetsAndBounds) redrawIfDifferentParentZ(app *app) {
+func (w *widgetsAndVisibleBounds) redrawIfDifferentParentZ(app *app) {
 	for widget, bounds3D := range w.bounds3Ds {
 		if widget.ZDelta() != 0 {
 			app.requestRedraw(bounds3D.bounds)
@@ -69,7 +69,7 @@ type widgetState struct {
 
 	parent   Widget
 	children []Widget
-	prev     widgetsAndBounds
+	prev     widgetsAndVisibleBounds
 
 	hidden       bool
 	disabled     bool
