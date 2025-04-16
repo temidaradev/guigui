@@ -5,11 +5,11 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Root struct {
@@ -27,29 +27,16 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	{
-		s := context.Size(r)
-		s.X -= 2 * basicwidget.UnitSize(context)
-		s.Y -= 4 * basicwidget.UnitSize(context)
+	u := basicwidget.UnitSize(context)
 
-		r.counterText.SetSelectable(true)
-		r.counterText.SetBold(true)
-		r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
-		r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-		r.counterText.SetScale(4)
-		r.counterText.SetText(fmt.Sprintf("%d", r.counter))
-
-		p := context.Position(r)
-		p.X += basicwidget.UnitSize(context)
-		p.Y += basicwidget.UnitSize(context)
-		appender.AppendChildWidgetWithBounds(&r.counterText, image.Rectangle{
-			Min: p,
-			Max: p.Add(s),
-		})
-	}
+	r.counterText.SetSelectable(true)
+	r.counterText.SetBold(true)
+	r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
+	r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
+	r.counterText.SetScale(4)
+	r.counterText.SetText(fmt.Sprintf("%d", r.counter))
 
 	r.resetButton.SetText("Reset")
-	context.SetSize(&r.resetButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
 	})
@@ -58,35 +45,49 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	} else {
 		context.Enable(&r.resetButton)
 	}
-	{
-		p := context.Position(r)
-		p.X += basicwidget.UnitSize(context)
-		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
-		appender.AppendChildWidgetWithPosition(&r.resetButton, p)
-	}
 
 	r.incButton.SetText("Increment")
-	context.SetSize(&r.incButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.incButton.SetOnUp(func() {
 		r.counter++
 	})
-	{
-		p := context.Position(r)
-		p.X += context.Size(r).X - 7*basicwidget.UnitSize(context)
-		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
-		appender.AppendChildWidgetWithPosition(&r.incButton, p)
-	}
 
 	r.decButton.SetText("Decrement")
-	context.SetSize(&r.decButton, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 	r.decButton.SetOnUp(func() {
 		r.counter--
 	})
-	{
-		p := context.Position(r)
-		p.X += context.Size(r).X - int(13.5*float64(basicwidget.UnitSize(context)))
-		p.Y += context.Size(r).Y - 2*basicwidget.UnitSize(context)
-		appender.AppendChildWidgetWithPosition(&r.decButton, p)
+
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(r).Inset(u),
+		Heights: []layout.Size{
+			layout.FractionSize(1),
+			layout.FixedSize(u),
+		},
+		RowGap: u,
+	}).CellBounds(2) {
+		switch i {
+		case 0:
+			appender.AppendChildWidgetWithBounds(&r.counterText, bounds)
+		case 1:
+			for i, bounds := range (layout.GridLayout{
+				Bounds: bounds,
+				Widths: []layout.Size{
+					layout.FixedSize(6 * u),
+					layout.FractionSize(1),
+					layout.FixedSize(6 * u),
+					layout.FixedSize(6 * u),
+				},
+				ColumnGap: u / 2,
+			}).CellBounds(4) {
+				switch i {
+				case 0:
+					appender.AppendChildWidgetWithBounds(&r.resetButton, bounds)
+				case 2:
+					appender.AppendChildWidgetWithBounds(&r.incButton, bounds)
+				case 3:
+					appender.AppendChildWidgetWithBounds(&r.decButton, bounds)
+				}
+			}
+		}
 	}
 
 	return nil
