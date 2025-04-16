@@ -59,7 +59,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(int(u / 2)),
 		Heights: []layout.Size{
-			layout.DefaultSize(func(index int) int {
+			layout.MaxContentSize(func(index int) int {
 				if index == 0 {
 					_, h := context.Size(&r.configForm)
 					return h
@@ -77,7 +77,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		g := layout.GridLayout{
 			Bounds: bounds,
 			Widths: []layout.Size{
-				layout.DefaultSize(func(index int) int {
+				layout.MaxContentSize(func(index int) int {
 					w, _ := context.Size(r.buttons[index])
 					return w
 				}),
@@ -86,7 +86,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				layout.FractionSize(2),
 			},
 			Heights: []layout.Size{
-				layout.DefaultSize(func(index int) int {
+				layout.MaxContentSize(func(index int) int {
 					_, h := context.Size(r.buttons[index])
 					return h
 				}),

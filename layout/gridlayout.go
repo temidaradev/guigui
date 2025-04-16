@@ -9,26 +9,18 @@ import (
 )
 
 type Size struct {
-	typ   sizeType
-	value int
-	f     func(index int) int
+	typ     sizeType
+	value   int
+	content func(index int) int
 }
 
 type sizeType int
 
 const (
-	sizeTypeDefault sizeType = iota
-	sizeTypeFixed
+	sizeTypeFixed sizeType = iota
 	sizeTypeFraction
+	sizeTypeMaxContent
 )
-
-func DefaultSize(f func(index int) int) Size {
-	return Size{
-		typ:   sizeTypeDefault,
-		value: 0,
-		f:     f,
-	}
-}
 
 func FixedSize(value int) Size {
 	return Size{
@@ -41,6 +33,14 @@ func FractionSize(value int) Size {
 	return Size{
 		typ:   sizeTypeFraction,
 		value: value,
+	}
+}
+
+func MaxContentSize(f func(index int) int) Size {
+	return Size{
+		typ:     sizeTypeMaxContent,
+		value:   0,
+		content: f,
 	}
 }
 
@@ -84,22 +84,22 @@ func (g GridLayout) CellBounds(count int) iter.Seq2[int, image.Rectangle] {
 
 		for i, width := range widths {
 			switch width.typ {
-			case sizeTypeDefault:
-				widthsInPixels[i] = 0
-				for j := range (count-1)/len(widths) + 1 {
-					if j*len(widths)+i >= count {
-						break
-					}
-					if width.f == nil {
-						continue
-					}
-					widthsInPixels[i] = max(widthsInPixels[i], width.f(j*len(widths)+i))
-				}
 			case sizeTypeFixed:
 				widthsInPixels[i] = width.value
 			case sizeTypeFraction:
 				widthsInPixels[i] = 0
 				denomW += width.value
+			case sizeTypeMaxContent:
+				widthsInPixels[i] = 0
+				for j := range (count-1)/len(widths) + 1 {
+					if j*len(widths)+i >= count {
+						break
+					}
+					if width.content == nil {
+						continue
+					}
+					widthsInPixels[i] = max(widthsInPixels[i], width.content(j*len(widths)+i))
+				}
 			}
 			restW -= widthsInPixels[i]
 		}
@@ -134,22 +134,22 @@ func (g GridLayout) CellBounds(count int) iter.Seq2[int, image.Rectangle] {
 
 		for j, height := range heights {
 			switch height.typ {
-			case sizeTypeDefault:
-				heightsInPixels[j] = 0
-				for i := range widths {
-					if j*len(widths)+i >= count {
-						break
-					}
-					if height.f == nil {
-						continue
-					}
-					heightsInPixels[j] = max(heightsInPixels[j], height.f(j*len(widths)+i))
-				}
 			case sizeTypeFixed:
 				heightsInPixels[j] = height.value
 			case sizeTypeFraction:
 				heightsInPixels[j] = 0
 				denomH += height.value
+			case sizeTypeMaxContent:
+				heightsInPixels[j] = 0
+				for i := range widths {
+					if j*len(widths)+i >= count {
+						break
+					}
+					if height.content == nil {
+						continue
+					}
+					heightsInPixels[j] = max(heightsInPixels[j], height.content(j*len(widths)+i))
+				}
 			}
 			restH -= heightsInPixels[j]
 		}
