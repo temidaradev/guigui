@@ -78,7 +78,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			Bounds: bounds,
 			Widths: []layout.Size{
 				layout.MaxContentSize(func(index int) int {
-					w, _ := context.Size(r.buttons[index])
+					w, _ := r.buttons[index].DefaultSize(context)
 					return w
 				}),
 				layout.FixedSize(200),
@@ -87,7 +87,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			},
 			Heights: []layout.Size{
 				layout.MaxContentSize(func(index int) int {
-					_, h := context.Size(r.buttons[index])
+					_, h := r.buttons[index].DefaultSize(context)
 					return h
 				}),
 				layout.FixedSize(100),
