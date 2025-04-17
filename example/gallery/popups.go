@@ -11,6 +11,7 @@ import (
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Popups struct {
@@ -40,9 +41,6 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		p.simplePopup.Open(context)
 	})
 
-	u := float64(basicwidget.UnitSize(context))
-
-	context.SetSize(&p.forms[0], image.Pt(context.Size(p).X-int(1*u), guigui.DefaultSize))
 	p.forms[0].SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.blurBackgroundText,
@@ -56,38 +54,54 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 			SecondaryWidget: &p.showButton,
 		},
 	})
-	pt := context.Position(p).Add(image.Pt(int(0.5*u), int(0.5*u)))
-	appender.AppendChildWidgetWithPosition(&p.forms[0], pt)
 
 	p.contextMenuPopupText.SetText("Context Menu")
 	p.contextMenuPopupClickHereText.SetText("Click Here by the Right Button")
 
-	context.SetSize(&p.forms[1], image.Pt(context.Size(p).X-int(1*u), guigui.DefaultSize))
 	p.forms[1].SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.contextMenuPopupText,
 			SecondaryWidget: &p.contextMenuPopupClickHereText,
 		},
 	})
-	pt.Y += context.Size(&p.forms[0]).Y + int(0.5*u)
-	appender.AppendChildWidgetWithPosition(&p.forms[1], pt)
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(p).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.MaxContentSize(func(index int) int {
+				if index >= len(p.forms) {
+					return 0
+				}
+				return context.Size(&p.forms[index]).Y
+			}),
+		},
+		RowGap: u / 2,
+	}).RepeatingCellBounds() {
+		if i >= len(p.forms) {
+			break
+		}
+		appender.AppendChildWidgetWithBounds(&p.forms[i], bounds)
+	}
 
 	p.simplePopupContent.popup = &p.simplePopup
 	p.simplePopup.SetContent(&p.simplePopupContent)
-	contentSize := image.Pt(int(12*u), int(6*u))
-	bounds := context.Bounds(&p.simplePopup)
-	contentPosition := image.Point{
-		X: bounds.Min.X + (bounds.Dx()-contentSize.X)/2,
-		Y: bounds.Min.Y + (bounds.Dy()-contentSize.Y)/2,
-	}
-	context.SetSize(&p.simplePopupContent, contentSize)
 	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleButton.Value())
 	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
 	p.simplePopup.SetAnimationDuringFade(true)
-	appender.AppendChildWidgetWithBounds(&p.simplePopup, image.Rectangle{
-		Min: contentPosition,
-		Max: contentPosition.Add(contentSize),
-	})
+
+	appBounds := context.AppBounds()
+	contentSize := image.Pt(int(12*u), int(6*u))
+	simplePopupPosition := image.Point{
+		X: appBounds.Min.X + (appBounds.Dx()-contentSize.X)/2,
+		Y: appBounds.Min.Y + (appBounds.Dy()-contentSize.Y)/2,
+	}
+	simplePopupBounds := image.Rectangle{
+		Min: simplePopupPosition,
+		Max: simplePopupPosition.Add(contentSize),
+	}
+	context.SetSize(&p.simplePopupContent, simplePopupBounds.Size())
+	appender.AppendChildWidgetWithBounds(&p.simplePopup, simplePopupBounds)
 
 	p.contextMenuPopup.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 	// A context menu's position is updated at HandlePointingInput.
@@ -117,20 +131,51 @@ type simplePopupContent struct {
 }
 
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	u := float64(basicwidget.UnitSize(context))
+	u := basicwidget.UnitSize(context)
 
 	s.titleText.SetText("Hello!")
 	s.titleText.SetBold(true)
-	pt := s.popup.ContentBounds(context).Min.Add(image.Pt(int(0.5*u), int(0.5*u)))
-	appender.AppendChildWidgetWithPosition(&s.titleText, pt)
 
 	s.closeButton.SetText("Close")
 	s.closeButton.SetOnUp(func() {
 		s.popup.Close()
 	})
-	cs := context.Size(&s.closeButton)
-	pt = s.popup.ContentBounds(context).Max.Add(image.Pt(-int(0.5*u)-cs.X, -int(0.5*u)-cs.Y))
-	appender.AppendChildWidgetWithPosition(&s.closeButton, pt)
+
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(s).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.FractionSize(1),
+			layout.MaxContentSize(func(index int) int {
+				if index != 1 {
+					return 0
+				}
+				return s.closeButton.DefaultSize(context).Y
+			}),
+		},
+	}).CellBounds() {
+		switch i {
+		case 0:
+			appender.AppendChildWidgetWithBounds(&s.titleText, bounds)
+		case 1:
+			for i, bounds := range (layout.GridLayout{
+				Bounds: bounds,
+				Widths: []layout.Size{
+					layout.FractionSize(1),
+					layout.MaxContentSize(func(index int) int {
+						if index != 1 {
+							return 0
+						}
+						return s.closeButton.DefaultSize(context).X
+					}),
+				},
+			}).CellBounds() {
+				if i != 1 {
+					continue
+				}
+				appender.AppendChildWidgetWithBounds(&s.closeButton, bounds)
+			}
+		}
+	}
 
 	return nil
 }

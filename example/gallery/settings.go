@@ -4,13 +4,13 @@
 package main
 
 import (
-	"image"
 	"sync"
 
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Settings struct {
@@ -76,8 +76,6 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		s.scaleDropdownList.SetSelectedItemIndex(1)
 	})
 
-	u := float64(basicwidget.UnitSize(context))
-	context.SetSize(&s.form, image.Pt(context.Size(s).X-int(1*u), guigui.DefaultSize))
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &s.colorModeText,
@@ -92,9 +90,24 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			SecondaryWidget: &s.scaleDropdownList,
 		},
 	})
-	{
-		p := context.Position(s).Add(image.Pt(int(0.5*u), int(0.5*u)))
-		appender.AppendChildWidgetWithPosition(&s.form, p)
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(s).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.MaxContentSize(func(index int) int {
+				if index >= 1 {
+					return 0
+				}
+				return context.Size(&s.form).Y
+			}),
+		},
+		RowGap: u / 2,
+	}).RepeatingCellBounds() {
+		if i >= 1 {
+			break
+		}
+		appender.AppendChildWidgetWithBounds(&s.form, bounds)
 	}
 
 	return nil

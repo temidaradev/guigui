@@ -4,10 +4,9 @@
 package main
 
 import (
-	"image"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Basic struct {
@@ -33,8 +32,6 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.textListText.SetText("Text List")
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
-	u := float64(basicwidget.UnitSize(context))
-	context.SetSize(&b.form, image.Pt(context.Size(b).X-int(1*u), guigui.DefaultSize))
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
@@ -53,9 +50,24 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &b.textList,
 		},
 	})
-	{
-		p := context.Position(b).Add(image.Pt(int(0.5*u), int(0.5*u)))
-		appender.AppendChildWidgetWithPosition(&b.form, p)
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(b).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.MaxContentSize(func(index int) int {
+				if index >= 1 {
+					return 0
+				}
+				return context.Size(&b.form).Y
+			}),
+		},
+		RowGap: u / 2,
+	}).RepeatingCellBounds() {
+		if i >= 1 {
+			break
+		}
+		appender.AppendChildWidgetWithBounds(&b.form, bounds)
 	}
 
 	return nil

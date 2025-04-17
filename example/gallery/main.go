@@ -5,12 +5,12 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	_ "github.com/hajimehoshi/guigui/basicwidget/cjkfont"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Root struct {
@@ -28,31 +28,30 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	rs := context.Size(r)
-	sw := 8 * basicwidget.UnitSize(context)
-	appender.AppendChildWidgetWithBounds(&r.sidebar, image.Rectangle{
-		Min: context.Position(r),
-		Max: context.Position(r).Add(image.Pt(sw, rs.Y)),
-	})
-	p := context.Position(r)
-	p.X += sw
-	pw := rs.X - sw
-	contentBounds := image.Rectangle{
-		Min: p,
-		Max: p.Add(image.Pt(pw, rs.Y)),
-	}
-
-	switch r.sidebar.SelectedItemTag() {
-	case "settings":
-		appender.AppendChildWidgetWithBounds(&r.settings, contentBounds)
-	case "basic":
-		appender.AppendChildWidgetWithBounds(&r.basic, contentBounds)
-	case "buttons":
-		appender.AppendChildWidgetWithBounds(&r.buttons, contentBounds)
-	case "lists":
-		appender.AppendChildWidgetWithBounds(&r.lists, contentBounds)
-	case "popups":
-		appender.AppendChildWidgetWithBounds(&r.popups, contentBounds)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(r),
+		Widths: []layout.Size{
+			layout.FixedSize(8 * basicwidget.UnitSize(context)),
+			layout.FractionSize(1),
+		},
+	}).CellBounds() {
+		switch i {
+		case 0:
+			appender.AppendChildWidgetWithBounds(&r.sidebar, bounds)
+		case 1:
+			switch r.sidebar.SelectedItemTag() {
+			case "settings":
+				appender.AppendChildWidgetWithBounds(&r.settings, bounds)
+			case "basic":
+				appender.AppendChildWidgetWithBounds(&r.basic, bounds)
+			case "buttons":
+				appender.AppendChildWidgetWithBounds(&r.buttons, bounds)
+			case "lists":
+				appender.AppendChildWidgetWithBounds(&r.lists, bounds)
+			case "popups":
+				appender.AppendChildWidgetWithBounds(&r.popups, bounds)
+			}
+		}
 	}
 
 	return nil

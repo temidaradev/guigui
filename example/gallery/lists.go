@@ -9,6 +9,7 @@ import (
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
+	"github.com/hajimehoshi/guigui/layout"
 )
 
 type Lists struct {
@@ -30,16 +31,30 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	l.textList.SetItems(items)
 	context.SetSize(&l.textList, image.Pt(guigui.DefaultSize, 6*basicwidget.UnitSize(context)))
 
-	u := float64(basicwidget.UnitSize(context))
-	context.SetSize(&l.form, image.Pt(context.Size(l).X-int(1*u), guigui.DefaultSize))
 	l.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &l.textListText,
 			SecondaryWidget: &l.textList,
 		},
 	})
-	{
-		appender.AppendChildWidgetWithPosition(&l.form, context.Position(l).Add(image.Pt(int(0.5*u), int(0.5*u))))
+
+	u := basicwidget.UnitSize(context)
+	for i, bounds := range (layout.GridLayout{
+		Bounds: context.Bounds(l).Inset(u / 2),
+		Heights: []layout.Size{
+			layout.MaxContentSize(func(index int) int {
+				if index >= 1 {
+					return 0
+				}
+				return context.Size(&l.form).Y
+			}),
+		},
+		RowGap: u / 2,
+	}).RepeatingCellBounds() {
+		if i >= 1 {
+			break
+		}
+		appender.AppendChildWidgetWithBounds(&l.form, bounds)
 	}
 
 	return nil
