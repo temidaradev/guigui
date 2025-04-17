@@ -101,10 +101,11 @@ type Text struct {
 
 	temporaryClipboard string
 
-	cachedTextSizePlus1 image.Point
-	lastFace            text.Face
-	lastAppScale        float64
-	lastWidth           int
+	cachedTextSizePlus1         image.Point
+	cachedAutoWrapTextSizePlus1 image.Point
+	lastFace                    text.Face
+	lastAppScale                float64
+	lastWidth                   int
 
 	onEnterPressed func(text string)
 }
@@ -115,6 +116,7 @@ func (t *Text) SetOnEnterPressed(f func(text string)) {
 
 func (t *Text) resetCachedSize() {
 	t.cachedTextSizePlus1 = image.Point{}
+	t.cachedAutoWrapTextSizePlus1 = image.Point{}
 }
 
 func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -881,15 +883,26 @@ func (t *Text) TextSize(context *guigui.Context) image.Point {
 }
 
 func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
-	if t.cachedTextSizePlus1.X > 0 && t.cachedTextSizePlus1.Y > 0 {
-		return t.cachedTextSizePlus1.Add(image.Pt(-1, -1))
+	useAutoWrap := t.autoWrap && !forceUnwrap
+	if useAutoWrap {
+		if t.cachedAutoWrapTextSizePlus1.X > 0 && t.cachedAutoWrapTextSizePlus1.Y > 0 {
+			return t.cachedAutoWrapTextSizePlus1.Add(image.Pt(-1, -1))
+		}
+	} else {
+		if t.cachedTextSizePlus1.X > 0 && t.cachedTextSizePlus1.Y > 0 {
+			return t.cachedTextSizePlus1.Add(image.Pt(-1, -1))
+		}
 	}
 
 	txt := t.textToDraw(context, true, forceUnwrap)
 	w, _ := text.Measure(txt, t.face(context), t.lineHeight(context))
 	w *= t.scaleMinus1 + 1
 	h := t.textHeight(context, txt)
-	t.cachedTextSizePlus1 = image.Pt(int(w)+1, h+1)
+	if useAutoWrap {
+		t.cachedAutoWrapTextSizePlus1 = image.Pt(int(w)+1, h+1)
+	} else {
+		t.cachedTextSizePlus1 = image.Pt(int(w)+1, h+1)
+	}
 	return image.Pt(int(w), h)
 }
 
