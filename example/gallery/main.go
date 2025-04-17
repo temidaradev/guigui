@@ -32,7 +32,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		Bounds: context.Bounds(r),
 		Widths: []layout.Size{
 			layout.FixedSize(8 * basicwidget.UnitSize(context)),
-			layout.FractionSize(1),
+			layout.FlexibleSize(1),
 		},
 	}).CellBounds() {
 		switch i {

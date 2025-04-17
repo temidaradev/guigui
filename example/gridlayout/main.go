@@ -65,7 +65,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				}
 				return 0
 			}),
-			layout.FractionSize(1),
+			layout.FlexibleSize(1),
 		},
 		RowGap: int(u / 2),
 	}).CellBounds() {
@@ -80,16 +80,16 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 					return r.buttons[index].DefaultSize(context).X
 				}),
 				layout.FixedSize(200),
-				layout.FractionSize(1),
-				layout.FractionSize(2),
+				layout.FlexibleSize(1),
+				layout.FlexibleSize(2),
 			},
 			Heights: []layout.Size{
 				layout.MaxContentSize(func(index int) int {
 					return r.buttons[index].DefaultSize(context).Y
 				}),
 				layout.FixedSize(100),
-				layout.FractionSize(1),
-				layout.FractionSize(2),
+				layout.FlexibleSize(1),
+				layout.FlexibleSize(2),
 			},
 		}
 		if r.gap {

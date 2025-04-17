@@ -18,7 +18,7 @@ type sizeType int
 
 const (
 	sizeTypeFixed sizeType = iota
-	sizeTypeFraction
+	sizeTypeFlexible
 	sizeTypeMaxContent
 )
 
@@ -29,9 +29,9 @@ func FixedSize(value int) Size {
 	}
 }
 
-func FractionSize(value int) Size {
+func FlexibleSize(value int) Size {
 	return Size{
-		typ:   sizeTypeFraction,
+		typ:   sizeTypeFlexible,
 		value: value,
 	}
 }
@@ -45,8 +45,8 @@ func MaxContentSize(f func(index int) int) Size {
 }
 
 var (
-	defaultWidths  = []Size{FractionSize(1)}
-	defaultHeights = []Size{FractionSize(1)}
+	defaultWidths  = []Size{FlexibleSize(1)}
+	defaultHeights = []Size{FlexibleSize(1)}
 )
 
 type GridLayout struct {
@@ -90,7 +90,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			switch width.typ {
 			case sizeTypeFixed:
 				widthsInPixels[i] = width.value
-			case sizeTypeFraction:
+			case sizeTypeFlexible:
 				widthsInPixels[i] = 0
 				denomW += width.value
 			case sizeTypeMaxContent:
@@ -114,7 +114,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 		if denomW > 0 {
 			origRestW := restW
 			for i, width := range widths {
-				if width.typ != sizeTypeFraction {
+				if width.typ != sizeTypeFlexible {
 					continue
 				}
 				w := int(float64(origRestW) * float64(width.value) / float64(denomW))
@@ -124,7 +124,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			// TODO: Use a better algorithm to distribute the rest.
 			for restW > 0 {
 				for i := len(widthsInPixels) - 1; i >= 0; i-- {
-					if widths[i].typ != sizeTypeFraction {
+					if widths[i].typ != sizeTypeFlexible {
 						continue
 					}
 					widthsInPixels[i]++
@@ -156,7 +156,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 				switch height.typ {
 				case sizeTypeFixed:
 					heightsInPixels[j] = height.value
-				case sizeTypeFraction:
+				case sizeTypeFlexible:
 					heightsInPixels[j] = 0
 					denomH += height.value
 				case sizeTypeMaxContent:
@@ -177,7 +177,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			if denomH > 0 {
 				origRestH := restH
 				for j, height := range heights {
-					if height.typ != sizeTypeFraction {
+					if height.typ != sizeTypeFlexible {
 						continue
 					}
 					h := int(float64(origRestH) * float64(height.value) / float64(denomH))
@@ -186,7 +186,7 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 				}
 				for restH > 0 {
 					for j := len(heightsInPixels) - 1; j >= 0; j-- {
-						if heights[j].typ != sizeTypeFraction {
+						if heights[j].typ != sizeTypeFlexible {
 							continue
 						}
 						heightsInPixels[j]++

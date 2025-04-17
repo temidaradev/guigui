@@ -144,7 +144,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(s).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.FractionSize(1),
+			layout.FlexibleSize(1),
 			layout.MaxContentSize(func(index int) int {
 				if index != 1 {
 					return 0
@@ -160,7 +160,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 			for i, bounds := range (layout.GridLayout{
 				Bounds: bounds,
 				Widths: []layout.Size{
-					layout.FractionSize(1),
+					layout.FlexibleSize(1),
 					layout.MaxContentSize(func(index int) int {
 						if index != 1 {
 							return 0

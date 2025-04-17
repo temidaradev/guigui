@@ -77,7 +77,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		Bounds: context.Bounds(r).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FixedSize(u),
-			layout.FractionSize(1),
+			layout.FlexibleSize(1),
 		},
 		RowGap: u / 2,
 	}).CellBounds() {
@@ -86,7 +86,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			for i, bounds := range (layout.GridLayout{
 				Bounds: bounds,
 				Widths: []layout.Size{
-					layout.FractionSize(1),
+					layout.FlexibleSize(1),
 					layout.FixedSize(5 * u),
 				},
 				ColumnGap: u / 2,
@@ -153,7 +153,7 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 		Bounds: context.Bounds(t),
 		Widths: []layout.Size{
 			layout.FixedSize(3 * u),
-			layout.FractionSize(1),
+			layout.FlexibleSize(1),
 		},
 		ColumnGap: u / 2,
 	}).CellBounds() {
