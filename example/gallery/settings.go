@@ -99,7 +99,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 				if index >= 1 {
 					return 0
 				}
-				return context.Size(&s.form).Y
+				return s.form.DefaultSize(context).Y
 			}),
 		},
 		RowGap: u / 2,

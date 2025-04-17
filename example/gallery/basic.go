@@ -59,7 +59,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 				if index >= 1 {
 					return 0
 				}
-				return context.Size(&b.form).Y
+				return b.form.DefaultSize(context).Y
 			}),
 		},
 		RowGap: u / 2,
