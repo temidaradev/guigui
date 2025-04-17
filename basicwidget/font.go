@@ -69,6 +69,46 @@ func drawText(bounds image.Rectangle, dst *ebiten.Image, str string, face text.F
 	text.Draw(dst, str, face, op)
 }
 
+func autoWrapText(width int, txt string, face text.Face) string {
+	var lines []string
+	var line string
+	var word string
+	state := -1
+	for len(txt) > 0 {
+		cluster, nextText, boundaries, nextState := uniseg.StepString(txt, state)
+		switch m := boundaries & uniseg.MaskLine; m {
+		default:
+			word += cluster
+		case uniseg.LineCanBreak, uniseg.LineMustBreak:
+			if line == "" {
+				line += word + cluster
+			} else {
+				l := line + word + cluster
+				if text.Advance(l, face) > float64(width) {
+					lines = append(lines, line)
+					line = word + cluster
+				} else {
+					line += word + cluster
+				}
+			}
+			word = ""
+			if m == uniseg.LineMustBreak {
+				lines = append(lines, line)
+				line = ""
+			}
+		}
+		state = nextState
+		txt = nextText
+	}
+
+	line += word
+	if len(line) > 0 {
+		lines = append(lines, line)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func textUpperLeft(bounds image.Rectangle, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) (float64, float64) {
 	w, h := text.Measure(str, face, lineHeight)
 	x := float64(bounds.Min.X)

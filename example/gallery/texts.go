@@ -16,6 +16,7 @@ type Texts struct {
 
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
+	unwrap          bool
 	bold            bool
 	selectable      bool
 	editable        bool
@@ -25,6 +26,8 @@ type Texts struct {
 	horizontalAlignDropdownList basicwidget.DropdownList
 	verticalAlignText           basicwidget.Text
 	verticalAlignDropdownList   basicwidget.DropdownList
+	autoWrapText                basicwidget.Text
+	autoWrapToggleButton        basicwidget.ToggleButton
 	boldText                    basicwidget.Text
 	boldToggleButton            basicwidget.ToggleButton
 	selectableText              basicwidget.Text
@@ -74,6 +77,12 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		}
 	})
 
+	t.autoWrapText.SetText("Auto Wrap")
+	t.autoWrapToggleButton.SetValue(!t.unwrap)
+	t.autoWrapToggleButton.SetOnValueChanged(func(checked bool) {
+		t.unwrap = !checked
+	})
+
 	t.boldText.SetText("Bold")
 	t.boldToggleButton.SetValue(t.bold)
 	t.boldToggleButton.SetOnValueChanged(func(checked bool) {
@@ -108,6 +117,10 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &t.verticalAlignDropdownList,
 		},
 		{
+			PrimaryWidget:   &t.autoWrapText,
+			SecondaryWidget: &t.autoWrapToggleButton,
+		},
+		{
 			PrimaryWidget:   &t.boldText,
 			SecondaryWidget: &t.boldToggleButton,
 		},
@@ -124,6 +137,7 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.sampleText.SetMultiline(true)
 	t.sampleText.SetHorizontalAlign(t.horizontalAlign)
 	t.sampleText.SetVerticalAlign(t.verticalAlign)
+	t.sampleText.SetAutoWrap(!t.unwrap)
 	t.sampleText.SetBold(t.bold)
 	t.sampleText.SetSelectable(t.selectable)
 	t.sampleText.SetEditable(t.editable)

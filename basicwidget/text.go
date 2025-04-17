@@ -83,6 +83,7 @@ type Text struct {
 	selectable           bool
 	editable             bool
 	multiline            bool
+	autoWrap             bool
 	selectionDragStart   int
 	selectionShiftIndex  int
 	dragging             bool
@@ -305,6 +306,15 @@ func (t *Text) SetMultiline(multiline bool) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *Text) SetAutoWrap(autoWrap bool) {
+	if t.autoWrap == autoWrap {
+		return
+	}
+
+	t.autoWrap = autoWrap
+	guigui.RequestRedraw(t)
+}
+
 func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 	offsetX, offsetY := t.scrollOverlay.Offset()
 
@@ -355,13 +365,14 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 		return guigui.HandleInputResult{}
 	}
 
+	text := t.textToDraw(context, false, false)
 	textBounds := t.textBounds(context)
 
 	face := t.face(context)
 	cursorPosition := image.Pt(ebiten.CursorPosition())
 	if t.dragging {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
+			idx := textIndexFromPosition(textBounds, cursorPosition, text, face, t.lineHeight(context), t.hAlign, t.vAlign)
 			if idx < t.selectionDragStart {
 				t.setTextAndSelection(t.field.Text(), idx, t.selectionDragStart, -1)
 			} else {
@@ -377,7 +388,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if cursorPosition.In(context.VisibleBounds(t)) {
-			idx := textIndexFromPosition(textBounds, cursorPosition, t.field.Text(), face, t.lineHeight(context), t.hAlign, t.vAlign)
+			idx := textIndexFromPosition(textBounds, cursorPosition, text, face, t.lineHeight(context), t.hAlign, t.vAlign)
 
 			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
 				t.clickCount++
@@ -432,7 +443,7 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 		return
 	}
 
-	text := t.textToDraw()
+	text := t.textToDraw(context, true, false)
 
 	tb := t.textBounds(context)
 	face := t.face(context)
@@ -459,8 +470,17 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 	}
 }
 
-func (t *Text) textToDraw() string {
-	return t.field.TextForRendering()
+func (t *Text) textToDraw(context *guigui.Context, showComposition bool, forceUnwrap bool) string {
+	var text string
+	if showComposition {
+		text = t.field.TextForRendering()
+	} else {
+		text = t.field.Text()
+	}
+	if forceUnwrap || !t.autoWrap {
+		return text
+	}
+	return autoWrapText(context.Size(t).X, text, t.face(context))
 }
 
 func (t *Text) selectionToDraw(context *guigui.Context) (start, end int, ok bool) {
@@ -520,7 +540,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 
 	start, _ := t.field.Selection()
 	var processed bool
-	if x, _, bottom, ok := textPosition(textBounds, t.field.Text(), start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
+	if x, _, bottom, ok := textPosition(textBounds, t.textToDraw(context, false, false), start, face, t.lineHeight(context), t.hAlign, t.vAlign); ok {
 		var err error
 		processed, err = t.field.HandleInput(int(x), int(bottom))
 		if err != nil {
@@ -664,9 +684,10 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = end
 			moveEnd = true
 		}
-		if x, y0, y1, ok := textPosition(textBounds, t.field.Text(), idx, face, lh, t.hAlign, t.vAlign); ok {
+		text := t.textToDraw(context, false, false)
+		if x, y0, y1, ok := textPosition(textBounds, text, idx, face, lh, t.hAlign, t.vAlign); ok {
 			y := (y0+y1)/2 - lh
-			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), t.field.Text(), face, lh, t.hAlign, t.vAlign)
+			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), text, face, lh, t.hAlign, t.vAlign)
 			if shift {
 				if moveEnd {
 					t.setTextAndSelection(t.field.Text(), start, idx, idx)
@@ -688,9 +709,10 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = start
 			moveStart = true
 		}
-		if x, y0, y1, ok := textPosition(textBounds, t.field.Text(), idx, face, lh, t.hAlign, t.vAlign); ok {
+		text := t.textToDraw(context, false, false)
+		if x, y0, y1, ok := textPosition(textBounds, text, idx, face, lh, t.hAlign, t.vAlign); ok {
 			y := (y0+y1)/2 + lh
-			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), t.field.Text(), face, lh, t.hAlign, t.vAlign)
+			idx := textIndexFromPosition(textBounds, image.Pt(int(x), int(y)), text, face, lh, t.hAlign, t.vAlign)
 			if shift {
 				if moveStart {
 					t.setTextAndSelection(t.field.Text(), idx, end, idx)
@@ -776,7 +798,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 
-	text := t.textToDraw()
+	text := t.textToDraw(context, true, false)
 	face := t.face(context)
 
 	if start, end, ok := t.selectionToDraw(context); ok {
@@ -846,17 +868,22 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {
-	return t.TextSize(context)
+	return t.textSize(context, true)
 }
 
 func (t *Text) TextSize(context *guigui.Context) image.Point {
+	return t.textSize(context, false)
+}
+
+func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
 	if t.cachedTextSizePlus1.X > 0 && t.cachedTextSizePlus1.Y > 0 {
 		return t.cachedTextSizePlus1.Add(image.Pt(-1, -1))
 	}
 
-	w, _ := text.Measure(t.textToDraw(), t.face(context), t.lineHeight(context))
+	txt := t.textToDraw(context, true, forceUnwrap)
+	w, _ := text.Measure(txt, t.face(context), t.lineHeight(context))
 	w *= t.scaleMinus1 + 1
-	h := t.textHeight(context, t.textToDraw())
+	h := t.textHeight(context, txt)
 	t.cachedTextSizePlus1 = image.Pt(int(w)+1, h+1)
 	return image.Pt(int(w), h)
 }
@@ -898,7 +925,7 @@ func (t *Text) cursorPosition(context *guigui.Context) (x, top, bottom float64, 
 		return 0, 0, 0, false
 	}
 
-	text := t.textToDraw()
+	text := t.textToDraw(context, true, false)
 	face := t.face(context)
 	return textPosition(textBounds, text, e, face, t.lineHeight(context), t.hAlign, t.vAlign)
 }
