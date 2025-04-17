@@ -75,18 +75,27 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	t.boldText.SetText("Bold")
+	t.boldToggleButton.SetValue(t.bold)
 	t.boldToggleButton.SetOnValueChanged(func(checked bool) {
 		t.bold = checked
 	})
 
 	t.selectableText.SetText("Selectable")
+	t.selectableToggleButton.SetValue(t.selectable)
 	t.selectableToggleButton.SetOnValueChanged(func(checked bool) {
 		t.selectable = checked
+		if !t.selectable {
+			t.editable = false
+		}
 	})
 
 	t.editableText.SetText("Editable")
+	t.editableToggleButton.SetValue(t.editable)
 	t.editableToggleButton.SetOnValueChanged(func(checked bool) {
 		t.editable = checked
+		if t.editable {
+			t.selectable = true
+		}
 	})
 
 	t.form.SetItems([]*basicwidget.FormItem{
@@ -111,13 +120,6 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &t.editableToggleButton,
 		},
 	})
-
-	if t.selectable {
-		context.Enable(&t.editableToggleButton)
-	} else {
-		t.editableToggleButton.SetValue(false)
-		context.Disable(&t.editableToggleButton)
-	}
 
 	t.sampleText.SetMultiline(true)
 	t.sampleText.SetHorizontalAlign(t.horizontalAlign)
