@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"iter"
+	"slices"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -69,13 +70,39 @@ func drawText(bounds image.Rectangle, dst *ebiten.Image, str string, face text.F
 	text.Draw(dst, str, face, op)
 }
 
-func autoWrapText(width int, txt string, face text.Face) string {
+func lines(str string) iter.Seq[string] {
+	return func(yield func(s string) bool) {
+		var line string
+		state := -1
+		for len(str) > 0 {
+			// uniseg.FirstLineSegmentInString is not available as this doesn't tell the size of the last cluster.
+			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
+			if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
+				if !yield(line) {
+					return
+				}
+				line = ""
+			} else {
+				line += cluster
+			}
+			state = nextState
+			str = nextStr
+		}
+		if len(line) > 0 {
+			if !yield(line) {
+				return
+			}
+		}
+	}
+}
+
+func autoWrapText(width int, str string, face text.Face) string {
 	var lines []string
 	var line string
 	var word string
 	state := -1
-	for len(txt) > 0 {
-		cluster, nextText, boundaries, nextState := uniseg.StepString(txt, state)
+	for len(str) > 0 {
+		cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
 		switch m := boundaries & uniseg.MaskLine; m {
 		default:
 			word += cluster
@@ -83,8 +110,7 @@ func autoWrapText(width int, txt string, face text.Face) string {
 			if line == "" {
 				line += word + cluster
 			} else {
-				l := line + word + cluster
-				if text.Advance(l, face) > float64(width) {
+				if l := line + word + cluster; text.Advance(l, face) > float64(width) {
 					lines = append(lines, line)
 					line = word + cluster
 				} else {
@@ -98,7 +124,7 @@ func autoWrapText(width int, txt string, face text.Face) string {
 			}
 		}
 		state = nextState
-		txt = nextText
+		str = nextStr
 	}
 
 	line += word
@@ -138,7 +164,7 @@ func textUpperLeft(bounds image.Rectangle, str string, face text.Face, lineHeigh
 }
 
 func textIndexFromPosition(textBounds image.Rectangle, position image.Point, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) int {
-	lines := strings.Split(str, "\n")
+	lines := slices.Collect(lines(str))
 	if len(lines) == 0 {
 		return 0
 	}
@@ -188,9 +214,8 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 
 	y := float64(textBounds.Min.Y)
 
-	lines := strings.Split(str, "\n")
 	var line string
-	for _, l := range lines {
+	for l := range lines(str) {
 		// +1 is for \n.
 		if index < len(l)+1 {
 			line = l
