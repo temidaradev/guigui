@@ -104,6 +104,7 @@ type Text struct {
 	cachedTextSizePlus1 image.Point
 	lastFace            text.Face
 	lastAppScale        float64
+	lastWidth           int
 
 	onEnterPressed func(text string)
 }
@@ -123,6 +124,10 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	if t.lastAppScale != context.AppScale() {
 		t.lastAppScale = context.AppScale()
+		t.resetCachedSize()
+	}
+	if t.autoWrap && t.lastWidth != context.Size(t).X {
+		t.lastWidth = context.Size(t).X
 		t.resetCachedSize()
 	}
 
