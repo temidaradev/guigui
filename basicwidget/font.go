@@ -9,6 +9,7 @@ import (
 	"iter"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -96,6 +97,10 @@ func lines(str string) iter.Seq[string] {
 	}
 }
 
+func removeSpaceAtLineTail(str string) string {
+	return strings.TrimRightFunc(str, unicode.IsSpace)
+}
+
 func autoWrapText(width int, str string, face text.Face) string {
 	var lines []string
 	var line string
@@ -110,7 +115,7 @@ func autoWrapText(width int, str string, face text.Face) string {
 			if line == "" {
 				line += word + cluster
 			} else {
-				if l := line + word + cluster; text.Advance(l, face) > float64(width) {
+				if text.Advance(removeSpaceAtLineTail(line+word+cluster), face) > float64(width) {
 					lines = append(lines, line)
 					line = word + cluster
 				} else {
@@ -119,7 +124,7 @@ func autoWrapText(width int, str string, face text.Face) string {
 			}
 			word = ""
 			if m == uniseg.LineMustBreak {
-				lines = append(lines, line)
+				lines = append(lines, line[:len(line)-len(cluster)])
 				line = ""
 			}
 		}
