@@ -73,6 +73,7 @@ func AutoWrapText(width int, str string, face text.Face) string {
 			} else {
 				l := line + word + cluster
 				l = l[:len(l)-tailingLineBreakLen(l)]
+				// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
 				if text.Advance(l, face) > float64(width) {
 					lines = append(lines, line)
 					line = word + cluster
