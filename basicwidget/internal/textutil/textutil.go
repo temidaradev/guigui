@@ -6,7 +6,6 @@ package textutil
 import (
 	"image"
 	"iter"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -131,51 +130,52 @@ func textUpperLeft(bounds image.Rectangle, str string, face text.Face, lineHeigh
 }
 
 func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) int {
-	lines := slices.Collect(lines(str))
-	if len(lines) == 0 {
-		return 0
-	}
-
 	// Determine the line first.
 	m := face.Metrics()
 	gap := lineHeight - m.HAscent - m.HDescent
 	top := float64(textBounds.Min.Y)
 	n := int((float64(position.Y) - top + gap/2) / lineHeight)
-	if n < 0 {
-		n = 0
-	}
-	if n >= len(lines) {
-		n = len(lines) - 1
-	}
 
-	var idx int
-	for _, l := range lines[:n] {
-		idx += len(l)
+	var pos int
+	var line string
+	var lineFound bool
+	var lineIndex int
+	for l := range lines(str) {
+		line = l
+		if lineIndex >= n {
+			lineFound = true
+			break
+		}
+		pos += len(l)
+		lineIndex++
+	}
+	// Use the last line.
+	if !lineFound {
+		pos -= len(line)
 	}
 
 	// Deterine the line index.
-	line := lines[n]
 	left, _ := textUpperLeft(textBounds, line, face, lineHeight, hAlign, vAlign)
 	var prevA float64
-	var found bool
+	var clusterFound bool
 	for _, c := range visibleCulsters(line, face) {
 		a := text.Advance(line[:c.EndIndexInBytes], face)
 		if (float64(position.X) - left) < (prevA + (a-prevA)/2) {
-			idx += c.StartIndexInBytes
-			found = true
+			pos += c.StartIndexInBytes
+			clusterFound = true
 			break
 		}
 		prevA = a
 	}
-	if !found {
-		idx += len(line)
+	if !clusterFound {
+		pos += len(line)
 		if uniseg.HasTrailingLineBreakInString(line) {
 			_, s := utf8.DecodeLastRuneInString(line)
-			idx -= s
+			pos -= s
 		}
 	}
 
-	return idx
+	return pos
 }
 
 func TextPosition(textBounds image.Rectangle, str string, index int, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) (x, top, bottom float64, ok bool) {
