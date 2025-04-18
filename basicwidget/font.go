@@ -76,10 +76,9 @@ func lines(str string) iter.Seq[string] {
 		var line string
 		state := -1
 		for len(str) > 0 {
-			// TODO: Use uniseg.FirstLineSegmentInString.
-			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
-			line += cluster
-			if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
+			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
+			line += segment
+			if mustBreak {
 				if !yield(line) {
 					return
 				}
@@ -101,8 +100,8 @@ func hasMandatoryBreak(str string) bool {
 	str += "a"
 	state := -1
 	for len(str) > 0 {
-		_, nextStr, boundaries, nextState := uniseg.StepString(str, state)
-		if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
+		_, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
+		if mustBreak {
 			return len(nextStr) > 0
 		}
 		state = nextState
