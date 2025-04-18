@@ -78,13 +78,12 @@ func lines(str string) iter.Seq[string] {
 		for len(str) > 0 {
 			// uniseg.FirstLineSegmentInString is not available as this doesn't tell the size of the last cluster.
 			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
+			line += cluster
 			if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
 				if !yield(line) {
 					return
 				}
 				line = ""
-			} else {
-				line += cluster
 			}
 			state = nextState
 			str = nextStr
@@ -188,7 +187,7 @@ func textIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 
 	var idx int
 	for _, l := range lines[:n] {
-		idx += len(l) + 1 // 1 is for a new-line character.
+		idx += len(l)
 	}
 
 	// Deterine the line index.
@@ -221,12 +220,11 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 
 	var line string
 	for l := range lines(str) {
-		// +1 is for \n.
-		if index < len(l)+1 {
+		if index < len(l) {
 			line = l
 			break
 		}
-		index -= len(l) + 1 // 1 is for a new-line character.
+		index -= len(l)
 		y += lineHeight
 	}
 
