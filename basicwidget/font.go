@@ -76,7 +76,7 @@ func lines(str string) iter.Seq[string] {
 		var line string
 		state := -1
 		for len(str) > 0 {
-			// uniseg.FirstLineSegmentInString is not available as this doesn't tell the size of the last cluster.
+			// TODO: Use uniseg.FirstLineSegmentInString.
 			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
 			line += cluster
 			if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
@@ -94,6 +94,21 @@ func lines(str string) iter.Seq[string] {
 			}
 		}
 	}
+}
+
+func hasMandatoryBreak(str string) bool {
+	// Add a dummy character to distinguish between the end of the string and new line characters.
+	str += "a"
+	state := -1
+	for len(str) > 0 {
+		_, nextStr, boundaries, nextState := uniseg.StepString(str, state)
+		if boundaries&uniseg.MaskLine == uniseg.LineMustBreak {
+			return len(nextStr) > 0
+		}
+		state = nextState
+		str = nextStr
+	}
+	return false
 }
 
 func removeSpaceAtLineTail(str string) string {
@@ -230,7 +245,7 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 		y += lineHeight
 	}
 	// When found is false, the position is in the tail of the last line.
-	if !found && len(str) > 0 {
+	if !found && len(str) > 0 && !hasMandatoryBreak(line) {
 		index = len(line)
 		y -= lineHeight
 	}
