@@ -161,8 +161,13 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	if !clusterFound {
 		pos += len(line)
 		if uniseg.HasTrailingLineBreakInString(line) {
-			_, s := utf8.DecodeLastRuneInString(line)
-			pos -= s
+			// https://en.wikipedia.org/wiki/Newline#Unicode
+			if strings.HasSuffix(line, "\r\n") {
+				pos -= 2
+			} else {
+				_, s := utf8.DecodeLastRuneInString(line)
+				pos -= s
+			}
 		}
 	}
 
