@@ -41,7 +41,7 @@ type Texts struct {
 
 const sampleText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 隴西の李徴は博学才穎、天宝の末年、若くして名を虎榜に連ね、ついで江南尉に補せられたが、性、狷介、自ら恃むところ頗る厚く、賤吏に甘んずるを潔しとしなかった。
-(Note: Selecting and editing auto-wrap texts is broken now.)`
+(Note: Selecting and editing auto-wrap texts are broken now.)`
 
 func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.horizontalAlignText.SetText("Horizontal Align")
