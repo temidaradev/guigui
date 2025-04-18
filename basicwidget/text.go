@@ -114,27 +114,27 @@ func (t *Text) SetOnEnterPressed(f func(text string)) {
 	t.onEnterPressed = f
 }
 
-func (t *Text) resetCachedSize() {
+func (t *Text) resetCachedTextSize() {
 	t.cachedTextSizePlus1 = image.Point{}
 	t.cachedAutoWrapTextSizePlus1 = image.Point{}
 }
 
-func (t *Text) resetAutoWrapCachedSize() {
+func (t *Text) resetAutoWrapCachedTextSize() {
 	t.cachedAutoWrapTextSizePlus1 = image.Point{}
 }
 
 func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if f := t.face(context); t.lastFace != f {
 		t.lastFace = f
-		t.resetCachedSize()
+		t.resetCachedTextSize()
 	}
 	if t.lastAppScale != context.AppScale() {
 		t.lastAppScale = context.AppScale()
-		t.resetCachedSize()
+		t.resetCachedTextSize()
 	}
 	if t.autoWrap && t.lastWidth != context.Size(t).X {
 		t.lastWidth = context.Size(t).X
-		t.resetAutoWrapCachedSize()
+		t.resetAutoWrapCachedTextSize()
 	}
 
 	t.scrollOverlay.SetContentSize(context, t.TextSize(context))
@@ -216,7 +216,7 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 	t.toAdjustScrollOffset = true
 	guigui.RequestRedraw(t)
 	if textChanged {
-		t.resetCachedSize()
+		t.resetCachedTextSize()
 	}
 }
 
@@ -558,7 +558,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	if processed {
 		guigui.RequestRedraw(t)
 		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
-		t.resetCachedSize()
+		t.resetCachedTextSize()
 		t.adjustScrollOffset(context)
 		return guigui.HandleInputByWidget(t)
 	}
