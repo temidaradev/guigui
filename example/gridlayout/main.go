@@ -20,11 +20,11 @@ type Root struct {
 	fill bool
 	gap  bool
 
-	configForm       basicwidget.Form
-	fillText         basicwidget.Text
-	fillToggleSwitch basicwidget.ToggleSwitch
-	gapText          basicwidget.Text
-	gapToggleSwitch  basicwidget.ToggleSwitch
+	configForm basicwidget.Form
+	fillText   basicwidget.Text
+	fillToggle basicwidget.Toggle
+	gapText    basicwidget.Text
+	gapToggle  basicwidget.Toggle
 
 	background basicwidget.Background
 	buttons    [16]guigui.Widget
@@ -34,23 +34,23 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
 	r.fillText.SetText("Fill Widgets into Grid Cells")
-	r.fillToggleSwitch.SetValue(r.fill)
-	r.fillToggleSwitch.SetOnValueChanged(func(value bool) {
+	r.fillToggle.SetValue(r.fill)
+	r.fillToggle.SetOnValueChanged(func(value bool) {
 		r.fill = value
 	})
 	r.gapText.SetText("Use Gap")
-	r.gapToggleSwitch.SetValue(r.gap)
-	r.gapToggleSwitch.SetOnValueChanged(func(value bool) {
+	r.gapToggle.SetValue(r.gap)
+	r.gapToggle.SetOnValueChanged(func(value bool) {
 		r.gap = value
 	})
 	formItems := []*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &r.fillText,
-			SecondaryWidget: &r.fillToggleSwitch,
+			SecondaryWidget: &r.fillToggle,
 		},
 		{
 			PrimaryWidget:   &r.gapText,
-			SecondaryWidget: &r.gapToggleSwitch,
+			SecondaryWidget: &r.gapToggle,
 		},
 	}
 	r.configForm.SetItems(formItems)

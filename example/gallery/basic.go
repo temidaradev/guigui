@@ -12,21 +12,21 @@ import (
 type Basic struct {
 	guigui.DefaultWidget
 
-	form             basicwidget.Form
-	textButtonText   basicwidget.Text
-	textButton       basicwidget.TextButton
-	toggleSwitchText basicwidget.Text
-	toggleSwitch     basicwidget.ToggleSwitch
-	textFieldText    basicwidget.Text
-	textField        basicwidget.TextField
-	textListText     basicwidget.Text
-	textList         basicwidget.TextList
+	form           basicwidget.Form
+	textButtonText basicwidget.Text
+	textButton     basicwidget.TextButton
+	toggleText     basicwidget.Text
+	toggle         basicwidget.Toggle
+	textFieldText  basicwidget.Text
+	textField      basicwidget.TextField
+	textListText   basicwidget.Text
+	textList       basicwidget.TextList
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Click Me!")
-	b.toggleSwitchText.SetText("Toggle Button")
+	b.toggleText.SetText("Toggle Button")
 	b.textFieldText.SetText("Text Field")
 	b.textField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
 	b.textListText.SetText("Text List")
@@ -38,8 +38,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &b.textButton,
 		},
 		{
-			PrimaryWidget:   &b.toggleSwitchText,
-			SecondaryWidget: &b.toggleSwitch,
+			PrimaryWidget:   &b.toggleText,
+			SecondaryWidget: &b.toggle,
 		},
 		{
 			PrimaryWidget:   &b.textFieldText,

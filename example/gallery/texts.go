@@ -27,13 +27,13 @@ type Texts struct {
 	verticalAlignText           basicwidget.Text
 	verticalAlignDropdownList   basicwidget.DropdownList
 	autoWrapText                basicwidget.Text
-	autoWrapToggleSwitch        basicwidget.ToggleSwitch
+	autoWrapToggle              basicwidget.Toggle
 	boldText                    basicwidget.Text
-	boldToggleSwitch            basicwidget.ToggleSwitch
+	boldToggle                  basicwidget.Toggle
 	selectableText              basicwidget.Text
-	selectableToggleSwitch      basicwidget.ToggleSwitch
+	selectableToggle            basicwidget.Toggle
 	editableText                basicwidget.Text
-	editableToggleSwitch        basicwidget.ToggleSwitch
+	editableToggle              basicwidget.Toggle
 	sampleText                  basicwidget.Text
 
 	initOnce sync.Once
@@ -79,20 +79,20 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	t.autoWrapText.SetText("Auto Wrap")
-	t.autoWrapToggleSwitch.SetValue(!t.unwrap)
-	t.autoWrapToggleSwitch.SetOnValueChanged(func(checked bool) {
+	t.autoWrapToggle.SetValue(!t.unwrap)
+	t.autoWrapToggle.SetOnValueChanged(func(checked bool) {
 		t.unwrap = !checked
 	})
 
 	t.boldText.SetText("Bold")
-	t.boldToggleSwitch.SetValue(t.bold)
-	t.boldToggleSwitch.SetOnValueChanged(func(checked bool) {
+	t.boldToggle.SetValue(t.bold)
+	t.boldToggle.SetOnValueChanged(func(checked bool) {
 		t.bold = checked
 	})
 
 	t.selectableText.SetText("Selectable")
-	t.selectableToggleSwitch.SetValue(t.selectable)
-	t.selectableToggleSwitch.SetOnValueChanged(func(checked bool) {
+	t.selectableToggle.SetValue(t.selectable)
+	t.selectableToggle.SetOnValueChanged(func(checked bool) {
 		t.selectable = checked
 		if !t.selectable {
 			t.editable = false
@@ -100,8 +100,8 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	t.editableText.SetText("Editable")
-	t.editableToggleSwitch.SetValue(t.editable)
-	t.editableToggleSwitch.SetOnValueChanged(func(checked bool) {
+	t.editableToggle.SetValue(t.editable)
+	t.editableToggle.SetOnValueChanged(func(checked bool) {
 		t.editable = checked
 		if t.editable {
 			t.selectable = true
@@ -119,19 +119,19 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		},
 		{
 			PrimaryWidget:   &t.autoWrapText,
-			SecondaryWidget: &t.autoWrapToggleSwitch,
+			SecondaryWidget: &t.autoWrapToggle,
 		},
 		{
 			PrimaryWidget:   &t.boldText,
-			SecondaryWidget: &t.boldToggleSwitch,
+			SecondaryWidget: &t.boldToggle,
 		},
 		{
 			PrimaryWidget:   &t.selectableText,
-			SecondaryWidget: &t.selectableToggleSwitch,
+			SecondaryWidget: &t.selectableToggle,
 		},
 		{
 			PrimaryWidget:   &t.editableText,
-			SecondaryWidget: &t.editableToggleSwitch,
+			SecondaryWidget: &t.editableToggle,
 		},
 	})
 
