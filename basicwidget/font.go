@@ -219,13 +219,20 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 	y := float64(textBounds.Min.Y)
 
 	var line string
+	var found bool
 	for l := range lines(str) {
+		line = l
 		if index < len(l) {
-			line = l
+			found = true
 			break
 		}
 		index -= len(l)
 		y += lineHeight
+	}
+	// When found is false, the position is in the tail of the last line.
+	if !found && len(str) > 0 {
+		index = len(line)
+		y -= lineHeight
 	}
 
 	x, _ = textUpperLeft(textBounds, line, face, lineHeight, hAlign, vAlign)
