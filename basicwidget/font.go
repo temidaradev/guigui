@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -93,21 +94,6 @@ func lines(str string) iter.Seq[string] {
 			}
 		}
 	}
-}
-
-func hasMandatoryBreak(str string) bool {
-	// Add a dummy character to distinguish between the end of the string and new line characters.
-	str += "a"
-	state := -1
-	for len(str) > 0 {
-		_, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
-		if mustBreak {
-			return len(nextStr) > 0
-		}
-		state = nextState
-		str = nextStr
-	}
-	return false
 }
 
 func removeSpaceAtLineTail(str string) string {
@@ -220,6 +206,10 @@ func textIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	}
 	if !found {
 		idx += len(line)
+		if uniseg.HasTrailingLineBreakInString(line) {
+			_, s := utf8.DecodeLastRuneInString(line)
+			idx -= s
+		}
 	}
 
 	return idx
@@ -244,7 +234,7 @@ func textPosition(textBounds image.Rectangle, str string, index int, face text.F
 		y += lineHeight
 	}
 	// When found is false, the position is in the tail of the last line.
-	if !found && len(str) > 0 && !hasMandatoryBreak(line) {
+	if !found && len(str) > 0 && !uniseg.HasTrailingLineBreakInString(str) {
 		index = len(line)
 		y -= lineHeight
 	}
