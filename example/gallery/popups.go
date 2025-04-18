@@ -19,9 +19,9 @@ type Popups struct {
 
 	forms                              [2]basicwidget.Form
 	blurBackgroundText                 basicwidget.Text
-	blurBackgroundToggleButton         basicwidget.ToggleButton
+	blurBackgroundToggleSwitch         basicwidget.ToggleSwitch
 	closeByClickingOutsideText         basicwidget.Text
-	closeByClickingOutsideToggleButton basicwidget.ToggleButton
+	closeByClickingOutsideToggleSwitch basicwidget.ToggleSwitch
 	showButton                         basicwidget.TextButton
 
 	contextMenuPopupText          basicwidget.Text
@@ -44,11 +44,11 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	p.forms[0].SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.blurBackgroundText,
-			SecondaryWidget: &p.blurBackgroundToggleButton,
+			SecondaryWidget: &p.blurBackgroundToggleSwitch,
 		},
 		{
 			PrimaryWidget:   &p.closeByClickingOutsideText,
-			SecondaryWidget: &p.closeByClickingOutsideToggleButton,
+			SecondaryWidget: &p.closeByClickingOutsideToggleSwitch,
 		},
 		{
 			SecondaryWidget: &p.showButton,
@@ -86,8 +86,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 	p.simplePopupContent.popup = &p.simplePopup
 	p.simplePopup.SetContent(&p.simplePopupContent)
-	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleButton.Value())
-	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleButton.Value())
+	p.simplePopup.SetBackgroundBlurred(p.blurBackgroundToggleSwitch.Value())
+	p.simplePopup.SetCloseByClickingOutside(p.closeByClickingOutsideToggleSwitch.Value())
 	p.simplePopup.SetAnimationDuringFade(true)
 
 	appBounds := context.AppBounds()

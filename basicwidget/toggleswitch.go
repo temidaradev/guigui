@@ -14,7 +14,7 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
-type ToggleButton struct {
+type ToggleSwitch struct {
 	guigui.DefaultWidget
 
 	pressed      bool
@@ -27,22 +27,22 @@ type ToggleButton struct {
 	onValueChanged func(value bool)
 }
 
-func (t *ToggleButton) SetOnValueChanged(f func(value bool)) {
+func (t *ToggleSwitch) SetOnValueChanged(f func(value bool)) {
 	t.onValueChanged = f
 }
 
-func (t *ToggleButton) Value() bool {
+func (t *ToggleSwitch) Value() bool {
 	return t.value
 }
 
-func (t *ToggleButton) SetValue(value bool) {
+func (t *ToggleSwitch) SetValue(value bool) {
 	if t.value == value {
 		return
 	}
 
 	t.value = value
 	if t.onceRendered {
-		t.count = toggleButtonMaxCount() - t.count
+		t.count = toggleSwitchMaxCount() - t.count
 	}
 	guigui.RequestRedraw(t)
 
@@ -51,11 +51,11 @@ func (t *ToggleButton) SetValue(value bool) {
 	}
 }
 
-func toggleButtonMaxCount() int {
+func toggleSwitchMaxCount() int {
 	return ebiten.TPS() / 12
 }
 
-func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *ToggleSwitch) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	hovered := t.isHovered(context)
 	if t.prevHovered != hovered {
 		t.prevHovered = hovered
@@ -64,7 +64,7 @@ func (t *ToggleButton) Build(context *guigui.Context, appender *guigui.ChildWidg
 	return nil
 }
 
-func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+func (t *ToggleSwitch) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if context.IsEnabled(t) && t.isHovered(context) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		t.pressed = true
 		t.SetValue(!t.value)
@@ -76,7 +76,7 @@ func (t *ToggleButton) HandlePointingInput(context *guigui.Context) guigui.Handl
 	return guigui.HandleInputResult{}
 }
 
-func (t *ToggleButton) Update(context *guigui.Context) error {
+func (t *ToggleSwitch) Update(context *guigui.Context) error {
 	if t.count > 0 {
 		t.count--
 		guigui.RequestRedraw(t)
@@ -84,15 +84,15 @@ func (t *ToggleButton) Update(context *guigui.Context) error {
 	return nil
 }
 
-func (t *ToggleButton) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
+func (t *ToggleSwitch) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
 	if t.canPress(context) || t.pressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
 }
 
-func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
-	rate := 1 - float64(t.count)/float64(toggleButtonMaxCount())
+func (t *ToggleSwitch) Draw(context *guigui.Context, dst *ebiten.Image) {
+	rate := 1 - float64(t.count)/float64(toggleSwitchMaxCount())
 
 	bounds := context.Bounds(t)
 
@@ -149,18 +149,18 @@ func (t *ToggleButton) Draw(context *guigui.Context, dst *ebiten.Image) {
 	t.onceRendered = true
 }
 
-func (t *ToggleButton) canPress(context *guigui.Context) bool {
+func (t *ToggleSwitch) canPress(context *guigui.Context) bool {
 	return context.IsEnabled(t) && t.isHovered(context) && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 }
 
-func (t *ToggleButton) isHovered(context *guigui.Context) bool {
+func (t *ToggleSwitch) isHovered(context *guigui.Context) bool {
 	return context.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition()))
 }
 
-func (t *ToggleButton) isActive(context *guigui.Context) bool {
+func (t *ToggleSwitch) isActive(context *guigui.Context) bool {
 	return context.IsEnabled(t) && t.isHovered(context) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && t.pressed
 }
 
-func (t *ToggleButton) DefaultSize(context *guigui.Context) image.Point {
+func (t *ToggleSwitch) DefaultSize(context *guigui.Context) image.Point {
 	return image.Pt(int(LineHeight(context)*1.75), int(LineHeight(context)))
 }

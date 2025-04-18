@@ -17,8 +17,6 @@ type Buttons struct {
 	textButton          basicwidget.TextButton
 	textImageButtonText basicwidget.Text
 	textImageButton     basicwidget.TextButton
-	toggleButtonText    basicwidget.Text
-	toggleButton        basicwidget.ToggleButton
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -31,7 +29,6 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		return err
 	}
 	b.textImageButton.SetImage(img)
-	b.toggleButtonText.SetText("Toggle Button")
 
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -41,10 +38,6 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		{
 			PrimaryWidget:   &b.textImageButtonText,
 			SecondaryWidget: &b.textImageButton,
-		},
-		{
-			PrimaryWidget:   &b.toggleButtonText,
-			SecondaryWidget: &b.toggleButton,
 		},
 	})
 
