@@ -7,7 +7,6 @@ import (
 	"image"
 	"iter"
 	"strings"
-	"unicode"
 	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -58,10 +57,6 @@ func lines(str string) iter.Seq[string] {
 	}
 }
 
-func removeSpaceAtLineTail(str string) string {
-	return strings.TrimRightFunc(str, unicode.IsSpace)
-}
-
 func AutoWrapText(width int, str string, face text.Face) string {
 	var lines []string
 	var line string
@@ -76,7 +71,9 @@ func AutoWrapText(width int, str string, face text.Face) string {
 			if line == "" {
 				line += word + cluster
 			} else {
-				if text.Advance(removeSpaceAtLineTail(line+word+cluster), face) > float64(width) {
+				l := line + word + cluster
+				l = l[:len(l)-tailingLineBreakLen(l)]
+				if text.Advance(l, face) > float64(width) {
 					lines = append(lines, line)
 					line = word + cluster
 				} else {
@@ -160,15 +157,7 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	}
 	if !clusterFound {
 		pos += len(line)
-		if uniseg.HasTrailingLineBreakInString(line) {
-			// https://en.wikipedia.org/wiki/Newline#Unicode
-			if strings.HasSuffix(line, "\r\n") {
-				pos -= 2
-			} else {
-				_, s := utf8.DecodeLastRuneInString(line)
-				pos -= s
-			}
-		}
+		pos -= tailingLineBreakLen(line)
 	}
 
 	return pos
@@ -204,4 +193,18 @@ func TextPosition(textBounds image.Rectangle, str string, index int, face text.F
 	m := face.Metrics()
 	paddingY := (lineHeight - (m.HAscent + m.HDescent)) / 2
 	return x, y + paddingY, y + lineHeight - paddingY, true
+}
+
+func tailingLineBreakLen(str string) int {
+	if !uniseg.HasTrailingLineBreakInString(str) {
+		return 0
+	}
+
+	// https://en.wikipedia.org/wiki/Newline#Unicode
+	if strings.HasSuffix(str, "\r\n") {
+		return 2
+	}
+
+	_, s := utf8.DecodeLastRuneInString(str)
+	return s
 }
