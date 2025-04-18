@@ -119,6 +119,10 @@ func (t *Text) resetCachedSize() {
 	t.cachedAutoWrapTextSizePlus1 = image.Point{}
 }
 
+func (t *Text) resetAutoWrapCachedSize() {
+	t.cachedAutoWrapTextSizePlus1 = image.Point{}
+}
+
 func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if f := t.face(context); t.lastFace != f {
 		t.lastFace = f
@@ -130,7 +134,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	if t.autoWrap && t.lastWidth != context.Size(t).X {
 		t.lastWidth = context.Size(t).X
-		t.resetCachedSize()
+		t.resetAutoWrapCachedSize()
 	}
 
 	t.scrollOverlay.SetContentSize(context, t.TextSize(context))
