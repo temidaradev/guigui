@@ -6,7 +6,6 @@ package textutil
 import (
 	"image"
 	"image/color"
-	"log/slog"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -59,11 +58,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 	}
 
 	if options.DrawComposition {
-		// Assume that the composition is always in the same line.
-		// TODO: What about auto-wrapping?
-		if lineCount(str[options.CompositionStart:options.CompositionEnd]) > 1 {
-			slog.Error("composition text must not contain '\\n'")
-		}
+		// TODO: Support multiple lines.
 		{
 			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionStart, &options.Options)
 			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionEnd, &options.Options)
