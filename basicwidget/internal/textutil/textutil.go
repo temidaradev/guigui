@@ -106,7 +106,7 @@ func lines2(width int, str string, face text.Face, autoWrap bool) iter.Seq2[int,
 }
 
 func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign) float64 {
-	w := text.Advance(line, face)
+	w := text.Advance(line[:len(line)-tailingLineBreakLen(line)], face)
 	switch hAlign {
 	case HorizontalAlignStart:
 		return 0
