@@ -84,7 +84,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 					x := float32(posStart.X) + float32(bounds.Min.X)
 					y := float32(posStart.Top) + float32(bounds.Min.Y)
 					width := float32(posEnd.X - posStart.X)
-					height := float32(posStart.Top - posStart.Bottom)
+					height := float32(posStart.Bottom - posStart.Top)
 					vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 				}
 			}
