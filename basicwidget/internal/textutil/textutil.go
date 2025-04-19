@@ -33,24 +33,26 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 	return text.AppendGlyphs(nil, str, face, nil)
 }
 
-func lines(str string) iter.Seq[string] {
-	return func(yield func(s string) bool) {
+func lines(str string) iter.Seq2[int, string] {
+	return func(yield func(pos int, s string) bool) {
 		var line string
+		var pos int
 		state := -1
 		for len(str) > 0 {
 			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
 			line += segment
 			if mustBreak {
-				if !yield(line) {
+				if !yield(pos, line) {
 					return
 				}
+				pos += len(line)
 				line = ""
 			}
 			state = nextState
 			str = nextStr
 		}
 		if len(line) > 0 {
-			if !yield(line) {
+			if !yield(pos, line) {
 				return
 			}
 		}
@@ -121,20 +123,14 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 
 	var pos int
 	var line string
-	var lineFound bool
 	var lineIndex int
-	for l := range lines(str) {
+	for p, l := range lines(str) {
 		line = l
+		pos = p
 		if lineIndex >= n {
-			lineFound = true
 			break
 		}
-		pos += len(l)
 		lineIndex++
-	}
-	// Use the last line.
-	if !lineFound {
-		pos -= len(line)
 	}
 
 	// Deterine the line index.
@@ -165,25 +161,26 @@ func TextPosition(textBounds image.Rectangle, str string, index int, face text.F
 
 	y := float64(textBounds.Min.Y)
 
+	var indexInLine int
 	var line string
 	var found bool
-	for l := range lines(str) {
+	for p, l := range lines(str) {
 		line = l
-		if index < len(l) {
+		if p <= index && index < p+len(l) {
 			found = true
+			indexInLine = index - p
 			break
 		}
-		index -= len(l)
 		y += lineHeight
 	}
 	// When found is false, the position is in the tail of the last line.
 	if !found && len(str) > 0 && !uniseg.HasTrailingLineBreakInString(str) {
-		index = len(line)
+		indexInLine = len(line)
 		y -= lineHeight
 	}
 
 	x = oneLineLeft(textBounds, line, face, hAlign)
-	x += text.Advance(line[:index], face)
+	x += text.Advance(line[:indexInLine], face)
 
 	m := face.Metrics()
 	paddingY := (lineHeight - (m.HAscent + m.HDescent)) / 2
