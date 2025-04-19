@@ -78,13 +78,13 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.SelectionEnd && end >= options.SelectionStart {
 				start := max(start, options.SelectionStart)
 				end := min(end, options.SelectionEnd)
-				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if ok0 && ok1 {
-					x := float32(pos0.X) + float32(bounds.Min.X)
-					y := float32(pos0.Top) + float32(bounds.Min.Y)
-					width := float32(pos1.X - pos0.X)
-					height := float32(pos0.Top - pos0.Bottom)
+				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if okStart && okEnd {
+					x := float32(posStart.X) + float32(bounds.Min.X)
+					y := float32(posStart.Top) + float32(bounds.Min.Y)
+					width := float32(posEnd.X - posStart.X)
+					height := float32(posStart.Top - posStart.Bottom)
 					vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 				}
 			}
@@ -94,12 +94,12 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.CompositionEnd && end >= options.CompositionStart {
 				start := max(start, options.CompositionStart)
 				end := min(end, options.CompositionEnd)
-				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if ok0 && ok1 {
-					x := float32(pos0.X) + float32(bounds.Min.X)
-					y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-					w := float32(pos1.X - pos0.X)
+				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if okStart && okEnd {
+					x := float32(posStart.X) + float32(bounds.Min.X)
+					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+					w := float32(posEnd.X - posStart.X)
 					h := options.CompositionBorderWidth
 					vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
 				}
@@ -107,12 +107,12 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.CompositionActiveEnd && end >= options.CompositionActiveStart {
 				start := max(start, options.CompositionActiveStart)
 				end := min(end, options.CompositionActiveEnd)
-				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if ok0 && ok1 {
-					x := float32(pos0.X) + float32(bounds.Min.X)
-					y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-					w := float32(pos1.X - pos0.X)
+				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if okStart && okEnd {
+					x := float32(posStart.X) + float32(bounds.Min.X)
+					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+					w := float32(posEnd.X - posStart.X)
 					h := options.CompositionBorderWidth
 					vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
 				}
