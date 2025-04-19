@@ -33,56 +33,6 @@ type DrawOptions struct {
 }
 
 func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOptions) {
-	if options.DrawSelection {
-		for pos, line := range lines(str) {
-			end := pos + len(line) - tailingLineBreakLen(line)
-			if options.SelectionStart > end {
-				continue
-			}
-			start := pos
-			if options.SelectionEnd < start {
-				break
-			}
-			start = max(start, options.SelectionStart)
-			end = min(end, options.SelectionEnd)
-			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-			if ok0 && ok1 {
-				x := float32(pos0.X) + float32(bounds.Min.X)
-				y := float32(pos0.Top) + float32(bounds.Min.Y)
-				width := float32(pos1.X - pos0.X)
-				height := float32(pos0.Top - pos0.Bottom)
-				vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
-			}
-		}
-	}
-
-	if options.DrawComposition {
-		// TODO: Support multiple lines.
-		{
-			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionStart, &options.Options)
-			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionEnd, &options.Options)
-			if ok0 && ok1 {
-				x := float32(pos0.X) + float32(bounds.Min.X)
-				y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-				w := float32(pos1.X - pos0.X)
-				h := options.CompositionBorderWidth
-				vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
-			}
-		}
-		{
-			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveStart, &options.Options)
-			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveEnd, &options.Options)
-			if ok0 && ok1 {
-				x := float32(pos0.X) + float32(bounds.Min.X)
-				y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-				w := float32(pos1.X - pos0.X)
-				h := options.CompositionBorderWidth
-				vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
-			}
-		}
-	}
-
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(float64(bounds.Min.X), float64(bounds.Min.Y))
 	op.ColorScale.ScaleWithColor(options.TextColor)
@@ -120,7 +70,56 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		op.GeoM.Translate(0, float64(bounds.Dy())-height)
 	}
 
-	for _, line := range lines(str) {
+	for pos, line := range lines(str) {
+		start := pos
+		end := pos + len(line) - tailingLineBreakLen(line)
+
+		if options.DrawSelection {
+			if start <= options.SelectionEnd && end >= options.SelectionStart {
+				start := max(start, options.SelectionStart)
+				end := min(end, options.SelectionEnd)
+				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if ok0 && ok1 {
+					x := float32(pos0.X) + float32(bounds.Min.X)
+					y := float32(pos0.Top) + float32(bounds.Min.Y)
+					width := float32(pos1.X - pos0.X)
+					height := float32(pos0.Top - pos0.Bottom)
+					vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
+				}
+			}
+		}
+
+		if options.DrawComposition {
+			if start <= options.CompositionEnd && end >= options.CompositionStart {
+				start := max(start, options.CompositionStart)
+				end := min(end, options.CompositionEnd)
+				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if ok0 && ok1 {
+					x := float32(pos0.X) + float32(bounds.Min.X)
+					y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+					w := float32(pos1.X - pos0.X)
+					h := options.CompositionBorderWidth
+					vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
+				}
+			}
+			if start <= options.CompositionActiveEnd && end >= options.CompositionActiveStart {
+				start := max(start, options.CompositionActiveStart)
+				end := min(end, options.CompositionActiveEnd)
+				pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if ok0 && ok1 {
+					x := float32(pos0.X) + float32(bounds.Min.X)
+					y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+					w := float32(pos1.X - pos0.X)
+					h := options.CompositionBorderWidth
+					vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
+				}
+			}
+		}
+
+		// Draw the text.
 		text.Draw(dst, line, options.Face, op)
 		op.GeoM.Translate(0, options.LineHeight)
 	}
