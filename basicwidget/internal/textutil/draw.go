@@ -78,19 +78,21 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.SelectionEnd && end >= options.SelectionStart {
 				start := max(start, options.SelectionStart)
 				end := min(end, options.SelectionEnd)
-				posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if countStart > 0 && countEnd > 0 {
-					posStart := posStart0
-					if countStart == 2 {
-						posStart = posStart1
+				if start != end {
+					posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+					posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+					if countStart > 0 && countEnd > 0 {
+						posStart := posStart0
+						if countStart == 2 {
+							posStart = posStart1
+						}
+						posEnd := posEnd0
+						x := float32(posStart.X) + float32(bounds.Min.X)
+						y := float32(posStart.Top) + float32(bounds.Min.Y)
+						width := float32(posEnd.X - posStart.X)
+						height := float32(posStart.Bottom - posStart.Top)
+						vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 					}
-					posEnd := posEnd0
-					x := float32(posStart.X) + float32(bounds.Min.X)
-					y := float32(posStart.Top) + float32(bounds.Min.Y)
-					width := float32(posEnd.X - posStart.X)
-					height := float32(posStart.Bottom - posStart.Top)
-					vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 				}
 			}
 		}
@@ -99,37 +101,41 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.CompositionEnd && end >= options.CompositionStart {
 				start := max(start, options.CompositionStart)
 				end := min(end, options.CompositionEnd)
-				posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if countStart > 0 && countEnd > 0 {
-					posStart := posStart0
-					if countStart == 2 {
-						posStart = posStart1
+				if start != end {
+					posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+					posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+					if countStart > 0 && countEnd > 0 {
+						posStart := posStart0
+						if countStart == 2 {
+							posStart = posStart1
+						}
+						posEnd := posEnd0
+						x := float32(posStart.X) + float32(bounds.Min.X)
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+						w := float32(posEnd.X - posStart.X)
+						h := options.CompositionBorderWidth
+						vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
 					}
-					posEnd := posEnd0
-					x := float32(posStart.X) + float32(bounds.Min.X)
-					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-					w := float32(posEnd.X - posStart.X)
-					h := options.CompositionBorderWidth
-					vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
 				}
 			}
 			if start <= options.CompositionActiveEnd && end >= options.CompositionActiveStart {
 				start := max(start, options.CompositionActiveStart)
 				end := min(end, options.CompositionActiveEnd)
-				posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if countStart > 0 && countEnd > 0 {
-					posStart := posStart0
-					if countStart == 2 {
-						posStart = posStart1
+				if start != end {
+					posStart0, posStart1, countStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+					posEnd0, _, countEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+					if countStart > 0 && countEnd > 0 {
+						posStart := posStart0
+						if countStart == 2 {
+							posStart = posStart1
+						}
+						posEnd := posEnd0
+						x := float32(posStart.X) + float32(bounds.Min.X)
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+						w := float32(posEnd.X - posStart.X)
+						h := options.CompositionBorderWidth
+						vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
 					}
-					posEnd := posEnd0
-					x := float32(posStart.X) + float32(bounds.Min.X)
-					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-					w := float32(posEnd.X - posStart.X)
-					h := options.CompositionBorderWidth
-					vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
 				}
 			}
 		}
