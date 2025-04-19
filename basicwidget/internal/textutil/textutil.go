@@ -35,71 +35,67 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 }
 
 func lines(str string) iter.Seq2[int, string] {
+	// TODO: Integrate lines and lines2.
+	return lines2(0, str, nil, false)
+}
+
+// TODO: Remove this. Auto-wrapping should be done in this package internally.
+func AutoWrapText(width int, str string, face text.Face) string {
+	var lines []string
+	for _, line := range lines2(width, str, face, true) {
+		line = line[:len(line)-tailingLineBreakLen(line)]
+		lines = append(lines, line)
+	}
+	return strings.Join(lines, "\n")
+}
+
+func lines2(width int, str string, face text.Face, autoWrap bool) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		var line string
+		var word string
 		var pos int
 		state := -1
 		for len(str) > 0 {
-			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
-			line += segment
-			if mustBreak {
-				if !yield(pos, line) {
-					return
+			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
+			switch m := boundaries & uniseg.MaskLine; m {
+			default:
+				word += cluster
+			case uniseg.LineCanBreak, uniseg.LineMustBreak:
+				if line == "" || !autoWrap {
+					line += word + cluster
+				} else {
+					l := line + word + cluster
+					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
+					if text.Advance(l[:len(l)-tailingLineBreakLen(l)], face) > float64(width) {
+						if !yield(pos, line) {
+							return
+						}
+						pos += len(line)
+						line = word + cluster
+					} else {
+						line += word + cluster
+					}
 				}
-				pos += len(line)
-				line = ""
+				word = ""
+				if m == uniseg.LineMustBreak {
+					if !yield(pos, line) {
+						return
+					}
+					pos += len(line)
+					line = ""
+				}
 			}
 			state = nextState
 			str = nextStr
 		}
+
+		line += word
 		if len(line) > 0 {
 			if !yield(pos, line) {
 				return
 			}
 		}
 	}
-}
-
-func AutoWrapText(width int, str string, face text.Face) string {
-	var lines []string
-	var line string
-	var word string
-	state := -1
-	for len(str) > 0 {
-		cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
-		switch m := boundaries & uniseg.MaskLine; m {
-		default:
-			word += cluster
-		case uniseg.LineCanBreak, uniseg.LineMustBreak:
-			if line == "" {
-				line += word + cluster
-			} else {
-				l := line + word + cluster
-				l = l[:len(l)-tailingLineBreakLen(l)]
-				// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
-				if text.Advance(l, face) > float64(width) {
-					lines = append(lines, line)
-					line = word + cluster
-				} else {
-					line += word + cluster
-				}
-			}
-			word = ""
-			if m == uniseg.LineMustBreak {
-				lines = append(lines, line[:len(line)-len(cluster)])
-				line = ""
-			}
-		}
-		state = nextState
-		str = nextStr
-	}
-
-	line += word
-	if len(line) > 0 {
-		lines = append(lines, line)
-	}
-
-	return strings.Join(lines, "\n")
 }
 
 func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign) float64 {
