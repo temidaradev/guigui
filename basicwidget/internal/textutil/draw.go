@@ -53,22 +53,8 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		op.PrimaryAlign = text.AlignEnd
 	}
 
-	c := lineCount(bounds.Dx(), str, options.AutoWrap, options.Face)
-	if c == 0 {
-		return
-	}
-	height := options.LineHeight * float64(c)
-
-	m := options.Face.Metrics()
-	padding := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
-	op.GeoM.Translate(0, padding)
-	switch options.VerticalAlign {
-	case VerticalAlignTop:
-	case VerticalAlignMiddle:
-		op.GeoM.Translate(0, (float64(bounds.Dy())-height)/2)
-	case VerticalAlignBottom:
-		op.GeoM.Translate(0, float64(bounds.Dy())-height)
-	}
+	yOffset := TextPositionYOffset(bounds.Size(), str, &options.Options)
+	op.GeoM.Translate(0, yOffset)
 
 	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, options.Face) {
 		start := pos
@@ -88,7 +74,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Top) + float32(bounds.Min.Y)
+						y := float32(posStart.Top) + float32(bounds.Min.Y) + float32(yOffset)
 						width := float32(posEnd.X - posStart.X)
 						height := float32(posStart.Bottom - posStart.Top)
 						vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
@@ -111,7 +97,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) + float32(yOffset) - options.CompositionBorderWidth
 						w := float32(posEnd.X - posStart.X)
 						h := options.CompositionBorderWidth
 						vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
@@ -131,7 +117,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) + float32(yOffset) - options.CompositionBorderWidth
 						w := float32(posEnd.X - posStart.X)
 						h := options.CompositionBorderWidth
 						vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)

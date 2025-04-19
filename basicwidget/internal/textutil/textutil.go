@@ -107,10 +107,8 @@ func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign)
 
 func TextIndexFromPosition(width int, position image.Point, str string, options *Options) int {
 	// Determine the line first.
-	m := options.Face.Metrics()
-	gap := options.LineHeight - m.HAscent - m.HDescent
-	var top float64
-	n := int((float64(position.Y) - top + gap/2) / options.LineHeight)
+	padding := textPadding(options.Face, options.LineHeight)
+	n := int((float64(position.Y) + padding) / options.LineHeight)
 
 	var pos int
 	var line string
@@ -182,8 +180,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		return TextPosition{}, TextPosition{}, 0
 	}
 
-	m := options.Face.Metrics()
-	paddingY := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
+	paddingY := textPadding(options.Face, options.LineHeight)
 
 	var pos0, pos1 TextPosition
 	if found0 {
@@ -248,4 +245,24 @@ func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight fl
 		height = lineHeight
 	}
 	return maxWidth, height
+}
+
+func textPadding(face text.Face, lineHeight float64) float64 {
+	m := face.Metrics()
+	padding := (lineHeight - (m.HAscent + m.HDescent)) / 2
+	return padding
+}
+
+func TextPositionYOffset(size image.Point, str string, options *Options) float64 {
+	c := lineCount(size.X, str, options.AutoWrap, options.Face)
+	textHeight := options.LineHeight * float64(c)
+	yOffset := textPadding(options.Face, options.LineHeight)
+	switch options.VerticalAlign {
+	case VerticalAlignTop:
+	case VerticalAlignMiddle:
+		yOffset += (float64(size.Y) - textHeight) / 2
+	case VerticalAlignBottom:
+		yOffset += float64(size.Y) - textHeight
+	}
+	return yOffset
 }
