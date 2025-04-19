@@ -4,6 +4,7 @@
 package textutil
 
 import (
+	"fmt"
 	"image"
 	"iter"
 	"strings"
@@ -101,24 +102,25 @@ func AutoWrapText(width int, str string, face text.Face) string {
 	return strings.Join(lines, "\n")
 }
 
-func oneLineLeft(bounds image.Rectangle, line string, face text.Face, hAlign HorizontalAlign) float64 {
+func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign) float64 {
 	w := text.Advance(line, face)
-	x := float64(bounds.Min.X)
 	switch hAlign {
 	case HorizontalAlignStart:
+		return 0
 	case HorizontalAlignCenter:
-		x += (float64(bounds.Dx()) - w) / 2
+		return (float64(width) - w) / 2
 	case HorizontalAlignEnd:
-		x += float64(bounds.Dx()) - w
+		return float64(width) - w
+	default:
+		panic(fmt.Sprintf("textutil: invalid HorizontalAlign: %d", hAlign))
 	}
-	return x
 }
 
-func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) int {
+func TextIndexFromPosition(width int, position image.Point, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) int {
 	// Determine the line first.
 	m := face.Metrics()
 	gap := lineHeight - m.HAscent - m.HDescent
-	top := float64(textBounds.Min.Y)
+	var top float64
 	n := int((float64(position.Y) - top + gap/2) / lineHeight)
 
 	var pos int
@@ -134,7 +136,7 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	}
 
 	// Deterine the line index.
-	left := oneLineLeft(textBounds, line, face, hAlign)
+	left := oneLineLeft(width, line, face, hAlign)
 	var prevA float64
 	var clusterFound bool
 	for _, c := range visibleCulsters(line, face) {
@@ -154,12 +156,12 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	return pos
 }
 
-func TextPosition(textBounds image.Rectangle, str string, index int, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) (x, top, bottom float64, ok bool) {
+func TextPosition(width int, str string, index int, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) (x, top, bottom float64, ok bool) {
 	if index < 0 || index > len(str) {
 		return 0, 0, 0, false
 	}
 
-	y := float64(textBounds.Min.Y)
+	var y float64
 
 	var indexInLine int
 	var line string
@@ -179,7 +181,7 @@ func TextPosition(textBounds image.Rectangle, str string, index int, face text.F
 		y -= lineHeight
 	}
 
-	x = oneLineLeft(textBounds, line, face, hAlign)
+	x = oneLineLeft(width, line, face, hAlign)
 	x += text.Advance(line[:indexInLine], face)
 
 	m := face.Metrics()
