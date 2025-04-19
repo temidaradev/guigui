@@ -947,7 +947,7 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
 		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
 	}
-	x, top, bottom, ok = textutil.TextPosition(textBounds.Dx(), txt, index, op)
+	x, top, bottom, ok = textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
 	if !ok {
 		return 0, 0, 0, false
 	}

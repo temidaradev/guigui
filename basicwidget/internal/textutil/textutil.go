@@ -159,7 +159,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	return pos
 }
 
-func TextPosition(width int, str string, index int, options *Options) (x, top, bottom float64, ok bool) {
+func TextPositionFromIndex(width int, str string, index int, options *Options) (x, top, bottom float64, ok bool) {
 	if index < 0 || index > len(str) {
 		return 0, 0, 0, false
 	}
