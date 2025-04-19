@@ -37,19 +37,19 @@ type DrawOptions struct {
 
 func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOptions) {
 	if options.DrawSelection {
-		var tailIndices []int
-		for i, r := range str[options.SelectionStart:options.SelectionEnd] {
-			if r != '\n' {
+		for pos, line := range lines(str) {
+			end := pos + len(line) - tailingLineBreakLen(line)
+			if options.SelectionStart > end {
 				continue
 			}
-			tailIndices = append(tailIndices, options.SelectionStart+i)
-		}
-		tailIndices = append(tailIndices, options.SelectionEnd)
-
-		headIdx := options.SelectionStart
-		for _, idx := range tailIndices {
-			x0, top0, bottom0, ok0 := TextPosition(bounds.Dx(), str, headIdx, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
-			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, idx, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
+			start := pos
+			if options.SelectionEnd < start {
+				break
+			}
+			start = max(start, options.SelectionStart)
+			end = min(end, options.SelectionEnd)
+			x0, top0, bottom0, ok0 := TextPosition(bounds.Dx(), str, start, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
+			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, end, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
 			if ok0 && ok1 {
 				x := float32(x0) + float32(bounds.Min.X)
 				y := float32(top0) + float32(bounds.Min.Y)
@@ -57,12 +57,12 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 				height := float32(bottom0 - top0)
 				vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 			}
-			headIdx = idx + 1
 		}
 	}
 
 	if options.DrawComposition {
 		// Assume that the composition is always in the same line.
+		// TODO: What about auto-wrapping?
 		if lineCount(str[options.CompositionStart:options.CompositionEnd]) > 1 {
 			slog.Error("composition text must not contain '\\n'")
 		}
