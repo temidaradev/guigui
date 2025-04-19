@@ -45,13 +45,13 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			}
 			start = max(start, options.SelectionStart)
 			end = min(end, options.SelectionEnd)
-			x0, top0, bottom0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-			x1, _, _, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
 			if ok0 && ok1 {
-				x := float32(x0) + float32(bounds.Min.X)
-				y := float32(top0) + float32(bounds.Min.Y)
-				width := float32(x1 - x0)
-				height := float32(bottom0 - top0)
+				x := float32(pos0.X) + float32(bounds.Min.X)
+				y := float32(pos0.Top) + float32(bounds.Min.Y)
+				width := float32(pos1.X - pos0.X)
+				height := float32(pos0.Top - pos0.Bottom)
 				vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
 			}
 		}
@@ -60,23 +60,23 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 	if options.DrawComposition {
 		// TODO: Support multiple lines.
 		{
-			x0, _, bottom0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionStart, &options.Options)
-			x1, _, _, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionEnd, &options.Options)
+			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionStart, &options.Options)
+			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionEnd, &options.Options)
 			if ok0 && ok1 {
-				x := float32(x0) + float32(bounds.Min.X)
-				y := float32(bottom0) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-				w := float32(x1 - x0)
+				x := float32(pos0.X) + float32(bounds.Min.X)
+				y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+				w := float32(pos1.X - pos0.X)
 				h := options.CompositionBorderWidth
 				vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
 			}
 		}
 		{
-			x0, _, bottom0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveStart, &options.Options)
-			x1, _, _, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveEnd, &options.Options)
+			pos0, ok0 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveStart, &options.Options)
+			pos1, ok1 := TextPositionFromIndex(bounds.Dx(), str, options.CompositionActiveEnd, &options.Options)
 			if ok0 && ok1 {
-				x := float32(x0) + float32(bounds.Min.X)
-				y := float32(bottom0) + float32(bounds.Min.Y) - options.CompositionBorderWidth
-				w := float32(x1 - x0)
+				x := float32(pos0.X) + float32(bounds.Min.X)
+				y := float32(pos0.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
+				w := float32(pos1.X - pos0.X)
 				h := options.CompositionBorderWidth
 				vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)
 			}

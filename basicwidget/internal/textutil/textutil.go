@@ -159,9 +159,15 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	return pos
 }
 
-func TextPositionFromIndex(width int, str string, index int, options *Options) (x, top, bottom float64, ok bool) {
+type TextPosition struct {
+	X      float64
+	Top    float64
+	Bottom float64
+}
+
+func TextPositionFromIndex(width int, str string, index int, options *Options) (position TextPosition, ok bool) {
 	if index < 0 || index > len(str) {
-		return 0, 0, 0, false
+		return TextPosition{}, false
 	}
 
 	var y float64
@@ -184,12 +190,16 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		y -= options.LineHeight
 	}
 
-	x = oneLineLeft(width, line, options.Face, options.HorizontalAlign)
+	x := oneLineLeft(width, line, options.Face, options.HorizontalAlign)
 	x += text.Advance(line[:indexInLine], options.Face)
 
 	m := options.Face.Metrics()
 	paddingY := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
-	return x, y + paddingY, y + options.LineHeight - paddingY, true
+	return TextPosition{
+		X:      x,
+		Top:    y + paddingY,
+		Bottom: y + options.LineHeight - paddingY,
+	}, true
 }
 
 func tailingLineBreakLen(str string) int {

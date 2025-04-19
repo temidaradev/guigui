@@ -465,23 +465,23 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 
 	tb := t.textBounds(context)
 	bounds := context.Bounds(t)
-	if x, _, y, ok := t.textPosition(context, end, true); ok {
+	if pos, ok := t.textPosition(context, end, true); ok {
 		var dx, dy float64
-		if max := float64(bounds.Max.X); x > max {
-			dx = max - x
+		if max := float64(bounds.Max.X); pos.X > max {
+			dx = max - pos.X
 		}
-		if max := float64(bounds.Max.Y); y > max {
-			dy = max - y
+		if max := float64(bounds.Max.Y); pos.Bottom > max {
+			dy = max - pos.Bottom
 		}
 		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
-	if x, y, _, ok := t.textPosition(context, start, true); ok {
+	if pos, ok := t.textPosition(context, start, true); ok {
 		var dx, dy float64
-		if min := float64(bounds.Min.X); x < min {
-			dx = min - x
+		if min := float64(bounds.Min.X); pos.X < min {
+			dx = min - pos.X
 		}
-		if min := float64(bounds.Min.Y); y < min {
-			dy = min - y
+		if min := float64(bounds.Min.Y); pos.Top < min {
+			dy = min - pos.Top
 		}
 		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
@@ -554,9 +554,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 
 	start, _ := t.field.Selection()
 	var processed bool
-	if x, _, bottom, ok := t.textPosition(context, start, false); ok {
+	if pos, ok := t.textPosition(context, start, false); ok {
 		var err error
-		processed, err = t.field.HandleInput(int(x), int(bottom))
+		processed, err = t.field.HandleInput(int(pos.X), int(pos.Bottom))
 		if err != nil {
 			slog.Error(err.Error())
 			return guigui.AbortHandlingInputByWidget(t)
@@ -698,9 +698,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = end
 			moveEnd = true
 		}
-		if x, y0, y1, ok := t.textPosition(context, idx, false); ok {
-			y := (y0+y1)/2 - lh
-			idx := t.textIndexFromPosition(context, image.Pt(int(x), int(y)), false)
+		if pos, ok := t.textPosition(context, idx, false); ok {
+			y := (pos.Top+pos.Bottom)/2 - lh
+			idx := t.textIndexFromPosition(context, image.Pt(int(pos.X), int(y)), false)
 			if shift {
 				if moveEnd {
 					t.setTextAndSelection(t.field.Text(), start, idx, idx)
@@ -722,9 +722,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			idx = start
 			moveStart = true
 		}
-		if x, y0, y1, ok := t.textPosition(context, idx, false); ok {
-			y := (y0+y1)/2 + lh
-			idx := t.textIndexFromPosition(context, image.Pt(int(x), int(y)), false)
+		if pos, ok := t.textPosition(context, idx, false); ok {
+			y := (pos.Top+pos.Bottom)/2 + lh
+			idx := t.textIndexFromPosition(context, image.Pt(int(pos.X), int(y)), false)
 			if shift {
 				if moveStart {
 					t.setTextAndSelection(t.field.Text(), idx, end, idx)
@@ -892,24 +892,24 @@ func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, boo
 	return 0, false
 }
 
-func (t *Text) cursorPosition(context *guigui.Context) (x, top, bottom float64, ok bool) {
+func (t *Text) cursorPosition(context *guigui.Context) (position textutil.TextPosition, ok bool) {
 	if !context.IsFocused(t) {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 	if !t.editable {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 	start, end := t.field.Selection()
 	if start < 0 {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 	if end < 0 {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 
 	_, e, ok := t.selectionToDraw(context)
 	if !ok {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 
 	return t.textPosition(context, e, true)
@@ -935,10 +935,10 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 	return idx
 }
 
-func (t *Text) textPosition(context *guigui.Context, index int, showComposition bool) (x, top, bottom float64, ok bool) {
+func (t *Text) textPosition(context *guigui.Context, index int, showComposition bool) (position textutil.TextPosition, ok bool) {
 	textBounds := t.textBounds(context)
 	if !textBounds.Overlaps(context.VisibleBounds(t)) {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
 	txt := t.textToDraw(context, showComposition, false)
 	op := &textutil.Options{
@@ -947,11 +947,15 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
 		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
 	}
-	x, top, bottom, ok = textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
+	position, ok = textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
 	if !ok {
-		return 0, 0, 0, false
+		return textutil.TextPosition{}, false
 	}
-	return x + float64(textBounds.Min.X), top + float64(textBounds.Min.Y), bottom + float64(textBounds.Min.Y), true
+	return textutil.TextPosition{
+		X:      position.X + float64(textBounds.Min.X),
+		Top:    position.Top + float64(textBounds.Min.Y),
+		Bottom: position.Bottom + float64(textBounds.Min.Y),
+	}, true
 }
 
 func cursorWidth(context *guigui.Context) int {
@@ -959,12 +963,12 @@ func cursorWidth(context *guigui.Context) int {
 }
 
 func (t *Text) cursorBounds(context *guigui.Context) image.Rectangle {
-	x, top, bottom, ok := t.cursorPosition(context)
+	pos, ok := t.cursorPosition(context)
 	if !ok {
 		return image.Rectangle{}
 	}
 	w := cursorWidth(context)
-	return image.Rect(int(x)-w/2, int(top), int(x)+w/2, int(bottom))
+	return image.Rect(int(pos.X)-w/2, int(pos.Top), int(pos.X)+w/2, int(pos.Bottom))
 }
 
 type textCursor struct {
@@ -972,12 +976,10 @@ type textCursor struct {
 
 	text *Text
 
-	counter    int
-	prevShown  bool
-	prevX      float64
-	prevTop    float64
-	prevBottom float64
-	prevOK     bool
+	counter   int
+	prevShown bool
+	prevPos   textutil.TextPosition
+	prevOK    bool
 }
 
 func (t *textCursor) resetCounter() {
@@ -985,13 +987,11 @@ func (t *textCursor) resetCounter() {
 }
 
 func (t *textCursor) Update(context *guigui.Context) error {
-	x, top, bottom, ok := t.text.cursorPosition(context)
-	if t.prevX != x || t.prevTop != top || t.prevBottom != bottom || t.prevOK != ok {
+	pos, ok := t.text.cursorPosition(context)
+	if t.prevPos != pos {
 		t.resetCounter()
 	}
-	t.prevX = x
-	t.prevTop = top
-	t.prevBottom = bottom
+	t.prevPos = pos
 	t.prevOK = ok
 
 	t.counter++
@@ -1008,7 +1008,7 @@ func (t *textCursor) shouldRenderCursor(context *guigui.Context, text *Text) boo
 	if t.counter > offset && (t.counter-offset)%ebiten.TPS() >= ebiten.TPS()/2 {
 		return false
 	}
-	if _, _, _, ok := text.cursorPosition(context); !ok {
+	if _, ok := text.cursorPosition(context); !ok {
 		return false
 	}
 	s, e, ok := text.selectionToDraw(context)
