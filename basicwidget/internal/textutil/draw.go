@@ -32,20 +32,26 @@ func DrawText(bounds image.Rectangle, dst *ebiten.Image, str string, face text.F
 		op.PrimaryAlign = text.AlignEnd
 	}
 
+	c := lineCount(str)
+	if c == 0 {
+		return
+	}
+	height := lineHeight * float64(c)
+
 	m := face.Metrics()
 	padding := (lineHeight - (m.HAscent + m.HDescent)) / 2
-
+	op.GeoM.Translate(0, padding)
 	switch vAlign {
 	case VerticalAlignTop:
-		op.GeoM.Translate(0, padding)
-		op.SecondaryAlign = text.AlignStart
 	case VerticalAlignMiddle:
-		op.GeoM.Translate(0, float64(bounds.Dy())/2)
-		op.SecondaryAlign = text.AlignCenter
+		op.GeoM.Translate(0, (float64(bounds.Dy())-height)/2)
 	case VerticalAlignBottom:
-		op.GeoM.Translate(0, float64(bounds.Dy())-padding)
-		op.SecondaryAlign = text.AlignEnd
+		op.GeoM.Translate(0, float64(bounds.Dy())-height)
 	}
 
-	text.Draw(dst, str, face, op)
+	for _, line := range lines(str) {
+		text.Draw(dst, line, face, op)
+		op.GeoM.Translate(0, lineHeight)
+	}
+
 }

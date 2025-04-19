@@ -202,3 +202,11 @@ func tailingLineBreakLen(str string) int {
 	_, s := utf8.DecodeLastRuneInString(str)
 	return s
 }
+
+func lineCount(str string) int {
+	count := 0
+	for range lines(str) {
+		count++
+	}
+	return count
+}
