@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	_ "embed"
+	"slices"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -114,8 +115,9 @@ func fontFace(size float64, weight text.Weight, ligature bool, locales []languag
 				index = i
 			}
 		}
+		// TODO: Now only one face is added for each locale. Add more faces (#68).
 		faceSources = append(faceSources, fps[index].faceSource)
-		fps = append(fps[:index], fps[index+1:]...)
+		fps = slices.Delete(fps, index, index+1)
 		if len(fps) == 0 {
 			break
 		}
