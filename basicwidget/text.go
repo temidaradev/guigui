@@ -945,21 +945,18 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
 		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
 	}
-	pos0, pos1, ok0, ok1 := textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
-	if !ok0 && !ok1 {
+	pos0, pos1, count := textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
+	if count == 0 {
 		return textutil.TextPosition{}, false
 	}
-	if ok1 {
-		return textutil.TextPosition{
-			X:      pos1.X + float64(textBounds.Min.X),
-			Top:    pos1.Top + float64(textBounds.Min.Y),
-			Bottom: pos1.Bottom + float64(textBounds.Min.Y),
-		}, true
+	pos := pos0
+	if count == 2 {
+		pos = pos1
 	}
 	return textutil.TextPosition{
-		X:      pos0.X + float64(textBounds.Min.X),
-		Top:    pos0.Top + float64(textBounds.Min.Y),
-		Bottom: pos0.Bottom + float64(textBounds.Min.Y),
+		X:      pos.X + float64(textBounds.Min.X),
+		Top:    pos.Top + float64(textBounds.Min.Y),
+		Bottom: pos.Bottom + float64(textBounds.Min.Y),
 	}, true
 }
 

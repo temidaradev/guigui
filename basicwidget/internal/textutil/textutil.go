@@ -151,9 +151,9 @@ type TextPosition struct {
 	Bottom float64
 }
 
-func TextPositionFromIndex(width int, str string, index int, options *Options) (position0, position1 TextPosition, ok0, ok1 bool) {
+func TextPositionFromIndex(width int, str string, index int, options *Options) (position0, position1 TextPosition, count int) {
 	if index < 0 || index > len(str) {
-		return TextPosition{}, TextPosition{}, false, false
+		return TextPosition{}, TextPosition{}, 0
 	}
 
 	var y, y0, y1 float64
@@ -178,6 +178,10 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		y += options.LineHeight
 	}
 
+	if !found0 && !found1 {
+		return TextPosition{}, TextPosition{}, 0
+	}
+
 	m := options.Face.Metrics()
 	paddingY := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
 
@@ -200,7 +204,13 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 			Bottom: y1 + options.LineHeight - paddingY,
 		}
 	}
-	return pos0, pos1, found0, found1
+	if found0 && !found1 {
+		return pos0, TextPosition{}, 1
+	}
+	if found1 && !found0 {
+		return pos1, TextPosition{}, 1
+	}
+	return pos0, pos1, 2
 }
 
 func tailingLineBreakLen(str string) int {
