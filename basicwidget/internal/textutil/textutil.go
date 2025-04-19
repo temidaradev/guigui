@@ -14,6 +14,13 @@ import (
 	"github.com/rivo/uniseg"
 )
 
+type Options struct {
+	Face            text.Face
+	LineHeight      float64
+	HorizontalAlign HorizontalAlign
+	VerticalAlign   VerticalAlign
+}
+
 type HorizontalAlign int
 
 const (
@@ -112,12 +119,12 @@ func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign)
 	}
 }
 
-func TextIndexFromPosition(width int, position image.Point, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) int {
+func TextIndexFromPosition(width int, position image.Point, str string, options *Options) int {
 	// Determine the line first.
-	m := face.Metrics()
-	gap := lineHeight - m.HAscent - m.HDescent
+	m := options.Face.Metrics()
+	gap := options.LineHeight - m.HAscent - m.HDescent
 	var top float64
-	n := int((float64(position.Y) - top + gap/2) / lineHeight)
+	n := int((float64(position.Y) - top + gap/2) / options.LineHeight)
 
 	var pos int
 	var line string
@@ -132,11 +139,11 @@ func TextIndexFromPosition(width int, position image.Point, str string, face tex
 	}
 
 	// Deterine the line index.
-	left := oneLineLeft(width, line, face, hAlign)
+	left := oneLineLeft(width, line, options.Face, options.HorizontalAlign)
 	var prevA float64
 	var clusterFound bool
-	for _, c := range visibleCulsters(line, face) {
-		a := text.Advance(line[:c.EndIndexInBytes], face)
+	for _, c := range visibleCulsters(line, options.Face) {
+		a := text.Advance(line[:c.EndIndexInBytes], options.Face)
 		if (float64(position.X) - left) < (prevA + (a-prevA)/2) {
 			pos += c.StartIndexInBytes
 			clusterFound = true
@@ -152,7 +159,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, face tex
 	return pos
 }
 
-func TextPosition(width int, str string, index int, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign) (x, top, bottom float64, ok bool) {
+func TextPosition(width int, str string, index int, options *Options) (x, top, bottom float64, ok bool) {
 	if index < 0 || index > len(str) {
 		return 0, 0, 0, false
 	}
@@ -169,20 +176,20 @@ func TextPosition(width int, str string, index int, face text.Face, lineHeight f
 			indexInLine = index - p
 			break
 		}
-		y += lineHeight
+		y += options.LineHeight
 	}
 	// When found is false, the position is in the tail of the last line.
 	if !found && len(str) > 0 && !uniseg.HasTrailingLineBreakInString(str) {
 		indexInLine = len(line)
-		y -= lineHeight
+		y -= options.LineHeight
 	}
 
-	x = oneLineLeft(width, line, face, hAlign)
-	x += text.Advance(line[:indexInLine], face)
+	x = oneLineLeft(width, line, options.Face, options.HorizontalAlign)
+	x += text.Advance(line[:indexInLine], options.Face)
 
-	m := face.Metrics()
-	paddingY := (lineHeight - (m.HAscent + m.HDescent)) / 2
-	return x, y + paddingY, y + lineHeight - paddingY, true
+	m := options.Face.Metrics()
+	paddingY := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
+	return x, y + paddingY, y + options.LineHeight - paddingY, true
 }
 
 func tailingLineBreakLen(str string) int {

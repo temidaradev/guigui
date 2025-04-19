@@ -14,11 +14,9 @@ import (
 )
 
 type DrawOptions struct {
-	Face            text.Face
-	LineHeight      float64
-	HorizontalAlign HorizontalAlign
-	VerticalAlign   VerticalAlign
-	TextColor       color.Color
+	Options
+
+	TextColor color.Color
 
 	DrawSelection  bool
 	SelectionStart int
@@ -48,8 +46,8 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			}
 			start = max(start, options.SelectionStart)
 			end = min(end, options.SelectionEnd)
-			x0, top0, bottom0, ok0 := TextPosition(bounds.Dx(), str, start, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
-			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, end, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
+			x0, top0, bottom0, ok0 := TextPosition(bounds.Dx(), str, start, &options.Options)
+			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, end, &options.Options)
 			if ok0 && ok1 {
 				x := float32(x0) + float32(bounds.Min.X)
 				y := float32(top0) + float32(bounds.Min.Y)
@@ -67,8 +65,8 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			slog.Error("composition text must not contain '\\n'")
 		}
 		{
-			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionStart, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
-			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionEnd, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
+			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionStart, &options.Options)
+			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionEnd, &options.Options)
 			if ok0 && ok1 {
 				x := float32(x0) + float32(bounds.Min.X)
 				y := float32(bottom0) + float32(bounds.Min.Y) - options.CompositionBorderWidth
@@ -78,8 +76,8 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			}
 		}
 		{
-			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionActiveStart, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
-			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionActiveEnd, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
+			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionActiveStart, &options.Options)
+			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionActiveEnd, &options.Options)
 			if ok0 && ok1 {
 				x := float32(x0) + float32(bounds.Min.X)
 				y := float32(bottom0) + float32(bounds.Min.Y) - options.CompositionBorderWidth

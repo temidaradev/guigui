@@ -821,11 +821,13 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 	face := t.face(context)
 	op := &textutil.DrawOptions{
-		Face:            face,
-		LineHeight:      t.lineHeight(context),
-		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
-		TextColor:       textColor,
+		Options: textutil.Options{
+			Face:            face,
+			LineHeight:      t.lineHeight(context),
+			HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
+			VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		},
+		TextColor: textColor,
 	}
 	if start, end, ok := t.selectionToDraw(context); ok {
 		op.DrawSelection = true
@@ -919,9 +921,14 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 		return -1
 	}
 	txt := t.textToDraw(context, showComposition, false)
-	face := t.face(context)
+	op := &textutil.Options{
+		Face:            t.face(context),
+		LineHeight:      t.lineHeight(context),
+		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+	}
 	position = position.Sub(textBounds.Min)
-	idx := textutil.TextIndexFromPosition(textBounds.Dx(), position, txt, face, t.lineHeight(context), textutil.HorizontalAlign(t.hAlign), textutil.VerticalAlign(t.vAlign))
+	idx := textutil.TextIndexFromPosition(textBounds.Dx(), position, txt, op)
 	if idx < 0 || idx > len(txt) {
 		return -1
 	}
@@ -934,8 +941,13 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 		return 0, 0, 0, false
 	}
 	txt := t.textToDraw(context, showComposition, false)
-	face := t.face(context)
-	x, top, bottom, ok = textutil.TextPosition(textBounds.Dx(), txt, index, face, t.lineHeight(context), textutil.HorizontalAlign(t.hAlign), textutil.VerticalAlign(t.vAlign))
+	op := &textutil.Options{
+		Face:            t.face(context),
+		LineHeight:      t.lineHeight(context),
+		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+	}
+	x, top, bottom, ok = textutil.TextPosition(textBounds.Dx(), txt, index, op)
 	if !ok {
 		return 0, 0, 0, false
 	}
