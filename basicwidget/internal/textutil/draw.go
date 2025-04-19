@@ -6,13 +6,14 @@ package textutil
 import (
 	"image"
 	"image/color"
+	"log/slog"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-type DrawTextOptions struct {
+type DrawOptions struct {
 	Face            text.Face
 	LineHeight      float64
 	HorizontalAlign HorizontalAlign
@@ -34,7 +35,7 @@ type DrawTextOptions struct {
 	CompositionBorderWidth   float32
 }
 
-func DrawText(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawTextOptions) {
+func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOptions) {
 	if options.DrawSelection {
 		var tailIndices []int
 		for i, r := range str[options.SelectionStart:options.SelectionEnd] {
@@ -62,9 +63,9 @@ func DrawText(bounds image.Rectangle, dst *ebiten.Image, str string, options *Dr
 
 	if options.DrawComposition {
 		// Assume that the composition is always in the same line.
-		/*if strings.Contains(txt[uStart:uEnd], "\n") {
+		if lineCount(str[options.CompositionStart:options.CompositionEnd]) > 1 {
 			slog.Error("composition text must not contain '\\n'")
-		}*/
+		}
 		{
 			x0, _, bottom0, ok0 := TextPosition(bounds.Dx(), str, options.CompositionStart, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)
 			x1, _, _, ok1 := TextPosition(bounds.Dx(), str, options.CompositionEnd, options.Face, options.LineHeight, options.HorizontalAlign, options.VerticalAlign)

@@ -820,7 +820,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		textColor = draw.ScaleAlpha(textColor, 1-t.transparent)
 	}
 	face := t.face(context)
-	op := &textutil.DrawTextOptions{
+	op := &textutil.DrawOptions{
 		Face:            face,
 		LineHeight:      t.lineHeight(context),
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
@@ -843,7 +843,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		op.ActiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4)
 		op.CompositionBorderWidth = float32(cursorWidth(context))
 	}
-	textutil.DrawText(textBounds, dst, t.textToDraw(context, true, false), op)
+	textutil.Draw(textBounds, dst, t.textToDraw(context, true, false), op)
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {
