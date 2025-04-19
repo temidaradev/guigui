@@ -99,14 +99,9 @@ func AutoWrapText(width int, str string, face text.Face) string {
 	return strings.Join(lines, "\n")
 }
 
-func textLeft(bounds image.Rectangle, str string, face text.Face, hAlign HorizontalAlign) float64 {
-	var w float64
-	for l := range lines(str) {
-		w = max(w, text.Advance(l, face))
-	}
-
+func oneLineLeft(bounds image.Rectangle, line string, face text.Face, hAlign HorizontalAlign) float64 {
+	w := text.Advance(line, face)
 	x := float64(bounds.Min.X)
-
 	switch hAlign {
 	case HorizontalAlignStart:
 	case HorizontalAlignCenter:
@@ -114,7 +109,6 @@ func textLeft(bounds image.Rectangle, str string, face text.Face, hAlign Horizon
 	case HorizontalAlignEnd:
 		x += float64(bounds.Dx()) - w
 	}
-
 	return x
 }
 
@@ -144,7 +138,7 @@ func TextIndexFromPosition(textBounds image.Rectangle, position image.Point, str
 	}
 
 	// Deterine the line index.
-	left := textLeft(textBounds, line, face, hAlign)
+	left := oneLineLeft(textBounds, line, face, hAlign)
 	var prevA float64
 	var clusterFound bool
 	for _, c := range visibleCulsters(line, face) {
@@ -188,7 +182,7 @@ func TextPosition(textBounds image.Rectangle, str string, index int, face text.F
 		y -= lineHeight
 	}
 
-	x = textLeft(textBounds, line, face, hAlign)
+	x = oneLineLeft(textBounds, line, face, hAlign)
 	x += text.Advance(line[:index], face)
 
 	m := face.Metrics()
