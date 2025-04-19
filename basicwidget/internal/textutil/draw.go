@@ -53,7 +53,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		op.PrimaryAlign = text.AlignEnd
 	}
 
-	c := lineCount(str)
+	c := lineCount(bounds.Dx(), str, options.AutoWrap, options.Face)
 	if c == 0 {
 		return
 	}
@@ -70,7 +70,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		op.GeoM.Translate(0, float64(bounds.Dy())-height)
 	}
 
-	for pos, line := range lines(str) {
+	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, options.Face) {
 		start := pos
 		end := pos + len(line) - tailingLineBreakLen(line)
 
@@ -78,9 +78,17 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.SelectionEnd && end >= options.SelectionStart {
 				start := max(start, options.SelectionStart)
 				end := min(end, options.SelectionEnd)
-				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if okStart && okEnd {
+				posStart0, posStart1, okStart0, okStart1 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd0, posEnd1, okEnd0, okEnd1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if (okStart0 || okStart1) && (okEnd0 || okEnd1) {
+					posStart := posStart1
+					if !okStart1 {
+						posStart = posStart0
+					}
+					posEnd := posEnd0
+					if !okEnd0 {
+						posEnd = posEnd1
+					}
 					x := float32(posStart.X) + float32(bounds.Min.X)
 					y := float32(posStart.Top) + float32(bounds.Min.Y)
 					width := float32(posEnd.X - posStart.X)
@@ -94,9 +102,17 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.CompositionEnd && end >= options.CompositionStart {
 				start := max(start, options.CompositionStart)
 				end := min(end, options.CompositionEnd)
-				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if okStart && okEnd {
+				posStart0, posStart1, okStart0, okStart1 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd0, posEnd1, okEnd0, okEnd1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if (okStart0 || okStart1) && (okEnd0 || okEnd1) {
+					posStart := posStart1
+					if !okStart1 {
+						posStart = posStart0
+					}
+					posEnd := posEnd0
+					if !okEnd0 {
+						posEnd = posEnd1
+					}
 					x := float32(posStart.X) + float32(bounds.Min.X)
 					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
 					w := float32(posEnd.X - posStart.X)
@@ -107,9 +123,17 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 			if start <= options.CompositionActiveEnd && end >= options.CompositionActiveStart {
 				start := max(start, options.CompositionActiveStart)
 				end := min(end, options.CompositionActiveEnd)
-				posStart, okStart := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
-				posEnd, okEnd := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
-				if okStart && okEnd {
+				posStart0, posStart1, okStart0, okStart1 := TextPositionFromIndex(bounds.Dx(), str, start, &options.Options)
+				posEnd0, posEnd1, okEnd0, okEnd1 := TextPositionFromIndex(bounds.Dx(), str, end, &options.Options)
+				if (okStart0 || okStart1) && (okEnd0 || okEnd1) {
+					posStart := posStart1
+					if !okStart1 {
+						posStart = posStart0
+					}
+					posEnd := posEnd0
+					if !okEnd0 {
+						posEnd = posEnd1
+					}
 					x := float32(posStart.X) + float32(bounds.Min.X)
 					y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
 					w := float32(posEnd.X - posStart.X)

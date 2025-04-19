@@ -487,17 +487,11 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 	}
 }
 
-func (t *Text) textToDraw(context *guigui.Context, showComposition bool, forceUnwrap bool) string {
-	var txt string
+func (t *Text) textToDraw(showComposition bool) string {
 	if showComposition {
-		txt = t.field.TextForRendering()
-	} else {
-		txt = t.field.Text()
+		return t.field.TextForRendering()
 	}
-	if forceUnwrap || !t.autoWrap {
-		return txt
-	}
-	return textutil.AutoWrapText(context.Size(t).X, txt, t.face(context))
+	return t.field.Text()
 }
 
 func (t *Text) selectionToDraw(context *guigui.Context) (start, end int, ok bool) {
@@ -822,6 +816,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	face := t.face(context)
 	op := &textutil.DrawOptions{
 		Options: textutil.Options{
+			AutoWrap:        t.autoWrap,
 			Face:            face,
 			LineHeight:      t.lineHeight(context),
 			HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
@@ -845,7 +840,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		op.ActiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4)
 		op.CompositionBorderWidth = float32(cursorWidth(context))
 	}
-	textutil.Draw(textBounds, dst, t.textToDraw(context, true, false), op)
+	textutil.Draw(textBounds, dst, t.textToDraw(true), op)
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {
@@ -868,21 +863,22 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
 		}
 	}
 
-	txt := t.textToDraw(context, true, forceUnwrap)
-	w, _ := text.Measure(txt, t.face(context), t.lineHeight(context))
-	w *= t.scaleMinus1 + 1
-	h := t.textHeight(context, txt)
+	txt := t.textToDraw(true)
+	var w, h float64
 	if useAutoWrap {
-		t.cachedAutoWrapTextSizePlus1 = image.Pt(int(w)+1, h+1)
+		ch := context.Size(t).Y
+		w, h = textutil.Measure(ch, txt, true, t.face(context), t.lineHeight(context))
 	} else {
-		t.cachedTextSizePlus1 = image.Pt(int(w)+1, h+1)
+		// context.Size is not available as this causes infinite recursion, and is not needed. Give 0 as a width.
+		w, h = textutil.Measure(0, txt, false, t.face(context), t.lineHeight(context))
 	}
-	return image.Pt(int(w), h)
-}
-
-func (t *Text) textHeight(context *guigui.Context, str string) int {
-	// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
-	return int(t.lineHeight(context) * float64(strings.Count(str, "\n")+1))
+	w *= t.scaleMinus1 + 1
+	if useAutoWrap {
+		t.cachedAutoWrapTextSizePlus1 = image.Pt(int(w)+1, int(h)+1)
+	} else {
+		t.cachedTextSizePlus1 = image.Pt(int(w)+1, int(h)+1)
+	}
+	return image.Pt(int(w), int(h))
 }
 
 func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
@@ -920,8 +916,9 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 	if !textBounds.Overlaps(context.VisibleBounds(t)) {
 		return -1
 	}
-	txt := t.textToDraw(context, showComposition, false)
+	txt := t.textToDraw(showComposition)
 	op := &textutil.Options{
+		AutoWrap:        t.autoWrap,
 		Face:            t.face(context),
 		LineHeight:      t.lineHeight(context),
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
@@ -940,21 +937,29 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 	if !textBounds.Overlaps(context.VisibleBounds(t)) {
 		return textutil.TextPosition{}, false
 	}
-	txt := t.textToDraw(context, showComposition, false)
+	txt := t.textToDraw(showComposition)
 	op := &textutil.Options{
+		AutoWrap:        t.autoWrap,
 		Face:            t.face(context),
 		LineHeight:      t.lineHeight(context),
 		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
 		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
 	}
-	position, ok = textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
-	if !ok {
+	pos0, pos1, ok0, ok1 := textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
+	if !ok0 && !ok1 {
 		return textutil.TextPosition{}, false
 	}
+	if ok1 {
+		return textutil.TextPosition{
+			X:      pos1.X + float64(textBounds.Min.X),
+			Top:    pos1.Top + float64(textBounds.Min.Y),
+			Bottom: pos1.Bottom + float64(textBounds.Min.Y),
+		}, true
+	}
 	return textutil.TextPosition{
-		X:      position.X + float64(textBounds.Min.X),
-		Top:    position.Top + float64(textBounds.Min.Y),
-		Bottom: position.Bottom + float64(textBounds.Min.Y),
+		X:      pos0.X + float64(textBounds.Min.X),
+		Top:    pos0.Top + float64(textBounds.Min.Y),
+		Bottom: pos0.Bottom + float64(textBounds.Min.Y),
 	}, true
 }
 

@@ -15,6 +15,7 @@ import (
 )
 
 type Options struct {
+	AutoWrap        bool
 	Face            text.Face
 	LineHeight      float64
 	HorizontalAlign HorizontalAlign
@@ -41,22 +42,7 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 	return text.AppendGlyphs(nil, str, face, nil)
 }
 
-func lines(str string) iter.Seq2[int, string] {
-	// TODO: Integrate lines and lines2.
-	return lines2(0, str, nil, false)
-}
-
-// TODO: Remove this. Auto-wrapping should be done in this package internally.
-func AutoWrapText(width int, str string, face text.Face) string {
-	var lines []string
-	for _, line := range lines2(width, str, face, true) {
-		line = line[:len(line)-tailingLineBreakLen(line)]
-		lines = append(lines, line)
-	}
-	return strings.Join(lines, "\n")
-}
-
-func lines2(width int, str string, face text.Face, autoWrap bool) iter.Seq2[int, string] {
+func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		var line string
 		var word string
@@ -129,7 +115,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var pos int
 	var line string
 	var lineIndex int
-	for p, l := range lines(str) {
+	for p, l := range lines(width, str, options.AutoWrap, options.Face) {
 		line = l
 		pos = p
 		if lineIndex >= n {
@@ -165,41 +151,56 @@ type TextPosition struct {
 	Bottom float64
 }
 
-func TextPositionFromIndex(width int, str string, index int, options *Options) (position TextPosition, ok bool) {
+func TextPositionFromIndex(width int, str string, index int, options *Options) (position0, position1 TextPosition, ok0, ok1 bool) {
 	if index < 0 || index > len(str) {
-		return TextPosition{}, false
+		return TextPosition{}, TextPosition{}, false, false
 	}
 
-	var y float64
-
-	var indexInLine int
-	var line string
-	var found bool
-	for p, l := range lines(str) {
-		line = l
-		if p <= index && index < p+len(l) {
-			found = true
-			indexInLine = index - p
+	var y, y0, y1 float64
+	var indexInLine0, indexInLine1 int
+	var line0, line1 string
+	var found0, found1 bool
+	for p, l := range lines(width, str, options.AutoWrap, options.Face) {
+		// When auto wrap is on, there can be two positions:
+		// one in the tail of the previous line and one in the head of the next line.
+		if tailingLineBreakLen(l) == 0 && index == p+len(l) {
+			found0 = true
+			line0 = l
+			indexInLine0 = index - p
+			y0 = y
+		} else if p <= index && index < p+len(l) {
+			found1 = true
+			line1 = l
+			indexInLine1 = index - p
+			y1 = y
 			break
 		}
 		y += options.LineHeight
 	}
-	// When found is false, the position is in the tail of the last line.
-	if !found && len(str) > 0 && !uniseg.HasTrailingLineBreakInString(str) {
-		indexInLine = len(line)
-		y -= options.LineHeight
-	}
-
-	x := oneLineLeft(width, line, options.Face, options.HorizontalAlign)
-	x += text.Advance(line[:indexInLine], options.Face)
 
 	m := options.Face.Metrics()
 	paddingY := (options.LineHeight - (m.HAscent + m.HDescent)) / 2
-	return TextPosition{
-		X:      x,
-		Top:    y + paddingY,
-		Bottom: y + options.LineHeight - paddingY,
-	}, true
+
+	var pos0, pos1 TextPosition
+	if found0 {
+		x0 := oneLineLeft(width, line0, options.Face, options.HorizontalAlign)
+		x0 += text.Advance(line0[:indexInLine0], options.Face)
+		pos0 = TextPosition{
+			X:      x0,
+			Top:    y0 + paddingY,
+			Bottom: y0 + options.LineHeight + paddingY,
+		}
+	}
+	if found1 {
+		x1 := oneLineLeft(width, line1, options.Face, options.HorizontalAlign)
+		x1 += text.Advance(line1[:indexInLine1], options.Face)
+		pos1 = TextPosition{
+			X:      x1,
+			Top:    y1 + paddingY,
+			Bottom: y1 + options.LineHeight - paddingY,
+		}
+	}
+	return pos0, pos1, found0, found1
 }
 
 func tailingLineBreakLen(str string) int {
@@ -216,10 +217,25 @@ func tailingLineBreakLen(str string) int {
 	return s
 }
 
-func lineCount(str string) int {
+func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 	var count int
-	for range lines(str) {
+	for range lines(width, str, autoWrap, face) {
 		count++
 	}
 	return count
+}
+
+func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64) (float64, float64) {
+	var maxWidth, height float64
+	for _, line := range lines(width, str, autoWrap, face) {
+		maxWidth = max(maxWidth, text.Advance(line, face))
+		// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
+		// Thus, just counting the line number is enough.
+		height += lineHeight
+	}
+	// If the text is empty, the height is the same as one line.
+	if height == 0 {
+		height = lineHeight
+	}
+	return maxWidth, height
 }
