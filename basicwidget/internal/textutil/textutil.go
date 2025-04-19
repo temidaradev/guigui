@@ -204,7 +204,7 @@ func tailingLineBreakLen(str string) int {
 }
 
 func lineCount(str string) int {
-	count := 0
+	var count int
 	for range lines(str) {
 		count++
 	}

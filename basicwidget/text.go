@@ -810,73 +810,40 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 
-	txt := t.textToDraw(context, true, false)
-
-	if start, end, ok := t.selectionToDraw(context); ok {
-		var tailIndices []int
-		for i, r := range txt[start:end] {
-			if r != '\n' {
-				continue
-			}
-			tailIndices = append(tailIndices, start+i)
-		}
-		tailIndices = append(tailIndices, end)
-
-		headIdx := start
-		for _, idx := range tailIndices {
-			x0, top0, bottom0, ok0 := t.textPosition(context, headIdx, true, false)
-			x1, _, _, ok1 := t.textPosition(context, idx, true, false)
-			if ok0 && ok1 {
-				x := float32(x0)
-				y := float32(top0)
-				width := float32(x1 - x0)
-				height := float32(bottom0 - top0)
-				vector.DrawFilledRect(dst, x, y, width, height, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), false)
-			}
-			headIdx = idx + 1
-		}
-	}
-
-	if uStart, cStart, cEnd, uEnd, ok := t.compositionSelectionToDraw(context); ok {
-		// Assume that the composition is always in the same line.
-		if strings.Contains(txt[uStart:uEnd], "\n") {
-			slog.Error("composition text must not contain '\\n'")
-		}
-		{
-			x0, _, bottom0, ok0 := t.textPosition(context, uStart, true, false)
-			x1, _, _, ok1 := t.textPosition(context, uEnd, true, false)
-			if ok0 && ok1 {
-				x := float32(x0)
-				y := float32(bottom0) - float32(cursorWidth(context))
-				w := float32(x1 - x0)
-				h := float32(cursorWidth(context))
-				vector.DrawFilledRect(dst, x, y, w, h, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), false)
-			}
-		}
-		{
-			x0, _, bottom0, ok0 := t.textPosition(context, cStart, true, false)
-			x1, _, _, ok1 := t.textPosition(context, cEnd, true, false)
-			if ok0 && ok1 {
-				x := float32(x0)
-				y := float32(bottom0) - float32(cursorWidth(context))
-				w := float32(x1 - x0)
-				h := float32(cursorWidth(context))
-				vector.DrawFilledRect(dst, x, y, w, h, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
-			}
-		}
-	}
-
-	var clr color.Color
+	var textColor color.Color
 	if t.color != nil {
-		clr = t.color
+		textColor = t.color
 	} else {
-		clr = DefaultTextColor(context)
+		textColor = DefaultTextColor(context)
 	}
 	if t.transparent > 0 {
-		clr = draw.ScaleAlpha(clr, 1-t.transparent)
+		textColor = draw.ScaleAlpha(textColor, 1-t.transparent)
 	}
 	face := t.face(context)
-	textutil.DrawText(textBounds, dst, txt, face, t.lineHeight(context), textutil.HorizontalAlign(t.hAlign), textutil.VerticalAlign(t.vAlign), clr)
+	op := &textutil.DrawTextOptions{
+		Face:            face,
+		LineHeight:      t.lineHeight(context),
+		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		TextColor:       textColor,
+	}
+	if start, end, ok := t.selectionToDraw(context); ok {
+		op.DrawSelection = true
+		op.SelectionStart = start
+		op.SelectionEnd = end
+		op.SelectionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
+	}
+	if uStart, cStart, cEnd, uEnd, ok := t.compositionSelectionToDraw(context); ok {
+		op.DrawComposition = true
+		op.CompositionStart = uStart
+		op.CompositionEnd = uEnd
+		op.CompositionActiveStart = cStart
+		op.CompositionActiveEnd = cEnd
+		op.InactiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
+		op.ActiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4)
+		op.CompositionBorderWidth = float32(cursorWidth(context))
+	}
+	textutil.DrawText(textBounds, dst, t.textToDraw(context, true, false), op)
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {
