@@ -26,6 +26,22 @@ import (
 	"github.com/hajimehoshi/guigui/internal/clipboard"
 )
 
+type HorizontalAlign int
+
+const (
+	HorizontalAlignStart  HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignStart)
+	HorizontalAlignCenter HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignCenter)
+	HorizontalAlignEnd    HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignEnd)
+)
+
+type VerticalAlign int
+
+const (
+	VerticalAlignTop    VerticalAlign = VerticalAlign(textutil.VerticalAlignTop)
+	VerticalAlignMiddle VerticalAlign = VerticalAlign(textutil.VerticalAlignMiddle)
+	VerticalAlignBottom VerticalAlign = VerticalAlign(textutil.VerticalAlignBottom)
+)
+
 func isKeyRepeating(key ebiten.Key) bool {
 	d := inpututil.KeyPressDuration(key)
 	if d == 1 {
@@ -872,7 +888,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.transparent > 0 {
 		clr = draw.ScaleAlpha(clr, 1-t.transparent)
 	}
-	drawText(textBounds, dst, txt, face, t.lineHeight(context), t.hAlign, t.vAlign, clr)
+	textutil.DrawText(textBounds, dst, txt, face, t.lineHeight(context), textutil.HorizontalAlign(t.hAlign), textutil.VerticalAlign(t.vAlign), clr)
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {

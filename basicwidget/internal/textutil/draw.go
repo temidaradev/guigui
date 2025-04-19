@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2024 Hajime Hoshi
+// SPDX-FileCopyrightText: 2025 Hajime Hoshi
 
-package basicwidget
+package textutil
 
 import (
 	"image"
@@ -9,27 +9,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-
-	"github.com/hajimehoshi/guigui/basicwidget/internal/textutil"
 )
 
-type HorizontalAlign int
-
-const (
-	HorizontalAlignStart  HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignStart)
-	HorizontalAlignCenter HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignCenter)
-	HorizontalAlignEnd    HorizontalAlign = HorizontalAlign(textutil.HorizontalAlignEnd)
-)
-
-type VerticalAlign int
-
-const (
-	VerticalAlignTop    VerticalAlign = VerticalAlign(textutil.VerticalAlignTop)
-	VerticalAlignMiddle VerticalAlign = VerticalAlign(textutil.VerticalAlignMiddle)
-	VerticalAlignBottom VerticalAlign = VerticalAlign(textutil.VerticalAlignBottom)
-)
-
-func drawText(bounds image.Rectangle, dst *ebiten.Image, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign, clr color.Color) {
+func DrawText(bounds image.Rectangle, dst *ebiten.Image, str string, face text.Face, lineHeight float64, hAlign HorizontalAlign, vAlign VerticalAlign, clr color.Color) {
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(float64(bounds.Min.X), float64(bounds.Min.Y))
 	op.ColorScale.ScaleWithColor(clr)
