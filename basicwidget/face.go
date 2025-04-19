@@ -29,15 +29,15 @@ type FaceSourceHint struct {
 	Locale language.Tag
 }
 
-type faceSourceWithPriority struct {
+type faceSourceWithPriorityFunc struct {
 	faceSource *text.GoTextFaceSource
 	priority   func(hint FaceSourceHint) float64
 }
 
-var faceSourceWithPriorities []faceSourceWithPriority
+var faceSourceWithPriorityFuncs []faceSourceWithPriorityFunc
 
 func RegisterFaceSource(faceSource *text.GoTextFaceSource, priority func(hint FaceSourceHint) float64) {
-	faceSourceWithPriorities = append(faceSourceWithPriorities, faceSourceWithPriority{
+	faceSourceWithPriorityFuncs = append(faceSourceWithPriorityFuncs, faceSourceWithPriorityFunc{
 		faceSource: faceSource,
 		priority:   priority,
 	})
@@ -96,7 +96,7 @@ func fontFace(size float64, weight text.Weight, ligature bool, locales []languag
 		return f
 	}
 
-	fps := append([]faceSourceWithPriority{}, faceSourceWithPriorities...)
+	fps := append([]faceSourceWithPriorityFunc{}, faceSourceWithPriorityFuncs...)
 
 	var faceSources []*text.GoTextFaceSource
 	for _, l := range locales {
