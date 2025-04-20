@@ -234,7 +234,7 @@ func (c *Context) SetVisible(widget Widget, visible bool) {
 	}
 	widgetState.hidden = !visible
 	if !visible {
-		c.Blur(widget)
+		c.blur(widget)
 	}
 	RequestRedraw(widget)
 }
@@ -250,7 +250,7 @@ func (c *Context) SetEnabled(widget Widget, enabled bool) {
 	}
 	widgetState.disabled = !enabled
 	if !enabled {
-		c.Blur(widget)
+		c.blur(widget)
 	}
 	RequestRedraw(widget)
 }
@@ -259,7 +259,15 @@ func (c *Context) IsEnabled(widget Widget) bool {
 	return widget.widgetState().isEnabled()
 }
 
-func (c *Context) Focus(widget Widget) {
+func (c *Context) SetFocused(widget Widget, focused bool) {
+	if focused {
+		c.focus(widget)
+	} else {
+		c.blur(widget)
+	}
+}
+
+func (c *Context) focus(widget Widget) {
 	widgetState := widget.widgetState()
 	if !widgetState.isVisible() {
 		return
@@ -287,7 +295,7 @@ func (c *Context) Focus(widget Widget) {
 	}
 }
 
-func (c *Context) Blur(widget Widget) {
+func (c *Context) blur(widget Widget) {
 	widgetState := widget.widgetState()
 	if !widgetState.isInTree() {
 		return

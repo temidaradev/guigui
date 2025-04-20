@@ -337,7 +337,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 			}
 
 			wasFocused := context.IsFocused(l)
-			context.Focus(l)
+			context.SetFocused(l, true)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
 				l.SetSelectedItemIndex(index)
 				l.lastSelectingItemTime = time.Now()

@@ -81,7 +81,7 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if context.IsWidgetHitAt(t, image.Pt(ebiten.CursorPosition())) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			context.Focus(&t.text)
+			context.SetFocused(&t.text, true)
 			t.text.selectAll()
 			return guigui.HandleInputByWidget(t)
 		}
@@ -95,7 +95,7 @@ func (t *TextField) Update(context *guigui.Context) error {
 		guigui.RequestRedraw(t)
 	}
 	if context.IsFocused(t) {
-		context.Focus(&t.text)
+		context.SetFocused(&t.text, true)
 		guigui.RequestRedraw(t)
 	}
 	return nil

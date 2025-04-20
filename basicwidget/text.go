@@ -436,12 +436,12 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 				t.selectAll()
 			}
 
-			context.Focus(t)
+			context.SetFocused(t, true)
 			t.lastClickTick = ebiten.Tick()
 			t.lastClickTextIndex = idx
 			return guigui.HandleInputByWidget(t)
 		}
-		context.Blur(t)
+		context.SetFocused(t, false)
 	}
 
 	if !context.IsFocused(t) {
