@@ -22,9 +22,9 @@ type Lists struct {
 
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	l.textListText.SetText("Text List")
-	var items []basicwidget.TextListItem
+	var items []basicwidget.TextListItem[int]
 	for i := 0; i < 100; i++ {
-		items = append(items, basicwidget.TextListItem{
+		items = append(items, basicwidget.TextListItem[int]{
 			Text: fmt.Sprintf("Item %d", i),
 		})
 	}

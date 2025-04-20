@@ -30,7 +30,7 @@ type TextList[T comparable] struct {
 	OnContextMenu     func(index int, x, y int)
 }*/
 
-type TextListItem struct {
+type TextListItem[T comparable] struct {
 	Text      string
 	DummyText string
 	Color     color.Color
@@ -38,10 +38,10 @@ type TextListItem struct {
 	Disabled  bool
 	Border    bool
 	Draggable bool
-	Tag       any
+	Tag       T
 }
 
-func (t *TextListItem) selectable() bool {
+func (t *TextListItem[T]) selectable() bool {
 	return !t.Header && !t.Disabled && !t.Border
 }
 
@@ -120,29 +120,29 @@ func (t *TextList[T]) SelectedItemIndex() int {
 	return t.list.SelectedItemIndex()
 }
 
-func (t *TextList[T]) SelectedItem() (TextListItem, bool) {
+func (t *TextList[T]) SelectedItem() (TextListItem[T], bool) {
 	if t.list.SelectedItemIndex() < 0 || t.list.SelectedItemIndex() >= len(t.textListItemWidgets) {
-		return TextListItem{}, false
+		return TextListItem[T]{}, false
 	}
 	return t.textListItemWidgets[t.list.SelectedItemIndex()].textListItem, true
 }
 
-func (t *TextList[T]) ItemByIndex(index int) (TextListItem, bool) {
+func (t *TextList[T]) ItemByIndex(index int) (TextListItem[T], bool) {
 	if index < 0 || index >= len(t.textListItemWidgets) {
-		return TextListItem{}, false
+		return TextListItem[T]{}, false
 	}
 	return t.textListItemWidgets[index].textListItem, true
 }
 
 func (t *TextList[T]) SetItemsByStrings(strs []string) {
-	items := make([]TextListItem, len(strs))
+	items := make([]TextListItem[T], len(strs))
 	for i, str := range strs {
 		items[i].Text = str
 	}
 	t.SetItems(items)
 }
 
-func (t *TextList[T]) SetItems(items []TextListItem) {
+func (t *TextList[T]) SetItems(items []TextListItem[T]) {
 	if cap(t.textListItemWidgets) < len(items) {
 		t.textListItemWidgets = append(t.textListItemWidgets, make([]*textListItemWidget[T], len(items)-cap(t.textListItemWidgets))...)
 	}
@@ -184,11 +184,11 @@ func (t *TextList[T]) SetItemString(str string, index int) {
 	t.textListItemWidgets[index].textListItem.Text = str
 }
 
-func (t *TextList[T]) AppendItem(item TextListItem) {
+func (t *TextList[T]) AppendItem(item TextListItem[T]) {
 	t.AddItem(item, len(t.textListItemWidgets))
 }
 
-func (t *TextList[T]) AddItem(item TextListItem, index int) {
+func (t *TextList[T]) AddItem(item TextListItem[T], index int) {
 	t.textListItemWidgets = slices.Insert(t.textListItemWidgets, index, &textListItemWidget[T]{
 		textList:     t,
 		textListItem: item,
@@ -214,12 +214,12 @@ type textListItemWidget[T comparable] struct {
 	guigui.DefaultWidget
 
 	textList     *TextList[T]
-	textListItem TextListItem
+	textListItem TextListItem[T]
 
 	text Text
 }
 
-func newTextListItemWidget[T comparable](textList *TextList[T], textListItem TextListItem) *textListItemWidget[T] {
+func newTextListItemWidget[T comparable](textList *TextList[T], textListItem TextListItem[T]) *textListItemWidget[T] {
 	t := &textListItemWidget[T]{
 		textList:     textList,
 		textListItem: textListItem,
@@ -228,7 +228,7 @@ func newTextListItemWidget[T comparable](textList *TextList[T], textListItem Tex
 	return t
 }
 
-func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem) {
+func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem[T]) {
 	t.textListItem = textListItem
 	t.text.SetText(t.textString())
 }

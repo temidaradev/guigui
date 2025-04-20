@@ -102,7 +102,7 @@ func (p *PopupMenu[T]) SetItemsByStrings(items []string) {
 	p.textList.SetItemsByStrings(items)
 }
 
-func (p *PopupMenu[T]) SelectedItem() (TextListItem, bool) {
+func (p *PopupMenu[T]) SelectedItem() (TextListItem[T], bool) {
 	return p.textList.SelectedItem()
 }
 
