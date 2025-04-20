@@ -73,7 +73,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 				if index >= len(p.forms) {
 					return 0
 				}
-				return context.Size(&p.forms[index]).Y
+				return p.forms[index].DefaultSize(context).Y
 			}),
 		},
 		RowGap: u / 2,
