@@ -6,7 +6,6 @@ package basicwidget
 import (
 	"image"
 	"image/color"
-	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -97,16 +96,9 @@ func (t *TextList[T]) SetCheckmarkIndex(index int) {
 }
 
 func (t *TextList[T]) updateListItems() {
-	if len(t.textListItemWidgets) < len(t.textListItems) {
-		t.textListItemWidgets = slices.Grow(t.textListItemWidgets, len(t.textListItems)-len(t.textListItemWidgets))[:len(t.textListItems)]
-	} else if len(t.textListItemWidgets) > len(t.textListItems) {
-		t.textListItemWidgets = slices.Delete(t.textListItemWidgets, len(t.textListItems), len(t.textListItemWidgets))
-	}
-	if len(t.listItems) < len(t.textListItems) {
-		t.listItems = slices.Grow(t.listItems, len(t.textListItems)-len(t.listItems))[:len(t.textListItems)]
-	} else if len(t.listItems) > len(t.textListItems) {
-		t.listItems = slices.Delete(t.listItems, len(t.textListItems), len(t.listItems))
-	}
+	t.textListItemWidgets = adjustSliceSize(t.textListItemWidgets, len(t.textListItems))
+	t.listItems = adjustSliceSize(t.listItems, len(t.textListItems))
+
 	for i, item := range t.textListItems {
 		t.textListItemWidgets[i].setTextListItem(item)
 		t.listItems[i] = t.textListItemWidgets[i].listItem()
@@ -166,11 +158,7 @@ func (t *TextList[T]) SetItemsByStrings(strs []string) {
 }
 
 func (t *TextList[T]) SetItems(items []TextListItem[T]) {
-	if len(t.textListItems) < len(items) {
-		t.textListItems = slices.Grow(t.textListItems, len(items)-len(t.textListItems))[:len(items)]
-	} else if len(t.textListItems) > len(items) {
-		t.textListItems = slices.Delete(t.textListItems, len(items), len(t.textListItems))
-	}
+	t.textListItems = adjustSliceSize(t.textListItems, len(items))
 	copy(t.textListItems, items)
 
 	// Updating list items at Build might be too late, when the text list is not visible like a dropdown menu.

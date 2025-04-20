@@ -193,11 +193,7 @@ func (l *List[T]) HoveredItemIndex(context *guigui.Context) int {
 }
 
 func (l *List[T]) SetItems(items []ListItem[T]) {
-	if len(l.items) < len(items) {
-		l.items = slices.Grow(l.items, len(items)-len(l.items))[:len(items)]
-	} else if len(l.items) > len(items) {
-		l.items = slices.Delete(l.items, len(items), len(l.items))
-	}
+	l.items = adjustSliceSize(l.items, len(items))
 	copy(l.items, items)
 	l.cachedDefaultWidth = 0
 	l.cachedDefaultHeight = 0
