@@ -24,10 +24,14 @@ type Root struct {
 	texts      Texts
 	lists      Lists
 	popups     Popups
+
+	model Model
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
+
+	r.sidebar.SetModel(&r.model)
 
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(r),
@@ -40,7 +44,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		case 0:
 			appender.AppendChildWidgetWithBounds(&r.sidebar, bounds)
 		case 1:
-			switch r.sidebar.SelectedItemTag() {
+			switch r.model.Mode() {
 			case "settings":
 				appender.AppendChildWidgetWithBounds(&r.settings, bounds)
 			case "basic":

@@ -5,7 +5,6 @@ package main
 
 import (
 	"image"
-	"sync"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -18,6 +17,10 @@ type Sidebar struct {
 	sidebarContent sidebarContent
 }
 
+func (s *Sidebar) SetModel(model *Model) {
+	s.sidebarContent.SetModel(model)
+}
+
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	context.SetSize(&s.sidebarContent, context.Size(s))
 	s.sidebar.SetContent(&s.sidebarContent)
@@ -27,21 +30,17 @@ func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	return nil
 }
 
-func (s *Sidebar) SelectedItemTag() string {
-	return s.sidebarContent.SelectedItemTag()
-}
-
-func (s *Sidebar) SetSelectedItemIndex(index int) {
-	s.sidebarContent.SetSelectedItemIndex(index)
-}
-
 type sidebarContent struct {
 	guigui.DefaultWidget
 
 	list            basicwidget.List
 	listItemWidgets []basicwidget.Text
 
-	initOnce sync.Once
+	model *Model
+}
+
+func (s *sidebarContent) SetModel(model *Model) {
+	s.model = model
 }
 
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -102,24 +101,21 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 		}
 	}
 	s.list.SetItems(listItems)
-
-	s.initOnce.Do(func() {
-		s.list.SetSelectedItemIndex(0)
+	s.list.SetSelectedItemByTag(s.model.Mode())
+	s.list.SetOnItemSelected(func(index int, item basicwidget.ListItem) {
+		if item.Tag == nil {
+			s.model.SetMode("")
+			return
+		}
+		tag, ok := item.Tag.(string)
+		if !ok {
+			s.model.SetMode("")
+			return
+		}
+		s.model.SetMode(tag)
 	})
 
 	appender.AppendChildWidgetWithBounds(&s.list, context.Bounds(s))
 
 	return nil
-}
-
-func (s *sidebarContent) SelectedItemTag() string {
-	item, ok := s.list.SelectedItem()
-	if !ok {
-		return ""
-	}
-	return item.Tag.(string)
-}
-
-func (s *sidebarContent) SetSelectedItemIndex(index int) {
-	s.list.SetSelectedItemIndex(index)
 }

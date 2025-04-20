@@ -86,7 +86,7 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
-func (t *TextList) SetOnItemSelected(callback func(index int)) {
+func (t *TextList) SetOnItemSelected(callback func(index int, item ListItem)) {
 	t.list.SetOnItemSelected(callback)
 }
 

@@ -68,14 +68,14 @@ type List struct {
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
 
-	onItemSelected func(index int)
+	onItemSelected func(index int, item ListItem)
 }
 
 func listItemPadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 
-func (l *List) SetOnItemSelected(f func(index int)) {
+func (l *List) SetOnItemSelected(f func(index int, item ListItem)) {
 	l.onItemSelected = f
 }
 
@@ -236,8 +236,19 @@ func (l *List) SetSelectedItemIndex(index int) {
 		guigui.RequestRedraw(l)
 	}
 	if l.onItemSelected != nil {
-		l.onItemSelected(index)
+		var item ListItem
+		if index >= 0 && index < len(l.items) {
+			item = l.items[index]
+		}
+		l.onItemSelected(index, item)
 	}
+}
+
+func (l *List) SetSelectedItemByTag(tag any) {
+	idx := slices.IndexFunc(l.items, func(item ListItem) bool {
+		return item.Tag == tag
+	})
+	l.SetSelectedItemIndex(idx)
 }
 
 func (l *List) JumpToItemIndex(index int) {
