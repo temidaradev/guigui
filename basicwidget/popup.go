@@ -103,7 +103,7 @@ func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 
 func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.initOnce.Do(func() {
-		context.Hide(p)
+		context.SetVisible(p, false)
 	})
 
 	if (p.showing || p.hiding) && p.openingCount > 0 {
@@ -144,7 +144,7 @@ func (p *Popup) Open(context *guigui.Context) {
 		p.openAfterClose = true
 		return
 	}
-	context.Show(p)
+	context.SetVisible(p, true)
 	p.showing = true
 	p.hiding = false
 }
@@ -201,7 +201,7 @@ func (p *Popup) Update(context *guigui.Context) error {
 				p.Open(context)
 				p.openAfterClose = false
 			} else {
-				context.Hide(p)
+				context.SetVisible(p, false)
 			}
 		}
 	}

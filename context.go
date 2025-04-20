@@ -227,22 +227,15 @@ func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
 	return c.VisibleBounds(parent).Intersect(c.Bounds(widget))
 }
 
-func (c *Context) Show(widget Widget) {
+func (c *Context) SetVisible(widget Widget, visible bool) {
 	widgetState := widget.widgetState()
-	if !widgetState.hidden {
+	if widgetState.hidden == !visible {
 		return
 	}
-	widgetState.hidden = false
-	RequestRedraw(widget)
-}
-
-func (c *Context) Hide(widget Widget) {
-	widgetState := widget.widgetState()
-	if widgetState.hidden {
-		return
+	widgetState.hidden = !visible
+	if !visible {
+		c.Blur(widget)
 	}
-	widgetState.hidden = true
-	c.Blur(widget)
 	RequestRedraw(widget)
 }
 

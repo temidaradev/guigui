@@ -181,7 +181,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		appender.AppendChildWidgetWithPosition(&t.cursor, p)
 	}
 
-	context.Hide(&t.scrollOverlay)
+	context.SetVisible(&t.scrollOverlay, false)
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	return nil
@@ -316,11 +316,7 @@ func (t *Text) SetEditable(editable bool) {
 }
 
 func (t *Text) SetScrollable(context *guigui.Context, scrollable bool) {
-	if scrollable {
-		context.Show(&t.scrollOverlay)
-	} else {
-		context.Hide(&t.scrollOverlay)
-	}
+	context.SetVisible(&t.scrollOverlay, scrollable)
 }
 
 func (t *Text) IsMultiline() bool {
