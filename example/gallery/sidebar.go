@@ -103,7 +103,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	s.list.SetItems(listItems)
 	s.list.SetSelectedItemByTag(s.model.Mode())
 	s.list.SetOnItemSelected(func(index int) {
-		item, ok := s.list.ItemAt(index)
+		item, ok := s.list.ItemByIndex(index)
 		if !ok {
 			s.model.SetMode("")
 			return

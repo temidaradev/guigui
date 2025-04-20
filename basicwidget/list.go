@@ -160,7 +160,7 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	return nil
 }
 
-func (l *List) ItemAt(index int) (ListItem, bool) {
+func (l *List) ItemByIndex(index int) (ListItem, bool) {
 	if index < 0 || index >= len(l.items) {
 		return ListItem{}, false
 	}
