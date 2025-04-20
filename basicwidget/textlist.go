@@ -19,7 +19,9 @@ type TextList[T comparable] struct {
 	guigui.DefaultWidget
 
 	list                List[T]
-	textListItemWidgets []*textListItemWidget[T]
+	listItems           []ListItem[T]
+	textListItems       []TextListItem[T]
+	textListItemWidgets []textListItemWidget[T]
 }
 
 /*type TextListCallback struct {
@@ -94,13 +96,34 @@ func (t *TextList[T]) SetCheckmarkIndex(index int) {
 	t.list.SetCheckmarkIndex(index)
 }
 
+func (t *TextList[T]) updateListItems() {
+	if len(t.textListItemWidgets) < len(t.textListItems) {
+		t.textListItemWidgets = slices.Grow(t.textListItemWidgets, len(t.textListItems)-len(t.textListItemWidgets))[:len(t.textListItems)]
+	} else if len(t.textListItemWidgets) > len(t.textListItems) {
+		t.textListItemWidgets = slices.Delete(t.textListItemWidgets, len(t.textListItems), len(t.textListItemWidgets))
+	}
+	if len(t.listItems) < len(t.textListItems) {
+		t.listItems = slices.Grow(t.listItems, len(t.textListItems)-len(t.listItems))[:len(t.textListItems)]
+	} else if len(t.listItems) > len(t.textListItems) {
+		t.listItems = slices.Delete(t.listItems, len(t.textListItems), len(t.listItems))
+	}
+	for i, item := range t.textListItems {
+		t.textListItemWidgets[i].setTextListItem(item)
+		t.listItems[i] = t.textListItemWidgets[i].listItem()
+	}
+	t.list.SetItems(t.listItems)
+}
+
 func (t *TextList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	context.SetSize(&t.list, context.Size(t))
+
+	t.updateListItems()
 
 	// To use HasFocusedChildWidget correctly, create the tree first.
 	appender.AppendChildWidgetWithPosition(&t.list, context.Position(t))
 
-	for i, item := range t.textListItemWidgets {
+	for i := range t.textListItemWidgets {
+		item := &t.textListItemWidgets[i]
 		item.text.SetBold(item.textListItem.Header)
 		if t.list.style != ListStyleMenu && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable() {
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
@@ -143,21 +166,16 @@ func (t *TextList[T]) SetItemsByStrings(strs []string) {
 }
 
 func (t *TextList[T]) SetItems(items []TextListItem[T]) {
-	if cap(t.textListItemWidgets) < len(items) {
-		t.textListItemWidgets = append(t.textListItemWidgets, make([]*textListItemWidget[T], len(items)-cap(t.textListItemWidgets))...)
+	if len(t.textListItems) < len(items) {
+		t.textListItems = slices.Grow(t.textListItems, len(items)-len(t.textListItems))[:len(items)]
+	} else if len(t.textListItems) > len(items) {
+		t.textListItems = slices.Delete(t.textListItems, len(items), len(t.textListItems))
 	}
-	t.textListItemWidgets = t.textListItemWidgets[:len(items)]
+	copy(t.textListItems, items)
 
-	listItems := make([]ListItem[T], len(items))
-	for i, item := range items {
-		if t.textListItemWidgets[i] == nil {
-			t.textListItemWidgets[i] = newTextListItemWidget(t, item)
-		} else {
-			t.textListItemWidgets[i].setTextListItem(item)
-		}
-		listItems[i] = t.textListItemWidgets[i].listItem()
-	}
-	t.list.SetItems(listItems)
+	// Updating list items at Build might be too late, when the text list is not visible like a dropdown menu.
+	// Update it here.
+	t.updateListItems()
 }
 
 func (t *TextList[T]) ItemsCount() int {
@@ -184,18 +202,6 @@ func (t *TextList[T]) SetItemString(str string, index int) {
 	t.textListItemWidgets[index].textListItem.Text = str
 }
 
-func (t *TextList[T]) AppendItem(item TextListItem[T]) {
-	t.AddItem(item, len(t.textListItemWidgets))
-}
-
-func (t *TextList[T]) AddItem(item TextListItem[T], index int) {
-	t.textListItemWidgets = slices.Insert(t.textListItemWidgets, index, &textListItemWidget[T]{
-		textList:     t,
-		textListItem: item,
-	})
-	t.list.AddItem(t.textListItemWidgets[index].listItem(), index)
-}
-
 func (t *TextList[T]) RemoveItem(index int) {
 	t.textListItemWidgets = slices.Delete(t.textListItemWidgets, index, index+1)
 	t.list.RemoveItem(index)
@@ -213,19 +219,9 @@ func (t *TextList[T]) DefaultSize(context *guigui.Context) image.Point {
 type textListItemWidget[T comparable] struct {
 	guigui.DefaultWidget
 
-	textList     *TextList[T]
 	textListItem TextListItem[T]
 
 	text Text
-}
-
-func newTextListItemWidget[T comparable](textList *TextList[T], textListItem TextListItem[T]) *textListItemWidget[T] {
-	t := &textListItemWidget[T]{
-		textList:     textList,
-		textListItem: textListItem,
-	}
-	t.text.SetText(t.textString())
-	return t
 }
 
 func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem[T]) {
