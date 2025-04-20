@@ -93,9 +93,6 @@ func (w *widgetState) isInTree() bool {
 }
 
 func (w *widgetState) isVisible() bool {
-	if !w.isInTree() {
-		return false
-	}
 	if w.parent != nil {
 		if w.hidden {
 			return false
@@ -106,9 +103,6 @@ func (w *widgetState) isVisible() bool {
 }
 
 func (w *widgetState) isEnabled() bool {
-	if !w.isInTree() {
-		return false
-	}
 	if w.parent != nil {
 		if w.disabled {
 			return false
