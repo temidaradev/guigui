@@ -68,14 +68,14 @@ type List struct {
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
 
-	onItemSelected func(index int, item ListItem)
+	onItemSelected func(index int)
 }
 
 func listItemPadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 
-func (l *List) SetOnItemSelected(f func(index int, item ListItem)) {
+func (l *List) SetOnItemSelected(f func(index int)) {
 	l.onItemSelected = f
 }
 
@@ -160,14 +160,6 @@ func (l *List) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	return nil
 }
 
-func (l *List) SelectedItem() (ListItem, bool) {
-	idx := l.SelectedItemIndex()
-	if idx < 0 || idx >= len(l.items) {
-		return ListItem{}, false
-	}
-	return l.items[idx], true
-}
-
 func (l *List) ItemAt(index int) (ListItem, bool) {
 	if index < 0 || index >= len(l.items) {
 		return ListItem{}, false
@@ -236,11 +228,7 @@ func (l *List) SetSelectedItemIndex(index int) {
 		guigui.RequestRedraw(l)
 	}
 	if l.onItemSelected != nil {
-		var item ListItem
-		if index >= 0 && index < len(l.items) {
-			item = l.items[index]
-		}
-		l.onItemSelected(index, item)
+		l.onItemSelected(index)
 	}
 }
 

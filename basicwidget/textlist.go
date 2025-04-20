@@ -86,7 +86,7 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
-func (t *TextList) SetOnItemSelected(callback func(index int, item ListItem)) {
+func (t *TextList) SetOnItemSelected(callback func(index int)) {
 	t.list.SetOnItemSelected(callback)
 }
 
@@ -127,7 +127,7 @@ func (t *TextList) SelectedItem() (TextListItem, bool) {
 	return t.textListItemWidgets[t.list.SelectedItemIndex()].textListItem, true
 }
 
-func (t *TextList) ItemAt(index int) (TextListItem, bool) {
+func (t *TextList) ItemByIndex(index int) (TextListItem, bool) {
 	if index < 0 || index >= len(t.textListItemWidgets) {
 		return TextListItem{}, false
 	}
