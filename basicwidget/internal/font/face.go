@@ -41,7 +41,7 @@ func (f *FaceChooser) Register(faceSource *text.GoTextFaceSource, priority func(
 	})
 }
 
-func (f *FaceChooser) FontFace(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
+func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
 	var localeStrs []string
 	for _, l := range locales {
 		localeStrs = append(localeStrs, l.String())
