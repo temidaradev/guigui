@@ -50,7 +50,7 @@ type List[T comparable] struct {
 
 	items                      []ListItem[T]
 	selectedItemIndexPlus1     int
-	showItemBorders            bool
+	itemBorderVisible          bool
 	style                      ListStyle
 	checkmarkIndexPlus1        int
 	lastHoverredItemIndexPlus1 int
@@ -230,11 +230,11 @@ func (l *List[T]) JumpToItemIndex(index int) {
 	l.indexToJumpPlus1 = index + 1
 }
 
-func (l *List[T]) ShowItemBorders(show bool) {
-	if l.showItemBorders == show {
+func (l *List[T]) SetItemBorderVisible(visible bool) {
+	if l.itemBorderVisible == visible {
 		return
 	}
-	l.showItemBorders = true
+	l.itemBorderVisible = visible
 	guigui.RequestRedraw(l)
 }
 
@@ -408,7 +408,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	// Draw item borders.
-	if l.showItemBorders && len(l.items) > 0 {
+	if l.itemBorderVisible && len(l.items) > 0 {
 		_, offsetY := l.scrollOverlay.Offset()
 		p := context.Position(l)
 		w := context.Size(l).X
