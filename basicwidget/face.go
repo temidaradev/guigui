@@ -7,11 +7,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	_ "embed"
-	"slices"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/text/language"
+
+	"github.com/hajimehoshi/guigui/basicwidget/internal/font"
 )
 
 //go:generate go run gen.go
@@ -30,17 +30,11 @@ type FaceSourceHint struct {
 	Locale language.Tag
 }
 
-type faceSourceWithPriorityFunc struct {
-	faceSource *text.GoTextFaceSource
-	priority   func(hint FaceSourceHint) float64
-}
-
-var faceSourceWithPriorityFuncs []faceSourceWithPriorityFunc
+var theFaceChoooser font.FaceChooser
 
 func RegisterFaceSource(faceSource *text.GoTextFaceSource, priority func(hint FaceSourceHint) float64) {
-	faceSourceWithPriorityFuncs = append(faceSourceWithPriorityFuncs, faceSourceWithPriorityFunc{
-		faceSource: faceSource,
-		priority:   priority,
+	theFaceChoooser.Register(faceSource, func(hint font.FaceSourceHint) float64 {
+		return priority(FaceSourceHint(hint))
 	})
 }
 
@@ -70,85 +64,6 @@ func init() {
 	})
 }
 
-var (
-	faceCache map[faceCacheKey]text.Face
-)
-
-type faceCacheKey struct {
-	size     float64
-	weight   text.Weight
-	ligature bool
-	locales  string
-}
-
 func fontFace(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
-	var localeStrs []string
-	for _, l := range locales {
-		localeStrs = append(localeStrs, l.String())
-	}
-
-	key := faceCacheKey{
-		size:     size,
-		weight:   weight,
-		ligature: ligature,
-		locales:  strings.Join(localeStrs, ","),
-	}
-	if f, ok := faceCache[key]; ok {
-		return f
-	}
-
-	fps := append([]faceSourceWithPriorityFunc{}, faceSourceWithPriorityFuncs...)
-
-	var faceSources []*text.GoTextFaceSource
-	for _, l := range locales {
-		var highestPriority float64
-		var index int
-		for i, fp := range fps {
-			p := min(max(fp.priority(FaceSourceHint{
-				Size:   size,
-				Weight: weight,
-				Locale: l,
-			}), 0), 1)
-			// If the priority is the same, the later one is used.
-			if highestPriority <= p {
-				highestPriority = p
-				index = i
-			}
-		}
-		// TODO: Now only one face is added for each locale. Add more faces (#68).
-		faceSources = append(faceSources, fps[index].faceSource)
-		fps = slices.Delete(fps, index, index+1)
-		if len(fps) == 0 {
-			break
-		}
-	}
-
-	var fs []text.Face
-	var lang language.Tag
-	if len(locales) > 0 {
-		lang = locales[0]
-	}
-	for _, faceSource := range faceSources {
-		f := &text.GoTextFace{
-			Source:   faceSource,
-			Size:     size,
-			Language: lang,
-		}
-		f.SetVariation(text.MustParseTag("wght"), float32(weight))
-		if !ligature {
-			f.SetFeature(text.MustParseTag("liga"), 0)
-		}
-		fs = append(fs, f)
-	}
-	mf, err := text.NewMultiFace(fs...)
-	if err != nil {
-		panic(err)
-	}
-
-	if faceCache == nil {
-		faceCache = map[faceCacheKey]text.Face{}
-	}
-	faceCache[key] = mf
-
-	return mf
+	return theFaceChoooser.FontFace(size, weight, ligature, locales)
 }
