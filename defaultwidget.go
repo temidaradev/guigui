@@ -11,7 +11,6 @@ import (
 
 type DefaultWidget struct {
 	s widgetState
-	_ noCopy
 }
 
 var _ Widget = (*DefaultWidget)(nil)
@@ -57,16 +56,4 @@ type RootWidget struct {
 
 func (d *RootWidget) DefaultSize(context *Context) image.Point {
 	return context.app.bounds().Size()
-}
-
-// noCopy is a struct to warn that the struct should not be copied.
-//
-// For details, see https://go.dev/issues/8005#issuecomment-190753527
-type noCopy struct {
-}
-
-func (n *noCopy) Lock() {
-}
-
-func (n *noCopy) Unlock() {
 }

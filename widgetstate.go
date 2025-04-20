@@ -83,6 +83,8 @@ type widgetState struct {
 	offscreen *ebiten.Image
 
 	dirty bool
+
+	_ noCopy
 }
 
 func (w *widgetState) isInTree() bool {
@@ -152,4 +154,16 @@ func z(widget Widget) int {
 	}
 	r += widget.ZDelta()
 	return r
+}
+
+// noCopy is a struct to warn that the struct should not be copied.
+//
+// For details, see https://go.dev/issues/8005#issuecomment-190753527
+type noCopy struct {
+}
+
+func (n *noCopy) Lock() {
+}
+
+func (n *noCopy) Unlock() {
 }
