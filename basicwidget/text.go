@@ -102,6 +102,7 @@ type Text struct {
 	multiline            bool
 	autoWrap             bool
 	selectionDragStart   int
+	selectionDragEnd     int
 	selectionShiftIndex  int
 	dragging             bool
 	toAdjustScrollOffset bool
@@ -192,6 +193,7 @@ func (t *Text) SetSelectable(selectable bool) {
 	}
 	t.selectable = selectable
 	t.selectionDragStart = -1
+	t.selectionDragEnd = -1
 	t.selectionShiftIndex = -1
 	if !t.selectable {
 		t.setTextAndSelection(t.field.Text(), 0, 0, -1)
@@ -393,15 +395,14 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	if t.dragging {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			idx := t.textIndexFromPosition(context, cursorPosition, false)
-			if idx < t.selectionDragStart {
-				t.setTextAndSelection(t.field.Text(), idx, t.selectionDragStart, -1)
-			} else {
-				t.setTextAndSelection(t.field.Text(), t.selectionDragStart, idx, -1)
-			}
+			start := min(idx, t.selectionDragStart)
+			end := max(idx, t.selectionDragEnd)
+			t.setTextAndSelection(t.field.Text(), start, end, -1)
 		}
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			t.dragging = false
 			t.selectionDragStart = -1
+			t.selectionDragEnd = -1
 		}
 		return guigui.HandleInputByWidget(t)
 	}
@@ -420,14 +421,16 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 			case 1:
 				t.dragging = true
 				t.selectionDragStart = idx
+				t.selectionDragEnd = idx
 				if start, end := t.field.Selection(); start != idx || end != idx {
 					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 				}
 			case 2:
+				t.dragging = true
 				text := t.field.Text()
 				start, end := findWordBoundaries(text, idx)
-				// TODO: `selectionDragEnd` needed to emulate Chrome's behavior.
 				t.selectionDragStart = start
+				t.selectionDragEnd = end
 				t.setTextAndSelection(text, start, end, -1)
 			case 3:
 				t.selectAll()
