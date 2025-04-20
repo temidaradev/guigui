@@ -44,6 +44,7 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 
 func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
+		origStr := str
 		var line string
 		var word string
 		var pos int
@@ -85,6 +86,15 @@ func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, 
 		line += word
 		if len(line) > 0 {
 			if !yield(pos, line) {
+				return
+			}
+			pos += len(line)
+			line = ""
+		}
+
+		// If the string ends with a line break, or an empty line, add an extra empty line.
+		if tailingLineBreakLen(origStr) > 0 || origStr == "" {
+			if !yield(pos, "") {
 				return
 			}
 		}
@@ -176,14 +186,6 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		y += options.LineHeight
 	}
 
-	// If the string is an empty, treat this as one line to put a cursor correctly.
-	if str == "" {
-		found0 = true
-		line0 = ""
-		indexInLine0 = 0
-		y0 = 0
-	}
-
 	if !found0 && !found1 {
 		return TextPosition{}, TextPosition{}, 0
 	}
@@ -248,10 +250,6 @@ func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight fl
 		// Thus, just counting the line number is enough.
 		height += lineHeight
 	}
-	// If the text is empty, the height is the same as one line.
-	if height == 0 {
-		height = lineHeight
-	}
 	return maxWidth, height
 }
 
@@ -263,10 +261,6 @@ func textPadding(face text.Face, lineHeight float64) float64 {
 
 func TextPositionYOffset(size image.Point, str string, options *Options) float64 {
 	c := lineCount(size.X, str, options.AutoWrap, options.Face)
-	// If the string is an empty, treat this as one line to put a cursor correctly.
-	if c == 0 {
-		c = 1
-	}
 	textHeight := options.LineHeight * float64(c)
 	yOffset := textPadding(options.Face, options.LineHeight)
 	switch options.VerticalAlign {
