@@ -38,11 +38,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.createButton.SetOnUp(func() {
 		r.tryCreateTask(r.textField.Text())
 	})
-	if r.model.CanAddTask(r.textField.Text()) {
-		context.Enable(&r.createButton)
-	} else {
-		context.Disable(&r.createButton)
-	}
+	context.SetEnabled(&r.createButton, r.model.CanAddTask(r.textField.Text()))
 
 	r.tasksPanelContent.SetModel(&r.model)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {

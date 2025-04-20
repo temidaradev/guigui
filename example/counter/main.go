@@ -38,11 +38,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.resetButton.SetOnUp(func() {
 		r.counter = 0
 	})
-	if r.counter == 0 {
-		context.Disable(&r.resetButton)
-	} else {
-		context.Enable(&r.resetButton)
-	}
+	context.SetEnabled(&r.resetButton, r.counter != 0)
 
 	r.incButton.SetText("Increment")
 	r.incButton.SetOnUp(func() {

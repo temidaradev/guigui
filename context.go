@@ -243,22 +243,15 @@ func (c *Context) IsVisible(widget Widget) bool {
 	return widget.widgetState().isVisible()
 }
 
-func (c *Context) Enable(widget Widget) {
+func (c *Context) SetEnabled(widget Widget, enabled bool) {
 	widgetState := widget.widgetState()
-	if !widgetState.disabled {
+	if widgetState.disabled == !enabled {
 		return
 	}
-	widgetState.disabled = false
-	RequestRedraw(widget)
-}
-
-func (c *Context) Disable(widget Widget) {
-	widgetState := widget.widgetState()
-	if widgetState.disabled {
-		return
+	widgetState.disabled = !enabled
+	if !enabled {
+		c.Blur(widget)
 	}
-	widgetState.disabled = true
-	c.Blur(widget)
 	RequestRedraw(widget)
 }
 
