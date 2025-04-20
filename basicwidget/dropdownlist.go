@@ -10,20 +10,20 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
-type DropdownList struct {
+type DropdownList[T comparable] struct {
 	guigui.DefaultWidget
 
 	textButton TextButton
-	popupMenu  PopupMenu
+	popupMenu  PopupMenu[T]
 
 	onValueChanged func(index int)
 }
 
-func (d *DropdownList) SetOnValueChanged(f func(index int)) {
+func (d *DropdownList[T]) SetOnValueChanged(f func(index int)) {
 	d.onValueChanged = f
 }
 
-func (d *DropdownList) updateButtonImage(context *guigui.Context) {
+func (d *DropdownList[T]) updateButtonImage(context *guigui.Context) {
 	img, err := theResourceImages.Get("unfold_more", context.ColorMode())
 	if err != nil {
 		slog.Error(err.Error())
@@ -32,7 +32,7 @@ func (d *DropdownList) updateButtonImage(context *guigui.Context) {
 	d.textButton.SetImage(img)
 }
 
-func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	d.updateButtonImage(context)
 	d.updateText()
 
@@ -62,7 +62,7 @@ func (d *DropdownList) Build(context *guigui.Context, appender *guigui.ChildWidg
 	return nil
 }
 
-func (d *DropdownList) updateText() {
+func (d *DropdownList[T]) updateText() {
 	if item, ok := d.popupMenu.SelectedItem(); ok {
 		d.textButton.SetText(item.Text)
 	} else {
@@ -70,21 +70,21 @@ func (d *DropdownList) updateText() {
 	}
 }
 
-func (d *DropdownList) SetItemsByStrings(items []string) {
+func (d *DropdownList[T]) SetItemsByStrings(items []string) {
 	d.popupMenu.SetItemsByStrings(items)
 	d.updateText()
 }
 
-func (d *DropdownList) SelectedItemIndex() int {
+func (d *DropdownList[T]) SelectedItemIndex() int {
 	return d.popupMenu.SelectedItemIndex()
 }
 
-func (d *DropdownList) SetSelectedItemIndex(index int) {
+func (d *DropdownList[T]) SetSelectedItemIndex(index int) {
 	d.popupMenu.SetSelectedItemIndex(index)
 	d.updateText()
 }
 
-func (d *DropdownList) DefaultSize(context *guigui.Context) image.Point {
+func (d *DropdownList[T]) DefaultSize(context *guigui.Context) image.Point {
 	// The button image affects the size.
 	d.updateButtonImage(context)
 	return context.Size(&d.textButton)

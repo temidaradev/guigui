@@ -15,11 +15,11 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
-type TextList struct {
+type TextList[T comparable] struct {
 	guigui.DefaultWidget
 
-	list                List
-	textListItemWidgets []*textListItemWidget
+	list                List[T]
+	textListItemWidgets []*textListItemWidget[T]
 }
 
 /*type TextListCallback struct {
@@ -86,15 +86,15 @@ func (t *TextListItem) selectable() bool {
 	return t
 }*/
 
-func (t *TextList) SetOnItemSelected(callback func(index int)) {
+func (t *TextList[T]) SetOnItemSelected(callback func(index int)) {
 	t.list.SetOnItemSelected(callback)
 }
 
-func (t *TextList) SetCheckmarkIndex(index int) {
+func (t *TextList[T]) SetCheckmarkIndex(index int) {
 	t.list.SetCheckmarkIndex(index)
 }
 
-func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *TextList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	context.SetSize(&t.list, context.Size(t))
 
 	// To use HasFocusedChildWidget correctly, create the tree first.
@@ -116,25 +116,25 @@ func (t *TextList) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	return nil
 }
 
-func (t *TextList) SelectedItemIndex() int {
+func (t *TextList[T]) SelectedItemIndex() int {
 	return t.list.SelectedItemIndex()
 }
 
-func (t *TextList) SelectedItem() (TextListItem, bool) {
+func (t *TextList[T]) SelectedItem() (TextListItem, bool) {
 	if t.list.SelectedItemIndex() < 0 || t.list.SelectedItemIndex() >= len(t.textListItemWidgets) {
 		return TextListItem{}, false
 	}
 	return t.textListItemWidgets[t.list.SelectedItemIndex()].textListItem, true
 }
 
-func (t *TextList) ItemByIndex(index int) (TextListItem, bool) {
+func (t *TextList[T]) ItemByIndex(index int) (TextListItem, bool) {
 	if index < 0 || index >= len(t.textListItemWidgets) {
 		return TextListItem{}, false
 	}
 	return t.textListItemWidgets[index].textListItem, true
 }
 
-func (t *TextList) SetItemsByStrings(strs []string) {
+func (t *TextList[T]) SetItemsByStrings(strs []string) {
 	items := make([]TextListItem, len(strs))
 	for i, str := range strs {
 		items[i].Text = str
@@ -142,13 +142,13 @@ func (t *TextList) SetItemsByStrings(strs []string) {
 	t.SetItems(items)
 }
 
-func (t *TextList) SetItems(items []TextListItem) {
+func (t *TextList[T]) SetItems(items []TextListItem) {
 	if cap(t.textListItemWidgets) < len(items) {
-		t.textListItemWidgets = append(t.textListItemWidgets, make([]*textListItemWidget, len(items)-cap(t.textListItemWidgets))...)
+		t.textListItemWidgets = append(t.textListItemWidgets, make([]*textListItemWidget[T], len(items)-cap(t.textListItemWidgets))...)
 	}
 	t.textListItemWidgets = t.textListItemWidgets[:len(items)]
 
-	listItems := make([]ListItem, len(items))
+	listItems := make([]ListItem[T], len(items))
 	for i, item := range items {
 		if t.textListItemWidgets[i] == nil {
 			t.textListItemWidgets[i] = newTextListItemWidget(t, item)
@@ -160,67 +160,67 @@ func (t *TextList) SetItems(items []TextListItem) {
 	t.list.SetItems(listItems)
 }
 
-func (t *TextList) ItemsCount() int {
+func (t *TextList[T]) ItemsCount() int {
 	return len(t.textListItemWidgets)
 }
 
-func (t *TextList) Tag(index int) any {
+func (t *TextList[T]) Tag(index int) any {
 	return t.textListItemWidgets[index].textListItem.Tag
 }
 
-func (t *TextList) SetSelectedItemIndex(index int) {
+func (t *TextList[T]) SetSelectedItemIndex(index int) {
 	t.list.SetSelectedItemIndex(index)
 }
 
-func (t *TextList) JumpToItemIndex(index int) {
+func (t *TextList[T]) JumpToItemIndex(index int) {
 	t.list.JumpToItemIndex(index)
 }
 
-func (t *TextList) SetStyle(style ListStyle) {
+func (t *TextList[T]) SetStyle(style ListStyle) {
 	t.list.SetStyle(style)
 }
 
-func (t *TextList) SetItemString(str string, index int) {
+func (t *TextList[T]) SetItemString(str string, index int) {
 	t.textListItemWidgets[index].textListItem.Text = str
 }
 
-func (t *TextList) AppendItem(item TextListItem) {
+func (t *TextList[T]) AppendItem(item TextListItem) {
 	t.AddItem(item, len(t.textListItemWidgets))
 }
 
-func (t *TextList) AddItem(item TextListItem, index int) {
-	t.textListItemWidgets = slices.Insert(t.textListItemWidgets, index, &textListItemWidget{
+func (t *TextList[T]) AddItem(item TextListItem, index int) {
+	t.textListItemWidgets = slices.Insert(t.textListItemWidgets, index, &textListItemWidget[T]{
 		textList:     t,
 		textListItem: item,
 	})
 	t.list.AddItem(t.textListItemWidgets[index].listItem(), index)
 }
 
-func (t *TextList) RemoveItem(index int) {
+func (t *TextList[T]) RemoveItem(index int) {
 	t.textListItemWidgets = slices.Delete(t.textListItemWidgets, index, index+1)
 	t.list.RemoveItem(index)
 }
 
-func (t *TextList) MoveItem(from, to int) {
+func (t *TextList[T]) MoveItem(from, to int) {
 	moveItemInSlice(t.textListItemWidgets, from, 1, to)
 	t.list.MoveItem(from, to)
 }
 
-func (t *TextList) DefaultSize(context *guigui.Context) image.Point {
+func (t *TextList[T]) DefaultSize(context *guigui.Context) image.Point {
 	return t.list.DefaultSize(context)
 }
 
-type textListItemWidget struct {
+type textListItemWidget[T comparable] struct {
 	guigui.DefaultWidget
 
-	textList     *TextList
+	textList     *TextList[T]
 	textListItem TextListItem
 
 	text Text
 }
 
-func newTextListItemWidget(textList *TextList, textListItem TextListItem) *textListItemWidget {
-	t := &textListItemWidget{
+func newTextListItemWidget[T comparable](textList *TextList[T], textListItem TextListItem) *textListItemWidget[T] {
+	t := &textListItemWidget[T]{
 		textList:     textList,
 		textListItem: textListItem,
 	}
@@ -228,12 +228,12 @@ func newTextListItemWidget(textList *TextList, textListItem TextListItem) *textL
 	return t
 }
 
-func (t *textListItemWidget) setTextListItem(textListItem TextListItem) {
+func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem) {
 	t.textListItem = textListItem
 	t.text.SetText(t.textString())
 }
 
-func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *textListItemWidget[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p := context.Position(t)
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2
@@ -246,14 +246,14 @@ func (t *textListItemWidget) Build(context *guigui.Context, appender *guigui.Chi
 	return nil
 }
 
-func (t *textListItemWidget) textString() string {
+func (t *textListItemWidget[T]) textString() string {
 	if t.textListItem.DummyText != "" {
 		return t.textListItem.DummyText
 	}
 	return t.textListItem.Text
 }
 
-func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
+func (t *textListItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.textListItem.Border {
 		p := context.Position(t)
 		s := context.Size(t)
@@ -270,7 +270,7 @@ func (t *textListItemWidget) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
-func (t *textListItemWidget) DefaultSize(context *guigui.Context) image.Point {
+func (t *textListItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
 	w := t.text.TextSize(context).X
 	if t.textListItem.Border {
 		return image.Pt(w, UnitSize(context)/2)
@@ -278,7 +278,7 @@ func (t *textListItemWidget) DefaultSize(context *guigui.Context) image.Point {
 	return image.Pt(w, int(LineHeight(context)))
 }
 
-/*func (t *textListItemWidget) index() int {
+/*func (t *textListItemWidget[T]) index() int {
 	for i, tt := range t.textList.textListItemWidgets {
 		if tt == t {
 			return i
@@ -287,12 +287,12 @@ func (t *textListItemWidget) DefaultSize(context *guigui.Context) image.Point {
 	return -1
 }*/
 
-func (t *textListItemWidget) selectable() bool {
+func (t *textListItemWidget[T]) selectable() bool {
 	return t.textListItem.selectable() && !t.textListItem.Border
 }
 
-func (t *textListItemWidget) listItem() ListItem {
-	return ListItem{
+func (t *textListItemWidget[T]) listItem() ListItem[T] {
+	return ListItem[T]{
 		Content:    t,
 		Selectable: t.selectable(),
 		Draggable:  t.textListItem.Draggable,

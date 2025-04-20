@@ -33,7 +33,7 @@ func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 type sidebarContent struct {
 	guigui.DefaultWidget
 
-	list            basicwidget.List
+	list            basicwidget.List[string]
 	listItemWidgets []basicwidget.Text
 
 	model *Model
@@ -80,11 +80,11 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	if len(s.listItemWidgets) == 0 {
 		s.listItemWidgets = make([]basicwidget.Text, len(items))
 	}
-	listItems := make([]basicwidget.ListItem, len(items))
+	listItems := make([]basicwidget.ListItem[string], len(items))
 	for i, item := range items {
 		t := &s.listItemWidgets[i]
 		t.SetText(item.text)
-		listItems[i] = basicwidget.ListItem{
+		listItems[i] = basicwidget.ListItem[string]{
 			Content:    t,
 			Selectable: true,
 			Tag:        item.tag,
@@ -108,12 +108,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 			s.model.SetMode("")
 			return
 		}
-		tag, ok := item.Tag.(string)
-		if !ok {
-			s.model.SetMode("")
-			return
-		}
-		s.model.SetMode(tag)
+		s.model.SetMode(item.Tag)
 	})
 
 	appender.AppendChildWidgetWithBounds(&s.list, context.Bounds(s))

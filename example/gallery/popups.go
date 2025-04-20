@@ -30,7 +30,7 @@ type Popups struct {
 	simplePopup        basicwidget.Popup
 	simplePopupContent simplePopupContent
 
-	contextMenuPopup basicwidget.PopupMenu
+	contextMenuPopup basicwidget.PopupMenu[int]
 }
 
 func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

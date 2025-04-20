@@ -17,7 +17,7 @@ type Lists struct {
 
 	form         basicwidget.Form
 	textListText basicwidget.Text
-	textList     basicwidget.TextList
+	textList     basicwidget.TextList[int]
 }
 
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

@@ -9,24 +9,24 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
-type PopupMenu struct {
+type PopupMenu[T comparable] struct {
 	guigui.DefaultWidget
 
-	textList TextList
+	textList TextList[T]
 	popup    Popup
 
 	onClosed func(index int)
 }
 
-func (p *PopupMenu) SetOnClosed(f func(index int)) {
+func (p *PopupMenu[T]) SetOnClosed(f func(index int)) {
 	p.onClosed = f
 }
 
-func (p *PopupMenu) SetCheckmarkIndex(index int) {
+func (p *PopupMenu[T]) SetCheckmarkIndex(index int) {
 	p.textList.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.textList.SetStyle(ListStyleMenu)
 	p.textList.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
@@ -57,7 +57,7 @@ func (p *PopupMenu) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	return nil
 }
 
-func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
+func (p *PopupMenu[T]) contentBounds(context *guigui.Context) image.Rectangle {
 	pos := context.Position(p)
 	// textList's size is updated at Build so do not call guigui.Size to determine the content size.
 	// Call DefaultSize instead.
@@ -89,27 +89,27 @@ func (p *PopupMenu) contentBounds(context *guigui.Context) image.Rectangle {
 	return r
 }
 
-func (p *PopupMenu) Open(context *guigui.Context) {
+func (p *PopupMenu[T]) Open(context *guigui.Context) {
 	context.Show(p)
 	p.popup.Open(context)
 }
 
-func (p *PopupMenu) Close() {
+func (p *PopupMenu[T]) Close() {
 	p.popup.Close()
 }
 
-func (p *PopupMenu) SetItemsByStrings(items []string) {
+func (p *PopupMenu[T]) SetItemsByStrings(items []string) {
 	p.textList.SetItemsByStrings(items)
 }
 
-func (p *PopupMenu) SelectedItem() (TextListItem, bool) {
+func (p *PopupMenu[T]) SelectedItem() (TextListItem, bool) {
 	return p.textList.SelectedItem()
 }
 
-func (p *PopupMenu) SelectedItemIndex() int {
+func (p *PopupMenu[T]) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
-func (p *PopupMenu) SetSelectedItemIndex(index int) {
+func (p *PopupMenu[T]) SetSelectedItemIndex(index int) {
 	p.textList.SetSelectedItemIndex(index)
 }

@@ -23,9 +23,9 @@ type Texts struct {
 
 	form                        basicwidget.Form
 	horizontalAlignText         basicwidget.Text
-	horizontalAlignDropdownList basicwidget.DropdownList
+	horizontalAlignDropdownList basicwidget.DropdownList[basicwidget.HorizontalAlign]
 	verticalAlignText           basicwidget.Text
-	verticalAlignDropdownList   basicwidget.DropdownList
+	verticalAlignDropdownList   basicwidget.DropdownList[basicwidget.VerticalAlign]
 	autoWrapText                basicwidget.Text
 	autoWrapToggle              basicwidget.Toggle
 	boldText                    basicwidget.Text

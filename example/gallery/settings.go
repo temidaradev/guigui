@@ -18,11 +18,11 @@ type Settings struct {
 
 	form                  basicwidget.Form
 	colorModeText         basicwidget.Text
-	colorModeDropdownList basicwidget.DropdownList
+	colorModeDropdownList basicwidget.DropdownList[guigui.ColorMode]
 	localeText            basicwidget.Text
-	localeDropdownList    basicwidget.DropdownList
+	localeDropdownList    basicwidget.DropdownList[language.Tag]
 	scaleText             basicwidget.Text
-	scaleDropdownList     basicwidget.DropdownList
+	scaleDropdownList     basicwidget.DropdownList[float64]
 
 	initOnce sync.Once
 }

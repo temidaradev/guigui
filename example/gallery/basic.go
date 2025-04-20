@@ -20,7 +20,7 @@ type Basic struct {
 	textFieldText  basicwidget.Text
 	textField      basicwidget.TextField
 	textListText   basicwidget.Text
-	textList       basicwidget.TextList
+	textList       basicwidget.TextList[int]
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
