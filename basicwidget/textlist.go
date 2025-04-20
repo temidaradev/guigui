@@ -295,7 +295,6 @@ func (t *textListItemWidget) listItem() ListItem {
 	return ListItem{
 		Content:    t,
 		Selectable: t.selectable(),
-		Wide:       t.textListItem.Header,
 		Draggable:  t.textListItem.Draggable,
 	}
 }

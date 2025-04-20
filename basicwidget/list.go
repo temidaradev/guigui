@@ -28,7 +28,6 @@ const (
 type ListItem struct {
 	Content    guigui.Widget
 	Selectable bool
-	Wide       bool
 	Draggable  bool
 	Tag        any
 }
