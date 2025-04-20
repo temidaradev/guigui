@@ -866,8 +866,8 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
 	txt := t.textToDraw(true)
 	var w, h float64
 	if useAutoWrap {
-		ch := context.Size(t).Y
-		w, h = textutil.Measure(ch, txt, true, t.face(context), t.lineHeight(context))
+		cw := context.Size(t).X
+		w, h = textutil.Measure(cw, txt, true, t.face(context), t.lineHeight(context))
 	} else {
 		// context.Size is not available as this causes infinite recursion, and is not needed. Give 0 as a width.
 		w, h = textutil.Measure(0, txt, false, t.face(context), t.lineHeight(context))
