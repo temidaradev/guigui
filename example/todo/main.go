@@ -8,7 +8,6 @@ import (
 	"image"
 	"os"
 	"slices"
-	"strings"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -32,14 +31,14 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
 	r.textField.SetOnEnterPressed(func(text string) {
-		r.tryCreateTask()
+		r.tryCreateTask(text)
 	})
 
 	r.createButton.SetText("Create")
 	r.createButton.SetOnUp(func() {
-		r.tryCreateTask()
+		r.tryCreateTask(r.textField.Text())
 	})
-	if r.canCreateTask() {
+	if r.model.CanAddTask(r.textField.Text()) {
 		context.Enable(&r.createButton)
 	} else {
 		context.Disable(&r.createButton)
@@ -86,15 +85,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	return nil
 }
 
-func (r *Root) canCreateTask() bool {
-	str := r.textField.Text()
-	str = strings.TrimSpace(str)
-	return str != ""
-}
-
-func (r *Root) tryCreateTask() {
-	str := r.textField.Text()
-	if r.model.TryAddTask(str) {
+func (r *Root) tryCreateTask(text string) {
+	if r.model.TryAddTask(text) {
 		r.textField.SetText("")
 	}
 }

@@ -12,6 +12,10 @@ type Model struct {
 	tasks []Task
 }
 
+func (m *Model) CanAddTask(text string) bool {
+	return strings.TrimSpace(text) != ""
+}
+
 func (m *Model) TryAddTask(text string) bool {
 	text = strings.TrimSpace(text)
 	if text == "" {
