@@ -81,26 +81,32 @@ func TestFaceSources(t *testing.T) {
 	}{
 		{
 			Locales: nil,
-			Out:     []string{"en", "fr", "ja", "zh-Hans", "zh-Hant", "fallback1", "fallback2"},
+			Out:     []string{"fallback2", "fallback1", "zh-Hant", "zh-Hans", "ja", "fr", "en"},
 		},
 		{
 			Locales: []language.Tag{
 				language.English,
 			},
-			Out: []string{"en", "fallback2", "fallback1", "fr", "ja", "zh-Hans", "zh-Hant"},
+			Out: []string{"en", "fallback2", "fallback1", "zh-Hant", "zh-Hans", "ja", "fr"},
 		},
 		{
 			Locales: []language.Tag{
 				language.SimplifiedChinese,
 			},
-			Out: []string{"zh-Hans", "zh-Hant", "fallback2", "fallback1", "en", "fr", "ja"},
+			Out: []string{"zh-Hans", "zh-Hant", "fallback2", "fallback1", "ja", "fr", "en"},
+		},
+		{
+			Locales: []language.Tag{
+				language.Chinese,
+			},
+			Out: []string{"zh-Hant", "zh-Hans", "fallback2", "fallback1", "ja", "fr", "en"},
 		},
 		{
 			Locales: []language.Tag{
 				language.SimplifiedChinese,
 				language.Japanese,
 			},
-			Out: []string{"zh-Hans", "ja", "zh-Hant", "fallback2", "fallback1", "en", "fr"},
+			Out: []string{"zh-Hans", "ja", "zh-Hant", "fallback2", "fallback1", "fr", "en"},
 		},
 		{
 			Locales: []language.Tag{

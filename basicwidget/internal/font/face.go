@@ -44,56 +44,43 @@ func (f *FaceChooser) Register(faceSource *text.GoTextFaceSource, priority func(
 
 func (f *FaceChooser) faceSources(size float64, weight text.Weight, locales []language.Tag) []*text.GoTextFaceSource {
 	type priority struct {
-		priority          float64
-		localeIndex       int
-		registrationIndex int
+		priority    float64
+		localeIndex int
 	}
 
 	priorities := map[*text.GoTextFaceSource]priority{}
 
 	for i, l := range locales {
-		for j, fp := range f.priorityFuncs {
+		for _, fp := range f.priorityFuncs {
 			p := min(max(fp.priority(FaceSourceHint{
 				Size:   size,
 				Weight: weight,
 				Locale: l,
 			}), 0), 1)
-			if priorities[fp.faceSource].priority >= p {
-				continue
+			if _, ok := priorities[fp.faceSource]; ok {
+				if priorities[fp.faceSource].priority >= p {
+					continue
+				}
 			}
 			priorities[fp.faceSource] = priority{
-				priority:          p,
-				localeIndex:       i,
-				registrationIndex: j,
+				priority:    p,
+				localeIndex: i,
 			}
 		}
 	}
 
 	var faceSources []*text.GoTextFaceSource
-	for _, fp := range f.priorityFuncs {
-		faceSources = append(faceSources, fp.faceSource)
+	for i := len(f.priorityFuncs) - 1; i >= 0; i-- {
+		faceSources = append(faceSources, f.priorityFuncs[i].faceSource)
 	}
 
 	slices.SortStableFunc(faceSources, func(a, b *text.GoTextFaceSource) int {
-		ap, aOk := priorities[a]
-		bp, bOk := priorities[b]
-		if !aOk && !bOk {
-			return 0
-		}
-		if !aOk {
-			return 1
-		}
-		if !bOk {
-			return -1
-		}
+		ap := priorities[a]
+		bp := priorities[b]
 		if ap.priority != bp.priority {
 			return -cmp.Compare(ap.priority, bp.priority)
 		}
-		if ap.localeIndex != bp.localeIndex {
-			return cmp.Compare(ap.localeIndex, bp.localeIndex)
-		}
-		// Prefer later registrations.
-		return -cmp.Compare(ap.registrationIndex, bp.registrationIndex)
+		return cmp.Compare(ap.localeIndex, bp.localeIndex)
 	})
 
 	return faceSources
