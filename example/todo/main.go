@@ -16,25 +16,6 @@ import (
 	"github.com/hajimehoshi/guigui/layout"
 )
 
-var theCurrentID int
-
-func nextTaskID() int {
-	theCurrentID++
-	return theCurrentID
-}
-
-type Task struct {
-	ID   int
-	Text string
-}
-
-func NewTask(text string) Task {
-	return Task{
-		ID:   nextTaskID(),
-		Text: text,
-	}
-}
-
 type Root struct {
 	guigui.RootWidget
 
@@ -44,7 +25,7 @@ type Root struct {
 	tasksPanel        basicwidget.ScrollablePanel
 	tasksPanelContent tasksPanelContent
 
-	tasks []Task
+	model Model
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -64,11 +45,9 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		context.Disable(&r.createButton)
 	}
 
-	r.tasksPanelContent.SetTasks(context, r.tasks)
+	r.tasksPanelContent.SetModel(&r.model)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
-		r.tasks = slices.DeleteFunc(r.tasks, func(t Task) bool {
-			return t.ID == id
-		})
+		r.model.DeleteTaskByID(id)
 	})
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
 
@@ -115,9 +94,7 @@ func (r *Root) canCreateTask() bool {
 
 func (r *Root) tryCreateTask() {
 	str := r.textField.Text()
-	str = strings.TrimSpace(str)
-	if str != "" {
-		r.tasks = slices.Insert(r.tasks, 0, NewTask(str))
+	if r.model.TryAddTask(str) {
 		r.textField.SetText("")
 	}
 }
@@ -179,22 +156,26 @@ type tasksPanelContent struct {
 	taskWidgets []taskWidget
 
 	onDeleted func(id int)
+
+	model *Model
 }
 
 func (t *tasksPanelContent) SetOnDeleted(f func(id int)) {
 	t.onDeleted = f
 }
 
-func (t *tasksPanelContent) SetTasks(context *guigui.Context, tasks []Task) {
-	if len(tasks) != len(t.taskWidgets) {
-		if len(tasks) > len(t.taskWidgets) {
-			t.taskWidgets = slices.Grow(t.taskWidgets, len(tasks)-len(t.taskWidgets))
-			t.taskWidgets = t.taskWidgets[:len(tasks)]
-		} else {
-			t.taskWidgets = slices.Delete(t.taskWidgets, len(tasks), len(t.taskWidgets))
-		}
+func (t *tasksPanelContent) SetModel(model *Model) {
+	t.model = model
+}
+
+func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	if t.model.TaskCount() > len(t.taskWidgets) {
+		t.taskWidgets = slices.Grow(t.taskWidgets, t.model.TaskCount()-len(t.taskWidgets))[:t.model.TaskCount()]
+	} else {
+		t.taskWidgets = slices.Delete(t.taskWidgets, t.model.TaskCount(), len(t.taskWidgets))
 	}
-	for i, task := range tasks {
+	for i := range t.model.TaskCount() {
+		task := t.model.TaskByIndex(i)
 		t.taskWidgets[i].SetOnDoneButtonPressed(func() {
 			if t.onDeleted != nil {
 				t.onDeleted(task.ID)
@@ -202,9 +183,7 @@ func (t *tasksPanelContent) SetTasks(context *guigui.Context, tasks []Task) {
 		})
 		t.taskWidgets[i].SetText(task.Text)
 	}
-}
 
-func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := basicwidget.UnitSize(context)
 
 	for i, bounds := range (layout.GridLayout{
