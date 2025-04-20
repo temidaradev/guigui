@@ -202,16 +202,6 @@ func (t *TextList[T]) SetItemString(str string, index int) {
 	t.textListItemWidgets[index].textListItem.Text = str
 }
 
-func (t *TextList[T]) RemoveItem(index int) {
-	t.textListItemWidgets = slices.Delete(t.textListItemWidgets, index, index+1)
-	t.list.RemoveItem(index)
-}
-
-func (t *TextList[T]) MoveItem(from, to int) {
-	moveItemInSlice(t.textListItemWidgets, from, 1, to)
-	t.list.MoveItem(from, to)
-}
-
 func (t *TextList[T]) DefaultSize(context *guigui.Context) image.Point {
 	return t.list.DefaultSize(context)
 }

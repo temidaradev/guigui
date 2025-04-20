@@ -203,25 +203,6 @@ func (l *List[T]) SetItems(items []ListItem[T]) {
 	l.cachedDefaultHeight = 0
 }
 
-func (l *List[T]) SetItem(item ListItem[T], index int) {
-	l.items[index] = item
-}
-
-func (l *List[T]) AddItem(item ListItem[T], index int) {
-	l.items = slices.Insert(l.items, index, item)
-	// TODO: Send an event.
-}
-
-func (l *List[T]) RemoveItem(index int) {
-	l.items = slices.Delete(l.items, index, index+1)
-	// TODO: Send an event.
-}
-
-func (l *List[T]) MoveItem(from int, to int) {
-	moveItemInSlice(l.items, from, 1, to)
-	// TODO: Send an event.
-}
-
 func (l *List[T]) SetSelectedItemIndex(index int) {
 	if index < 0 || index >= len(l.items) {
 		index = -1
