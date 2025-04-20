@@ -99,6 +99,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				}
 			}
 		case 1:
+			context.SetSize(&r.tasksPanelContent, image.Pt(bounds.Dx(), guigui.DefaultSize))
 			appender.AppendChildWidgetWithBounds(&r.tasksPanel, bounds)
 		}
 	}
