@@ -125,7 +125,11 @@ func (b *Button) isActive(context *guigui.Context) bool {
 }
 
 func (b *Button) SetForcePressed(pressed bool) {
+	if b.forcePressed == pressed {
+		return
+	}
 	b.forcePressed = pressed
+	guigui.RequestRedraw(b)
 }
 
 func defaultButtonSize(context *guigui.Context) image.Point {
