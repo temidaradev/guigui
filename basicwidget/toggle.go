@@ -141,8 +141,9 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 	cy := bounds.Min.Y + r
 	thumbClr1, thumbClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeOutset)
-	draw.DrawRoundedRect(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbColor, r)
-	draw.DrawRoundedRectBorder(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbClr1, thumbClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
+	thumbBounds := image.Rect(cx-r, cy-r, cx+r, cy+r)
+	draw.DrawRoundedRect(context, dst, thumbBounds, thumbColor, r)
+	draw.DrawRoundedRectBorder(context, dst, thumbBounds, thumbClr1, thumbClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 
 	// Border (lower)
 	b = bounds
