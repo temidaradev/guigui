@@ -203,13 +203,14 @@ func (l *List[T]) SelectItemByIndex(index int) {
 	if index < 0 || index >= len(l.items) {
 		index = -1
 	}
-	if l.SelectedItemIndex() != index {
-		l.selectedItemIndexPlus1 = index + 1
-		guigui.RequestRedraw(l)
+	if l.SelectedItemIndex() == index {
+		return
 	}
+	l.selectedItemIndexPlus1 = index + 1
 	if l.onItemSelected != nil {
 		l.onItemSelected(index)
 	}
+	guigui.RequestRedraw(l)
 }
 
 func (l *List[T]) SelectItemByTag(tag T) {

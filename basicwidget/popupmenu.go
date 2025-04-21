@@ -104,6 +104,10 @@ func (p *PopupMenu[T]) Close() {
 	p.popup.Close()
 }
 
+func (p *PopupMenu[T]) IsOpen() bool {
+	return p.popup.IsOpen()
+}
+
 func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
 	var textListItems []TextListItem[T]
 	for _, item := range items {

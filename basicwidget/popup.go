@@ -60,6 +60,10 @@ type Popup struct {
 	onClosed func(reason PopupClosedReason)
 }
 
+func (p *Popup) IsOpen() bool {
+	return p.showing || p.hiding || p.openingCount > 0
+}
+
 func (p *Popup) SetContent(widget guigui.Widget) {
 	p.content.setContent(widget)
 }
@@ -157,6 +161,9 @@ func (p *Popup) close(reason PopupClosedReason) {
 	p.closedReason = reason
 
 	if p.hiding {
+		return
+	}
+	if p.openingCount == 0 {
 		return
 	}
 

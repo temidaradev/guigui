@@ -58,7 +58,9 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 			d.onValueChanged(index)
 		}
 	})
-	d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
+	if !d.popupMenu.IsOpen() {
+		d.popupMenu.SetCheckmarkIndex(d.SelectedItemIndex())
+	}
 
 	pt := context.Position(d)
 	pt.X -= listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
@@ -115,11 +117,19 @@ func (d *DropdownList[T]) SelectedItemIndex() int {
 }
 
 func (d *DropdownList[T]) SelectItemByIndex(index int) {
+	if d.popupMenu.IsOpen() {
+		// TODO: Should the item be selected after closing the popup?
+		return
+	}
 	d.popupMenu.SelectItemByIndex(index)
 	d.updateText()
 }
 
 func (d *DropdownList[T]) SelectItemByTag(tag T) {
+	if d.popupMenu.IsOpen() {
+		// TODO: Should the item be selected after closing the popup?
+		return
+	}
 	d.popupMenu.SelectItemByTag(tag)
 	d.updateText()
 }

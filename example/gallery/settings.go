@@ -4,8 +4,6 @@
 package main
 
 import (
-	"sync"
-
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
@@ -23,8 +21,6 @@ type Settings struct {
 	localeDropdownList    basicwidget.DropdownList[language.Tag]
 	scaleText             basicwidget.Text
 	scaleDropdownList     basicwidget.DropdownList[float64]
-
-	initOnce sync.Once
 }
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -42,10 +38,12 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.colorModeDropdownList.SetOnValueChanged(func(index int) {
 		item, ok := s.colorModeDropdownList.ItemByIndex(index)
 		if !ok {
+			context.SetColorMode(guigui.ColorModeLight)
 			return
 		}
 		context.SetColorMode(item.Tag)
 	})
+	s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
 
 	s.localeText.SetText("Locale")
 	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
@@ -77,10 +75,20 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.localeDropdownList.SetOnValueChanged(func(index int) {
 		item, ok := s.localeDropdownList.ItemByIndex(index)
 		if !ok {
+			context.SetAppLocales(nil)
+			return
+		}
+		if item.Tag == language.Und {
+			context.SetAppLocales(nil)
 			return
 		}
 		context.SetAppLocales([]language.Tag{item.Tag})
 	})
+	if locales := context.AppendAppLocales(nil); len(locales) > 0 {
+		s.localeDropdownList.SelectItemByTag(locales[0])
+	} else {
+		s.localeDropdownList.SelectItemByTag(language.Und)
+	}
 
 	s.scaleText.SetText("Scale")
 	s.scaleDropdownList.SetItems([]basicwidget.DropdownListItem[float64]{
@@ -100,16 +108,12 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.scaleDropdownList.SetOnValueChanged(func(index int) {
 		item, ok := s.scaleDropdownList.ItemByIndex(index)
 		if !ok {
+			context.SetAppScale(1)
 			return
 		}
 		context.SetAppScale(item.Tag)
 	})
-
-	s.initOnce.Do(func() {
-		s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
-		s.localeDropdownList.SelectItemByIndex(0)
-		s.scaleDropdownList.SelectItemByIndex(1)
-	})
+	s.scaleDropdownList.SelectItemByTag(context.AppScale())
 
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
