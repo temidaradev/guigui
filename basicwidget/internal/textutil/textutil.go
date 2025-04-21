@@ -45,51 +45,49 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		origStr := str
-		var line string
-		var word string
+		// Use []byte instead of string for efficient concatenations.
+		var line []byte
+		var word []byte
 		var pos int
 		state := -1
 		for len(str) > 0 {
 			cluster, nextStr, boundaries, nextState := uniseg.StepString(str, state)
 			switch m := boundaries & uniseg.MaskLine; m {
 			default:
-				word += cluster
+				word = append(word, cluster...)
 			case uniseg.LineCanBreak, uniseg.LineMustBreak:
-				if line == "" || !autoWrap {
-					line += word + cluster
-				} else {
-					l := line + word + cluster
+				if len(line) > 0 && autoWrap {
+					l := string(line) + string(word) + string(cluster)
 					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
 					if text.Advance(l[:len(l)-tailingLineBreakLen(l)], face) > float64(width) {
-						if !yield(pos, line) {
+						if !yield(pos, string(line)) {
 							return
 						}
 						pos += len(line)
-						line = word + cluster
-					} else {
-						line += word + cluster
+						line = line[:0]
 					}
 				}
-				word = ""
+				line = append(line, word...)
+				line = append(line, cluster...)
+				word = word[:0]
 				if m == uniseg.LineMustBreak {
-					if !yield(pos, line) {
+					if !yield(pos, string(line)) {
 						return
 					}
 					pos += len(line)
-					line = ""
+					line = line[:0]
 				}
 			}
 			state = nextState
 			str = nextStr
 		}
 
-		line += word
+		line = append(line, word...)
 		if len(line) > 0 {
-			if !yield(pos, line) {
+			if !yield(pos, string(line)) {
 				return
 			}
 			pos += len(line)
-			line = ""
 		}
 
 		// If the string ends with a line break, or an empty line, add an extra empty line.
