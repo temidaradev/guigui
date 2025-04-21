@@ -31,6 +31,7 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
+	r.texts.SetModel(&r.model)
 	r.sidebar.SetModel(&r.model)
 
 	for i, bounds := range (layout.GridLayout{

@@ -3,8 +3,12 @@
 
 package main
 
+import "github.com/hajimehoshi/guigui/basicwidget"
+
 type Model struct {
 	mode string
+
+	texts TextsModel
 }
 
 func (m *Model) Mode() string {
@@ -16,4 +20,71 @@ func (m *Model) Mode() string {
 
 func (m *Model) SetMode(mode string) {
 	m.mode = mode
+}
+
+func (m *Model) Texts() *TextsModel {
+	return &m.texts
+}
+
+type TextsModel struct {
+	horizontalAlign basicwidget.HorizontalAlign
+	verticalAlign   basicwidget.VerticalAlign
+	unwrap          bool
+	bold            bool
+	selectable      bool
+	editable        bool
+}
+
+func (t *TextsModel) HorizontalAlign() basicwidget.HorizontalAlign {
+	return t.horizontalAlign
+}
+
+func (t *TextsModel) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
+	t.horizontalAlign = align
+}
+
+func (t *TextsModel) VerticalAlign() basicwidget.VerticalAlign {
+	return t.verticalAlign
+}
+
+func (t *TextsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
+	t.verticalAlign = align
+}
+
+func (t *TextsModel) AutoWrap() bool {
+	return !t.unwrap
+}
+
+func (t *TextsModel) SetAutoWrap(autoWrap bool) {
+	t.unwrap = !autoWrap
+}
+
+func (t *TextsModel) Bold() bool {
+	return t.bold
+}
+
+func (t *TextsModel) SetBold(bold bool) {
+	t.bold = bold
+}
+
+func (t *TextsModel) Selectable() bool {
+	return t.selectable
+}
+
+func (t *TextsModel) SetSelectable(selectable bool) {
+	t.selectable = selectable
+	if !selectable {
+		t.editable = false
+	}
+}
+
+func (t *TextsModel) Editable() bool {
+	return t.editable
+}
+
+func (t *TextsModel) SetEditable(editable bool) {
+	t.editable = editable
+	if editable {
+		t.selectable = true
+	}
 }

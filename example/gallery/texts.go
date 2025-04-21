@@ -14,13 +14,6 @@ import (
 type Texts struct {
 	guigui.DefaultWidget
 
-	horizontalAlign basicwidget.HorizontalAlign
-	verticalAlign   basicwidget.VerticalAlign
-	unwrap          bool
-	bold            bool
-	selectable      bool
-	editable        bool
-
 	form                        basicwidget.Form
 	horizontalAlignText         basicwidget.Text
 	horizontalAlignDropdownList basicwidget.DropdownList[basicwidget.HorizontalAlign]
@@ -36,7 +29,13 @@ type Texts struct {
 	editableToggle              basicwidget.Toggle
 	sampleText                  basicwidget.Text
 
+	model *Model
+
 	initOnce sync.Once
+}
+
+func (t *Texts) SetModel(model *Model) {
+	t.model = model
 }
 
 const sampleText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -61,11 +60,12 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.horizontalAlignDropdownList.SetOnValueChanged(func(index int) {
 		item, ok := t.horizontalAlignDropdownList.ItemByIndex(index)
 		if !ok {
-			t.horizontalAlign = basicwidget.HorizontalAlignStart
+			t.model.Texts().SetHorizontalAlign(basicwidget.HorizontalAlignStart)
 			return
 		}
-		t.horizontalAlign = item.Tag
+		t.model.Texts().SetHorizontalAlign(item.Tag)
 	})
+	t.horizontalAlignDropdownList.SelectItemByTag(t.model.Texts().HorizontalAlign())
 
 	t.verticalAlignText.SetText("Vertical Align")
 	t.verticalAlignDropdownList.SetItems([]basicwidget.DropdownListItem[basicwidget.VerticalAlign]{
@@ -85,41 +85,36 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.verticalAlignDropdownList.SetOnValueChanged(func(index int) {
 		item, ok := t.verticalAlignDropdownList.ItemByIndex(index)
 		if !ok {
-			t.verticalAlign = basicwidget.VerticalAlignTop
+			t.model.Texts().SetVerticalAlign(basicwidget.VerticalAlignTop)
 			return
 		}
-		t.verticalAlign = item.Tag
+		t.model.Texts().SetVerticalAlign(item.Tag)
 	})
+	t.verticalAlignDropdownList.SelectItemByTag(t.model.Texts().VerticalAlign())
 
 	t.autoWrapText.SetText("Auto Wrap")
-	t.autoWrapToggle.SetValue(!t.unwrap)
-	t.autoWrapToggle.SetOnValueChanged(func(checked bool) {
-		t.unwrap = !checked
+	t.autoWrapToggle.SetOnValueChanged(func(value bool) {
+		t.model.Texts().SetAutoWrap(value)
 	})
+	t.autoWrapToggle.SetValue(t.model.Texts().AutoWrap())
 
 	t.boldText.SetText("Bold")
-	t.boldToggle.SetValue(t.bold)
-	t.boldToggle.SetOnValueChanged(func(checked bool) {
-		t.bold = checked
+	t.boldToggle.SetOnValueChanged(func(value bool) {
+		t.model.Texts().SetBold(value)
 	})
+	t.boldToggle.SetValue(t.model.Texts().Bold())
 
 	t.selectableText.SetText("Selectable")
-	t.selectableToggle.SetValue(t.selectable)
 	t.selectableToggle.SetOnValueChanged(func(checked bool) {
-		t.selectable = checked
-		if !t.selectable {
-			t.editable = false
-		}
+		t.model.Texts().SetSelectable(checked)
 	})
+	t.selectableToggle.SetValue(t.model.Texts().Selectable())
 
 	t.editableText.SetText("Editable")
-	t.editableToggle.SetValue(t.editable)
-	t.editableToggle.SetOnValueChanged(func(checked bool) {
-		t.editable = checked
-		if t.editable {
-			t.selectable = true
-		}
+	t.editableToggle.SetOnValueChanged(func(value bool) {
+		t.model.Texts().SetEditable(value)
 	})
+	t.editableToggle.SetValue(t.model.Texts().Editable())
 
 	t.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -149,17 +144,15 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	t.sampleText.SetMultiline(true)
-	t.sampleText.SetHorizontalAlign(t.horizontalAlign)
-	t.sampleText.SetVerticalAlign(t.verticalAlign)
-	t.sampleText.SetAutoWrap(!t.unwrap)
-	t.sampleText.SetBold(t.bold)
-	t.sampleText.SetSelectable(t.selectable)
-	t.sampleText.SetEditable(t.editable)
+	t.sampleText.SetHorizontalAlign(t.model.Texts().HorizontalAlign())
+	t.sampleText.SetVerticalAlign(t.model.Texts().VerticalAlign())
+	t.sampleText.SetAutoWrap(t.model.Texts().AutoWrap())
+	t.sampleText.SetBold(t.model.Texts().Bold())
+	t.sampleText.SetSelectable(t.model.Texts().Selectable())
+	t.sampleText.SetEditable(t.model.Texts().Editable())
 
 	t.initOnce.Do(func() {
 		t.sampleText.SetText(sampleText)
-		t.horizontalAlignDropdownList.SelectItemByIndex(0)
-		t.verticalAlignDropdownList.SelectItemByIndex(0)
 	})
 
 	u := basicwidget.UnitSize(context)
