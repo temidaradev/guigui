@@ -178,6 +178,10 @@ func (t *TextList[T]) SetSelectedItemIndex(index int) {
 	t.list.SetSelectedItemIndex(index)
 }
 
+func (t *TextList[T]) SetSelectedItemByTag(tag T) {
+	t.list.SetSelectedItemByTag(tag)
+}
+
 func (t *TextList[T]) JumpToItemIndex(index int) {
 	t.list.JumpToItemIndex(index)
 }
