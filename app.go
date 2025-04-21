@@ -298,6 +298,13 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 
 func (a *app) build() error {
 	if err := traverseWidget(a.root, func(widget Widget) error {
+		widget.widgetState().zCache = 0
+		widget.widgetState().hasZCache = false
+		return nil
+	}); err != nil {
+		return err
+	}
+	if err := traverseWidget(a.root, func(widget Widget) error {
 		widgetState := widget.widgetState()
 		widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
 		if err := widget.Build(&a.context, &ChildWidgetAppender{

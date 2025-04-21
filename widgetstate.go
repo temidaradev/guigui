@@ -82,7 +82,9 @@ type widgetState struct {
 
 	offscreen *ebiten.Image
 
-	dirty bool
+	dirty     bool
+	hasZCache bool
+	zCache    int
 
 	_ noCopy
 }
@@ -148,11 +150,17 @@ func RequestRedraw(widget Widget) {
 }
 
 func z(widget Widget) int {
+	s := widget.widgetState()
+	if s.hasZCache {
+		return widget.widgetState().zCache
+	}
 	var r int
-	if parent := widget.widgetState().parent; parent != nil {
+	if parent := s.parent; parent != nil {
 		r = z(parent)
 	}
 	r += widget.ZDelta()
+	s.zCache = r
+	s.hasZCache = true
 	return r
 }
 
