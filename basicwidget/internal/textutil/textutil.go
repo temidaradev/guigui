@@ -43,6 +43,50 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 }
 
 func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
+	if autoWrap {
+		return autoWrapLines(width, str, face)
+	}
+	return noWrapLines(str)
+}
+
+func noWrapLines(str string) iter.Seq2[int, string] {
+	return func(yield func(pos int, s string) bool) {
+		origStr := str
+		// Use []byte instead of string for efficient concatenations.
+		var line []byte
+		var pos int
+		state := -1
+		for len(str) > 0 {
+			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
+			line = append(line, segment...)
+			if mustBreak {
+				if !yield(pos, string(line)) {
+					return
+				}
+				pos += len(line)
+				line = line[:0]
+			}
+			str = nextStr
+			state = nextState
+		}
+
+		if len(line) > 0 {
+			if !yield(pos, string(line)) {
+				return
+			}
+			pos += len(line)
+		}
+
+		// If the string ends with a line break, or an empty line, add an extra empty line.
+		if tailingLineBreakLen(origStr) > 0 || origStr == "" {
+			if !yield(pos, "") {
+				return
+			}
+		}
+	}
+}
+
+func autoWrapLines(width int, str string, face text.Face) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		origStr := str
 		// Use []byte instead of string for efficient concatenations.
@@ -56,7 +100,7 @@ func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, 
 			default:
 				word = append(word, cluster...)
 			case uniseg.LineCanBreak, uniseg.LineMustBreak:
-				if len(line) > 0 && autoWrap {
+				if len(line) > 0 {
 					l := string(line) + string(word) + string(cluster)
 					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
 					if text.Advance(l[:len(l)-tailingLineBreakLen(l)], face) > float64(width) {
@@ -78,8 +122,8 @@ func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, 
 					line = line[:0]
 				}
 			}
-			state = nextState
 			str = nextStr
+			state = nextState
 		}
 
 		line = append(line, word...)
