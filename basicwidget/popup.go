@@ -6,7 +6,6 @@ package basicwidget
 import (
 	"image"
 	"image/color"
-	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -54,8 +53,6 @@ type Popup struct {
 	nextContentPosition    image.Point
 	hasNextContentPosition bool
 	openAfterClose         bool
-
-	initOnce sync.Once
 
 	onClosed func(reason PopupClosedReason)
 }
@@ -106,9 +103,7 @@ func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 }
 
 func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.initOnce.Do(func() {
-		context.SetVisible(p, false)
-	})
+	context.SetVisible(p, p.IsOpen())
 
 	if (p.showing || p.hiding) && p.openingCount > 0 {
 		p.nextContentPosition = context.Position(p)
