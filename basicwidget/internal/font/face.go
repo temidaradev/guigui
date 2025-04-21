@@ -40,6 +40,7 @@ func (f *FaceChooser) Register(faceSource *text.GoTextFaceSource, priority func(
 		faceSource: faceSource,
 		priority:   priority,
 	})
+	clear(f.cache)
 }
 
 func (f *FaceChooser) faceSources(size float64, weight text.Weight, locales []language.Tag) []*text.GoTextFaceSource {
