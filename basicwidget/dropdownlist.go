@@ -49,7 +49,7 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 	d.textButton.SetOnDown(func() {
 		d.popupMenu.Open(context)
 	})
-	d.textButton.SetForcePressed(context.IsVisible(&d.popupMenu))
+	d.textButton.SetForcePressed(d.popupMenu.IsOpen())
 
 	appender.AppendChildWidgetWithPosition(&d.textButton, context.Position(d))
 
