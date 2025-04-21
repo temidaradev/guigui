@@ -21,6 +21,8 @@ type TextList[T comparable] struct {
 	listItems           []ListItem[T]
 	textListItems       []TextListItem[T]
 	textListItemWidgets []textListItemWidget[T]
+
+	listItemHeightPlus1 int
 }
 
 /*type TextListCallback struct {
@@ -87,6 +89,14 @@ func (t *TextListItem[T]) selectable() bool {
 	return t
 }*/
 
+func (t *TextList[T]) SetItemHeight(height int) {
+	if t.listItemHeightPlus1 == height+1 {
+		return
+	}
+	t.listItemHeightPlus1 = height + 1
+	guigui.RequestRedraw(t)
+}
+
 func (t *TextList[T]) SetOnItemSelected(callback func(index int)) {
 	t.list.SetOnItemSelected(callback)
 }
@@ -117,14 +127,23 @@ func (t *TextList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 	for i := range t.textListItemWidgets {
 		item := &t.textListItemWidgets[i]
 		item.text.SetBold(item.textListItem.Header)
-		if t.list.style != ListStyleMenu && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable() {
+		switch {
+		case t.list.style == ListStyleNormal && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		} else if t.list.style == ListStyleMenu && t.list.isHoveringVisible() && t.list.HoveredItemIndex(context) == i && item.selectable() {
+		case t.list.style == ListStyleSidebar && t.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		} else if !item.selectable() && !item.textListItem.Header {
+		case t.list.style == ListStyleMenu && t.list.isHoveringVisible() && t.list.HoveredItemIndex(context) == i && item.selectable():
+			item.text.SetColor(DefaultActiveListItemTextColor(context))
+		case !item.selectable() && !item.textListItem.Header:
 			item.text.SetColor(DefaultDisabledListItemTextColor(context))
-		} else {
+		default:
 			item.text.SetColor(item.textListItem.Color)
+		}
+
+		if t.listItemHeightPlus1 > 0 {
+			context.SetSize(item, image.Pt(guigui.DefaultSize, t.listItemHeightPlus1-1))
+		} else {
+			context.SetSize(item, image.Pt(guigui.DefaultSize, guigui.DefaultSize))
 		}
 	}
 
@@ -216,6 +235,8 @@ func (t *textListItemWidget[T]) Build(context *guigui.Context, appender *guigui.
 	if t.textListItem.Header {
 		p.X += UnitSize(context) / 2
 		context.SetSize(&t.text, context.Size(t).Add(image.Pt(-UnitSize(context), 0)))
+	} else {
+		context.SetSize(&t.text, context.Size(t))
 	}
 	t.text.SetText(t.textString())
 	t.text.SetVerticalAlign(VerticalAlignMiddle)

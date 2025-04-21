@@ -4,8 +4,6 @@
 package main
 
 import (
-	"image"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 )
@@ -33,8 +31,7 @@ func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 type sidebarContent struct {
 	guigui.DefaultWidget
 
-	list            basicwidget.List[string]
-	listItemWidgets []basicwidget.Text
+	list basicwidget.TextList[string]
 
 	model *Model
 }
@@ -46,62 +43,36 @@ func (s *sidebarContent) SetModel(model *Model) {
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
 
-	type item struct {
-		text string
-		tag  string
-	}
-	items := []item{
+	items := []basicwidget.TextListItem[string]{
 		{
-			text: "Settings",
-			tag:  "settings",
+			Text: "Settings",
+			Tag:  "settings",
 		},
 		{
-			text: "Basic",
-			tag:  "basic",
+			Text: "Basic",
+			Tag:  "basic",
 		},
 		{
-			text: "Buttons",
-			tag:  "buttons",
+			Text: "Buttons",
+			Tag:  "buttons",
 		},
 		{
-			text: "Texts",
-			tag:  "texts",
+			Text: "Texts",
+			Tag:  "texts",
 		},
 		{
-			text: "Lists",
-			tag:  "lists",
+			Text: "Lists",
+			Tag:  "lists",
 		},
 		{
-			text: "Popups",
-			tag:  "popups",
+			Text: "Popups",
+			Tag:  "popups",
 		},
 	}
 
-	if len(s.listItemWidgets) == 0 {
-		s.listItemWidgets = make([]basicwidget.Text, len(items))
-	}
-	listItems := make([]basicwidget.ListItem[string], len(items))
-	for i, item := range items {
-		t := &s.listItemWidgets[i]
-		t.SetText(item.text)
-		listItems[i] = basicwidget.ListItem[string]{
-			Content:    t,
-			Selectable: true,
-			Tag:        item.tag,
-		}
-	}
-	for i := range s.listItemWidgets {
-		t := &s.listItemWidgets[i]
-		t.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
-		context.SetSize(t, image.Pt(guigui.DefaultSize, basicwidget.UnitSize(context)))
-		if s.list.SelectedItemIndex() == i {
-			t.SetColor(basicwidget.DefaultActiveListItemTextColor(context))
-		} else {
-			t.SetColor(basicwidget.DefaultTextColor(context))
-		}
-	}
-	s.list.SetItems(listItems)
+	s.list.SetItems(items)
 	s.list.SetSelectedItemByTag(s.model.Mode())
+	s.list.SetItemHeight(basicwidget.UnitSize(context))
 	s.list.SetOnItemSelected(func(index int) {
 		item, ok := s.list.ItemByIndex(index)
 		if !ok {
