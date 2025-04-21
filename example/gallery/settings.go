@@ -106,9 +106,9 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 
 	s.initOnce.Do(func() {
-		s.colorModeDropdownList.SetSelectedItemByTag(context.ColorMode())
-		s.localeDropdownList.SetSelectedItemIndex(0)
-		s.scaleDropdownList.SetSelectedItemIndex(1)
+		s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
+		s.localeDropdownList.SelectItemByIndex(0)
+		s.scaleDropdownList.SelectItemByIndex(1)
 	})
 
 	s.form.SetItems([]*basicwidget.FormItem{

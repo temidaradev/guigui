@@ -144,8 +144,8 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 
 	t.initOnce.Do(func() {
 		t.sampleText.SetText(sampleText)
-		t.horizontalAlignDropdownList.SetSelectedItemIndex(0)
-		t.verticalAlignDropdownList.SetSelectedItemIndex(0)
+		t.horizontalAlignDropdownList.SelectItemByIndex(0)
+		t.verticalAlignDropdownList.SelectItemByIndex(0)
 	})
 
 	u := basicwidget.UnitSize(context)

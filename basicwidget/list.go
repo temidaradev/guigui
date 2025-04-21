@@ -199,7 +199,7 @@ func (l *List[T]) SetItems(items []ListItem[T]) {
 	l.cachedDefaultHeight = 0
 }
 
-func (l *List[T]) SetSelectedItemIndex(index int) {
+func (l *List[T]) SelectItemByIndex(index int) {
 	if index < 0 || index >= len(l.items) {
 		index = -1
 	}
@@ -212,11 +212,11 @@ func (l *List[T]) SetSelectedItemIndex(index int) {
 	}
 }
 
-func (l *List[T]) SetSelectedItemByTag(tag T) {
+func (l *List[T]) SelectItemByTag(tag T) {
 	idx := slices.IndexFunc(l.items, func(item ListItem[T]) bool {
 		return item.Tag == tag
 	})
-	l.SetSelectedItemIndex(idx)
+	l.SelectItemByIndex(idx)
 }
 
 func (l *List[T]) JumpToItemIndex(index int) {
@@ -316,7 +316,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 			wasFocused := context.IsFocused(l)
 			context.SetFocused(l, true)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
-				l.SetSelectedItemIndex(index)
+				l.SelectItemByIndex(index)
 				l.lastSelectingItemTime = time.Now()
 			}
 			l.pressStartX = x

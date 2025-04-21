@@ -193,12 +193,12 @@ func (t *TextList[T]) Tag(index int) any {
 	return t.textListItemWidgets[index].textListItem.Tag
 }
 
-func (t *TextList[T]) SetSelectedItemIndex(index int) {
-	t.list.SetSelectedItemIndex(index)
+func (t *TextList[T]) SelectItemByIndex(index int) {
+	t.list.SelectItemByIndex(index)
 }
 
-func (t *TextList[T]) SetSelectedItemByTag(tag T) {
-	t.list.SetSelectedItemByTag(tag)
+func (t *TextList[T]) SelectItemByTag(tag T) {
+	t.list.SelectItemByTag(tag)
 }
 
 func (t *TextList[T]) JumpToItemIndex(index int) {

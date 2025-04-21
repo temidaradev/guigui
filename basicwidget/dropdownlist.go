@@ -114,13 +114,13 @@ func (d *DropdownList[T]) SelectedItemIndex() int {
 	return d.popupMenu.SelectedItemIndex()
 }
 
-func (d *DropdownList[T]) SetSelectedItemIndex(index int) {
-	d.popupMenu.SetSelectedItemIndex(index)
+func (d *DropdownList[T]) SelectItemByIndex(index int) {
+	d.popupMenu.SelectItemByIndex(index)
 	d.updateText()
 }
 
-func (d *DropdownList[T]) SetSelectedItemByTag(tag T) {
-	d.popupMenu.SetSelectedItemByTag(tag)
+func (d *DropdownList[T]) SelectItemByTag(tag T) {
+	d.popupMenu.SelectItemByTag(tag)
 	d.updateText()
 }
 

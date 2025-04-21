@@ -157,10 +157,10 @@ func (p *PopupMenu[T]) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
-func (p *PopupMenu[T]) SetSelectedItemIndex(index int) {
-	p.textList.SetSelectedItemIndex(index)
+func (p *PopupMenu[T]) SelectItemByIndex(index int) {
+	p.textList.SelectItemByIndex(index)
 }
 
-func (p *PopupMenu[T]) SetSelectedItemByTag(tag T) {
-	p.textList.SetSelectedItemByTag(tag)
+func (p *PopupMenu[T]) SelectItemByTag(tag T) {
+	p.textList.SelectItemByTag(tag)
 }
