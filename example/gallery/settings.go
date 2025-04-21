@@ -29,7 +29,7 @@ type Settings struct {
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
-	s.colorModeDropdownList.SetItems([]basicwidget.PopupMenuItem[guigui.ColorMode]{
+	s.colorModeDropdownList.SetItems([]basicwidget.DropdownListItem[guigui.ColorMode]{
 		{
 			Text: "Light",
 			Tag:  guigui.ColorModeLight,
@@ -48,7 +48,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 
 	s.localeText.SetText("Locale")
-	s.localeDropdownList.SetItems([]basicwidget.PopupMenuItem[language.Tag]{
+	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
 		{
 			Text: "(Default)",
 			Tag:  language.Und,
@@ -83,7 +83,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 
 	s.scaleText.SetText("Scale")
-	s.scaleDropdownList.SetItems([]basicwidget.PopupMenuItem[float64]{
+	s.scaleDropdownList.SetItems([]basicwidget.DropdownListItem[float64]{
 		{
 			Text: "80%",
 			Tag:  0.8,

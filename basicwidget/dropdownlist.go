@@ -5,10 +5,20 @@ package basicwidget
 
 import (
 	"image"
+	"image/color"
 	"log/slog"
 
 	"github.com/hajimehoshi/guigui"
 )
+
+type DropdownListItem[T comparable] struct {
+	Text     string
+	Color    color.Color
+	Header   bool
+	Disabled bool
+	Border   bool
+	Tag      T
+}
 
 type DropdownList[T comparable] struct {
 	guigui.DefaultWidget
@@ -70,8 +80,12 @@ func (d *DropdownList[T]) updateText() {
 	}
 }
 
-func (d *DropdownList[T]) SetItems(items []PopupMenuItem[T]) {
-	d.popupMenu.SetItems(items)
+func (d *DropdownList[T]) SetItems(items []DropdownListItem[T]) {
+	var popupMenuItems []PopupMenuItem[T]
+	for _, item := range items {
+		popupMenuItems = append(popupMenuItems, PopupMenuItem[T](item))
+	}
+	d.popupMenu.SetItems(popupMenuItems)
 	d.updateText()
 }
 
@@ -80,12 +94,20 @@ func (d *DropdownList[T]) SetItemsByStrings(items []string) {
 	d.updateText()
 }
 
-func (d *DropdownList[T]) SelectedItem() (PopupMenuItem[T], bool) {
-	return d.popupMenu.SelectedItem()
+func (d *DropdownList[T]) SelectedItem() (DropdownListItem[T], bool) {
+	item, ok := d.popupMenu.SelectedItem()
+	if !ok {
+		return DropdownListItem[T]{}, false
+	}
+	return DropdownListItem[T](item), true
 }
 
-func (d *DropdownList[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
-	return d.popupMenu.ItemByIndex(index)
+func (d *DropdownList[T]) ItemByIndex(index int) (DropdownListItem[T], bool) {
+	item, ok := d.popupMenu.ItemByIndex(index)
+	if !ok {
+		return DropdownListItem[T]{}, false
+	}
+	return DropdownListItem[T](item), true
 }
 
 func (d *DropdownList[T]) SelectedItemIndex() int {
