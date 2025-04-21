@@ -70,9 +70,18 @@ func (d *DropdownList[T]) updateText() {
 	}
 }
 
+func (d *DropdownList[T]) SetItems(items []PopupMenuItem[T]) {
+	d.popupMenu.SetItems(items)
+	d.updateText()
+}
+
 func (d *DropdownList[T]) SetItemsByStrings(items []string) {
 	d.popupMenu.SetItemsByStrings(items)
 	d.updateText()
+}
+
+func (d *DropdownList[T]) SelectedItem() (PopupMenuItem[T], bool) {
+	return d.popupMenu.SelectedItem()
 }
 
 func (d *DropdownList[T]) SelectedItemIndex() int {
