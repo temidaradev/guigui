@@ -6,7 +6,6 @@ package font
 import (
 	"cmp"
 	"slices"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/text/language"
@@ -88,16 +87,18 @@ func (f *FaceChooser) faceSources(size float64, weight text.Weight, locales []la
 }
 
 func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
-	var localeStrs []string
+	// 7 is for a long locale length like 'zh-Hans'. 1 is for a comma.
+	localeStr := make([]byte, 0, len(locales)*(7+1))
 	for _, l := range locales {
-		localeStrs = append(localeStrs, l.String())
+		localeStr = append(localeStr, l.String()...)
+		localeStr = append(localeStr, ',')
 	}
 
 	key := faceCacheKey{
 		size:     size,
 		weight:   weight,
 		ligature: ligature,
-		locales:  strings.Join(localeStrs, ","),
+		locales:  string(localeStr),
 	}
 	if f, ok := f.cache[key]; ok {
 		return f
