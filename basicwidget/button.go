@@ -78,16 +78,12 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// See macOS's buttons.
 	cm := context.ColorMode()
 	backgroundColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.3)
-	borderColor := draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	if b.isActive(context) || b.forcePressed {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if b.canPress(context) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if !context.IsEnabled(b) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.8, 0.1)
 	}
 
 	bounds := context.Bounds(b)
@@ -97,7 +93,6 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		border = true
 	}
 	if border || b.isActive(context) || b.forcePressed {
-		bounds := bounds.Inset(int(1 * context.Scale()))
 		draw.DrawRoundedRect(context, dst, bounds, backgroundColor, r)
 	}
 
@@ -108,7 +103,8 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		} else if !context.IsEnabled(b) {
 			borderType = draw.RoundedRectBorderTypeRegular
 		}
-		draw.DrawRoundedRectBorder(context, dst, bounds, borderColor, r, float32(1*context.Scale()), borderType)
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType)
+		draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType)
 	}
 }
 

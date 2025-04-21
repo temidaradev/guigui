@@ -525,9 +525,9 @@ func (l *listFrame[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		border = draw.RoundedRectBorderTypeOutset
 	}
 	bounds := context.Bounds(l)
-	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0)
+	clr1, clr2 := draw.BorderColors(context.ColorMode(), border)
 	borderWidth := float32(1 * context.Scale())
-	draw.DrawRoundedRectBorder(context, dst, bounds, clr, RoundedCornerRadius(context), borderWidth, border)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), borderWidth, border)
 }
 
 func (l *listFrame[T]) DefaultSize(context *guigui.Context) image.Point {

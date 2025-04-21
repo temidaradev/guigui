@@ -104,7 +104,8 @@ func (t *TextField) Update(context *guigui.Context) error {
 func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), RoundedCornerRadius(context))
-	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0), RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
+	clr1, clr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
 
 func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
@@ -125,8 +126,9 @@ type textFieldFocus struct {
 func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t.textField)
 	w := textFieldFocusBorderWidth(context)
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
 	bounds = bounds.Inset(-w)
-	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8), w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr, clr, w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)
 }
 
 func (t *textFieldFocus) ZDelta() int {

@@ -143,7 +143,8 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	draw.DrawRoundedRectBorder(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875), RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
+	draw.DrawRoundedRectBorder(context, dst, bounds, clr, clr, RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
 func (f *Form) DefaultSize(context *guigui.Context) image.Point {

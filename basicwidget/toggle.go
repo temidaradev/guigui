@@ -99,16 +99,12 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	cm := context.ColorMode()
 	backgroundColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 	thumbColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.6)
-	borderColor := draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	if t.isActive(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if t.canPress(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.575)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.7, 0)
 	} else if !context.IsEnabled(t) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
-		borderColor = draw.Color2(cm, draw.ColorTypeBase, 0.8, 0.1)
 	}
 
 	// Background
@@ -126,7 +122,13 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// Border (upper)
 	b := bounds
 	b.Max.Y = b.Min.Y + b.Dy()/2
-	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
+	var borderClr1, borderClr2 color.Color
+	if context.IsEnabled(t) {
+		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset)
+	} else {
+		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeRegular)
+	}
+	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
 	// Thumb
 	cxOff := float64(bounds.Min.X) + float64(r)
@@ -138,13 +140,14 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 		cx = int((1-rate)*cxOn + rate*cxOff)
 	}
 	cy := bounds.Min.Y + r
+	thumbClr1, thumbClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeOutset)
 	draw.DrawRoundedRect(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbColor, r)
-	draw.DrawRoundedRectBorder(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
+	draw.DrawRoundedRectBorder(context, dst, image.Rect(cx-r, cy-r, cx+r, cy+r), thumbClr1, thumbClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)
 
 	// Border (lower)
 	b = bounds
 	b.Min.Y = b.Max.Y - b.Dy()/2
-	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderColor, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
+	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
 	t.onceRendered = true
 }
