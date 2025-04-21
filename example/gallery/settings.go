@@ -54,23 +54,23 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			Tag:  language.Und,
 		},
 		{
-			Text: "en",
+			Text: "English",
 			Tag:  language.English,
 		},
 		{
-			Text: "ja",
+			Text: "Japanese",
 			Tag:  language.Japanese,
 		},
 		{
-			Text: "ko",
+			Text: "Korean",
 			Tag:  language.Korean,
 		},
 		{
-			Text: "zh-Hans",
+			Text: "Simplified Chinese",
 			Tag:  language.SimplifiedChinese,
 		},
 		{
-			Text: "zh-Hant",
+			Text: "Traditional Chinese",
 			Tag:  language.TraditionalChinese,
 		},
 	})
