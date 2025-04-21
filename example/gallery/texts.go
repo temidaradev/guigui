@@ -4,8 +4,6 @@
 package main
 
 import (
-	"sync"
-
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	"github.com/hajimehoshi/guigui/layout"
@@ -30,16 +28,11 @@ type Texts struct {
 	sampleText                  basicwidget.Text
 
 	model *Model
-
-	initOnce sync.Once
 }
 
 func (t *Texts) SetModel(model *Model) {
 	t.model = model
 }
-
-const sampleText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-隴西の李徴は博学才穎、天宝の末年、若くして名を虎榜に連ね、ついで江南尉に補せられたが、性、狷介、自ら恃むところ頗る厚く、賤吏に甘んずるを潔しとしなかった。`
 
 func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.horizontalAlignText.SetText("Horizontal Align")
@@ -150,10 +143,12 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.sampleText.SetBold(t.model.Texts().Bold())
 	t.sampleText.SetSelectable(t.model.Texts().Selectable())
 	t.sampleText.SetEditable(t.model.Texts().Editable())
-
-	t.initOnce.Do(func() {
-		t.sampleText.SetText(sampleText)
+	t.sampleText.SetOnValueChanged(func(text string) {
+		t.model.Texts().SetText(text)
 	})
+	if !context.HasFocusedChildWidget(&t.sampleText) {
+		t.sampleText.SetText(t.model.Texts().Text())
+	}
 
 	u := basicwidget.UnitSize(context)
 	for i, bounds := range (layout.GridLayout{

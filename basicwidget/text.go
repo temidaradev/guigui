@@ -125,7 +125,12 @@ type Text struct {
 	lastAppScale                float64
 	lastWidth                   int
 
+	onValueChanged func(text string)
 	onEnterPressed func(text string)
+}
+
+func (t *Text) SetOnValueChanged(f func(text string)) {
+	t.onValueChanged = f
 }
 
 func (t *Text) SetOnEnterPressed(f func(text string)) {
@@ -236,6 +241,9 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 	guigui.RequestRedraw(t)
 	if textChanged {
 		t.resetCachedTextSize()
+		if t.onValueChanged != nil {
+			t.onValueChanged(t.field.Text())
+		}
 	}
 }
 
@@ -549,6 +557,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		return guigui.HandleInputResult{}
 	}
 
+	origText := t.field.Text()
 	start, _ := t.field.Selection()
 	var processed bool
 	if pos, ok := t.textPosition(context, start, false); ok {
@@ -564,6 +573,11 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
 		t.resetCachedTextSize()
 		t.adjustScrollOffset(context)
+		if t.field.Text() != origText {
+			if t.onValueChanged != nil {
+				t.onValueChanged(t.field.Text())
+			}
+		}
 		return guigui.HandleInputByWidget(t)
 	}
 

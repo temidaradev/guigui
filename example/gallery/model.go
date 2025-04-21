@@ -33,6 +33,8 @@ type TextsModel struct {
 	bold            bool
 	selectable      bool
 	editable        bool
+	text            string
+	textSet         bool
 }
 
 func (t *TextsModel) HorizontalAlign() basicwidget.HorizontalAlign {
@@ -87,4 +89,17 @@ func (t *TextsModel) SetEditable(editable bool) {
 	if editable {
 		t.selectable = true
 	}
+}
+
+func (t *TextsModel) Text() string {
+	if !t.textSet {
+		return `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+隴西の李徴は博学才穎、天宝の末年、若くして名を虎榜に連ね、ついで江南尉に補せられたが、性、狷介、自ら恃むところ頗る厚く、賤吏に甘んずるを潔しとしなかった。`
+	}
+	return t.text
+}
+
+func (t *TextsModel) SetText(text string) {
+	t.text = text
+	t.textSet = true
 }
