@@ -274,6 +274,7 @@ func (t *textListItemWidget[T]) listItem() ListItem[T] {
 		Content:    t,
 		Selectable: t.selectable(),
 		Draggable:  t.textListItem.Draggable,
+		Tag:        t.textListItem.Tag,
 	}
 }
 
