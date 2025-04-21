@@ -44,37 +44,51 @@ const sampleText = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
 
 func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.horizontalAlignText.SetText("Horizontal Align")
-	t.horizontalAlignDropdownList.SetItemsByStrings([]string{
-		"Start",
-		"Center",
-		"End",
+	t.horizontalAlignDropdownList.SetItems([]basicwidget.DropdownListItem[basicwidget.HorizontalAlign]{
+		{
+			Text: "Start",
+			Tag:  basicwidget.HorizontalAlignStart,
+		},
+		{
+			Text: "Center",
+			Tag:  basicwidget.HorizontalAlignCenter,
+		},
+		{
+			Text: "End",
+			Tag:  basicwidget.HorizontalAlignEnd,
+		},
 	})
 	t.horizontalAlignDropdownList.SetOnValueChanged(func(index int) {
-		switch index {
-		case 0:
+		item, ok := t.horizontalAlignDropdownList.ItemByIndex(index)
+		if !ok {
 			t.horizontalAlign = basicwidget.HorizontalAlignStart
-		case 1:
-			t.horizontalAlign = basicwidget.HorizontalAlignCenter
-		case 2:
-			t.horizontalAlign = basicwidget.HorizontalAlignEnd
+			return
 		}
+		t.horizontalAlign = item.Tag
 	})
 
 	t.verticalAlignText.SetText("Vertical Align")
-	t.verticalAlignDropdownList.SetItemsByStrings([]string{
-		"Top",
-		"Middle",
-		"Bottom",
+	t.verticalAlignDropdownList.SetItems([]basicwidget.DropdownListItem[basicwidget.VerticalAlign]{
+		{
+			Text: "Top",
+			Tag:  basicwidget.VerticalAlignTop,
+		},
+		{
+			Text: "Middle",
+			Tag:  basicwidget.VerticalAlignMiddle,
+		},
+		{
+			Text: "Bottom",
+			Tag:  basicwidget.VerticalAlignBottom,
+		},
 	})
 	t.verticalAlignDropdownList.SetOnValueChanged(func(index int) {
-		switch index {
-		case 0:
+		item, ok := t.verticalAlignDropdownList.ItemByIndex(index)
+		if !ok {
 			t.verticalAlign = basicwidget.VerticalAlignTop
-		case 1:
-			t.verticalAlign = basicwidget.VerticalAlignMiddle
-		case 2:
-			t.verticalAlign = basicwidget.VerticalAlignBottom
+			return
 		}
+		t.verticalAlign = item.Tag
 	})
 
 	t.autoWrapText.SetText("Auto Wrap")
