@@ -26,7 +26,7 @@ type Basic struct {
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Click Me!")
-	b.toggleText.SetText("Toggle Button")
+	b.toggleText.SetText("Toggle")
 	b.textFieldText.SetText("Text Field")
 	b.textField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
 	b.textListText.SetText("Text List")
