@@ -5,9 +5,19 @@ package basicwidget
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/guigui"
 )
+
+type PopupMenuItem[T comparable] struct {
+	Text     string
+	Color    color.Color
+	Header   bool
+	Disabled bool
+	Border   bool
+	Tag      T
+}
 
 type PopupMenu[T comparable] struct {
 	guigui.DefaultWidget
@@ -94,12 +104,38 @@ func (p *PopupMenu[T]) Close() {
 	p.popup.Close()
 }
 
+func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
+	var textListItems []TextListItem[T]
+	for _, item := range items {
+		textListItems = append(textListItems, TextListItem[T]{
+			Text:     item.Text,
+			Color:    item.Color,
+			Header:   item.Header,
+			Disabled: item.Disabled,
+			Border:   item.Border,
+			Tag:      item.Tag,
+		})
+	}
+	p.textList.SetItems(textListItems)
+}
+
 func (p *PopupMenu[T]) SetItemsByStrings(items []string) {
 	p.textList.SetItemsByStrings(items)
 }
 
-func (p *PopupMenu[T]) SelectedItem() (TextListItem[T], bool) {
-	return p.textList.SelectedItem()
+func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
+	textListItem, ok := p.textList.SelectedItem()
+	if !ok {
+		return PopupMenuItem[T]{}, false
+	}
+	return PopupMenuItem[T]{
+		Text:     textListItem.Text,
+		Color:    textListItem.Color,
+		Header:   textListItem.Header,
+		Disabled: textListItem.Disabled,
+		Border:   textListItem.Border,
+		Tag:      textListItem.Tag,
+	}, true
 }
 
 func (p *PopupMenu[T]) SelectedItemIndex() int {
