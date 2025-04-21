@@ -138,10 +138,29 @@ func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
 	}, true
 }
 
+func (p *PopupMenu[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
+	textListItem, ok := p.textList.ItemByIndex(index)
+	if !ok {
+		return PopupMenuItem[T]{}, false
+	}
+	return PopupMenuItem[T]{
+		Text:     textListItem.Text,
+		Color:    textListItem.Color,
+		Header:   textListItem.Header,
+		Disabled: textListItem.Disabled,
+		Border:   textListItem.Border,
+		Tag:      textListItem.Tag,
+	}, true
+}
+
 func (p *PopupMenu[T]) SelectedItemIndex() int {
 	return p.textList.SelectedItemIndex()
 }
 
 func (p *PopupMenu[T]) SetSelectedItemIndex(index int) {
 	p.textList.SetSelectedItemIndex(index)
+}
+
+func (p *PopupMenu[T]) SetSelectedItemByTag(tag T) {
+	p.textList.SetSelectedItemByTag(tag)
 }

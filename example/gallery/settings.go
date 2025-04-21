@@ -29,49 +29,84 @@ type Settings struct {
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
-	s.colorModeDropdownList.SetItemsByStrings([]string{"Light", "Dark"})
+	s.colorModeDropdownList.SetItems([]basicwidget.PopupMenuItem[guigui.ColorMode]{
+		{
+			Text: "Light",
+			Tag:  guigui.ColorModeLight,
+		},
+		{
+			Text: "Dark",
+			Tag:  guigui.ColorModeDark,
+		},
+	})
 	s.colorModeDropdownList.SetOnValueChanged(func(index int) {
-		switch index {
-		case 0:
-			context.SetColorMode(guigui.ColorModeLight)
-		case 1:
-			context.SetColorMode(guigui.ColorModeDark)
+		item, ok := s.colorModeDropdownList.ItemByIndex(index)
+		if !ok {
+			return
 		}
+		context.SetColorMode(item.Tag)
 	})
 
 	s.localeText.SetText("Locale")
-	langs := []string{"(Default)", "en", "ja", "ko", "zh-Hans", "zh-Hant"}
-	s.localeDropdownList.SetItemsByStrings(langs)
+	s.localeDropdownList.SetItems([]basicwidget.PopupMenuItem[language.Tag]{
+		{
+			Text: "(Default)",
+			Tag:  language.Und,
+		},
+		{
+			Text: "en",
+			Tag:  language.English,
+		},
+		{
+			Text: "ja",
+			Tag:  language.Japanese,
+		},
+		{
+			Text: "ko",
+			Tag:  language.Korean,
+		},
+		{
+			Text: "zh-Hans",
+			Tag:  language.SimplifiedChinese,
+		},
+		{
+			Text: "zh-Hant",
+			Tag:  language.TraditionalChinese,
+		},
+	})
 	s.localeDropdownList.SetOnValueChanged(func(index int) {
-		if index == 0 {
-			context.SetAppLocales(nil)
+		item, ok := s.localeDropdownList.ItemByIndex(index)
+		if !ok {
 			return
 		}
-		lang := language.MustParse(langs[index])
-		context.SetAppLocales([]language.Tag{lang})
+		context.SetAppLocales([]language.Tag{item.Tag})
 	})
 
 	s.scaleText.SetText("Scale")
-	s.scaleDropdownList.SetItemsByStrings([]string{"80%", "100%", "120%"})
+	s.scaleDropdownList.SetItems([]basicwidget.PopupMenuItem[float64]{
+		{
+			Text: "80%",
+			Tag:  0.8,
+		},
+		{
+			Text: "100%",
+			Tag:  1,
+		},
+		{
+			Text: "120%",
+			Tag:  1.2,
+		},
+	})
 	s.scaleDropdownList.SetOnValueChanged(func(index int) {
-		switch index {
-		case 0:
-			context.SetAppScale(0.8)
-		case 1:
-			context.SetAppScale(1.0)
-		case 2:
-			context.SetAppScale(1.2)
+		item, ok := s.scaleDropdownList.ItemByIndex(index)
+		if !ok {
+			return
 		}
+		context.SetAppScale(item.Tag)
 	})
 
 	s.initOnce.Do(func() {
-		switch context.ColorMode() {
-		case guigui.ColorModeLight:
-			s.colorModeDropdownList.SetSelectedItemIndex(0)
-		case guigui.ColorModeDark:
-			s.colorModeDropdownList.SetSelectedItemIndex(1)
-		}
-
+		s.colorModeDropdownList.SetSelectedItemByTag(context.ColorMode())
 		s.localeDropdownList.SetSelectedItemIndex(0)
 		s.scaleDropdownList.SetSelectedItemIndex(1)
 	})

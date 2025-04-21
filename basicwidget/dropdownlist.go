@@ -84,12 +84,21 @@ func (d *DropdownList[T]) SelectedItem() (PopupMenuItem[T], bool) {
 	return d.popupMenu.SelectedItem()
 }
 
+func (d *DropdownList[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
+	return d.popupMenu.ItemByIndex(index)
+}
+
 func (d *DropdownList[T]) SelectedItemIndex() int {
 	return d.popupMenu.SelectedItemIndex()
 }
 
 func (d *DropdownList[T]) SetSelectedItemIndex(index int) {
 	d.popupMenu.SetSelectedItemIndex(index)
+	d.updateText()
+}
+
+func (d *DropdownList[T]) SetSelectedItemByTag(tag T) {
+	d.popupMenu.SetSelectedItemByTag(tag)
 	d.updateText()
 }
 
