@@ -29,7 +29,7 @@ func (m *Model) Texts() *TextsModel {
 type TextsModel struct {
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
-	unwrap          bool
+	noWrap          bool
 	bold            bool
 	selectable      bool
 	editable        bool
@@ -54,11 +54,11 @@ func (t *TextsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
 }
 
 func (t *TextsModel) AutoWrap() bool {
-	return !t.unwrap
+	return !t.noWrap
 }
 
 func (t *TextsModel) SetAutoWrap(autoWrap bool) {
-	t.unwrap = !autoWrap
+	t.noWrap = !autoWrap
 }
 
 func (t *TextsModel) Bold() bool {
