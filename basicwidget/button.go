@@ -78,7 +78,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// See macOS's buttons.
 	cm := context.ColorMode()
 	backgroundColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.3)
-	if b.isActive(context) || b.forcePressed {
+	if b.isPressed(context) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
 	} else if b.canPress(context) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
@@ -92,13 +92,13 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if context.IsEnabled(b) && b.isHovered(context) || b.forcePressed {
 		border = true
 	}
-	if border || b.isActive(context) || b.forcePressed {
+	if border || b.isPressed(context) {
 		draw.DrawRoundedRect(context, dst, bounds, backgroundColor, r)
 	}
 
 	if border {
 		borderType := draw.RoundedRectBorderTypeOutset
-		if b.isActive(context) || b.forcePressed {
+		if b.isPressed(context) {
 			borderType = draw.RoundedRectBorderTypeInset
 		} else if !context.IsEnabled(b) {
 			borderType = draw.RoundedRectBorderTypeRegular
@@ -118,6 +118,10 @@ func (b *Button) isHovered(context *guigui.Context) bool {
 
 func (b *Button) isActive(context *guigui.Context) bool {
 	return context.IsEnabled(b) && b.isHovered(context) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && b.pressed
+}
+
+func (b *Button) isPressed(context *guigui.Context) bool {
+	return b.isActive(context) || b.forcePressed
 }
 
 func (b *Button) SetForcePressed(pressed bool) {

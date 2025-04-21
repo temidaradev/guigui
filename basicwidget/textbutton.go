@@ -73,7 +73,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	} else {
 		textP.X += (s.X - tw) / 2
 	}
-	if t.button.isActive(context) {
+	if t.button.isPressed(context) {
 		textP.Y += int(1 * context.Scale())
 	}
 	appender.AppendChildWidgetWithBounds(&t.text, image.Rectangle{
@@ -84,7 +84,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	imgP := context.Position(t)
 	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
 	imgP.Y += (s.Y - imgSize) / 2
-	if t.button.isActive(context) {
+	if t.button.isPressed(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
 	appender.AppendChildWidgetWithBounds(&t.image, image.Rectangle{
