@@ -117,19 +117,11 @@ func (d *DropdownList[T]) SelectedItemIndex() int {
 }
 
 func (d *DropdownList[T]) SelectItemByIndex(index int) {
-	if d.popupMenu.IsOpen() {
-		// TODO: Should the item be selected after closing the popup?
-		return
-	}
 	d.popupMenu.SelectItemByIndex(index)
 	d.updateText()
 }
 
 func (d *DropdownList[T]) SelectItemByTag(tag T) {
-	if d.popupMenu.IsOpen() {
-		// TODO: Should the item be selected after closing the popup?
-		return
-	}
 	d.popupMenu.SelectItemByTag(tag)
 	d.updateText()
 }
@@ -138,4 +130,8 @@ func (d *DropdownList[T]) DefaultSize(context *guigui.Context) image.Point {
 	// The button image affects the size.
 	d.updateButtonImage(context)
 	return context.Size(&d.textButton)
+}
+
+func (d *DropdownList[T]) IsPopupOpen() bool {
+	return d.popupMenu.IsOpen()
 }

@@ -43,7 +43,9 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		}
 		context.SetColorMode(item.Tag)
 	})
-	s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
+	if !s.colorModeDropdownList.IsPopupOpen() {
+		s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
+	}
 
 	s.localeText.SetText("Locale")
 	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
@@ -84,10 +86,12 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		}
 		context.SetAppLocales([]language.Tag{item.Tag})
 	})
-	if locales := context.AppendAppLocales(nil); len(locales) > 0 {
-		s.localeDropdownList.SelectItemByTag(locales[0])
-	} else {
-		s.localeDropdownList.SelectItemByTag(language.Und)
+	if !s.localeDropdownList.IsPopupOpen() {
+		if locales := context.AppendAppLocales(nil); len(locales) > 0 {
+			s.localeDropdownList.SelectItemByTag(locales[0])
+		} else {
+			s.localeDropdownList.SelectItemByTag(language.Und)
+		}
 	}
 
 	s.scaleText.SetText("Scale")
@@ -113,7 +117,9 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		}
 		context.SetAppScale(item.Tag)
 	})
-	s.scaleDropdownList.SelectItemByTag(context.AppScale())
+	if !s.scaleDropdownList.IsPopupOpen() {
+		s.scaleDropdownList.SelectItemByTag(context.AppScale())
+	}
 
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
