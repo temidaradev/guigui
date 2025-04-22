@@ -130,9 +130,9 @@ func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType) 
 	case RoundedRectBorderTypeRegular:
 		return Color2(colorMode, ColorTypeBase, 0.8, 0.1), Color2(colorMode, ColorTypeBase, 0.8, 0.1)
 	case RoundedRectBorderTypeInset:
-		return Color2(colorMode, ColorTypeBase, 0.65, 0.2), Color2(colorMode, ColorTypeBase, 0.75, 0.3)
+		return Color2(colorMode, ColorTypeBase, 0.75, 0.2), Color2(colorMode, ColorTypeBase, 0.85, 0.3)
 	case RoundedRectBorderTypeOutset:
-		return Color2(colorMode, ColorTypeBase, 0.75, 0.5), Color2(colorMode, ColorTypeBase, 0.65, 0.2)
+		return Color2(colorMode, ColorTypeBase, 0.85, 0.5), Color2(colorMode, ColorTypeBase, 0.75, 0.2)
 	}
 	panic(fmt.Sprintf("draw: invalid border type: %d", borderType))
 }
