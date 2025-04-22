@@ -14,18 +14,18 @@ import (
 type Settings struct {
 	guigui.DefaultWidget
 
-	form                  basicwidget.Form
-	colorModeText         basicwidget.Text
-	colorModeDropdownList basicwidget.DropdownList[guigui.ColorMode]
-	localeText            basicwidget.Text
-	localeDropdownList    basicwidget.DropdownList[language.Tag]
-	scaleText             basicwidget.Text
-	scaleDropdownList     basicwidget.DropdownList[float64]
+	form                      basicwidget.Form
+	colorModeText             basicwidget.Text
+	colorModeSegmentedControl basicwidget.SegmentedControl[guigui.ColorMode]
+	localeText                basicwidget.Text
+	localeDropdownList        basicwidget.DropdownList[language.Tag]
+	scaleText                 basicwidget.Text
+	scaleDropdownList         basicwidget.DropdownList[float64]
 }
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
-	s.colorModeDropdownList.SetItems([]basicwidget.DropdownListItem[guigui.ColorMode]{
+	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[guigui.ColorMode]{
 		{
 			Text: "Light",
 			Tag:  guigui.ColorModeLight,
@@ -35,17 +35,15 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			Tag:  guigui.ColorModeDark,
 		},
 	})
-	s.colorModeDropdownList.SetOnValueChanged(func(index int) {
-		item, ok := s.colorModeDropdownList.ItemByIndex(index)
+	s.colorModeSegmentedControl.SetOnItemSelected(func(index int) {
+		item, ok := s.colorModeSegmentedControl.ItemByIndex(index)
 		if !ok {
 			context.SetColorMode(guigui.ColorModeLight)
 			return
 		}
 		context.SetColorMode(item.Tag)
 	})
-	if !s.colorModeDropdownList.IsPopupOpen() {
-		s.colorModeDropdownList.SelectItemByTag(context.ColorMode())
-	}
+	s.colorModeSegmentedControl.SelectItemByTag(context.ColorMode())
 
 	s.localeText.SetText("Locale")
 	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
@@ -124,7 +122,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &s.colorModeText,
-			SecondaryWidget: &s.colorModeDropdownList,
+			SecondaryWidget: &s.colorModeSegmentedControl,
 		},
 		{
 			PrimaryWidget:   &s.localeText,

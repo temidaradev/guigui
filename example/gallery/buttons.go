@@ -12,11 +12,13 @@ import (
 type Buttons struct {
 	guigui.DefaultWidget
 
-	form                basicwidget.Form
-	textButtonText      basicwidget.Text
-	textButton          basicwidget.TextButton
-	textImageButtonText basicwidget.Text
-	textImageButton     basicwidget.TextButton
+	form                     basicwidget.Form
+	textButtonText           basicwidget.Text
+	textButton               basicwidget.TextButton
+	textImageButtonText      basicwidget.Text
+	textImageButton          basicwidget.TextButton
+	textSegmentedControlText basicwidget.Text
+	textSegmentedControl     basicwidget.SegmentedControl[int]
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -29,6 +31,18 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		return err
 	}
 	b.textImageButton.SetImage(img)
+	b.textSegmentedControlText.SetText("Segmented Control")
+	b.textSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[int]{
+		{
+			Text: "One",
+		},
+		{
+			Text: "Two",
+		},
+		{
+			Text: "Three",
+		},
+	})
 
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -38,6 +52,10 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		{
 			PrimaryWidget:   &b.textImageButtonText,
 			SecondaryWidget: &b.textImageButton,
+		},
+		{
+			PrimaryWidget:   &b.textSegmentedControlText,
+			SecondaryWidget: &b.textSegmentedControl,
 		},
 	})
 
