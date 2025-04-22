@@ -20,7 +20,7 @@ type Settings struct {
 	localeText                basicwidget.Text
 	localeDropdownList        basicwidget.DropdownList[language.Tag]
 	scaleText                 basicwidget.Text
-	scaleDropdownList         basicwidget.DropdownList[float64]
+	scaleSegmentedControl     basicwidget.SegmentedControl[float64]
 }
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -93,7 +93,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	}
 
 	s.scaleText.SetText("Scale")
-	s.scaleDropdownList.SetItems([]basicwidget.DropdownListItem[float64]{
+	s.scaleSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[float64]{
 		{
 			Text: "80%",
 			Tag:  0.8,
@@ -107,17 +107,15 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			Tag:  1.2,
 		},
 	})
-	s.scaleDropdownList.SetOnValueChanged(func(index int) {
-		item, ok := s.scaleDropdownList.ItemByIndex(index)
+	s.scaleSegmentedControl.SetOnItemSelected(func(index int) {
+		item, ok := s.scaleSegmentedControl.ItemByIndex(index)
 		if !ok {
 			context.SetAppScale(1)
 			return
 		}
 		context.SetAppScale(item.Tag)
 	})
-	if !s.scaleDropdownList.IsPopupOpen() {
-		s.scaleDropdownList.SelectItemByTag(context.AppScale())
-	}
+	s.scaleSegmentedControl.SelectItemByTag(context.AppScale())
 
 	s.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -130,7 +128,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		},
 		{
 			PrimaryWidget:   &s.scaleText,
-			SecondaryWidget: &s.scaleDropdownList,
+			SecondaryWidget: &s.scaleSegmentedControl,
 		},
 	})
 
