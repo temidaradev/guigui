@@ -37,7 +37,15 @@ func init() {
 	whiteImage.WritePixels(pix)
 }
 
-func appendRectVectorPath(path *vector.Path, rx0, ry0, rx1, ry1 float32, radius float32) {
+func appendRectVectorPath(path *vector.Path, x0, y0, x1, y1 float32, radius float32) {
+	path.MoveTo(x0, y0)
+	path.LineTo(x1, y0)
+	path.LineTo(x1, y1)
+	path.LineTo(x0, y1)
+	path.LineTo(x0, y0)
+}
+
+func appendRoundedRectVectorPath(path *vector.Path, rx0, ry0, rx1, ry1 float32, radius float32) {
 	x0 := rx0
 	x1 := rx0 + radius
 	x2 := rx1 - radius
@@ -68,6 +76,7 @@ type imageKey struct {
 var (
 	whiteRoundedRects       = map[imageKey]*ebiten.Image{}
 	whiteRoundedShadowRects = map[imageKey]*ebiten.Image{}
+	whiteRectBorders        = map[imageKey]*ebiten.Image{}
 	whiteRoundedRectBorders = map[imageKey]*ebiten.Image{}
 )
 
@@ -83,7 +92,7 @@ func ensureWhiteRoundedRect(radius int) *ebiten.Image {
 	img := ebiten.NewImage(s, s)
 
 	var path vector.Path
-	appendRectVectorPath(&path, 0, 0, float32(s), float32(s), float32(radius))
+	appendRoundedRectVectorPath(&path, 0, 0, float32(s), float32(s), float32(radius))
 	path.Close()
 
 	vs, is := path.AppendVerticesAndIndicesForFilling(nil, nil)
@@ -209,6 +218,22 @@ func ensureWhiteRoundedShadowRect(radius int) *ebiten.Image {
 	return img
 }
 
+func ensureWhiteRectBorder(partSize int, borderWidth float32, borderType RoundedRectBorderType, colorMode guigui.ColorMode) *ebiten.Image {
+	key := imageKey{
+		radius:      partSize,
+		borderWidth: borderWidth,
+		borderType:  borderType,
+		colorMode:   colorMode,
+	}
+	if img, ok := whiteRectBorders[key]; ok {
+		return img
+	}
+
+	img := whiteRoundedRectBorder(partSize, borderWidth, borderType, colorMode, appendRectVectorPath)
+	whiteRectBorders[key] = img
+	return img
+}
+
 func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, borderType RoundedRectBorderType, colorMode guigui.ColorMode) *ebiten.Image {
 	key := imageKey{
 		radius:      radius,
@@ -220,6 +245,12 @@ func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, borderType Ro
 		return img
 	}
 
+	img := whiteRoundedRectBorder(radius, borderWidth, borderType, colorMode, appendRoundedRectVectorPath)
+	whiteRoundedRectBorders[key] = img
+	return img
+}
+
+func whiteRoundedRectBorder(radius int, borderWidth float32, borderType RoundedRectBorderType, colorMode guigui.ColorMode, appendPathFunc func(path *vector.Path, rx0, ry0, rx1, ry1 float32, radius float32)) *ebiten.Image {
 	// Use it's own anti-aliasing instead of Ebitengine's anti-aliasing for higher quality result.
 	// Ebitengine's anti-aliasing just scales vertice and doesn't create finer paths for anti-aliasing scale.
 	const aaScale = 2
@@ -228,23 +259,23 @@ func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, borderType Ro
 	inset := borderWidth * aaScale
 
 	var path vector.Path
-	appendRectVectorPath(&path, 0, 0, float32(s), float32(s), float32(radius))
+	appendPathFunc(&path, 0, 0, float32(s), float32(s), float32(radius))
 	switch borderType {
 	case RoundedRectBorderTypeRegular:
-		appendRectVectorPath(&path, inset, inset, float32(s)-inset, float32(s)-inset, float32(radius)-inset)
+		appendPathFunc(&path, inset, inset, float32(s)-inset, float32(s)-inset, float32(radius)-inset)
 	case RoundedRectBorderTypeInset:
 		// Use a thicker border for the dark mode, as colors tend to be contracting colors.
 		if colorMode == guigui.ColorModeDark {
-			appendRectVectorPath(&path, inset, inset*2, float32(s)-inset, float32(s)-inset/2, float32(radius)-inset/2)
+			appendPathFunc(&path, inset, inset*2, float32(s)-inset, float32(s)-inset/2, float32(radius)-inset/2)
 		} else {
-			appendRectVectorPath(&path, inset, inset*3/2, float32(s)-inset, float32(s)-inset/2, float32(radius)-inset/2)
+			appendPathFunc(&path, inset, inset*3/2, float32(s)-inset, float32(s)-inset/2, float32(radius)-inset/2)
 		}
 	case RoundedRectBorderTypeOutset:
 		// Use a thicker border for the dark mode, as colors tend to be contracting colors.
 		if colorMode == guigui.ColorModeDark {
-			appendRectVectorPath(&path, inset, inset/2, float32(s)-inset, float32(s)-inset*2, float32(radius)-inset/2)
+			appendPathFunc(&path, inset, inset/2, float32(s)-inset, float32(s)-inset*2, float32(radius)-inset/2)
 		} else {
-			appendRectVectorPath(&path, inset, inset/2, float32(s)-inset, float32(s)-inset*3/2, float32(radius)-inset/2)
+			appendPathFunc(&path, inset, inset/2, float32(s)-inset, float32(s)-inset*3/2, float32(radius)-inset/2)
 		}
 	}
 	path.Close()
@@ -268,12 +299,39 @@ func ensureWhiteRoundedRectBorder(radius int, borderWidth float32, borderType Ro
 	img := ebiten.NewImage(s/aaScale, s/aaScale)
 	img.DrawImage(offscreen, op2)
 
-	whiteRoundedRectBorders[key] = img
-
 	return img
 }
 
+type SharpenCorners struct {
+	UpperLeft  bool
+	UpperRight bool
+	LowerLeft  bool
+	LowerRight bool
+}
+
+func (s *SharpenCorners) bools() [3][3]bool {
+	return [3][3]bool{
+		{!s.UpperLeft, true, !s.UpperRight},
+		{true, true, true},
+		{!s.LowerLeft, true, !s.LowerRight},
+	}
+}
+
+func (s *SharpenCorners) invertedBools() [3][3]bool {
+	bs := s.bools()
+	for j := range 3 {
+		for i := range 3 {
+			bs[j][i] = !bs[j][i]
+		}
+	}
+	return bs
+}
+
 func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int) {
+	DrawRoundedRectWithSharpenCorners(context, dst, bounds, clr, radius, SharpenCorners{})
+}
+
+func DrawRoundedRectWithSharpenCorners(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int, sharpenCorners SharpenCorners) {
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
@@ -283,7 +341,17 @@ func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, bounds image.Re
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius), clr, clr)
+
+	if sharpenCorners == (SharpenCorners{}) {
+		drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius), clr, clr)
+		return
+	}
+
+	drawNinePatchParts(dst, bounds, ensureWhiteRoundedRect(radius), clr, clr, sharpenCorners.bools())
+	if !dst.Bounds().Intersect(bounds).Empty() {
+		vs, is, op := ninePatchVertices(bounds, whiteImage.Bounds(), radius, radius, clr, clr, sharpenCorners.invertedBools())
+		dst.DrawTriangles32(vs, is, whiteImage, op)
+	}
 }
 
 func DrawRoundedShadowRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int) {
@@ -300,6 +368,10 @@ func DrawRoundedShadowRect(context *guigui.Context, dst *ebiten.Image, bounds im
 }
 
 func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr1, clr2 color.Color, radius int, borderWidth float32, borderType RoundedRectBorderType) {
+	DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, radius, borderWidth, borderType, SharpenCorners{})
+}
+
+func DrawRoundedRectBorderWithSharpenCorners(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr1, clr2 color.Color, radius int, borderWidth float32, borderType RoundedRectBorderType, sharpenCorners SharpenCorners) {
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
@@ -309,17 +381,37 @@ func DrawRoundedRectBorder(context *guigui.Context, dst *ebiten.Image, bounds im
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
-	drawNinePatch(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, borderType, context.ColorMode()), clr1, clr2)
+
+	if sharpenCorners == (SharpenCorners{}) {
+		drawNinePatch(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, borderType, context.ColorMode()), clr1, clr2)
+		return
+	}
+
+	drawNinePatchParts(dst, bounds, ensureWhiteRoundedRectBorder(radius, borderWidth, borderType, context.ColorMode()), clr1, clr2, sharpenCorners.bools())
+	drawNinePatchParts(dst, bounds, ensureWhiteRectBorder(radius, borderWidth, borderType, context.ColorMode()), clr1, clr2, sharpenCorners.invertedBools())
 }
 
 func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image, clr1, clr2 color.Color) {
+	drawNinePatchParts(dst, bounds, src, clr1, clr2, [3][3]bool{
+		{true, true, true},
+		{true, true, true},
+		{true, true, true},
+	})
+}
+
+func drawNinePatchParts(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image, clr1, clr2 color.Color, renderingParts [3][3]bool) {
 	if dst.Bounds().Intersect(bounds).Empty() {
 		return
 	}
-	partW, partH := src.Bounds().Dx()/3, src.Bounds().Dy()/3
+	cornerW, cornerH := src.Bounds().Dx()/3, src.Bounds().Dy()/3
+	vs, is, op := ninePatchVertices(bounds, src.Bounds(), cornerW, cornerH, clr1, clr2, renderingParts)
+	dst.DrawTriangles32(vs, is, src, op)
+}
 
+func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH int, clr1, clr2 color.Color, renderingParts [3][3]bool) ([]ebiten.Vertex, []uint32, *ebiten.DrawTrianglesOptions) {
 	op := &ebiten.DrawTrianglesOptions{}
 	op.ColorScaleMode = ebiten.ColorScaleModePremultipliedAlpha
+
 	var c1 [4]uint32
 	var c2 [4]uint32
 	c1[0], c1[1], c1[2], c1[3] = clr1.RGBA()
@@ -330,8 +422,8 @@ func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image,
 	}
 	rates := [...]float32{
 		0,
-		float32(partH) / float32(bounds.Dy()),
-		float32(bounds.Dy()-partH) / float32(bounds.Dy()),
+		float32(cornerH) / float32(dstBounds.Dy()),
+		float32(dstBounds.Dy()-cornerH) / float32(dstBounds.Dy()),
 		1,
 	}
 	var clrs [4][4]float32
@@ -343,39 +435,43 @@ func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image,
 
 	var vs []ebiten.Vertex
 	var is []uint32
-	for j := 0; j < 3; j++ {
-		for i := 0; i < 3; i++ {
+	for j := range 3 {
+		for i := range 3 {
+			if !renderingParts[j][i] {
+				continue
+			}
+
 			var scaleX float32 = 1.0
 			var scaleY float32 = 1.0
 			var tx, ty int
 
 			switch i {
 			case 0:
-				tx = bounds.Min.X
+				tx = dstBounds.Min.X
 			case 1:
-				scaleX = float32(bounds.Dx()-2*partW) / float32(partW)
-				tx = bounds.Min.X + partW
+				scaleX = float32(dstBounds.Dx()-2*cornerW) / float32(cornerW)
+				tx = dstBounds.Min.X + cornerW
 			case 2:
-				tx = bounds.Max.X - partW
+				tx = dstBounds.Max.X - cornerW
 			}
 			switch j {
 			case 0:
-				ty = bounds.Min.Y
+				ty = dstBounds.Min.Y
 			case 1:
-				scaleY = float32(bounds.Dy()-2*partH) / float32(partH)
-				ty = bounds.Min.Y + partH
+				scaleY = float32(dstBounds.Dy()-2*cornerH) / float32(cornerH)
+				ty = dstBounds.Min.Y + cornerH
 			case 2:
-				ty = bounds.Max.Y - partH
+				ty = dstBounds.Max.Y - cornerH
 			}
 
 			tx0 := float32(tx)
-			tx1 := float32(tx) + scaleX*float32(partW)
+			tx1 := float32(tx) + scaleX*float32(cornerW)
 			ty0 := float32(ty)
-			ty1 := float32(ty) + scaleY*float32(partH)
-			sx0 := float32(i * partW)
-			sy0 := float32(j * partH)
-			sx1 := float32(i+1) * float32(partW)
-			sy1 := float32(j+1) * float32(partH)
+			ty1 := float32(ty) + scaleY*float32(cornerH)
+			sx0 := float32(i * srcBounds.Dx() / 3)
+			sy0 := float32(j * srcBounds.Dy() / 3)
+			sx1 := float32(i+1) * float32(srcBounds.Dx()/3)
+			sy1 := float32(j+1) * float32(srcBounds.Dy()/3)
 
 			base := uint32(len(vs))
 			vs = append(vs,
@@ -424,5 +520,5 @@ func drawNinePatch(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.Image,
 		}
 	}
 
-	dst.DrawTriangles32(vs, is, src, op)
+	return vs, is, op
 }

@@ -20,6 +20,7 @@ type Button struct {
 	forcePressed    bool
 	borderInvisible bool
 	prevHovered     bool
+	sharpenCorners  draw.SharpenCorners
 
 	onDown func()
 	onUp   func()
@@ -93,7 +94,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		border = true
 	}
 	if border || b.isPressed(context) {
-		draw.DrawRoundedRect(context, dst, bounds, backgroundColor, r)
+		draw.DrawRoundedRectWithSharpenCorners(context, dst, bounds, backgroundColor, r, b.sharpenCorners)
 	}
 
 	if border {
@@ -104,7 +105,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 			borderType = draw.RoundedRectBorderTypeRegular
 		}
 		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType)
-		draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType)
+		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
 
@@ -138,4 +139,12 @@ func defaultButtonSize(context *guigui.Context) image.Point {
 
 func (b *Button) DefaultSize(context *guigui.Context) image.Point {
 	return defaultButtonSize(context)
+}
+
+func (b *Button) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
+	if b.sharpenCorners == sharpenCorners {
+		return
+	}
+	b.sharpenCorners = sharpenCorners
+	guigui.RequestRedraw(b)
 }

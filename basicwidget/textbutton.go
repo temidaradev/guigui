@@ -105,6 +105,10 @@ func (t *TextButton) DefaultSize(context *guigui.Context) image.Point {
 	return image.Pt(w+UnitSize(context), dh)
 }
 
+func (t *TextButton) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
+	t.button.setSharpenCorners(sharpenCorners)
+}
+
 func textButtonImageSize(context *guigui.Context) int {
 	return int(LineHeight(context))
 }

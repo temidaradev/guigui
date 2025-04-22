@@ -7,6 +7,7 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 	"github.com/hajimehoshi/guigui/layout"
 )
 
@@ -64,6 +65,27 @@ func (s *SegmentedControl[T]) ensureButtons(context *guigui.Context) {
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
+		if s.abstractList.ItemCount() > 1 {
+			switch i {
+			case 0:
+				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+					UpperRight: true,
+					LowerRight: true,
+				})
+			case s.abstractList.ItemCount() - 1:
+				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+					UpperLeft: true,
+					LowerLeft: true,
+				})
+			default:
+				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+					UpperLeft:  true,
+					LowerLeft:  true,
+					UpperRight: true,
+					LowerRight: true,
+				})
+			}
+		}
 		context.SetEnabled(&s.textButtons[i], !item.Disabled)
 	}
 }
