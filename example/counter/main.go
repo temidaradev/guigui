@@ -17,8 +17,8 @@ type Root struct {
 
 	background  basicwidget.Background
 	resetButton basicwidget.TextButton
-	incButton   basicwidget.TextButton
 	decButton   basicwidget.TextButton
+	incButton   basicwidget.TextButton
 	counterText basicwidget.Text
 
 	counter int
@@ -40,14 +40,14 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 	context.SetEnabled(&r.resetButton, r.counter != 0)
 
-	r.incButton.SetText("Increment")
-	r.incButton.SetOnUp(func() {
-		r.counter++
-	})
-
 	r.decButton.SetText("Decrement")
 	r.decButton.SetOnUp(func() {
 		r.counter--
+	})
+
+	r.incButton.SetText("Increment")
+	r.incButton.SetOnUp(func() {
+		r.counter++
 	})
 
 	u := basicwidget.UnitSize(context)
@@ -77,9 +77,9 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				case 0:
 					appender.AppendChildWidgetWithBounds(&r.resetButton, bounds)
 				case 2:
-					appender.AppendChildWidgetWithBounds(&r.incButton, bounds)
-				case 3:
 					appender.AppendChildWidgetWithBounds(&r.decButton, bounds)
+				case 3:
+					appender.AppendChildWidgetWithBounds(&r.incButton, bounds)
 				}
 			}
 		}
