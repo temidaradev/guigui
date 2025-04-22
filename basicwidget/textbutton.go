@@ -47,8 +47,8 @@ func (t *TextButton) SetTextColor(clr color.Color) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *TextButton) SetForcePressed(forcePressed bool) {
-	t.button.SetForcePressed(forcePressed)
+func (t *TextButton) setKeepPressed(forcePressed bool) {
+	t.button.setKeepPressed(forcePressed)
 }
 
 func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

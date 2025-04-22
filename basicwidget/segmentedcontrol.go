@@ -95,7 +95,7 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 
 	widths := make([]layout.Size, s.abstractList.ItemCount())
 	for i := range s.abstractList.ItemCount() {
-		s.textButtons[i].SetForcePressed(s.abstractList.SelectedItemIndex() == i)
+		s.textButtons[i].setKeepPressed(s.abstractList.SelectedItemIndex() == i)
 		s.textButtons[i].SetOnDown(func() {
 			s.SelectItemByIndex(i)
 		})

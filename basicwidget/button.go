@@ -17,7 +17,7 @@ type Button struct {
 	guigui.DefaultWidget
 
 	pressed         bool
-	forcePressed    bool
+	keepPressed     bool
 	borderInvisible bool
 	prevHovered     bool
 	sharpenCorners  draw.SharpenCorners
@@ -90,7 +90,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(b)
 	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
 	border := !b.borderInvisible
-	if context.IsEnabled(b) && b.isHovered(context) || b.forcePressed {
+	if context.IsEnabled(b) && b.isHovered(context) || b.keepPressed {
 		border = true
 	}
 	if border || b.isPressed(context) {
@@ -122,14 +122,14 @@ func (b *Button) isActive(context *guigui.Context) bool {
 }
 
 func (b *Button) isPressed(context *guigui.Context) bool {
-	return b.isActive(context) || b.forcePressed
+	return b.isActive(context) || b.keepPressed
 }
 
-func (b *Button) SetForcePressed(pressed bool) {
-	if b.forcePressed == pressed {
+func (b *Button) setKeepPressed(keep bool) {
+	if b.keepPressed == keep {
 		return
 	}
-	b.forcePressed = pressed
+	b.keepPressed = keep
 	guigui.RequestRedraw(b)
 }
 
