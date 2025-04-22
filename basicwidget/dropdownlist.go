@@ -26,11 +26,11 @@ type DropdownList[T comparable] struct {
 	textButton TextButton
 	popupMenu  PopupMenu[T]
 
-	onValueChanged func(index int)
+	onSelectedItemChanged func(index int)
 }
 
-func (d *DropdownList[T]) SetOnValueChanged(f func(index int)) {
-	d.onValueChanged = f
+func (d *DropdownList[T]) SetOnSelectedItemChanged(f func(index int)) {
+	d.onSelectedItemChanged = f
 }
 
 func (d *DropdownList[T]) updateButtonImage(context *guigui.Context) {
@@ -54,8 +54,8 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 	appender.AppendChildWidgetWithPosition(&d.textButton, context.Position(d))
 
 	d.popupMenu.SetOnClosed(func(index int) {
-		if d.onValueChanged != nil {
-			d.onValueChanged(index)
+		if d.onSelectedItemChanged != nil {
+			d.onSelectedItemChanged(index)
 		}
 	})
 	if !d.popupMenu.IsOpen() {

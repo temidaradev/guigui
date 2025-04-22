@@ -50,7 +50,7 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			Tag:  basicwidget.HorizontalAlignEnd,
 		},
 	})
-	t.horizontalAlignDropdownList.SetOnValueChanged(func(index int) {
+	t.horizontalAlignDropdownList.SetOnSelectedItemChanged(func(index int) {
 		item, ok := t.horizontalAlignDropdownList.ItemByIndex(index)
 		if !ok {
 			t.model.Texts().SetHorizontalAlign(basicwidget.HorizontalAlignStart)
@@ -75,7 +75,7 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			Tag:  basicwidget.VerticalAlignBottom,
 		},
 	})
-	t.verticalAlignDropdownList.SetOnValueChanged(func(index int) {
+	t.verticalAlignDropdownList.SetOnSelectedItemChanged(func(index int) {
 		item, ok := t.verticalAlignDropdownList.ItemByIndex(index)
 		if !ok {
 			t.model.Texts().SetVerticalAlign(basicwidget.VerticalAlignTop)
