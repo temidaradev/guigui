@@ -60,11 +60,14 @@ func (s *SegmentedControl[T]) SelectItemByTag(tag T) {
 	}
 }
 
-func (s *SegmentedControl[T]) ensureButtons(context *guigui.Context) {
+func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.textButtons = adjustSliceSize(s.textButtons, s.abstractList.ItemCount())
+
+	widths := make([]layout.Size, s.abstractList.ItemCount())
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
+		s.textButtons[i].SetTextBold(s.abstractList.SelectedItemIndex() == i)
 		s.textButtons[i].setUseAccentColor(true)
 		if s.abstractList.ItemCount() > 1 {
 			switch i {
@@ -88,14 +91,6 @@ func (s *SegmentedControl[T]) ensureButtons(context *guigui.Context) {
 			}
 		}
 		context.SetEnabled(&s.textButtons[i], !item.Disabled)
-	}
-}
-
-func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	s.ensureButtons(context)
-
-	widths := make([]layout.Size, s.abstractList.ItemCount())
-	for i := range s.abstractList.ItemCount() {
 		s.textButtons[i].setKeepPressed(s.abstractList.SelectedItemIndex() == i)
 		s.textButtons[i].SetOnDown(func() {
 			s.SelectItemByIndex(i)
@@ -113,12 +108,14 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 }
 
 func (s *SegmentedControl[T]) DefaultSize(context *guigui.Context) image.Point {
-	s.ensureButtons(context)
-
 	var w, h int
-	for i := range s.textButtons {
-		w = max(w, s.textButtons[i].DefaultSize(context).X)
-		h = max(h, s.textButtons[i].DefaultSize(context).Y)
+	for i := range s.abstractList.ItemCount() {
+		var t TextButton
+		item, _ := s.abstractList.ItemByIndex(i)
+		t.SetText(item.Text)
+		t.SetTextBold(true)
+		w = max(w, t.DefaultSize(context).X)
+		h = max(h, t.DefaultSize(context).Y)
 	}
 	return image.Pt(w*len(s.textButtons), h)
 }

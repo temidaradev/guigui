@@ -35,6 +35,10 @@ func (t *TextButton) SetText(text string) {
 	t.text.SetText(text)
 }
 
+func (t *TextButton) SetTextBold(bold bool) {
+	t.text.SetBold(bold)
+}
+
 func (t *TextButton) SetImage(image *ebiten.Image) {
 	t.image.SetImage(image)
 }
