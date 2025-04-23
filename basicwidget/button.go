@@ -82,7 +82,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	backgroundColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.3)
 	if b.isPressed(context) {
 		if b.useAccentColor {
-			backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.9, 0.5)
+			backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.875, 0.5)
 		} else {
 			backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
 		}
