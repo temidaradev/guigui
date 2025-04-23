@@ -126,7 +126,7 @@ func (t *TextList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	for i := range t.textListItemWidgets {
 		item := &t.textListItemWidgets[i]
-		item.text.SetBold(item.textListItem.Header)
+		item.text.SetBold(item.textListItem.Header || t.list.style == ListStyleSidebar && t.SelectedItemIndex() == i)
 		switch {
 		case t.list.style == ListStyleNormal && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
@@ -270,7 +270,11 @@ func (t *textListItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image)
 }
 
 func (t *textListItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
-	w := t.text.TextSize(context).X
+	// Assume that every item can use a bold font.
+	var tmpText Text
+	tmpText.SetText(t.textString())
+	tmpText.SetBold(true)
+	w := tmpText.TextSize(context).X
 	if t.textListItem.Border {
 		return image.Pt(w, UnitSize(context)/2)
 	}
