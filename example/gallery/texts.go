@@ -12,20 +12,20 @@ import (
 type Texts struct {
 	guigui.DefaultWidget
 
-	form                        basicwidget.Form
-	horizontalAlignText         basicwidget.Text
-	horizontalAlignDropdownList basicwidget.DropdownList[basicwidget.HorizontalAlign]
-	verticalAlignText           basicwidget.Text
-	verticalAlignDropdownList   basicwidget.DropdownList[basicwidget.VerticalAlign]
-	autoWrapText                basicwidget.Text
-	autoWrapToggle              basicwidget.Toggle
-	boldText                    basicwidget.Text
-	boldToggle                  basicwidget.Toggle
-	selectableText              basicwidget.Text
-	selectableToggle            basicwidget.Toggle
-	editableText                basicwidget.Text
-	editableToggle              basicwidget.Toggle
-	sampleText                  basicwidget.Text
+	form                            basicwidget.Form
+	horizontalAlignText             basicwidget.Text
+	horizontalAlignSegmentedControl basicwidget.SegmentedControl[basicwidget.HorizontalAlign]
+	verticalAlignText               basicwidget.Text
+	verticalAlignSegmentedControl   basicwidget.SegmentedControl[basicwidget.VerticalAlign]
+	autoWrapText                    basicwidget.Text
+	autoWrapToggle                  basicwidget.Toggle
+	boldText                        basicwidget.Text
+	boldToggle                      basicwidget.Toggle
+	selectableText                  basicwidget.Text
+	selectableToggle                basicwidget.Toggle
+	editableText                    basicwidget.Text
+	editableToggle                  basicwidget.Toggle
+	sampleText                      basicwidget.Text
 
 	model *Model
 }
@@ -36,7 +36,7 @@ func (t *Texts) SetModel(model *Model) {
 
 func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	t.horizontalAlignText.SetText("Horizontal Align")
-	t.horizontalAlignDropdownList.SetItems([]basicwidget.DropdownListItem[basicwidget.HorizontalAlign]{
+	t.horizontalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.HorizontalAlign]{
 		{
 			Text: "Start",
 			Tag:  basicwidget.HorizontalAlignStart,
@@ -50,18 +50,18 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			Tag:  basicwidget.HorizontalAlignEnd,
 		},
 	})
-	t.horizontalAlignDropdownList.SetOnSelectedItemChanged(func(index int) {
-		item, ok := t.horizontalAlignDropdownList.ItemByIndex(index)
+	t.horizontalAlignSegmentedControl.SetOnItemSelected(func(index int) {
+		item, ok := t.horizontalAlignSegmentedControl.ItemByIndex(index)
 		if !ok {
 			t.model.Texts().SetHorizontalAlign(basicwidget.HorizontalAlignStart)
 			return
 		}
 		t.model.Texts().SetHorizontalAlign(item.Tag)
 	})
-	t.horizontalAlignDropdownList.SelectItemByTag(t.model.Texts().HorizontalAlign())
+	t.horizontalAlignSegmentedControl.SelectItemByTag(t.model.Texts().HorizontalAlign())
 
 	t.verticalAlignText.SetText("Vertical Align")
-	t.verticalAlignDropdownList.SetItems([]basicwidget.DropdownListItem[basicwidget.VerticalAlign]{
+	t.verticalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.VerticalAlign]{
 		{
 			Text: "Top",
 			Tag:  basicwidget.VerticalAlignTop,
@@ -75,15 +75,15 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			Tag:  basicwidget.VerticalAlignBottom,
 		},
 	})
-	t.verticalAlignDropdownList.SetOnSelectedItemChanged(func(index int) {
-		item, ok := t.verticalAlignDropdownList.ItemByIndex(index)
+	t.verticalAlignSegmentedControl.SetOnItemSelected(func(index int) {
+		item, ok := t.verticalAlignSegmentedControl.ItemByIndex(index)
 		if !ok {
 			t.model.Texts().SetVerticalAlign(basicwidget.VerticalAlignTop)
 			return
 		}
 		t.model.Texts().SetVerticalAlign(item.Tag)
 	})
-	t.verticalAlignDropdownList.SelectItemByTag(t.model.Texts().VerticalAlign())
+	t.verticalAlignSegmentedControl.SelectItemByTag(t.model.Texts().VerticalAlign())
 
 	t.autoWrapText.SetText("Auto Wrap")
 	t.autoWrapToggle.SetOnValueChanged(func(value bool) {
@@ -112,11 +112,11 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.horizontalAlignText,
-			SecondaryWidget: &t.horizontalAlignDropdownList,
+			SecondaryWidget: &t.horizontalAlignSegmentedControl,
 		},
 		{
 			PrimaryWidget:   &t.verticalAlignText,
-			SecondaryWidget: &t.verticalAlignDropdownList,
+			SecondaryWidget: &t.verticalAlignSegmentedControl,
 		},
 		{
 			PrimaryWidget:   &t.autoWrapText,
