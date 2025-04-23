@@ -207,9 +207,8 @@ func (t *tasksPanelContent) DefaultSize(context *guigui.Context) image.Point {
 
 func main() {
 	op := &guigui.RunOptions{
-		Title:           "TODO",
-		WindowMinWidth:  320,
-		WindowMinHeight: 240,
+		Title:         "TODO",
+		WindowMinSize: image.Pt(320, 240),
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)

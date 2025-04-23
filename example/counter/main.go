@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
@@ -90,9 +91,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 func main() {
 	op := &guigui.RunOptions{
-		Title:           "Counter",
-		WindowMinWidth:  600,
-		WindowMinHeight: 300,
+		Title:         "Counter",
+		WindowMinSize: image.Pt(600, 300),
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)

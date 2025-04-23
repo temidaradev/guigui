@@ -77,12 +77,10 @@ type app struct {
 }
 
 type RunOptions struct {
-	Title           string
-	WindowMinWidth  int
-	WindowMinHeight int
-	WindowMaxWidth  int
-	WindowMaxHeight int
-	AppScale        float64
+	Title         string
+	WindowMinSize image.Point
+	WindowMaxSize image.Point
+	AppScale      float64
 
 	RunGameOptions *ebiten.RunGameOptions
 }
@@ -99,17 +97,17 @@ func Run(root Widget, options *RunOptions) error {
 	minH := -1
 	maxW := -1
 	maxH := -1
-	if options.WindowMinWidth > 0 {
-		minW = options.WindowMinWidth
+	if options.WindowMinSize.X > 0 {
+		minW = options.WindowMinSize.X
 	}
-	if options.WindowMinHeight > 0 {
-		minH = options.WindowMinHeight
+	if options.WindowMinSize.Y > 0 {
+		minH = options.WindowMinSize.Y
 	}
-	if options.WindowMaxWidth > 0 {
-		maxW = options.WindowMaxWidth
+	if options.WindowMaxSize.X > 0 {
+		maxW = options.WindowMaxSize.X
 	}
-	if options.WindowMaxHeight > 0 {
-		maxH = options.WindowMaxHeight
+	if options.WindowMaxSize.Y > 0 {
+		maxH = options.WindowMaxSize.Y
 	}
 	ebiten.SetWindowSizeLimits(minW, minH, maxW, maxH)
 
