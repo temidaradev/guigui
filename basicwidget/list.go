@@ -391,7 +391,7 @@ func (l *List[T]) selectedItemColor(context *guigui.Context) color.Color {
 
 func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if l.style != ListStyleSidebar {
-		clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
+		clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3)
 		if l.style == ListStyleMenu {
 			clr = draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95)
 		}

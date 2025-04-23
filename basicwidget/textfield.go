@@ -103,7 +103,7 @@ func (t *TextField) Update(context *guigui.Context) error {
 
 func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
-	draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), RoundedCornerRadius(context))
+	draw.DrawRoundedRect(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3), RoundedCornerRadius(context))
 	clr1, clr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, false)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
