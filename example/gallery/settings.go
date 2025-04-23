@@ -72,7 +72,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			Tag:  language.TraditionalChinese,
 		},
 	})
-	s.localeDropdownList.SetOnSelectedItemChanged(func(index int) {
+	s.localeDropdownList.SetOnItemSelected(func(index int) {
 		item, ok := s.localeDropdownList.ItemByIndex(index)
 		if !ok {
 			context.SetAppLocales(nil)
