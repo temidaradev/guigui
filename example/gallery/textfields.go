@@ -4,6 +4,8 @@
 package main
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	"github.com/hajimehoshi/guigui/layout"
@@ -12,13 +14,13 @@ import (
 type TextFields struct {
 	guigui.DefaultWidget
 
-	form            basicwidget.Form
-	startAlignText  basicwidget.Text
-	startAlign      basicwidget.TextField
-	centerAlignText basicwidget.Text
-	centerAlign     basicwidget.TextField
-	endAlignText    basicwidget.Text
-	endAlign        basicwidget.TextField
+	form                 basicwidget.Form
+	startAlignText       basicwidget.Text
+	startAlignTextField  basicwidget.TextField
+	centerAlignText      basicwidget.Text
+	centerAlignTextField basicwidget.TextField
+	endAlignText         basicwidget.Text
+	endAlignTextField    basicwidget.TextField
 
 	model *Model
 }
@@ -28,43 +30,47 @@ func (t *TextFields) SetModel(model *Model) {
 }
 
 func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	u := basicwidget.UnitSize(context)
+
 	t.startAlignText.SetText("Horizontal Align - Start")
-	t.startAlign.SetOnValueChanged(func(text string) {
+	t.startAlignTextField.SetOnValueChanged(func(text string) {
 		t.model.TextFields().SetHorizontalAlignStartText(text)
 	})
-	t.startAlign.SetText(t.model.TextFields().HorizontalAlignStartText())
-	t.startAlign.SetHorizontalAlign(basicwidget.HorizontalAlignStart)
+	t.startAlignTextField.SetText(t.model.TextFields().HorizontalAlignStartText())
+	t.startAlignTextField.SetHorizontalAlign(basicwidget.HorizontalAlignStart)
+	context.SetSize(&t.startAlignTextField, image.Pt(8*u, guigui.DefaultSize))
 
 	t.centerAlignText.SetText("Horizontal Align - Center")
-	t.centerAlign.SetOnValueChanged(func(text string) {
+	t.centerAlignTextField.SetOnValueChanged(func(text string) {
 		t.model.TextFields().SetHorizontalAlignCenterText(text)
 	})
-	t.centerAlign.SetText(t.model.TextFields().HorizontalAlignCenterText())
-	t.centerAlign.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
+	t.centerAlignTextField.SetText(t.model.TextFields().HorizontalAlignCenterText())
+	t.centerAlignTextField.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
+	context.SetSize(&t.centerAlignTextField, image.Pt(8*u, guigui.DefaultSize))
 
 	t.endAlignText.SetText("Horizontal Align - End")
-	t.endAlign.SetOnValueChanged(func(text string) {
+	t.endAlignTextField.SetOnValueChanged(func(text string) {
 		t.model.TextFields().SetHorizontalAlignEndText(text)
 	})
-	t.endAlign.SetText(t.model.TextFields().HorizontalAlignEndText())
-	t.endAlign.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
+	t.endAlignTextField.SetText(t.model.TextFields().HorizontalAlignEndText())
+	t.endAlignTextField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
+	context.SetSize(&t.endAlignTextField, image.Pt(8*u, guigui.DefaultSize))
 
 	t.form.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.startAlignText,
-			SecondaryWidget: &t.startAlign,
+			SecondaryWidget: &t.startAlignTextField,
 		},
 		{
 			PrimaryWidget:   &t.centerAlignText,
-			SecondaryWidget: &t.centerAlign,
+			SecondaryWidget: &t.centerAlignTextField,
 		},
 		{
 			PrimaryWidget:   &t.endAlignText,
-			SecondaryWidget: &t.endAlign,
+			SecondaryWidget: &t.endAlignTextField,
 		},
 	})
 
-	u := basicwidget.UnitSize(context)
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(t).Inset(u / 2),
 		Heights: []layout.Size{
