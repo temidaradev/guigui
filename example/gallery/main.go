@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"os"
 
 	"github.com/hajimehoshi/guigui"
@@ -71,7 +72,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 func main() {
 	op := &guigui.RunOptions{
-		Title: "Component Gallery",
+		Title:      "Component Gallery",
+		WindowSize: image.Pt(800, 600),
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)

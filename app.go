@@ -78,6 +78,7 @@ type app struct {
 
 type RunOptions struct {
 	Title         string
+	WindowSize    image.Point
 	WindowMinSize image.Point
 	WindowMaxSize image.Point
 	AppScale      float64
@@ -93,6 +94,7 @@ func Run(root Widget, options *RunOptions) error {
 	ebiten.SetWindowTitle(options.Title)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetScreenClearedEveryFrame(false)
+	ebiten.SetWindowSize(options.WindowSize.X, options.WindowSize.Y)
 	minW := -1
 	minH := -1
 	maxW := -1
