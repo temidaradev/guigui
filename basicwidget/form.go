@@ -121,7 +121,7 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	if len(f.items) > 0 {
 		paddingX, paddingY := formItemPadding(context)
-		y := paddingY
+		y := bounds.Min.Y
 		for _, item := range f.items[:len(f.items)-1] {
 			var primaryH int
 			var secondaryH int
@@ -132,14 +132,16 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 				secondaryH = context.Size(item.SecondaryWidget).Y
 			}
 			h := max(primaryH, secondaryH, minFormItemHeight(context))
-			y += h + 2*paddingY
+			y += h + paddingY
 
 			x0 := float32(bounds.Min.X + paddingX)
 			x1 := float32(bounds.Max.X - paddingX)
-			y := float32(y) + float32(paddingY)
+			yy := float32(y) + float32(paddingY)
 			width := 1 * float32(context.Scale())
 			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
-			vector.StrokeLine(dst, x0, y, x1, y, width, clr, false)
+			vector.StrokeLine(dst, x0, yy, x1, yy, width, clr, false)
+
+			y += paddingY
 		}
 	}
 

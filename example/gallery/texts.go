@@ -154,16 +154,16 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(t).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.FixedSize(t.form.DefaultSize(context).Y),
 			layout.FlexibleSize(1),
+			layout.FixedSize(t.form.DefaultSize(context).Y),
 		},
 		RowGap: u / 2,
 	}).CellBounds() {
 		switch i {
 		case 0:
-			appender.AppendChildWidgetWithBounds(&t.form, bounds)
-		case 1:
 			appender.AppendChildWidgetWithBounds(&t.sampleText, bounds)
+		case 1:
+			appender.AppendChildWidgetWithBounds(&t.form, bounds)
 		}
 	}
 
