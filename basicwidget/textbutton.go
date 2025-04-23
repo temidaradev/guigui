@@ -66,6 +66,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	}
 	t.text.SetHorizontalAlign(HorizontalAlignCenter)
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
+
 	textP := context.Position(t)
 	if t.image.HasImage() {
 		textP.X += (s.X - tw + UnitSize(context)/4) / 2
@@ -115,4 +116,8 @@ func textButtonImageSize(context *guigui.Context) int {
 
 func textButtonTextAndImagePadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
+}
+
+func (t *TextButton) setUseAccentColor(use bool) {
+	t.button.setUseAccentColor(use)
 }

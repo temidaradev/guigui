@@ -18,6 +18,7 @@ type Button struct {
 
 	pressed         bool
 	keepPressed     bool
+	useAccentColor  bool
 	borderInvisible bool
 	prevHovered     bool
 	sharpenCorners  draw.SharpenCorners
@@ -80,7 +81,11 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	cm := context.ColorMode()
 	backgroundColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.3)
 	if b.isPressed(context) {
-		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
+		if b.useAccentColor {
+			backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.9, 0.5)
+		} else {
+			backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
+		}
 	} else if b.canPress(context) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
 	} else if !context.IsEnabled(b) {
@@ -104,7 +109,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		} else if !context.IsEnabled(b) {
 			borderType = draw.RoundedRectBorderTypeRegular
 		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, false)
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context))
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
@@ -146,5 +151,13 @@ func (b *Button) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
 		return
 	}
 	b.sharpenCorners = sharpenCorners
+	guigui.RequestRedraw(b)
+}
+
+func (b *Button) setUseAccentColor(use bool) {
+	if b.useAccentColor == use {
+		return
+	}
+	b.useAccentColor = use
 	guigui.RequestRedraw(b)
 }

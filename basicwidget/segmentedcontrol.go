@@ -65,6 +65,7 @@ func (s *SegmentedControl[T]) ensureButtons(context *guigui.Context) {
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
+		s.textButtons[i].setUseAccentColor(true)
 		if s.abstractList.ItemCount() > 1 {
 			switch i {
 			case 0:
