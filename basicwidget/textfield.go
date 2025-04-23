@@ -28,6 +28,10 @@ func (t *TextField) SetOnEnterPressed(f func(text string)) {
 	t.text.SetOnEnterPressed(f)
 }
 
+func (t *TextField) SetOnValueChanged(f func(text string)) {
+	t.text.SetOnValueChanged(f)
+}
+
 func (t *TextField) Text() string {
 	return t.text.Text()
 }

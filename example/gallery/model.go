@@ -8,7 +8,8 @@ import "github.com/hajimehoshi/guigui/basicwidget"
 type Model struct {
 	mode string
 
-	texts TextsModel
+	texts      TextsModel
+	textFields TextFieldsModel
 }
 
 func (m *Model) Mode() string {
@@ -24,6 +25,10 @@ func (m *Model) SetMode(mode string) {
 
 func (m *Model) Texts() *TextsModel {
 	return &m.texts
+}
+
+func (m *Model) TextFields() *TextFieldsModel {
+	return &m.textFields
 }
 
 type TextsModel struct {
@@ -102,4 +107,49 @@ func (t *TextsModel) Text() string {
 func (t *TextsModel) SetText(text string) {
 	t.text = text
 	t.textSet = true
+}
+
+type TextFieldsModel struct {
+	hAlignStartText     string
+	hAlignStartTextSet  bool
+	hAlignCenterText    string
+	hAlignCenterTextSet bool
+	hAlignEndText       string
+	hAlignEndTextSet    bool
+}
+
+func (t *TextFieldsModel) HorizontalAlignStartText() string {
+	if !t.hAlignStartTextSet {
+		return "Hello, Guigui!"
+	}
+	return t.hAlignStartText
+}
+
+func (t *TextFieldsModel) SetHorizontalAlignStartText(text string) {
+	t.hAlignStartText = text
+	t.hAlignStartTextSet = true
+}
+
+func (t *TextFieldsModel) HorizontalAlignCenterText() string {
+	if !t.hAlignCenterTextSet {
+		return "Hello, Guigui!"
+	}
+	return t.hAlignCenterText
+}
+
+func (t *TextFieldsModel) SetHorizontalAlignCenterText(text string) {
+	t.hAlignCenterText = text
+	t.hAlignCenterTextSet = true
+}
+
+func (t *TextFieldsModel) HorizontalAlignEndText() string {
+	if !t.hAlignEndTextSet {
+		return "Hello, Guigui!"
+	}
+	return t.hAlignEndText
+}
+
+func (t *TextFieldsModel) SetHorizontalAlignEndText(text string) {
+	t.hAlignEndText = text
+	t.hAlignEndTextSet = true
 }
