@@ -124,9 +124,9 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	b.Max.Y = b.Min.Y + b.Dy()/2
 	var borderClr1, borderClr2 color.Color
 	if context.IsEnabled(t) {
-		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset)
+		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, t.value)
 	} else {
-		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeRegular)
+		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeRegular, false)
 	}
 	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
@@ -140,7 +140,7 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 		cx = int((1-rate)*cxOn + rate*cxOff)
 	}
 	cy := bounds.Min.Y + r
-	thumbClr1, thumbClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeOutset)
+	thumbClr1, thumbClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeOutset, false)
 	thumbBounds := image.Rect(cx-r, cy-r, cx+r, cy+r)
 	draw.DrawRoundedRect(context, dst, thumbBounds, thumbColor, r)
 	draw.DrawRoundedRectBorder(context, dst, thumbBounds, thumbClr1, thumbClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeOutset)

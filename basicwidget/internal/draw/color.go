@@ -125,14 +125,18 @@ func ScaleAlpha(clr color.Color, alpha float64) color.Color {
 	}
 }
 
-func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType) (color.Color, color.Color) {
+func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType, accent bool) (color.Color, color.Color) {
+	typ := ColorTypeBase
+	if accent {
+		typ = ColorTypeAccent
+	}
 	switch borderType {
 	case RoundedRectBorderTypeRegular:
-		return Color2(colorMode, ColorTypeBase, 0.8, 0.1), Color2(colorMode, ColorTypeBase, 0.8, 0.1)
+		return Color2(colorMode, typ, 0.8, 0.1), Color2(colorMode, typ, 0.8, 0.1)
 	case RoundedRectBorderTypeInset:
-		return Color2(colorMode, ColorTypeBase, 0.7, 0.2), Color2(colorMode, ColorTypeBase, 0.85, 0.3)
+		return Color2(colorMode, typ, 0.7, 0.2), Color2(colorMode, typ, 0.85, 0.3)
 	case RoundedRectBorderTypeOutset:
-		return Color2(colorMode, ColorTypeBase, 0.85, 0.5), Color2(colorMode, ColorTypeBase, 0.7, 0.2)
+		return Color2(colorMode, typ, 0.85, 0.5), Color2(colorMode, typ, 0.7, 0.2)
 	}
 	panic(fmt.Sprintf("draw: invalid border type: %d", borderType))
 }

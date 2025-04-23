@@ -104,7 +104,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		} else if !context.IsEnabled(b) {
 			borderType = draw.RoundedRectBorderTypeRegular
 		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType)
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, false)
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
