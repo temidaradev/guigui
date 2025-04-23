@@ -45,7 +45,7 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 }
 
 func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if context.IsEnabled(b) && b.isHovered(context) {
+	if context.IsEnabled(b) && b.isHovered(context) && !b.keepPressed {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			b.pressed = true
 			if b.onDown != nil {
@@ -68,7 +68,7 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 }
 
 func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if b.canPress(context) || b.pressed {
+	if (b.canPress(context) || b.pressed) && !b.keepPressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -115,7 +115,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 }
 
 func (b *Button) canPress(context *guigui.Context) bool {
-	return context.IsEnabled(b) && b.isHovered(context) && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	return context.IsEnabled(b) && b.isHovered(context) && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !b.keepPressed
 }
 
 func (b *Button) isHovered(context *guigui.Context) bool {
