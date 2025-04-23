@@ -841,7 +841,11 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		op.DrawSelection = true
 		op.SelectionStart = start
 		op.SelectionEnd = end
-		op.SelectionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
+		if context.IsFocused(t) {
+			op.SelectionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
+		} else {
+			op.SelectionColor = draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
+		}
 	}
 	if uStart, cStart, cEnd, uEnd, ok := t.compositionSelectionToDraw(context); ok {
 		op.DrawComposition = true
