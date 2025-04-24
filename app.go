@@ -581,8 +581,14 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 		}
 	}
 
+	// widgets are ordered by descending z values.
 	for _, w := range widgets {
-		if z(w) != z(widget) {
+		if z(w) > z(widget) {
+			// w overlaps widget at point.
+			return false
+		}
+		if z(w) < z(widget) {
+			// The same z value no longer exists.
 			return false
 		}
 		if w.widgetState() == widget.widgetState() {
