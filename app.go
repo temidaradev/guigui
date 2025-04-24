@@ -94,7 +94,9 @@ func Run(root Widget, options *RunOptions) error {
 	ebiten.SetWindowTitle(options.Title)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetScreenClearedEveryFrame(false)
-	ebiten.SetWindowSize(options.WindowSize.X, options.WindowSize.Y)
+	if options.WindowSize.X > 0 || options.WindowSize.Y > 0 {
+		ebiten.SetWindowSize(options.WindowSize.X, options.WindowSize.Y)
+	}
 	minW := -1
 	minH := -1
 	maxW := -1
