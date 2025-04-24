@@ -139,3 +139,7 @@ func (t *textFieldFocus) ZDelta() int {
 func (t *textFieldFocus) DefaultSize(context *guigui.Context) image.Point {
 	return context.Size(t.textField).Add(image.Pt(2*textFieldFocusBorderWidth(context), 2*textFieldFocusBorderWidth(context)))
 }
+
+func (t *textFieldFocus) PassThrough() bool {
+	return true
+}
