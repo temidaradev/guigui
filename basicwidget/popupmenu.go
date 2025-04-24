@@ -56,10 +56,6 @@ func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetSize(&p.textList, bounds.Size())
 	appender.AppendChildWidgetWithBounds(&p.popup, bounds)
 
-	// Sync the visibility with the popup.
-	// TODO: This is tricky. Refactor this. Perhaps, introducing Widget.PassThrough might be a good idea.
-	context.SetVisible(p, context.IsVisible(&p.popup))
-
 	return nil
 }
 
