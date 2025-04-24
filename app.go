@@ -583,7 +583,7 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 
 	for _, w := range widgets {
 		if z(w) != z(widget) {
-			return false
+			continue
 		}
 		if w.widgetState() == widget.widgetState() {
 			return true
