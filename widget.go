@@ -18,6 +18,7 @@ type Widget interface {
 	Draw(context *Context, dst *ebiten.Image)
 	ZDelta() int
 	DefaultSize(context *Context) image.Point
+	PassThrough() bool
 
 	widgetState() *widgetState
 }

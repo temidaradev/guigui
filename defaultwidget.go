@@ -46,6 +46,10 @@ func (d *DefaultWidget) DefaultSize(context *Context) image.Point {
 	return image.Pt(int(144*context.Scale()), int(144*context.Scale()))
 }
 
+func (d *DefaultWidget) PassThrough() bool {
+	return false
+}
+
 func (d *DefaultWidget) widgetState() *widgetState {
 	return &d.s
 }

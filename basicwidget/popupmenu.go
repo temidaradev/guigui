@@ -92,7 +92,6 @@ func (p *PopupMenu[T]) contentBounds(context *guigui.Context) image.Rectangle {
 }
 
 func (p *PopupMenu[T]) Open(context *guigui.Context) {
-	context.SetVisible(p, true)
 	p.popup.Open(context)
 }
 

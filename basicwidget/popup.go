@@ -103,8 +103,6 @@ func (p *Popup) SetOnClosed(f func(reason PopupClosedReason)) {
 }
 
 func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	context.SetVisible(p, p.IsOpen())
-
 	if (p.showing || p.hiding) && p.openingCount > 0 {
 		p.nextContentPosition = context.Position(p)
 		p.hasNextContentPosition = true
@@ -143,7 +141,6 @@ func (p *Popup) Open(context *guigui.Context) {
 		p.openAfterClose = true
 		return
 	}
-	context.SetVisible(p, true)
 	p.showing = true
 	p.hiding = false
 }
@@ -202,8 +199,6 @@ func (p *Popup) Update(context *guigui.Context) error {
 				}
 				p.Open(context)
 				p.openAfterClose = false
-			} else {
-				context.SetVisible(p, false)
 			}
 		}
 	}
@@ -216,6 +211,10 @@ func (p *Popup) ZDelta() int {
 
 func (p *Popup) DefaultSize(context *guigui.Context) image.Point {
 	return context.AppSize()
+}
+
+func (p *Popup) PassThrough() bool {
+	return !p.IsOpen()
 }
 
 type popupContent struct {

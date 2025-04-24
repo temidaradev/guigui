@@ -358,6 +358,10 @@ func (a *app) handleInputWidget(typ handleInputType) HandleInputResult {
 }
 
 func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle int) HandleInputResult {
+	if widget.PassThrough() {
+		return HandleInputResult{}
+	}
+
 	widgetState := widget.widgetState()
 	if widgetState.hidden {
 		return HandleInputResult{}
@@ -587,6 +591,9 @@ func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, 
 		return widgets
 	}
 	if !widget.widgetState().isEnabled() {
+		return widgets
+	}
+	if widget.PassThrough() {
 		return widgets
 	}
 
