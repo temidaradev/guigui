@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"iter"
 	"log/slog"
 	"maps"
 	"math"
@@ -387,43 +386,22 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 }
 
 func (a *app) cursorShape() bool {
-	for i := len(a.zs) - 1; i >= 0; i-- {
-		z := a.zs[i]
-		if a.doCursorShape(a.root, z) {
-			return true
+	var firstZ int
+	for i, widget := range a.widgetsInDescendingZOrderAt(image.Pt(ebiten.CursorPosition())) {
+		if i == 0 {
+			firstZ = z(widget)
 		}
+		if z(widget) < firstZ {
+			break
+		}
+		shape, ok := widget.CursorShape(&a.context)
+		if !ok {
+			continue
+		}
+		ebiten.SetCursorShape(shape)
+		return true
 	}
 	return false
-}
-
-func (a *app) doCursorShape(widget Widget, zToHandle int) bool {
-	widgetState := widget.widgetState()
-	if widgetState.hidden {
-		return false
-	}
-
-	// Iterate the children in the reverse order of rendering.
-	for i := len(widgetState.children) - 1; i >= 0; i-- {
-		child := widgetState.children[i]
-		if a.doCursorShape(child, zToHandle) {
-			return true
-		}
-	}
-
-	if zToHandle != z(widget) {
-		return false
-	}
-
-	if !image.Pt(ebiten.CursorPosition()).In(a.context.VisibleBounds(widget)) {
-		return false
-	}
-
-	shape, ok := widget.CursorShape(&a.context)
-	if !ok {
-		return false
-	}
-	ebiten.SetCursorShape(shape)
-	return true
 }
 
 func (a *app) updateWidget(widget Widget) error {
@@ -562,27 +540,8 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 	if !widget.widgetState().isInTree() {
 		return false
 	}
-
-	var widgets []Widget
-	idx := slices.IndexFunc(a.hitTestCache, func(i hitTestCacheItem) bool {
-		return i.point.Eq(point)
-	})
-	if idx >= 0 {
-		widgets = a.hitTestCache[idx].widgets
-	} else {
-		widgets = slices.Collect(a.widgetsAt(point))
-		a.hitTestCache = slices.Insert(a.hitTestCache, 0, hitTestCacheItem{
-			point:   point,
-			widgets: widgets,
-		})
-		const maxCacheSize = 4
-		if len(a.hitTestCache) > maxCacheSize {
-			a.hitTestCache = slices.Delete(a.hitTestCache, maxCacheSize, len(a.hitTestCache))
-		}
-	}
-
 	// widgets are ordered by descending z values.
-	for _, w := range widgets {
+	for _, w := range a.widgetsInDescendingZOrderAt(point) {
 		if z(w) > z(widget) {
 			// w overlaps widget at point.
 			return false
@@ -598,45 +557,52 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 	return false
 }
 
-func (a *app) widgetsAt(point image.Point) iter.Seq[Widget] {
-	return func(yield func(w Widget) bool) {
-		for i := len(a.zs) - 1; i >= 0; i-- {
-			z := a.zs[i]
-			for widget := range a.doWidgetsAt(point, z, a.root) {
-				if !yield(widget) {
-					return
-				}
-			}
-		}
+func (a *app) widgetsInDescendingZOrderAt(point image.Point) []Widget {
+	idx := slices.IndexFunc(a.hitTestCache, func(i hitTestCacheItem) bool {
+		return i.point.Eq(point)
+	})
+	if idx >= 0 {
+		return a.hitTestCache[idx].widgets
 	}
+
+	var widgets []Widget
+	for i := len(a.zs) - 1; i >= 0; i-- {
+		z := a.zs[i]
+		widgets = a.appendWidgetsAt(widgets, point, z, a.root)
+	}
+	a.hitTestCache = slices.Insert(a.hitTestCache, 0, hitTestCacheItem{
+		point:   point,
+		widgets: widgets,
+	})
+	const maxCacheSize = 4
+	if len(a.hitTestCache) > maxCacheSize {
+		a.hitTestCache = slices.Delete(a.hitTestCache, maxCacheSize, len(a.hitTestCache))
+	}
+
+	return widgets
 }
 
-func (a *app) doWidgetsAt(point image.Point, targetZ int, widget Widget) iter.Seq[Widget] {
-	return func(yield func(w Widget) bool) {
-		if !widget.widgetState().isVisible() {
-			return
-		}
-		if !widget.widgetState().isEnabled() {
-			return
-		}
-
-		children := widget.widgetState().children
-		for i := len(children) - 1; i >= 0; i-- {
-			child := children[i]
-			for widget := range a.doWidgetsAt(point, targetZ, child) {
-				if !yield(widget) {
-					return
-				}
-			}
-		}
-		if z(widget) != targetZ {
-			return
-		}
-		if !point.In(a.context.VisibleBounds(widget)) {
-			return
-		}
-		if !yield(widget) {
-			return
-		}
+func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, widget Widget) []Widget {
+	if !widget.widgetState().isVisible() {
+		return widgets
 	}
+	if !widget.widgetState().isEnabled() {
+		return widgets
+	}
+
+	children := widget.widgetState().children
+	for i := len(children) - 1; i >= 0; i-- {
+		child := children[i]
+		widgets = a.appendWidgetsAt(widgets, point, targetZ, child)
+	}
+
+	if z(widget) != targetZ {
+		return widgets
+	}
+	if !point.In(a.context.VisibleBounds(widget)) {
+		return widgets
+	}
+
+	widgets = append(widgets, widget)
+	return widgets
 }
