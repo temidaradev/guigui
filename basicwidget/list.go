@@ -108,10 +108,7 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		l.indexToJumpPlus1 = 0
 	}
 
-	appender.AppendChildWidgetWithBounds(&l.scrollOverlay, image.Rectangle{
-		Min: context.Position(l),
-		Max: context.Position(l).Add(context.Size(l)),
-	})
+	appender.AppendChildWidgetWithBounds(&l.scrollOverlay, context.Bounds(l))
 
 	hoveredItemIndex := l.HoveredItemIndex(context)
 	p := context.Position(l)

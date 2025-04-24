@@ -62,6 +62,15 @@ func (t *TextField) SelectAll() {
 }
 
 func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	if t.prevFocused != context.HasFocusedChildWidget(t) {
+		t.prevFocused = context.HasFocusedChildWidget(t)
+		guigui.RequestRedraw(t)
+	}
+	if context.IsFocused(t) {
+		context.SetFocused(&t.text, true)
+		guigui.RequestRedraw(t)
+	}
+
 	t.text.SetEditable(true)
 	b := context.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
@@ -91,18 +100,6 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 		}
 	}
 	return guigui.HandleInputResult{}
-}
-
-func (t *TextField) Update(context *guigui.Context) error {
-	if t.prevFocused != context.HasFocusedChildWidget(t) {
-		t.prevFocused = context.HasFocusedChildWidget(t)
-		guigui.RequestRedraw(t)
-	}
-	if context.IsFocused(t) {
-		context.SetFocused(&t.text, true)
-		guigui.RequestRedraw(t)
-	}
-	return nil
 }
 
 func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
