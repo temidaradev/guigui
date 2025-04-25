@@ -96,16 +96,15 @@ type Text struct {
 	scaleMinus1 float64
 	bold        bool
 
-	selectable           bool
-	editable             bool
-	multiline            bool
-	autoWrap             bool
-	selectionDragStart   int
-	selectionDragEnd     int
-	selectionShiftIndex  int
-	dragging             bool
-	toAdjustScrollOffset bool
-	prevFocused          bool
+	selectable          bool
+	editable            bool
+	multiline           bool
+	autoWrap            bool
+	selectionDragStart  int
+	selectionDragEnd    int
+	selectionShiftIndex int
+	dragging            bool
+	prevFocused         bool
 
 	clickCount         int
 	lastClickTick      int64
@@ -113,8 +112,7 @@ type Text struct {
 
 	filter TextFilter
 
-	cursor        textCursor
-	scrollOverlay ScrollOverlay
+	cursor textCursor
 
 	temporaryClipboard string
 
@@ -159,8 +157,6 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetAutoWrapCachedTextSize()
 	}
 
-	t.scrollOverlay.SetContentSize(context, t.TextSize(context))
-
 	if !t.prevFocused && context.IsFocused(t) {
 		t.field.Focus()
 		t.cursor.resetCounter()
@@ -173,20 +169,12 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	}
 	t.prevFocused = context.IsFocused(t)
 
-	if t.toAdjustScrollOffset && !context.VisibleBounds(t).Empty() {
-		t.adjustScrollOffset(context)
-		t.toAdjustScrollOffset = false
-	}
-
 	if t.selectable || t.editable {
 		t.cursor.text = t
 		p := context.Position(t)
 		p.X -= cursorWidth(context) / 2
 		appender.AppendChildWidgetWithPosition(&t.cursor, p)
 	}
-
-	context.SetVisible(&t.scrollOverlay, false)
-	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	return nil
 }
@@ -240,7 +228,6 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 		return
 	}
 	t.field.SetTextAndSelection(text, start, end)
-	t.toAdjustScrollOffset = true
 	guigui.RequestRedraw(t)
 	if textChanged {
 		t.resetCachedTextSize()
@@ -277,6 +264,10 @@ func (t *Text) SetScale(scale float64) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *Text) HorizontalAlign() HorizontalAlign {
+	return t.hAlign
+}
+
 func (t *Text) SetHorizontalAlign(align HorizontalAlign) {
 	if t.hAlign == align {
 		return
@@ -284,6 +275,10 @@ func (t *Text) SetHorizontalAlign(align HorizontalAlign) {
 
 	t.hAlign = align
 	guigui.RequestRedraw(t)
+}
+
+func (t *Text) VerticalAlign() VerticalAlign {
+	return t.vAlign
 }
 
 func (t *Text) SetVerticalAlign(align VerticalAlign) {
@@ -349,14 +344,9 @@ func (t *Text) SetAutoWrap(autoWrap bool) {
 }
 
 func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
-	offsetX, offsetY := t.scrollOverlay.Offset()
-
 	b := context.Bounds(t)
 
 	ts := t.TextSize(context)
-	if b.Dx() < ts.X {
-		b.Max.X = b.Min.X + ts.X
-	}
 
 	switch t.vAlign {
 	case VerticalAlignTop:
@@ -369,7 +359,6 @@ func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 		b.Min.Y = b.Max.Y - ts.Y
 	}
 
-	b = b.Add(image.Pt(int(offsetX), int(offsetY)))
 	return b
 }
 
@@ -467,26 +456,6 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	return guigui.HandleInputResult{}
 }
 
-func (t *Text) adjustScrollOffset(context *guigui.Context) {
-	start, end, ok := t.selectionToDraw(context)
-	if !ok {
-		return
-	}
-
-	tb := t.textBounds(context)
-	bounds := context.Bounds(t)
-	if pos, ok := t.textPosition(context, end, true); ok {
-		dx := min(float64(bounds.Max.X)-pos.X, 0)
-		dy := min(float64(bounds.Max.Y)-pos.Bottom, 0)
-		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
-	}
-	if pos, ok := t.textPosition(context, start, true); ok {
-		dx := max(float64(bounds.Min.X)-pos.X, 0)
-		dy := max(float64(bounds.Min.Y)-pos.Top, 0)
-		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
-	}
-}
-
 func (t *Text) textToDraw(showComposition bool) string {
 	if showComposition {
 		return t.field.TextForRendering()
@@ -557,7 +526,6 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		guigui.RequestRedraw(t)
 		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
 		t.resetCachedTextSize()
-		t.adjustScrollOffset(context)
 		if t.field.Text() != origText {
 			if t.onValueChanged != nil {
 				t.onValueChanged(t.field.Text())
@@ -876,6 +844,9 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
 		w, h = textutil.Measure(0, txt, false, t.face(context), t.lineHeight(context))
 	}
 	w *= t.scaleMinus1 + 1
+	// If width is 0, the text's bounds and visible bounds are empty, and nothing including its cursor is rendered.
+	// Force to set a positive number as the width.
+	w = max(w, 1)
 	if useAutoWrap {
 		t.cachedAutoWrapTextSizePlus1 = image.Pt(int(w)+1, int(h)+1)
 	} else {
@@ -939,7 +910,7 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 
 func (t *Text) textPosition(context *guigui.Context, index int, showComposition bool) (position textutil.TextPosition, ok bool) {
 	textBounds := t.textBounds(context)
-	if !textBounds.Overlaps(context.VisibleBounds(t)) {
+	if !textBounds.Overlaps(context.VisibleBounds(t)) && t.textToDraw(showComposition) != "" {
 		return textutil.TextPosition{}, false
 	}
 	txt := t.textToDraw(showComposition)
@@ -1034,6 +1005,12 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 	b := t.text.cursorBounds(context)
+	tb := context.VisibleBounds(t.text)
+	tb.Min.X -= cursorWidth(context) / 2
+	tb.Max.X += cursorWidth(context) / 2
+	if !b.Overlaps(tb) {
+		return
+	}
 	vector.DrawFilledRect(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Dx()), float32(b.Dy()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4), false)
 }
 

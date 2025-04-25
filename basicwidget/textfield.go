@@ -16,14 +16,17 @@ import (
 type TextField struct {
 	guigui.DefaultWidget
 
-	background textFieldBackground
-	text       Text
-	frame      textFieldFrame
-	focus      textFieldFocus
+	background    textFieldBackground
+	text          Text
+	frame         textFieldFrame
+	scrollOverlay ScrollOverlay
+	focus         textFieldFocus
 
 	readonly bool
 
 	prevFocused bool
+
+	onTextAndSelectionChanged func(text string, start, end int)
 }
 
 func (t *TextField) SetOnEnterPressed(f func(text string)) {
@@ -32,6 +35,10 @@ func (t *TextField) SetOnEnterPressed(f func(text string)) {
 
 func (t *TextField) SetOnValueChanged(f func(text string)) {
 	t.text.SetOnValueChanged(f)
+}
+
+func (t *TextField) SetTextAndSelectionChanged(f func(text string, start, end int)) {
+	t.onTextAndSelectionChanged = f
 }
 
 func (t *TextField) Text() string {
@@ -63,6 +70,14 @@ func (t *TextField) SelectAll() {
 	t.text.selectAll()
 }
 
+func textFieldPadding(context *guigui.Context) int {
+	return UnitSize(context) / 2
+}
+
+func (t *TextField) scrollContentSize(context *guigui.Context) image.Point {
+	return t.text.TextSize(context).Add(image.Pt(2*textFieldPadding(context), 0))
+}
+
 func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if t.prevFocused != context.HasFocusedChildWidget(t) {
 		t.prevFocused = context.HasFocusedChildWidget(t)
@@ -73,19 +88,33 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		guigui.RequestRedraw(t)
 	}
 
+	padding := textFieldPadding(context)
+
+	t.scrollOverlay.SetContentSize(context, t.scrollContentSize(context))
+
 	appender.AppendChildWidgetWithBounds(&t.background, context.Bounds(t))
 
 	t.text.SetEditable(true)
-	b := context.Bounds(t)
-	b.Min.X += UnitSize(context) / 2
-	b.Max.X -= UnitSize(context) / 2
-	// TODO: Consider multiline.
-	if !t.text.IsMultiline() {
-		t.text.SetVerticalAlign(VerticalAlignMiddle)
+
+	pt := context.Position(t)
+	b := image.Rectangle{
+		Min: pt,
+		Max: pt.Add(image.Pt(max(t.text.TextSize(context).X, context.Size(t).X-2*padding), context.Size(t).Y)),
 	}
-	appender.AppendChildWidgetWithBounds(&t.text, b)
+	b = b.Add(image.Pt(padding, 0))
+	t.text.SetVerticalAlign(VerticalAlignMiddle)
+
+	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
+	context.SetSize(&t.text, b.Size())
+	t.adjustScrollOffset(context)
+	offsetX, offsetY := t.scrollOverlay.Offset()
+	b = b.Add(image.Pt(int(offsetX), int(offsetY)))
+	appender.AppendChildWidgetWithPosition(&t.text, b.Min)
 
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
+
+	context.SetVisible(&t.scrollOverlay, false)
+	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	if context.HasFocusedChildWidget(t) {
 		t.focus.textField = t
@@ -95,6 +124,25 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	}
 
 	return nil
+}
+
+func (t *TextField) adjustScrollOffset(context *guigui.Context) {
+	start, end, ok := t.text.selectionToDraw(context)
+	if !ok {
+		return
+	}
+	bounds := context.Bounds(t)
+	padding := textFieldPadding(context)
+	if pos, ok := t.text.textPosition(context, end, true); ok {
+		dx := min(float64(bounds.Max.X-padding)-pos.X, 0)
+		dy := min(float64(bounds.Max.Y)-pos.Bottom, 0)
+		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
+	}
+	if pos, ok := t.text.textPosition(context, start, true); ok {
+		dx := max(float64(bounds.Min.X+padding)-pos.X, 0)
+		dy := max(float64(bounds.Min.Y)-pos.Top, 0)
+		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
+	}
 }
 
 func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
@@ -108,6 +156,10 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 		}
 	}
 	return guigui.HandleInputResult{}
+}
+
+func (t *TextField) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
+	return t.text.CursorShape(context)
 }
 
 func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
