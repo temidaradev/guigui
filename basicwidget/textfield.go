@@ -16,8 +16,10 @@ import (
 type TextField struct {
 	guigui.DefaultWidget
 
-	text  Text
-	focus textFieldFocus
+	background textFieldBackground
+	text       Text
+	frame      textFieldFrame
+	focus      textFieldFocus
 
 	readonly bool
 
@@ -71,6 +73,8 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		guigui.RequestRedraw(t)
 	}
 
+	appender.AppendChildWidgetWithBounds(&t.background, context.Bounds(t))
+
 	t.text.SetEditable(true)
 	b := context.Bounds(t)
 	b.Min.X += UnitSize(context) / 2
@@ -80,6 +84,8 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		t.text.SetVerticalAlign(VerticalAlignMiddle)
 	}
 	appender.AppendChildWidgetWithBounds(&t.text, b)
+
+	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
 
 	if context.HasFocusedChildWidget(t) {
 		t.focus.textField = t
@@ -102,16 +108,32 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 	return guigui.HandleInputResult{}
 }
 
-func (t *TextField) Draw(context *guigui.Context, dst *ebiten.Image) {
+func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
+	// TODO: Increase the height for multiple lines.
+	return image.Pt(6*UnitSize(context), UnitSize(context))
+}
+
+type textFieldBackground struct {
+	guigui.DefaultWidget
+}
+
+func (t *textFieldBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	draw.DrawRoundedRect(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3), RoundedCornerRadius(context))
+}
+
+type textFieldFrame struct {
+	guigui.DefaultWidget
+}
+
+func (t *textFieldFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
+	bounds := context.Bounds(t)
 	clr1, clr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, false)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
 
-func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
-	// TODO: Increase the height for multiple lines.
-	return image.Pt(6*UnitSize(context), UnitSize(context))
+func (t *textFieldFrame) PassThrough() bool {
+	return true
 }
 
 func textFieldFocusBorderWidth(context *guigui.Context) int {
