@@ -181,7 +181,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	if t.selectable || t.editable {
 		t.cursor.text = t
 		p := context.Position(t)
-		p.X -= cursorWidth(context)
+		p.X -= cursorWidth(context) / 2
 		appender.AppendChildWidgetWithPosition(&t.cursor, p)
 	}
 
@@ -1038,7 +1038,7 @@ func (t *textCursor) ZDelta() int {
 }
 
 func (t *textCursor) DefaultSize(context *guigui.Context) image.Point {
-	return context.Size(t.text).Add(image.Pt(2*cursorWidth(context), 0))
+	return context.Size(t.text).Add(image.Pt(cursorWidth(context), 0))
 }
 
 func (t *textCursor) PassThrough() bool {
