@@ -548,10 +548,6 @@ func (t *Text) compositionSelectionToDraw(context *guigui.Context) (uStart, cSta
 }
 
 func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
-	if !context.IsFocused(t) || !context.IsEnabled(t) {
-		return guigui.HandleInputResult{}
-	}
-
 	if !t.selectable && !t.editable {
 		return guigui.HandleInputResult{}
 	}

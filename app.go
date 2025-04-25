@@ -362,11 +362,19 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 		return HandleInputResult{}
 	}
 
-	widgetState := widget.widgetState()
-	if widgetState.hidden {
+	if !a.context.IsVisible(widget) {
 		return HandleInputResult{}
 	}
 
+	if !a.context.IsEnabled(widget) {
+		return HandleInputResult{}
+	}
+
+	if typ == handleInputTypeButton && !a.context.HasFocusedChildWidget(widget) {
+		return HandleInputResult{}
+	}
+
+	widgetState := widget.widgetState()
 	// Iterate the children in the reverse order of rendering.
 	for i := len(widgetState.children) - 1; i >= 0; i-- {
 		child := widgetState.children[i]
