@@ -322,10 +322,6 @@ func (t *Text) SetEditable(editable bool) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *Text) SetScrollable(context *guigui.Context, scrollable bool) {
-	context.SetVisible(&t.scrollOverlay, scrollable)
-}
-
 func (t *Text) IsMultiline() bool {
 	return t.multiline
 }
