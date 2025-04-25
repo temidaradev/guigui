@@ -472,23 +472,13 @@ func (t *Text) adjustScrollOffset(context *guigui.Context) {
 	tb := t.textBounds(context)
 	bounds := context.Bounds(t)
 	if pos, ok := t.textPosition(context, end, true); ok {
-		var dx, dy float64
-		if max := float64(bounds.Max.X); pos.X > max {
-			dx = max - pos.X
-		}
-		if max := float64(bounds.Max.Y); pos.Bottom > max {
-			dy = max - pos.Bottom
-		}
+		dx := min(float64(bounds.Max.X)-pos.X, 0)
+		dy := min(float64(bounds.Max.Y)-pos.Bottom, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
 	if pos, ok := t.textPosition(context, start, true); ok {
-		var dx, dy float64
-		if min := float64(bounds.Min.X); pos.X < min {
-			dx = min - pos.X
-		}
-		if min := float64(bounds.Min.Y); pos.Top < min {
-			dy = min - pos.Top
-		}
+		dx := max(float64(bounds.Min.X)-pos.X, 0)
+		dy := max(float64(bounds.Min.Y)-pos.Top, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, tb.Size(), dx, dy)
 	}
 }
