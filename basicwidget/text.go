@@ -1040,3 +1040,7 @@ func (t *textCursor) ZDelta() int {
 func (t *textCursor) DefaultSize(context *guigui.Context) image.Point {
 	return context.Size(t.text).Add(image.Pt(2*cursorWidth(context), 0))
 }
+
+func (t *textCursor) PassThrough() bool {
+	return true
+}
