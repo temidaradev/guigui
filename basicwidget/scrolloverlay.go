@@ -85,7 +85,6 @@ func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentSize image.Poi
 	}
 	s.offsetX = x
 	s.offsetY = y
-	s.adjustOffset(context)
 	if s.onceUpdated {
 		guigui.RequestRedraw(s)
 	}
