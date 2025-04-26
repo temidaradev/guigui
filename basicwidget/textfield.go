@@ -22,8 +22,6 @@ type TextField struct {
 	scrollOverlay ScrollOverlay
 	focus         textFieldFocus
 
-	readonly bool
-
 	prevFocused bool
 
 	onTextAndSelectionChanged func(text string, start, end int)
@@ -63,7 +61,6 @@ func (t *TextField) SetVerticalAlign(valign VerticalAlign) {
 
 func (t *TextField) SetEditable(editable bool) {
 	t.text.SetEditable(editable)
-	t.readonly = !editable
 }
 
 func (t *TextField) SelectAll() {
