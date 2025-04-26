@@ -70,12 +70,13 @@ func (t *TextField) SelectAll() {
 	t.text.selectAll()
 }
 
-func textFieldPadding(context *guigui.Context) int {
-	return UnitSize(context) / 2
+func textFieldPadding(context *guigui.Context) image.Point {
+	return image.Pt(UnitSize(context)/2, 0)
 }
 
 func (t *TextField) scrollContentSize(context *guigui.Context) image.Point {
-	return t.text.TextSize(context).Add(image.Pt(2*textFieldPadding(context), 0))
+	padding := textFieldPadding(context)
+	return t.text.TextSize(context).Add(image.Pt(2*padding.X, 2*padding.Y))
 }
 
 func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -97,11 +98,14 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	t.text.SetEditable(true)
 
 	pt := context.Position(t)
+	s := t.text.TextSize(context)
+	s.X = max(s.X, context.Size(t).X-2*padding.X)
+	s.Y = max(s.Y, context.Size(t).Y-2*padding.Y)
 	b := image.Rectangle{
 		Min: pt,
-		Max: pt.Add(image.Pt(max(t.text.TextSize(context).X, context.Size(t).X-2*padding), context.Size(t).Y)),
+		Max: pt.Add(s),
 	}
-	b = b.Add(image.Pt(padding, 0))
+	b = b.Add(padding)
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
 
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
@@ -134,13 +138,13 @@ func (t *TextField) adjustScrollOffset(context *guigui.Context) {
 	bounds := context.Bounds(t)
 	padding := textFieldPadding(context)
 	if pos, ok := t.text.textPosition(context, end, true); ok {
-		dx := min(float64(bounds.Max.X-padding)-pos.X, 0)
-		dy := min(float64(bounds.Max.Y)-pos.Bottom, 0)
+		dx := min(float64(bounds.Max.X-padding.X)-pos.X, 0)
+		dy := min(float64(bounds.Max.Y-padding.Y)-pos.Bottom, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
 	}
 	if pos, ok := t.text.textPosition(context, start, true); ok {
-		dx := max(float64(bounds.Min.X+padding)-pos.X, 0)
-		dy := max(float64(bounds.Min.Y)-pos.Top, 0)
+		dx := max(float64(bounds.Min.X+padding.X)-pos.X, 0)
+		dy := max(float64(bounds.Min.Y+padding.Y)-pos.Top, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
 	}
 }
