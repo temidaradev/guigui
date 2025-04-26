@@ -223,6 +223,17 @@ func tailingLineBreakLen(str string) int {
 	return s
 }
 
+func trimTailingLineBreak(str string) string {
+	for {
+		c := tailingLineBreakLen(str)
+		if c == 0 {
+			break
+		}
+		str = str[:len(str)-c]
+	}
+	return str
+}
+
 func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 	var count int
 	for range lines(width, str, autoWrap, face) {
@@ -234,6 +245,7 @@ func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64) (float64, float64) {
 	var maxWidth, height float64
 	for _, line := range lines(width, str, autoWrap, face) {
+		line = trimTailingLineBreak(line)
 		maxWidth = max(maxWidth, text.Advance(line, face))
 		// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
 		// Thus, just counting the line number is enough.
