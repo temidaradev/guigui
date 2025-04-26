@@ -225,6 +225,10 @@ func (t *Text) selectAll() {
 	t.setTextAndSelection(t.field.Text(), 0, len(t.field.Text()), -1)
 }
 
+func (t *Text) setSelection(start, end int) {
+	t.setTextAndSelection(t.field.Text(), start, end, -1)
+}
+
 func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) {
 	t.selectionShiftIndex = shiftIndex
 	if start > end {
