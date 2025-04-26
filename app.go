@@ -12,6 +12,7 @@ import (
 	"math"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -22,17 +23,24 @@ import (
 type debugMode struct {
 	showRenderingRegions bool
 	showInputLogs        bool
+	deviceScale          float64
 }
 
 var theDebugMode debugMode
 
 func init() {
 	for _, token := range strings.Split(os.Getenv("GUIGUI_DEBUG"), ",") {
-		switch token {
-		case "showrenderingregions":
+		switch {
+		case token == "showrenderingregions":
 			theDebugMode.showRenderingRegions = true
-		case "showinputlogs":
+		case token == "showinputlogs":
 			theDebugMode.showInputLogs = true
+		case strings.HasPrefix(token, "devicescale="):
+			f, err := strconv.ParseFloat(token[len("devicescale="):], 64)
+			if err != nil {
+				slog.Error(err.Error())
+			}
+			theDebugMode.deviceScale = f
 		}
 	}
 }
@@ -136,6 +144,9 @@ func Run(root Widget, options *RunOptions) error {
 }
 
 func deviceScaleFactor() float64 {
+	if theDebugMode.deviceScale != 0 {
+		return theDebugMode.deviceScale
+	}
 	// Calling ebiten.Monitor() seems pretty expensive. Do not call this often.
 	// TODO: Ebitengine should be fixed.
 	return ebiten.Monitor().DeviceScaleFactor()
