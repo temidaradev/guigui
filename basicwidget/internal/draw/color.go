@@ -149,9 +149,16 @@ func TextColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	return Color(colorMode, ColorTypeBase, 0.1)
 }
 
-func ControlBackgroundColor(colorMode guigui.ColorMode, enabled bool) color.Color {
+func ControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	if !enabled {
 		return Color2(colorMode, ColorTypeBase, 0.9, 0.25)
 	}
 	return Color2(colorMode, ColorTypeBase, 1, 0.3)
+}
+
+func ThumbColor(colorMode guigui.ColorMode, enabled bool) color.Color {
+	if !enabled {
+		return Color2(colorMode, ColorTypeBase, 0.9, 0.55)
+	}
+	return Color2(colorMode, ColorTypeBase, 1, 0.6)
 }

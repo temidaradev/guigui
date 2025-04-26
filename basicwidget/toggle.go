@@ -98,13 +98,11 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	cm := context.ColorMode()
 	backgroundColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
-	thumbColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.6)
+	thumbColor := draw.ThumbColor(context.ColorMode(), context.IsEnabled(t))
 	if t.isActive(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
 	} else if t.canPress(context) {
 		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.575)
-	} else if !context.IsEnabled(t) {
-		thumbColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.55)
 	}
 
 	// Background

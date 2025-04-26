@@ -388,7 +388,7 @@ func (l *List[T]) selectedItemColor(context *guigui.Context) color.Color {
 
 func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if l.style != ListStyleSidebar {
-		clr := draw.ControlBackgroundColor(context.ColorMode(), context.IsEnabled(l))
+		clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(l))
 		bounds := context.Bounds(l)
 		draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 	}
