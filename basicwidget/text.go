@@ -808,7 +808,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		op.CompositionActiveEnd = cEnd
 		op.InactiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
 		op.ActiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4)
-		op.CompositionBorderWidth = float32(cursorWidth(context))
+		op.CompositionBorderWidth = float32(textCursorWidth(context))
 	}
 	textutil.Draw(textBounds, dst, t.textToDraw(true), op)
 }
@@ -936,7 +936,7 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 	}, true
 }
 
-func cursorWidth(context *guigui.Context) int {
+func textCursorWidth(context *guigui.Context) int {
 	return int(2 * context.Scale())
 }
 
@@ -945,7 +945,7 @@ func (t *Text) cursorBounds(context *guigui.Context) image.Rectangle {
 	if !ok {
 		return image.Rectangle{}
 	}
-	w := cursorWidth(context)
+	w := textCursorWidth(context)
 	return image.Rect(int(pos.X)-w/2, int(pos.Top), int(pos.X)+w/2, int(pos.Bottom))
 }
 
@@ -1005,8 +1005,8 @@ func (t *textCursor) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 	b := t.text.cursorBounds(context)
 	tb := context.VisibleBounds(t.text)
-	tb.Min.X -= cursorWidth(context) / 2
-	tb.Max.X += cursorWidth(context) / 2
+	tb.Min.X -= textCursorWidth(context) / 2
+	tb.Max.X += textCursorWidth(context) / 2
 	if !b.Overlaps(tb) {
 		return
 	}
