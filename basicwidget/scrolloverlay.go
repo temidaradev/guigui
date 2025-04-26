@@ -342,7 +342,7 @@ func (s *ScrollOverlay) barSize(context *guigui.Context) (float64, float64) {
 	}
 	if s.contentSize.Y > bounds.Dy() {
 		h = (float64(bounds.Dy()) - 2*padding) * float64(bounds.Dy()) / float64(s.contentSize.Y)
-		w = max(h, scrollOverlayBarStrokeWidth(context))
+		h = max(h, scrollOverlayBarStrokeWidth(context))
 	}
 	return w, h
 }
