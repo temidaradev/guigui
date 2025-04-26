@@ -151,7 +151,7 @@ func TextColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 
 func ControlBackgroundColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	if !enabled {
-		return Color2(colorMode, ColorTypeBase, 0.9, 0.15)
+		return Color2(colorMode, ColorTypeBase, 0.9, 0.25)
 	}
 	return Color2(colorMode, ColorTypeBase, 1, 0.3)
 }
