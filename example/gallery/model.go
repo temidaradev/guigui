@@ -32,14 +32,28 @@ func (m *Model) TextFields() *TextFieldsModel {
 }
 
 type TextsModel struct {
+	text    string
+	textSet bool
+
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
 	noWrap          bool
 	bold            bool
 	selectable      bool
 	editable        bool
-	text            string
-	textSet         bool
+}
+
+func (t *TextsModel) Text() string {
+	if !t.textSet {
+		return `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+隴西の李徴は博学才穎、天宝の末年、若くして名を虎榜に連ね、ついで江南尉に補せられたが、性、狷介、自ら恃むところ頗る厚く、賤吏に甘んずるを潔しとしなかった。`
+	}
+	return t.text
+}
+
+func (t *TextsModel) SetText(text string) {
+	t.text = text
+	t.textSet = true
 }
 
 func (t *TextsModel) HorizontalAlign() basicwidget.HorizontalAlign {
@@ -96,64 +110,27 @@ func (t *TextsModel) SetEditable(editable bool) {
 	}
 }
 
-func (t *TextsModel) Text() string {
-	if !t.textSet {
-		return `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-隴西の李徴は博学才穎、天宝の末年、若くして名を虎榜に連ね、ついで江南尉に補せられたが、性、狷介、自ら恃むところ頗る厚く、賤吏に甘んずるを潔しとしなかった。`
-	}
-	return t.text
-}
-
-func (t *TextsModel) SetText(text string) {
-	t.text = text
-	t.textSet = true
-}
-
 type TextFieldsModel struct {
-	hAlignStartText     string
-	hAlignStartTextSet  bool
-	hAlignCenterText    string
-	hAlignCenterTextSet bool
-	hAlignEndText       string
-	hAlignEndTextSet    bool
-	multilineText       string
-	multilineTextSet    bool
+	singleLineText     string
+	singleLinetTextSet bool
+	multilineText      string
+	multilineTextSet   bool
+
+	horizontalAlign basicwidget.HorizontalAlign
+	verticalAlign   basicwidget.VerticalAlign
+	autoWrap        bool
 }
 
-func (t *TextFieldsModel) HorizontalAlignStartText() string {
-	if !t.hAlignStartTextSet {
+func (t *TextFieldsModel) SingleLineText() string {
+	if !t.singleLinetTextSet {
 		return "Hello, Guigui!"
 	}
-	return t.hAlignStartText
+	return t.singleLineText
 }
 
-func (t *TextFieldsModel) SetHorizontalAlignStartText(text string) {
-	t.hAlignStartText = text
-	t.hAlignStartTextSet = true
-}
-
-func (t *TextFieldsModel) HorizontalAlignCenterText() string {
-	if !t.hAlignCenterTextSet {
-		return "Hello, Guigui!"
-	}
-	return t.hAlignCenterText
-}
-
-func (t *TextFieldsModel) SetHorizontalAlignCenterText(text string) {
-	t.hAlignCenterText = text
-	t.hAlignCenterTextSet = true
-}
-
-func (t *TextFieldsModel) HorizontalAlignEndText() string {
-	if !t.hAlignEndTextSet {
-		return "Hello, Guigui!"
-	}
-	return t.hAlignEndText
-}
-
-func (t *TextFieldsModel) SetHorizontalAlignEndText(text string) {
-	t.hAlignEndText = text
-	t.hAlignEndTextSet = true
+func (t *TextFieldsModel) SetSingleLineText(text string) {
+	t.singleLineText = text
+	t.singleLinetTextSet = true
 }
 
 func (t *TextFieldsModel) MultilineText() string {
@@ -166,4 +143,28 @@ func (t *TextFieldsModel) MultilineText() string {
 func (t *TextFieldsModel) SetMultilineText(text string) {
 	t.multilineText = text
 	t.multilineTextSet = true
+}
+
+func (t *TextFieldsModel) HorizontalAlign() basicwidget.HorizontalAlign {
+	return t.horizontalAlign
+}
+
+func (t *TextFieldsModel) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
+	t.horizontalAlign = align
+}
+
+func (t *TextFieldsModel) VerticalAlign() basicwidget.VerticalAlign {
+	return t.verticalAlign
+}
+
+func (t *TextFieldsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
+	t.verticalAlign = align
+}
+
+func (t *TextFieldsModel) AutoWrap() bool {
+	return t.autoWrap
+}
+
+func (t *TextFieldsModel) SetAutoWrap(autoWrap bool) {
+	t.autoWrap = autoWrap
 }

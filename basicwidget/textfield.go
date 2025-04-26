@@ -61,8 +61,8 @@ func (t *TextField) SetVerticalAlign(valign VerticalAlign) {
 	t.text.SetVerticalAlign(valign)
 }
 
-func (t *TextField) SetEditable(editable bool) {
-	t.text.SetEditable(editable)
+func (t *TextField) SetAutoWrap(autoWrap bool) {
+	t.text.SetAutoWrap(autoWrap)
 }
 
 func (t *TextField) SelectAll() {
