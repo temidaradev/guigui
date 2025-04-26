@@ -738,7 +738,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			if end < 0 {
 				end = len(t.field.Text())
 			} else {
-				end += start
+				end += start + 1
 			}
 		}
 		t.temporaryClipboard = t.field.Text()[start:end]
