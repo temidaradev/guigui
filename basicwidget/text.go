@@ -737,6 +737,8 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			end = strings.Index(t.field.Text()[start:], "\n")
 			if end < 0 {
 				end = len(t.field.Text())
+			} else if end == 0 {
+				end += start + 1
 			} else {
 				end += start
 			}
