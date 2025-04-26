@@ -79,7 +79,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// At least, shadow should be darker.
 	// See macOS's buttons.
 	cm := context.ColorMode()
-	backgroundColor := draw.Color2(cm, draw.ColorTypeBase, 1, 0.3)
+	backgroundColor := draw.ControlBackgroundColor(context.ColorMode(), context.IsEnabled(b))
 	if b.isPressed(context) {
 		if b.useAccentColor {
 			backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.875, 0.5)
@@ -88,8 +88,6 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	} else if b.canPress(context) {
 		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
-	} else if !context.IsEnabled(b) {
-		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
 	}
 
 	bounds := context.Bounds(b)

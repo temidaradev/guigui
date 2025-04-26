@@ -97,6 +97,11 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	appender.AppendChildWidgetWithBounds(&t.background, context.Bounds(t))
 
 	t.text.SetEditable(true)
+	if context.IsEnabled(t) {
+		t.text.SetColor(draw.DefaultTextColor(context.ColorMode()))
+	} else {
+		t.text.SetColor(draw.DisabledTextColor(context.ColorMode()))
+	}
 
 	pt := context.Position(t)
 	s := t.text.TextSize(context)
@@ -184,10 +189,7 @@ type textFieldBackground struct {
 
 func (t *textFieldBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
-	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3)
-	if !context.IsEnabled(t) {
-		clr = draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.9, 0.15)
-	}
+	clr := draw.ControlBackgroundColor(context.ColorMode(), context.IsEnabled(t))
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 

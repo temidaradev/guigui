@@ -78,10 +78,6 @@ func findWordBoundaries(text string, idx int) (start, end int) {
 
 type TextFilter func(text string, start, end int) (string, int, int)
 
-func DefaultTextColor(context *guigui.Context) color.Color {
-	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.1)
-}
-
 type Text struct {
 	guigui.DefaultWidget
 
@@ -776,7 +772,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.color != nil {
 		textColor = t.color
 	} else {
-		textColor = DefaultTextColor(context)
+		textColor = draw.DefaultTextColor(context.ColorMode())
 	}
 	if t.transparent > 0 {
 		textColor = draw.ScaleAlpha(textColor, 1-t.transparent)
