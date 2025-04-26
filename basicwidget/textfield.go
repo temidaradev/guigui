@@ -184,7 +184,11 @@ type textFieldBackground struct {
 
 func (t *textFieldBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
-	draw.DrawRoundedRect(context, dst, bounds, draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3), RoundedCornerRadius(context))
+	clr := draw.Color2(context.ColorMode(), draw.ColorTypeBase, 1, 0.3)
+	if !context.IsEnabled(t) {
+		clr = draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.9, 0.15)
+	}
+	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
 type textFieldFrame struct {

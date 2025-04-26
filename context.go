@@ -300,10 +300,13 @@ func (c *Context) blur(widget Widget) {
 	if !widgetState.isInTree() {
 		return
 	}
-	if c.app.focusedWidget != widget {
-		return
-	}
-	c.app.focusedWidget = nil
+	_ = traverseWidget(widget, func(w Widget) error {
+		if c.app.focusedWidget == w {
+			c.app.focusedWidget = nil
+			return skipTraverse
+		}
+		return nil
+	})
 	RequestRedraw(widget)
 }
 

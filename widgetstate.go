@@ -4,6 +4,7 @@
 package guigui
 
 import (
+	"errors"
 	"image"
 	"maps"
 
@@ -132,6 +133,8 @@ func (w *widgetState) ensureOffscreen(bounds image.Rectangle) *ebiten.Image {
 	}
 	return w.offscreen.SubImage(bounds).(*ebiten.Image)
 }
+
+var skipTraverse = errors.New("skip traverse")
 
 func traverseWidget(widget Widget, f func(widget Widget) error) error {
 	if err := f(widget); err != nil {

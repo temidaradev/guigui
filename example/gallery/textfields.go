@@ -27,6 +27,8 @@ type TextFields struct {
 	verticalAlignSegmentedControl   basicwidget.SegmentedControl[basicwidget.VerticalAlign]
 	autoWrapText                    basicwidget.Text
 	autoWrapToggle                  basicwidget.Toggle
+	enabledText                     basicwidget.Text
+	enabledToggle                   basicwidget.Toggle
 
 	model *Model
 }
@@ -48,6 +50,7 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.singleLineTextField.SetText(t.model.TextFields().SingleLineText())
 	t.singleLineTextField.SetHorizontalAlign(t.model.TextFields().HorizontalAlign())
 	t.singleLineTextField.SetVerticalAlign(t.model.TextFields().VerticalAlign())
+	context.SetEnabled(&t.singleLineTextField, t.model.TextFields().Enabled())
 	context.SetSize(&t.singleLineTextField, image.Pt(width, guigui.DefaultSize))
 
 	t.multilineText.SetText("Multiline")
@@ -59,6 +62,7 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.multilineTextField.SetHorizontalAlign(t.model.TextFields().HorizontalAlign())
 	t.multilineTextField.SetVerticalAlign(t.model.TextFields().VerticalAlign())
 	t.multilineTextField.SetAutoWrap(t.model.TextFields().AutoWrap())
+	context.SetEnabled(&t.multilineTextField, t.model.TextFields().Enabled())
 	context.SetSize(&t.multilineTextField, image.Pt(width, 4*u))
 
 	// Configurations
@@ -118,6 +122,12 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.autoWrapToggle.SetValue(t.model.TextFields().AutoWrap())
 
+	t.enabledText.SetText("Enabled")
+	t.enabledToggle.SetOnValueChanged(func(value bool) {
+		t.model.TextFields().SetEnabled(value)
+	})
+	t.enabledToggle.SetValue(t.model.TextFields().Enabled())
+
 	t.configForm.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.horizontalAlignText,
@@ -130,6 +140,10 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.autoWrapText,
 			SecondaryWidget: &t.autoWrapToggle,
+		},
+		{
+			PrimaryWidget:   &t.enabledText,
+			SecondaryWidget: &t.enabledToggle,
 		},
 	})
 

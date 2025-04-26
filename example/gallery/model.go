@@ -119,6 +119,7 @@ type TextFieldsModel struct {
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
 	autoWrap        bool
+	disabled        bool
 }
 
 func (t *TextFieldsModel) SingleLineText() string {
@@ -167,4 +168,12 @@ func (t *TextFieldsModel) AutoWrap() bool {
 
 func (t *TextFieldsModel) SetAutoWrap(autoWrap bool) {
 	t.autoWrap = autoWrap
+}
+
+func (t *TextFieldsModel) Enabled() bool {
+	return !t.disabled
+}
+
+func (t *TextFieldsModel) SetEnabled(enabled bool) {
+	t.disabled = !enabled
 }
