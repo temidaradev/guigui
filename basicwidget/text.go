@@ -888,10 +888,13 @@ func (t *Text) cursorPosition(context *guigui.Context) (position textutil.TextPo
 
 func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Point, showComposition bool) int {
 	textBounds := t.textBounds(context)
-	if !textBounds.Overlaps(context.VisibleBounds(t)) {
-		return -1
+	if position.Y < textBounds.Min.Y {
+		return 0
 	}
 	txt := t.textToDraw(showComposition)
+	if position.Y >= textBounds.Max.Y {
+		return len(txt)
+	}
 	op := &textutil.Options{
 		AutoWrap:        t.autoWrap,
 		Face:            t.face(context),
