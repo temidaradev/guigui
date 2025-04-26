@@ -79,6 +79,7 @@ func (s *ScrollOverlay) SetOffsetByDelta(context *guigui.Context, contentSize im
 func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentSize image.Point, x, y float64) {
 	s.SetContentSize(context, contentSize)
 
+	x, y = s.doAdjustOffset(context, x, y)
 	if s.offsetX == x && s.offsetY == y {
 		return
 	}
@@ -224,10 +225,14 @@ func (s *ScrollOverlay) Offset() (float64, float64) {
 }
 
 func (s *ScrollOverlay) adjustOffset(context *guigui.Context) {
-	// Adjust offsets.
+	s.offsetX, s.offsetY = s.doAdjustOffset(context, s.offsetX, s.offsetY)
+}
+
+func (s *ScrollOverlay) doAdjustOffset(context *guigui.Context, x, y float64) (float64, float64) {
 	r := s.scrollRange(context)
-	s.offsetX = min(max(s.offsetX, float64(r.Min.X)), float64(r.Max.X))
-	s.offsetY = min(max(s.offsetY, float64(r.Min.Y)), float64(r.Max.Y))
+	x = min(max(x, float64(r.Min.X)), float64(r.Max.X))
+	y = min(max(y, float64(r.Min.Y)), float64(r.Max.Y))
+	return x, y
 }
 
 func (s *ScrollOverlay) scrollRange(context *guigui.Context) image.Rectangle {
