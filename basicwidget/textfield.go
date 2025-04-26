@@ -71,7 +71,9 @@ func (t *TextField) SelectAll() {
 }
 
 func textFieldPadding(context *guigui.Context) image.Point {
-	return image.Pt(UnitSize(context)/2, 0)
+	x := UnitSize(context) / 2
+	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
+	return image.Pt(x, y)
 }
 
 func (t *TextField) scrollContentSize(context *guigui.Context) image.Point {
@@ -106,7 +108,6 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		Max: pt.Add(s),
 	}
 	b = b.Add(padding)
-	t.text.SetVerticalAlign(VerticalAlignMiddle)
 
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
 	context.SetSize(&t.text, b.Size())
