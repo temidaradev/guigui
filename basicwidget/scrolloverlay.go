@@ -323,7 +323,7 @@ func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
-func scrollOverlayBarWidth(context *guigui.Context) float64 {
+func scrollOverlayBarStrokeWidth(context *guigui.Context) float64 {
 	return 8 * context.Scale()
 }
 
@@ -333,15 +333,16 @@ func scrollOverlayPadding(context *guigui.Context) float64 {
 
 func (s *ScrollOverlay) barSize(context *guigui.Context) (float64, float64) {
 	bounds := context.Bounds(s)
+	padding := scrollOverlayPadding(context)
 
 	var w, h float64
 	if s.contentSize.X > bounds.Dx() {
-		w = float64(bounds.Dx()) * float64(bounds.Dx()) / float64(s.contentSize.X)
-		w = max(w, scrollOverlayBarWidth(context))
+		w = (float64(bounds.Dx()) - 2*padding) * float64(bounds.Dx()) / float64(s.contentSize.X)
+		w = max(w, scrollOverlayBarStrokeWidth(context))
 	}
 	if s.contentSize.Y > bounds.Dy() {
-		h = float64(bounds.Dy()) * float64(bounds.Dy()) / float64(s.contentSize.Y)
-		w = max(h, scrollOverlayBarWidth(context))
+		h = (float64(bounds.Dy()) - 2*padding) * float64(bounds.Dy()) / float64(s.contentSize.Y)
+		w = max(h, scrollOverlayBarStrokeWidth(context))
 	}
 	return w, h
 }
@@ -357,28 +358,28 @@ func (s *ScrollOverlay) barBounds(context *guigui.Context) (image.Rectangle, ima
 	var horizontalBarBounds, verticalBarBounds image.Rectangle
 	if s.contentSize.X > bounds.Dx() {
 		rate := -offsetX / float64(s.contentSize.X-bounds.Dx())
-		x0 := float64(bounds.Min.X) + rate*(float64(bounds.Dx())-barWidth)
+		x0 := float64(bounds.Min.X) + padding + rate*(float64(bounds.Dx())-2*padding-barWidth)
 		x1 := x0 + float64(barWidth)
 		var y0, y1 float64
-		if scrollOverlayBarWidth(context) > float64(bounds.Dy())*0.3 {
+		if scrollOverlayBarStrokeWidth(context) > float64(bounds.Dy())*0.3 {
 			y0 = float64(bounds.Max.Y) - float64(bounds.Dy())*0.3
 			y1 = float64(bounds.Max.Y)
 		} else {
-			y0 = float64(bounds.Max.Y) - padding - scrollOverlayBarWidth(context)
+			y0 = float64(bounds.Max.Y) - padding - scrollOverlayBarStrokeWidth(context)
 			y1 = float64(bounds.Max.Y) - padding
 		}
 		horizontalBarBounds = image.Rect(int(x0), int(y0), int(x1), int(y1))
 	}
 	if s.contentSize.Y > bounds.Dy() {
 		rate := -offsetY / float64(s.contentSize.Y-bounds.Dy())
-		y0 := float64(bounds.Min.Y) + rate*(float64(bounds.Dy())-barHeight)
+		y0 := float64(bounds.Min.Y) + padding + rate*(float64(bounds.Dy())-2*padding-barHeight)
 		y1 := y0 + float64(barHeight)
 		var x0, x1 float64
-		if scrollOverlayBarWidth(context) > float64(bounds.Dx())*0.3 {
+		if scrollOverlayBarStrokeWidth(context) > float64(bounds.Dx())*0.3 {
 			x0 = float64(bounds.Max.X) - float64(bounds.Dx())*0.3
 			x1 = float64(bounds.Max.X)
 		} else {
-			x0 = float64(bounds.Max.X) - padding - scrollOverlayBarWidth(context)
+			x0 = float64(bounds.Max.X) - padding - scrollOverlayBarStrokeWidth(context)
 			x1 = float64(bounds.Max.X) - padding
 		}
 		verticalBarBounds = image.Rect(int(x0), int(y0), int(x1), int(y1))
