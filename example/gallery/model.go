@@ -116,6 +116,8 @@ type TextFieldsModel struct {
 	hAlignCenterTextSet bool
 	hAlignEndText       string
 	hAlignEndTextSet    bool
+	multilineText       string
+	multilineTextSet    bool
 }
 
 func (t *TextFieldsModel) HorizontalAlignStartText() string {
@@ -152,4 +154,16 @@ func (t *TextFieldsModel) HorizontalAlignEndText() string {
 func (t *TextFieldsModel) SetHorizontalAlignEndText(text string) {
 	t.hAlignEndText = text
 	t.hAlignEndTextSet = true
+}
+
+func (t *TextFieldsModel) MultilineText() string {
+	if !t.multilineTextSet {
+		return "Hello, Guigui!\nThis is a multiline text field."
+	}
+	return t.multilineText
+}
+
+func (t *TextFieldsModel) SetMultilineText(text string) {
+	t.multilineText = text
+	t.multilineTextSet = true
 }

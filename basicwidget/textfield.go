@@ -23,6 +23,8 @@ type TextField struct {
 	focus         textFieldFocus
 
 	prevFocused bool
+	prevStart   int
+	prevEnd     int
 
 	onTextAndSelectionChanged func(text string, start, end int)
 }
@@ -108,14 +110,14 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
 	context.SetSize(&t.text, b.Size())
-	t.adjustScrollOffset(context)
+	t.adjustScrollOffsetIfNeeded(context)
 	offsetX, offsetY := t.scrollOverlay.Offset()
 	b = b.Add(image.Pt(int(offsetX), int(offsetY)))
 	appender.AppendChildWidgetWithPosition(&t.text, b.Min)
 
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
 
-	context.SetVisible(&t.scrollOverlay, false)
+	context.SetVisible(&t.scrollOverlay, t.text.IsMultiline())
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	if context.HasFocusedChildWidget(t) {
@@ -128,11 +130,16 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	return nil
 }
 
-func (t *TextField) adjustScrollOffset(context *guigui.Context) {
+func (t *TextField) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 	start, end, ok := t.text.selectionToDraw(context)
 	if !ok {
 		return
 	}
+	if t.prevStart == start && t.prevEnd == end {
+		return
+	}
+	t.prevStart = start
+	t.prevEnd = end
 	bounds := context.Bounds(t)
 	padding := textFieldPadding(context)
 	if pos, ok := t.text.textPosition(context, end, true); ok {
@@ -165,7 +172,9 @@ func (t *TextField) CursorShape(context *guigui.Context) (ebiten.CursorShapeType
 }
 
 func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
-	// TODO: Increase the height for multiple lines.
+	if t.text.IsMultiline() {
+		return image.Pt(6*UnitSize(context), 4*UnitSize(context))
+	}
 	return image.Pt(6*UnitSize(context), UnitSize(context))
 }
 
