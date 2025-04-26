@@ -772,7 +772,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if t.color != nil {
 		textColor = t.color
 	} else {
-		textColor = draw.DefaultTextColor(context.ColorMode())
+		textColor = draw.TextColor(context.ColorMode(), context.IsEnabled(t))
 	}
 	if t.transparent > 0 {
 		textColor = draw.ScaleAlpha(textColor, 1-t.transparent)

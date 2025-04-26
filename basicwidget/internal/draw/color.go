@@ -142,12 +142,11 @@ func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType, 
 	panic(fmt.Sprintf("draw: invalid border type: %d", borderType))
 }
 
-func DefaultTextColor(colorMode guigui.ColorMode) color.Color {
+func TextColor(colorMode guigui.ColorMode, enabled bool) color.Color {
+	if !enabled {
+		return Color(colorMode, ColorTypeBase, 0.5)
+	}
 	return Color(colorMode, ColorTypeBase, 0.1)
-}
-
-func DisabledTextColor(colorMode guigui.ColorMode) color.Color {
-	return Color(colorMode, ColorTypeBase, 0.5)
 }
 
 func ControlBackgroundColor(colorMode guigui.ColorMode, enabled bool) color.Color {

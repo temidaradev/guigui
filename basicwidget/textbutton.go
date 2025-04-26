@@ -63,10 +63,10 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	imgSize := textButtonImageSize(context)
 
 	tw := t.text.TextSize(context).X
-	if !context.IsEnabled(&t.button) {
-		t.text.SetColor(draw.DisabledTextColor(context.ColorMode()))
-	} else {
+	if t.textColor != nil {
 		t.text.SetColor(t.textColor)
+	} else {
+		t.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(t)))
 	}
 	t.text.SetHorizontalAlign(HorizontalAlignCenter)
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
