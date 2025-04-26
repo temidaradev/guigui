@@ -65,7 +65,6 @@ const (
 type Context struct {
 	app *app
 
-	deviceScale    float64
 	appScaleMinus1 float64
 	colorMode      ColorMode
 	hasColorMode   bool
@@ -73,19 +72,11 @@ type Context struct {
 }
 
 func (c *Context) Scale() float64 {
-	return c.deviceScale * c.AppScale()
+	return c.DeviceScale() * c.AppScale()
 }
 
 func (c *Context) DeviceScale() float64 {
-	return c.deviceScale
-}
-
-func (c *Context) setDeviceScale(deviceScale float64) {
-	if c.deviceScale == deviceScale {
-		return
-	}
-	c.deviceScale = deviceScale
-	c.app.requestRedraw(c.app.bounds())
+	return c.app.deviceScale
 }
 
 func (c *Context) AppScale() float64 {

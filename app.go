@@ -64,10 +64,10 @@ type app struct {
 
 	screenWidth  float64
 	screenHeight float64
+	deviceScale  float64
 
 	lastScreenWidth  float64
 	lastScreenHeight float64
-	lastScale        float64
 
 	focusedWidget Widget
 
@@ -115,7 +115,8 @@ func Run(root Widget, options *RunOptions) error {
 	ebiten.SetWindowSizeLimits(minW, minH, maxW, maxH)
 
 	a := &app{
-		root: root,
+		root:        root,
+		deviceScale: deviceScaleFactor(),
 	}
 	a.root.widgetState().root = true
 	a.context.app = a
@@ -134,6 +135,12 @@ func Run(root Widget, options *RunOptions) error {
 	return ebiten.RunGameWithOptions(a, &eop)
 }
 
+func deviceScaleFactor() float64 {
+	// Calling ebiten.Monitor() seems pretty expensive. Do not call this often.
+	// TODO: Ebitengine should be fixed.
+	return ebiten.Monitor().DeviceScaleFactor()
+}
+
 func (a app) bounds() image.Rectangle {
 	return image.Rect(0, 0, int(math.Ceil(a.screenWidth)), int(math.Ceil(a.screenHeight)))
 }
@@ -142,7 +149,10 @@ func (a *app) Update() error {
 	rootState := a.root.widgetState()
 	rootState.position = image.Point{}
 
-	a.context.setDeviceScale(ebiten.Monitor().DeviceScaleFactor())
+	if s := deviceScaleFactor(); a.deviceScale != s {
+		a.deviceScale = s
+		a.requestRedraw(a.bounds())
+	}
 
 	// Construct the widget tree.
 	if err := a.build(); err != nil {
@@ -187,10 +197,6 @@ func (a *app) Update() error {
 	if a.lastScreenHeight != a.screenHeight {
 		invalidated = true
 		a.lastScreenHeight = a.screenHeight
-	}
-	if s := ebiten.Monitor().DeviceScaleFactor(); a.lastScale != s {
-		invalidated = true
-		a.lastScale = s
 	}
 	if invalidated {
 		a.requestRedraw(a.bounds())
@@ -270,7 +276,7 @@ func (a *app) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (a *app) LayoutF(outsideWidth, outsideHeight float64) (float64, float64) {
-	s := ebiten.Monitor().DeviceScaleFactor()
+	s := a.deviceScale
 	a.screenWidth = outsideWidth * s
 	a.screenHeight = outsideHeight * s
 	return a.screenWidth, a.screenHeight
