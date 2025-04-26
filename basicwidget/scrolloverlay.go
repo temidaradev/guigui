@@ -19,7 +19,7 @@ func barMaxOpacity() int {
 }
 
 func barShowingTime() int {
-	return ebiten.TPS()
+	return ebiten.TPS() / 2
 }
 
 type ScrollOverlay struct {
