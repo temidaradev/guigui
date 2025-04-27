@@ -16,8 +16,8 @@ import (
 
 //go:generate go run gen.go
 
-//go:embed NotoSans.ttf.gz
-var notoSansTTFGz []byte
+//go:embed InterVariable.ttf.gz
+var interVariableTTFGz []byte
 
 type FaceSourceQueryResult struct {
 	FaceSource *text.GoTextFaceSource
@@ -39,7 +39,7 @@ func RegisterFaceSource(faceSource *text.GoTextFaceSource, priority func(hint Fa
 }
 
 func init() {
-	r, err := gzip.NewReader(bytes.NewReader(notoSansTTFGz))
+	r, err := gzip.NewReader(bytes.NewReader(interVariableTTFGz))
 	if err != nil {
 		panic(err)
 	}

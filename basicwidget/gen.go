@@ -6,7 +6,9 @@
 package main
 
 import (
+	"archive/zip"
 	"bufio"
+	"bytes"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -22,8 +24,7 @@ func main() {
 }
 
 func xmain() error {
-	// Get `NotoSans[wdth,wght].ttf` (Full) from https://notofonts.github.io/#latin-greek-cyrillic.
-	const url = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/full/variable-ttf/NotoSans[wdth,wght].ttf"
+	const url = "https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip"
 	res, err := http.Get(url)
 	if err != nil {
 		return err
@@ -35,26 +36,43 @@ func xmain() error {
 		return err
 	}
 
-	out, err := os.Create("NotoSans.ttf.gz")
+	r := bytes.NewReader(bs)
+	f, err := zip.NewReader(r, int64(len(bs)))
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	for _, f := range f.File {
+		const filename = "InterVariable.ttf"
+		if f.Name != filename {
+			continue
+		}
+		out, err := os.Create(filename + ".gz")
+		if err != nil {
+			return err
+		}
+		defer out.Close()
 
-	w := bufio.NewWriter(out)
-	gw, err := gzip.NewWriterLevel(w, gzip.BestCompression)
-	if err != nil {
-		return err
-	}
+		w := bufio.NewWriter(out)
+		gw, err := gzip.NewWriterLevel(w, gzip.BestCompression)
+		if err != nil {
+			return err
+		}
 
-	if _, err := gw.Write(bs); err != nil {
-		return err
-	}
-	if err := gw.Close(); err != nil {
-		return err
-	}
-	if err := w.Flush(); err != nil {
-		return err
+		r, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer r.Close()
+
+		if _, err := io.Copy(gw, r); err != nil {
+			return err
+		}
+		if err := gw.Close(); err != nil {
+			return err
+		}
+		if err := w.Flush(); err != nil {
+			return err
+		}
 	}
 
 	return nil
