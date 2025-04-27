@@ -21,7 +21,6 @@ import (
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
-	"github.com/hajimehoshi/guigui/basicwidget/internal/font"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/textutil"
 	"github.com/hajimehoshi/guigui/internal/clipboard"
 )
@@ -89,7 +88,6 @@ type Text struct {
 	color       color.Color
 	transparent float64
 	locales     []language.Tag
-	fullLocales []language.Tag
 	scaleMinus1 float64
 	bold        bool
 	number      bool
@@ -373,9 +371,6 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	if t.bold {
 		weight = text.WeightBold
 	}
-	t.fullLocales = slices.Delete(t.fullLocales, 0, len(t.fullLocales))
-	t.fullLocales = append(t.fullLocales, t.locales...)
-	t.fullLocales = context.AppendLocales(t.fullLocales)
 
 	var liga uint32
 	if !t.selectable && !t.editable {
@@ -386,7 +381,7 @@ func (t *Text) face(context *guigui.Context) text.Face {
 		tnum = 1
 	}
 
-	features := []font.FontFeature{
+	features := []fontFeature{
 		{
 			Tag:   text.MustParseTag("liga"),
 			Value: liga,
@@ -396,7 +391,16 @@ func (t *Text) face(context *guigui.Context) text.Face {
 			Value: tnum,
 		},
 	}
-	return fontFace(size, weight, features, t.fullLocales)
+
+	var lang language.Tag
+	if len(t.locales) > 0 {
+		lang = t.locales[0]
+	} else {
+		if locales := context.AppendLocales(nil); len(locales) > 0 {
+			lang = locales[0]
+		}
+	}
+	return fontFace(size, weight, features, lang)
 }
 
 func (t *Text) lineHeight(context *guigui.Context) float64 {

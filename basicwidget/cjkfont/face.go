@@ -11,8 +11,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/text/language"
-
-	"github.com/hajimehoshi/guigui/basicwidget"
 )
 
 //go:generate go run gen.go
@@ -20,21 +18,13 @@ import (
 //go:embed NotoSansCJK-VF.otf.ttc.gz
 var notoSansCJKVFOTFTTCGz []byte
 
-func preferTC(region language.Region) bool {
-	switch region {
-	case language.MustParseRegion("MO"), language.MustParseRegion("TW"):
-		return true
-	}
-	return false
-}
-
-func preferHK(region language.Region) bool {
-	switch region {
-	case language.MustParseRegion("HK"):
-		return true
-	}
-	return false
-}
+var (
+	theFaceSourceSC *text.GoTextFaceSource
+	theFaceSourceTC *text.GoTextFaceSource
+	theFaceSourceHK *text.GoTextFaceSource
+	theFaceSourceJP *text.GoTextFaceSource
+	theFaceSourceKR *text.GoTextFaceSource
+)
 
 func init() {
 	r, err := gzip.NewReader(bytes.NewReader(notoSansCJKVFOTFTTCGz))
@@ -69,115 +59,70 @@ func init() {
 		}
 	}
 
-	basicwidget.RegisterFaceSource(faceSC, faceSCPriority)
-	basicwidget.RegisterFaceSource(faceTC, faceTCPriority)
-	basicwidget.RegisterFaceSource(faceHK, faceHKPriority)
-	basicwidget.RegisterFaceSource(faceJP, faceJPPriority)
-	basicwidget.RegisterFaceSource(faceKR, faceKRPriority)
+	theFaceSourceSC = faceSC
+	theFaceSourceTC = faceTC
+	theFaceSourceHK = faceHK
+	theFaceSourceJP = faceJP
+	theFaceSourceKR = faceKR
 }
 
-func faceSCPriority(hint basicwidget.FaceSourceHint) float64 {
-	locale := hint.Locale
-	script, conf := locale.Script()
+func FaceSourceSC() *text.GoTextFaceSource {
+	return theFaceSourceSC
+}
+
+func FaceSourceTC() *text.GoTextFaceSource {
+	return theFaceSourceTC
+}
+
+func FaceSourceHK() *text.GoTextFaceSource {
+	return theFaceSourceHK
+}
+
+func FaceSourceJP() *text.GoTextFaceSource {
+	return theFaceSourceJP
+}
+
+func FaceSourceKR() *text.GoTextFaceSource {
+	return theFaceSourceKR
+}
+
+var (
+	ja = language.MustParseBase("ja")
+	ko = language.MustParseBase("ko")
+	zh = language.MustParseBase("zh")
+	cn = language.MustParseRegion("CN")
+	tw = language.MustParseRegion("TW")
+	mo = language.MustParseRegion("MO")
+	hk = language.MustParseRegion("HK")
+)
+
+func FaceSourceFromLocale(locale language.Tag) *text.GoTextFaceSource {
+	if locale == language.Und {
+		return nil
+	}
+
+	base, conf := locale.Base()
 	if conf == language.No {
-		return 0
+		return nil
 	}
-	switch script {
-	case language.MustParseScript("Hans"):
-		switch conf {
-		case language.Exact, language.High:
-			return 1
-		case language.Low:
-			// As a special case, if only `zh` is specified, prefer SC.
-			if base, conf := locale.Base(); base == language.MustParseBase("zh") && conf > language.No {
-				return 1
-			}
-			return 0.5
+	switch base {
+	case ja:
+		return theFaceSourceJP
+	case ko:
+		return theFaceSourceKR
+	case zh:
+		region, conf := locale.Region()
+		if conf == language.No {
+			return nil
 		}
-	case language.MustParseScript("Hant"):
-		return 0.5
-	}
-	return 0
-}
-
-func faceTCPriority(hint basicwidget.FaceSourceHint) float64 {
-	locale := hint.Locale
-	script, conf := locale.Script()
-	if conf == language.No {
-		return 0
-	}
-	switch script {
-	case language.MustParseScript("Hans"):
-		return 0.5
-	case language.MustParseScript("Hant"):
-		if region, conf := locale.Region(); conf > language.No {
-			if preferTC(region) {
-				return 1
-			}
-			if preferHK(region) {
-				return 0.5
-			}
-		}
-		switch conf {
-		case language.Exact, language.High:
-			return 1
-		case language.Low:
-			return 0.5
+		switch region {
+		case cn:
+			return theFaceSourceSC
+		case tw, mo:
+			return theFaceSourceTC
+		case hk:
+			return theFaceSourceHK
 		}
 	}
-	return 0
-}
-
-func faceHKPriority(hint basicwidget.FaceSourceHint) float64 {
-	locale := hint.Locale
-	script, conf := locale.Script()
-	if conf == language.No {
-		return 0
-	}
-	switch script {
-	case language.MustParseScript("Hans"):
-		return 0.5
-	case language.MustParseScript("Hant"):
-		if region, conf := locale.Region(); conf > language.No {
-			if preferHK(region) {
-				return 1
-			}
-		}
-		return 0.5
-	}
-	return 0
-}
-
-func faceJPPriority(hint basicwidget.FaceSourceHint) float64 {
-	locale := hint.Locale
-	script, conf := locale.Script()
-	if script != language.MustParseScript("Jpan") &&
-		script != language.MustParseScript("Hira") &&
-		script != language.MustParseScript("Kana") &&
-		script != language.MustParseScript("Hrkt") {
-		return 0
-	}
-	switch conf {
-	case language.Exact, language.High:
-		return 1
-	case language.Low:
-		return 0.5
-	}
-	return 0
-}
-
-func faceKRPriority(hint basicwidget.FaceSourceHint) float64 {
-	locale := hint.Locale
-	script, conf := locale.Script()
-	if script != language.MustParseScript("Hang") &&
-		script != language.MustParseScript("Kore") {
-		return 0
-	}
-	switch conf {
-	case language.Exact, language.High:
-		return 1
-	case language.Low:
-		return 0.5
-	}
-	return 0
+	return nil
 }
