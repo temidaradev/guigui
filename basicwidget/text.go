@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/font"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/textutil"
 	"github.com/hajimehoshi/guigui/internal/clipboard"
 )
@@ -365,11 +366,19 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	t.fullLocales = slices.Delete(t.fullLocales, 0, len(t.fullLocales))
 	t.fullLocales = append(t.fullLocales, t.locales...)
 	t.fullLocales = context.AppendLocales(t.fullLocales)
-	var liga bool
+
+	var liga uint32
 	if !t.selectable && !t.editable {
-		liga = true
+		liga = 1
 	}
-	return fontFace(size, weight, liga, t.fullLocales)
+
+	features := []font.FontFeature{
+		{
+			Tag:   text.MustParseTag("liga"),
+			Value: liga,
+		},
+	}
+	return fontFace(size, weight, features, t.fullLocales)
 }
 
 func (t *Text) lineHeight(context *guigui.Context) float64 {

@@ -64,6 +64,6 @@ func init() {
 	})
 }
 
-func fontFace(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
-	return theFaceChoooser.Face(size, weight, ligature, locales)
+func fontFace(size float64, weight text.Weight, features []font.FontFeature, locales []language.Tag) text.Face {
+	return theFaceChoooser.Face(size, weight, features, locales)
 }

@@ -30,7 +30,7 @@ type FaceChooser struct {
 type faceCacheKey struct {
 	size     float64
 	weight   text.Weight
-	ligature bool
+	features string
 	locales  string
 }
 
@@ -86,7 +86,7 @@ func (f *FaceChooser) faceSources(size float64, weight text.Weight, locales []la
 	return faceSources
 }
 
-func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, locales []language.Tag) text.Face {
+func (f *FaceChooser) Face(size float64, weight text.Weight, features []FontFeature, locales []language.Tag) text.Face {
 	// 7 is for a long locale length like 'zh-Hans'. 1 is for a comma.
 	localeStr := make([]byte, 0, len(locales)*(7+1))
 	for _, l := range locales {
@@ -97,7 +97,7 @@ func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, loca
 	key := faceCacheKey{
 		size:     size,
 		weight:   weight,
-		ligature: ligature,
+		features: string(serializeFontFeatures(features)),
 		locales:  string(localeStr),
 	}
 	if f, ok := f.cache[key]; ok {
@@ -118,8 +118,8 @@ func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, loca
 			Language: lang,
 		}
 		f.SetVariation(text.MustParseTag("wght"), float32(weight))
-		if !ligature {
-			f.SetFeature(text.MustParseTag("liga"), 0)
+		for _, ff := range features {
+			f.SetFeature(ff.Tag, ff.Value)
 		}
 		fs = append(fs, f)
 	}
@@ -134,4 +134,22 @@ func (f *FaceChooser) Face(size float64, weight text.Weight, ligature bool, loca
 	f.cache[key] = mf
 
 	return mf
+}
+
+type FontFeature struct {
+	Tag   text.Tag
+	Value uint32
+}
+
+func serializeFontFeatures(features []FontFeature) []byte {
+	if len(features) == 0 {
+		return nil
+	}
+
+	b := make([]byte, 0, len(features)*8)
+	for _, ff := range features {
+		b = append(b, byte(ff.Tag), byte(ff.Tag>>8), byte(ff.Tag>>16), byte(ff.Tag>>24))
+		b = append(b, byte(ff.Value), byte(ff.Value>>8), byte(ff.Value>>16), byte(ff.Value>>24))
+	}
+	return b
 }
