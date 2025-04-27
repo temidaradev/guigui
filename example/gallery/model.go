@@ -115,7 +115,8 @@ type TextInputsModel struct {
 	singleLinetTextSet bool
 	multilineText      string
 	multilineTextSet   bool
-	numberFieldValue   int64
+	numberFieldValue1  int64
+	numberFieldValue2  int64
 
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
@@ -179,10 +180,18 @@ func (t *TextInputsModel) SetEnabled(enabled bool) {
 	t.disabled = !enabled
 }
 
-func (t *TextInputsModel) NumberFieldValue() int64 {
-	return t.numberFieldValue
+func (t *TextInputsModel) NumberFieldValue1() int64 {
+	return t.numberFieldValue1
 }
 
-func (t *TextInputsModel) SetNumberFieldValue(value int64) {
-	t.numberFieldValue = value
+func (t *TextInputsModel) SetNumberFieldValue1(value int64) {
+	t.numberFieldValue1 = value
+}
+
+func (t *TextInputsModel) NumberFieldValue2() int64 {
+	return t.numberFieldValue2
+}
+
+func (t *TextInputsModel) SetNumberFieldValue2(value int64) {
+	t.numberFieldValue2 = value
 }

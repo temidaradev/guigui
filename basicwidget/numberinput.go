@@ -5,6 +5,7 @@ package basicwidget
 
 import (
 	"image"
+	"math"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,8 +18,12 @@ type NumberInput struct {
 
 	textInput TextInput
 
-	nextValue string
-	value     int64
+	value      int64
+	min        int64
+	minSet     bool
+	max        int64
+	maxSet     bool
+	stepMinus1 int64
 
 	onValueChanged func(value int64)
 }
@@ -32,8 +37,44 @@ func (n *NumberInput) Value() int64 {
 }
 
 func (n *NumberInput) SetValue(value int64) {
-	n.nextValue = strconv.FormatInt(value, 10)
+	value = min(max(value, n.MinimumValue()), n.MaximumValue())
+	if n.value == value {
+		return
+	}
 	n.value = value
+	if n.onValueChanged != nil {
+		n.onValueChanged(value)
+	}
+}
+
+func (n *NumberInput) MinimumValue() int64 {
+	if n.minSet {
+		return n.min
+	}
+	return math.MinInt64
+}
+
+func (n *NumberInput) SetMinimumValue(minimum int64) {
+	n.min = minimum
+	n.minSet = true
+	n.SetValue(n.value)
+}
+
+func (n *NumberInput) MaximumValue() int64 {
+	if n.maxSet {
+		return n.max
+	}
+	return math.MaxInt64
+}
+
+func (n *NumberInput) SetMaximumValue(maximum int64) {
+	n.max = maximum
+	n.maxSet = true
+	n.SetValue(n.value)
+}
+
+func (n *NumberInput) SetStep(step int64) {
+	n.stepMinus1 = step - 1
 }
 
 func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -58,16 +99,15 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if err != nil {
 			return
 		}
-		n.value = i
+		n.SetValue(i)
 		if n.onValueChanged != nil {
 			n.onValueChanged(i)
 		}
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
 	// HasFocusedChildWidget works after appending the child widget.
-	if n.nextValue != "" && !context.HasFocusedChildWidget(n) {
-		n.textInput.SetText(n.nextValue)
-		n.nextValue = ""
+	if !context.HasFocusedChildWidget(n) {
+		n.textInput.SetText(strconv.FormatInt(n.value, 10))
 	}
 
 	return nil
@@ -75,11 +115,15 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 func (n *NumberInput) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
 	if isKeyRepeating(ebiten.KeyUp) {
-		n.textInput.SetText(strconv.FormatInt(n.value+1, 10))
+		step := n.stepMinus1 + 1
+		n.SetValue(n.value + step)
+		n.textInput.SetText(strconv.FormatInt(n.value, 10))
 		return guigui.HandleInputByWidget(n)
 	}
 	if isKeyRepeating(ebiten.KeyDown) {
-		n.textInput.SetText(strconv.FormatInt(n.value-1, 10))
+		step := n.stepMinus1 + 1
+		n.SetValue(n.value - step)
+		n.textInput.SetText(strconv.FormatInt(n.value, 10))
 		return guigui.HandleInputByWidget(n)
 	}
 	return guigui.HandleInputResult{}

@@ -19,8 +19,10 @@ type TextInputs struct {
 	singleLineTextInput basicwidget.TextInput
 	multilineText       basicwidget.Text
 	multilineTextInput  basicwidget.TextInput
-	numberInputText     basicwidget.Text
-	numberInput         basicwidget.NumberInput
+	numberInput1Text    basicwidget.Text
+	numberInput1        basicwidget.NumberInput
+	numberInput2Text    basicwidget.Text
+	numberInput2        basicwidget.NumberInput
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -67,12 +69,22 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
-	t.numberInputText.SetText("Number Field")
-	t.numberInput.SetOnValueChanged(func(value int64) {
-		t.model.TextInputs().SetNumberFieldValue(value)
+	t.numberInput1Text.SetText("Number Field")
+	t.numberInput1.SetOnValueChanged(func(value int64) {
+		t.model.TextInputs().SetNumberFieldValue1(value)
 	})
-	t.numberInput.SetValue(t.model.TextInputs().NumberFieldValue())
-	context.SetSize(&t.numberInput, image.Pt(width, guigui.DefaultSize))
+	t.numberInput1.SetValue(t.model.TextInputs().NumberFieldValue1())
+	context.SetSize(&t.numberInput1, image.Pt(width, guigui.DefaultSize))
+
+	t.numberInput2Text.SetText("Number Field w/ Range and Step")
+	t.numberInput2.SetOnValueChanged(func(value int64) {
+		t.model.TextInputs().SetNumberFieldValue2(value)
+	})
+	t.numberInput2.SetMinimumValue(-100)
+	t.numberInput2.SetMaximumValue(100)
+	t.numberInput2.SetStep(5)
+	t.numberInput2.SetValue(t.model.TextInputs().NumberFieldValue2())
+	context.SetSize(&t.numberInput2, image.Pt(width, guigui.DefaultSize))
 
 	t.textInputForm.SetItems([]*basicwidget.FormItem{
 		{
@@ -84,8 +96,12 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 			SecondaryWidget: &t.multilineTextInput,
 		},
 		{
-			PrimaryWidget:   &t.numberInputText,
-			SecondaryWidget: &t.numberInput,
+			PrimaryWidget:   &t.numberInput1Text,
+			SecondaryWidget: &t.numberInput1,
+		},
+		{
+			PrimaryWidget:   &t.numberInput2Text,
+			SecondaryWidget: &t.numberInput2,
 		},
 	})
 
