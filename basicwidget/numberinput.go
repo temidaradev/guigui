@@ -41,6 +41,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		return "0", min(start, 1), min(end, 1)
 	})
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
+	n.textInput.SetNumber(true)
 	n.textInput.SetOnValueChanged(func(text string) {
 		if text == "" {
 			return

@@ -73,6 +73,10 @@ func (t *TextInput) SetFilter(filter TextFilter) {
 	t.text.SetFilter(filter)
 }
 
+func (t *TextInput) SetNumber(number bool) {
+	t.text.SetNumber(number)
+}
+
 func textInputPadding(context *guigui.Context) image.Point {
 	x := UnitSize(context) / 2
 	y := int(float64(UnitSize(context))-LineHeight(context)) / 2

@@ -92,6 +92,7 @@ type Text struct {
 	fullLocales []language.Tag
 	scaleMinus1 float64
 	bold        bool
+	number      bool
 
 	selectable          bool
 	editable            bool
@@ -250,6 +251,15 @@ func (t *Text) SetBold(bold bool) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *Text) SetNumber(number bool) {
+	if t.number == number {
+		return
+	}
+
+	t.number = number
+	guigui.RequestRedraw(t)
+}
+
 func (t *Text) SetScale(scale float64) {
 	if t.scaleMinus1 == scale-1 {
 		return
@@ -371,11 +381,19 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	if !t.selectable && !t.editable {
 		liga = 1
 	}
+	var tnum uint32
+	if t.number {
+		tnum = 1
+	}
 
 	features := []font.FontFeature{
 		{
 			Tag:   text.MustParseTag("liga"),
 			Value: liga,
+		},
+		{
+			Tag:   text.MustParseTag("tnum"),
+			Value: tnum,
 		},
 	}
 	return fontFace(size, weight, features, t.fullLocales)
