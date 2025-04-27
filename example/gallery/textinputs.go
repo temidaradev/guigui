@@ -11,14 +11,14 @@ import (
 	"github.com/hajimehoshi/guigui/layout"
 )
 
-type TextFields struct {
+type TextInputs struct {
 	guigui.DefaultWidget
 
-	textFieldForm       basicwidget.Form
+	textInputForm       basicwidget.Form
 	singleLineText      basicwidget.Text
-	singleLineTextField basicwidget.TextField
+	singleLineTextInput basicwidget.TextInput
 	multilineText       basicwidget.Text
-	multilineTextField  basicwidget.TextField
+	multilineTextInput  basicwidget.TextInput
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -33,37 +33,37 @@ type TextFields struct {
 	model *Model
 }
 
-func (t *TextFields) SetModel(model *Model) {
+func (t *TextInputs) SetModel(model *Model) {
 	t.model = model
 }
 
-func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := basicwidget.UnitSize(context)
 
 	// Text Fields
 	width := 12 * u
 
 	t.singleLineText.SetText("Single Line")
-	t.singleLineTextField.SetOnValueChanged(func(text string) {
-		t.model.TextFields().SetSingleLineText(text)
+	t.singleLineTextInput.SetOnValueChanged(func(text string) {
+		t.model.TextInputs().SetSingleLineText(text)
 	})
-	t.singleLineTextField.SetText(t.model.TextFields().SingleLineText())
-	t.singleLineTextField.SetHorizontalAlign(t.model.TextFields().HorizontalAlign())
-	t.singleLineTextField.SetVerticalAlign(t.model.TextFields().VerticalAlign())
-	context.SetEnabled(&t.singleLineTextField, t.model.TextFields().Enabled())
-	context.SetSize(&t.singleLineTextField, image.Pt(width, guigui.DefaultSize))
+	t.singleLineTextInput.SetText(t.model.TextInputs().SingleLineText())
+	t.singleLineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.singleLineTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	context.SetEnabled(&t.singleLineTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.singleLineTextInput, image.Pt(width, guigui.DefaultSize))
 
 	t.multilineText.SetText("Multiline")
-	t.multilineTextField.SetOnValueChanged(func(text string) {
-		t.model.TextFields().SetMultilineText(text)
+	t.multilineTextInput.SetOnValueChanged(func(text string) {
+		t.model.TextInputs().SetMultilineText(text)
 	})
-	t.multilineTextField.SetText(t.model.TextFields().MultilineText())
-	t.multilineTextField.SetMultiline(true)
-	t.multilineTextField.SetHorizontalAlign(t.model.TextFields().HorizontalAlign())
-	t.multilineTextField.SetVerticalAlign(t.model.TextFields().VerticalAlign())
-	t.multilineTextField.SetAutoWrap(t.model.TextFields().AutoWrap())
-	context.SetEnabled(&t.multilineTextField, t.model.TextFields().Enabled())
-	context.SetSize(&t.multilineTextField, image.Pt(width, 4*u))
+	t.multilineTextInput.SetText(t.model.TextInputs().MultilineText())
+	t.multilineTextInput.SetMultiline(true)
+	t.multilineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.multilineTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.multilineTextInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
+	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
 	// Configurations
 	t.horizontalAlignText.SetText("Horizontal Align")
@@ -84,12 +84,12 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.horizontalAlignSegmentedControl.SetOnItemSelected(func(index int) {
 		item, ok := t.horizontalAlignSegmentedControl.ItemByIndex(index)
 		if !ok {
-			t.model.TextFields().SetHorizontalAlign(basicwidget.HorizontalAlignStart)
+			t.model.TextInputs().SetHorizontalAlign(basicwidget.HorizontalAlignStart)
 			return
 		}
-		t.model.TextFields().SetHorizontalAlign(item.Tag)
+		t.model.TextInputs().SetHorizontalAlign(item.Tag)
 	})
-	t.horizontalAlignSegmentedControl.SelectItemByTag(t.model.TextFields().HorizontalAlign())
+	t.horizontalAlignSegmentedControl.SelectItemByTag(t.model.TextInputs().HorizontalAlign())
 
 	t.verticalAlignText.SetText("Vertical Align")
 	t.verticalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.VerticalAlign]{
@@ -109,24 +109,24 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.verticalAlignSegmentedControl.SetOnItemSelected(func(index int) {
 		item, ok := t.verticalAlignSegmentedControl.ItemByIndex(index)
 		if !ok {
-			t.model.TextFields().SetVerticalAlign(basicwidget.VerticalAlignTop)
+			t.model.TextInputs().SetVerticalAlign(basicwidget.VerticalAlignTop)
 			return
 		}
-		t.model.TextFields().SetVerticalAlign(item.Tag)
+		t.model.TextInputs().SetVerticalAlign(item.Tag)
 	})
-	t.verticalAlignSegmentedControl.SelectItemByTag(t.model.TextFields().VerticalAlign())
+	t.verticalAlignSegmentedControl.SelectItemByTag(t.model.TextInputs().VerticalAlign())
 
 	t.autoWrapText.SetText("Auto Wrap")
 	t.autoWrapToggle.SetOnValueChanged(func(value bool) {
-		t.model.TextFields().SetAutoWrap(value)
+		t.model.TextInputs().SetAutoWrap(value)
 	})
-	t.autoWrapToggle.SetValue(t.model.TextFields().AutoWrap())
+	t.autoWrapToggle.SetValue(t.model.TextInputs().AutoWrap())
 
 	t.enabledText.SetText("Enabled")
 	t.enabledToggle.SetOnValueChanged(func(value bool) {
-		t.model.TextFields().SetEnabled(value)
+		t.model.TextInputs().SetEnabled(value)
 	})
-	t.enabledToggle.SetValue(t.model.TextFields().Enabled())
+	t.enabledToggle.SetValue(t.model.TextInputs().Enabled())
 
 	t.configForm.SetItems([]*basicwidget.FormItem{
 		{
@@ -147,21 +147,21 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 		},
 	})
 
-	t.textFieldForm.SetItems([]*basicwidget.FormItem{
+	t.textInputForm.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
-			SecondaryWidget: &t.singleLineTextField,
+			SecondaryWidget: &t.singleLineTextInput,
 		},
 		{
 			PrimaryWidget:   &t.multilineText,
-			SecondaryWidget: &t.multilineTextField,
+			SecondaryWidget: &t.multilineTextInput,
 		},
 	})
 
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(t).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.FixedSize(t.textFieldForm.DefaultSize(context).Y),
+			layout.FixedSize(t.textInputForm.DefaultSize(context).Y),
 			layout.FlexibleSize(1),
 			layout.FixedSize(t.configForm.DefaultSize(context).Y),
 		},
@@ -169,7 +169,7 @@ func (t *TextFields) Build(context *guigui.Context, appender *guigui.ChildWidget
 	}).CellBounds() {
 		switch i {
 		case 0:
-			appender.AppendChildWidgetWithBounds(&t.textFieldForm, bounds)
+			appender.AppendChildWidgetWithBounds(&t.textInputForm, bounds)
 		case 2:
 			appender.AppendChildWidgetWithBounds(&t.configForm, bounds)
 		}

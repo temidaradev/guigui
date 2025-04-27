@@ -20,7 +20,7 @@ type Root struct {
 
 	background        basicwidget.Background
 	createButton      basicwidget.TextButton
-	textField         basicwidget.TextField
+	textInput         basicwidget.TextInput
 	tasksPanel        basicwidget.ScrollablePanel
 	tasksPanelContent tasksPanelContent
 
@@ -30,15 +30,15 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	r.textField.SetOnEnterPressed(func(text string) {
+	r.textInput.SetOnEnterPressed(func(text string) {
 		r.tryCreateTask(text)
 	})
 
 	r.createButton.SetText("Create")
 	r.createButton.SetOnUp(func() {
-		r.tryCreateTask(r.textField.Text())
+		r.tryCreateTask(r.textInput.Text())
 	})
-	context.SetEnabled(&r.createButton, r.model.CanAddTask(r.textField.Text()))
+	context.SetEnabled(&r.createButton, r.model.CanAddTask(r.textInput.Text()))
 
 	r.tasksPanelContent.SetModel(&r.model)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
@@ -67,7 +67,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			}).CellBounds() {
 				switch i {
 				case 0:
-					appender.AppendChildWidgetWithBounds(&r.textField, bounds)
+					appender.AppendChildWidgetWithBounds(&r.textInput, bounds)
 				case 1:
 					appender.AppendChildWidgetWithBounds(&r.createButton, bounds)
 				}
@@ -83,7 +83,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 func (r *Root) tryCreateTask(text string) {
 	if r.model.TryAddTask(text) {
-		r.textField.SetText("")
+		r.textInput.SetText("")
 	}
 }
 

@@ -13,14 +13,14 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
-type TextField struct {
+type TextInput struct {
 	guigui.DefaultWidget
 
-	background    textFieldBackground
+	background    textInputBackground
 	text          Text
-	frame         textFieldFrame
+	frame         textInputFrame
 	scrollOverlay ScrollOverlay
-	focus         textFieldFocus
+	focus         textInputFocus
 
 	prevFocused bool
 	prevStart   int
@@ -29,58 +29,58 @@ type TextField struct {
 	onTextAndSelectionChanged func(text string, start, end int)
 }
 
-func (t *TextField) SetOnEnterPressed(f func(text string)) {
+func (t *TextInput) SetOnEnterPressed(f func(text string)) {
 	t.text.SetOnEnterPressed(f)
 }
 
-func (t *TextField) SetOnValueChanged(f func(text string)) {
+func (t *TextInput) SetOnValueChanged(f func(text string)) {
 	t.text.SetOnValueChanged(f)
 }
 
-func (t *TextField) SetTextAndSelectionChanged(f func(text string, start, end int)) {
+func (t *TextInput) SetTextAndSelectionChanged(f func(text string, start, end int)) {
 	t.onTextAndSelectionChanged = f
 }
 
-func (t *TextField) Text() string {
+func (t *TextInput) Text() string {
 	return t.text.Text()
 }
 
-func (t *TextField) SetText(text string) {
+func (t *TextInput) SetText(text string) {
 	t.text.SetText(text)
 }
 
-func (t *TextField) SetMultiline(multiline bool) {
+func (t *TextInput) SetMultiline(multiline bool) {
 	t.text.SetMultiline(multiline)
 }
 
-func (t *TextField) SetHorizontalAlign(halign HorizontalAlign) {
+func (t *TextInput) SetHorizontalAlign(halign HorizontalAlign) {
 	t.text.SetHorizontalAlign(halign)
 }
 
-func (t *TextField) SetVerticalAlign(valign VerticalAlign) {
+func (t *TextInput) SetVerticalAlign(valign VerticalAlign) {
 	t.text.SetVerticalAlign(valign)
 }
 
-func (t *TextField) SetAutoWrap(autoWrap bool) {
+func (t *TextInput) SetAutoWrap(autoWrap bool) {
 	t.text.SetAutoWrap(autoWrap)
 }
 
-func (t *TextField) SelectAll() {
+func (t *TextInput) SelectAll() {
 	t.text.selectAll()
 }
 
-func textFieldPadding(context *guigui.Context) image.Point {
+func textInputPadding(context *guigui.Context) image.Point {
 	x := UnitSize(context) / 2
 	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
 	return image.Pt(x, y)
 }
 
-func (t *TextField) scrollContentSize(context *guigui.Context) image.Point {
-	padding := textFieldPadding(context)
+func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
+	padding := textInputPadding(context)
 	return t.text.TextSize(context).Add(image.Pt(2*padding.X, 2*padding.Y))
 }
 
-func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if t.prevFocused != context.HasFocusedChildWidget(t) {
 		t.prevFocused = context.HasFocusedChildWidget(t)
 		guigui.RequestRedraw(t)
@@ -90,7 +90,7 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		guigui.RequestRedraw(t)
 	}
 
-	padding := textFieldPadding(context)
+	padding := textInputPadding(context)
 
 	t.scrollOverlay.SetContentSize(context, t.scrollContentSize(context))
 
@@ -122,8 +122,8 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
 	if context.HasFocusedChildWidget(t) {
-		t.focus.textField = t
-		w := textFieldFocusBorderWidth(context)
+		t.focus.textInput = t
+		w := textInputFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))
 		appender.AppendChildWidgetWithPosition(&t.focus, p)
 	}
@@ -131,7 +131,7 @@ func (t *TextField) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	return nil
 }
 
-func (t *TextField) adjustScrollOffsetIfNeeded(context *guigui.Context) {
+func (t *TextInput) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 	start, end, ok := t.text.selectionToDraw(context)
 	if !ok {
 		return
@@ -142,7 +142,7 @@ func (t *TextField) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 	t.prevStart = start
 	t.prevEnd = end
 	bounds := context.Bounds(t)
-	padding := textFieldPadding(context)
+	padding := textInputPadding(context)
 	if pos, ok := t.text.textPosition(context, end, true); ok {
 		dx := min(float64(bounds.Max.X-padding.X)-pos.X, 0)
 		dy := min(float64(bounds.Max.Y-padding.Y)-pos.Bottom, 0)
@@ -155,7 +155,7 @@ func (t *TextField) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 	}
 }
 
-func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+func (t *TextInput) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	cp := image.Pt(ebiten.CursorPosition())
 	if context.IsWidgetHitAt(t, cp) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
@@ -168,67 +168,67 @@ func (t *TextField) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 	return guigui.HandleInputResult{}
 }
 
-func (t *TextField) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
+func (t *TextInput) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
 	return t.text.CursorShape(context)
 }
 
-func (t *TextField) DefaultSize(context *guigui.Context) image.Point {
+func (t *TextInput) DefaultSize(context *guigui.Context) image.Point {
 	if t.text.IsMultiline() {
 		return image.Pt(6*UnitSize(context), 4*UnitSize(context))
 	}
 	return image.Pt(6*UnitSize(context), UnitSize(context))
 }
 
-type textFieldBackground struct {
+type textInputBackground struct {
 	guigui.DefaultWidget
 }
 
-func (t *textFieldBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
+func (t *textInputBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t))
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
-type textFieldFrame struct {
+type textInputFrame struct {
 	guigui.DefaultWidget
 }
 
-func (t *textFieldFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
+func (t *textInputFrame) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	clr1, clr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, false)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 }
 
-func (t *textFieldFrame) PassThrough() bool {
+func (t *textInputFrame) PassThrough() bool {
 	return true
 }
 
-func textFieldFocusBorderWidth(context *guigui.Context) int {
+func textInputFocusBorderWidth(context *guigui.Context) int {
 	return int(4 * context.Scale())
 }
 
-type textFieldFocus struct {
+type textInputFocus struct {
 	guigui.DefaultWidget
 
-	textField *TextField
+	textInput *TextInput
 }
 
-func (t *textFieldFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
-	bounds := context.Bounds(t.textField)
-	w := textFieldFocusBorderWidth(context)
+func (t *textInputFocus) Draw(context *guigui.Context, dst *ebiten.Image) {
+	bounds := context.Bounds(t.textInput)
+	w := textInputFocusBorderWidth(context)
 	clr := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.8)
 	bounds = bounds.Inset(-w)
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr, clr, w+RoundedCornerRadius(context), float32(w), draw.RoundedRectBorderTypeRegular)
 }
 
-func (t *textFieldFocus) ZDelta() int {
+func (t *textInputFocus) ZDelta() int {
 	return 1
 }
 
-func (t *textFieldFocus) DefaultSize(context *guigui.Context) image.Point {
-	return context.Size(t.textField).Add(image.Pt(2*textFieldFocusBorderWidth(context), 2*textFieldFocusBorderWidth(context)))
+func (t *textInputFocus) DefaultSize(context *guigui.Context) image.Point {
+	return context.Size(t.textInput).Add(image.Pt(2*textInputFocusBorderWidth(context), 2*textInputFocusBorderWidth(context)))
 }
 
-func (t *textFieldFocus) PassThrough() bool {
+func (t *textInputFocus) PassThrough() bool {
 	return true
 }

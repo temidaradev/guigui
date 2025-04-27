@@ -312,8 +312,8 @@ func (t *textListItemWidget[T]) listItem() ListItem[T] {
 		l0.SetText(t0)
 		t.AddChild(l0, &view.IdentityLayouter{})
 	}
-	var tf *TextField
-	tf = NewTextField(t.settings, &TextFieldCallback{
+	var tf *TextInput
+	tf = NewTextInput(t.settings, &TextInputCallback{
 		OnTextUpdated: func(value string) {
 			t.textListItem.Text = t0 + value
 		},

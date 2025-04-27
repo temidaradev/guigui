@@ -9,7 +9,7 @@ type Model struct {
 	mode string
 
 	texts      TextsModel
-	textFields TextFieldsModel
+	textInputs TextInputsModel
 }
 
 func (m *Model) Mode() string {
@@ -27,8 +27,8 @@ func (m *Model) Texts() *TextsModel {
 	return &m.texts
 }
 
-func (m *Model) TextFields() *TextFieldsModel {
-	return &m.textFields
+func (m *Model) TextInputs() *TextInputsModel {
+	return &m.textInputs
 }
 
 type TextsModel struct {
@@ -110,7 +110,7 @@ func (t *TextsModel) SetEditable(editable bool) {
 	}
 }
 
-type TextFieldsModel struct {
+type TextInputsModel struct {
 	singleLineText     string
 	singleLinetTextSet bool
 	multilineText      string
@@ -122,58 +122,58 @@ type TextFieldsModel struct {
 	disabled        bool
 }
 
-func (t *TextFieldsModel) SingleLineText() string {
+func (t *TextInputsModel) SingleLineText() string {
 	if !t.singleLinetTextSet {
 		return "Hello, Guigui!"
 	}
 	return t.singleLineText
 }
 
-func (t *TextFieldsModel) SetSingleLineText(text string) {
+func (t *TextInputsModel) SetSingleLineText(text string) {
 	t.singleLineText = text
 	t.singleLinetTextSet = true
 }
 
-func (t *TextFieldsModel) MultilineText() string {
+func (t *TextInputsModel) MultilineText() string {
 	if !t.multilineTextSet {
 		return "Hello, Guigui!\nThis is a multiline text field."
 	}
 	return t.multilineText
 }
 
-func (t *TextFieldsModel) SetMultilineText(text string) {
+func (t *TextInputsModel) SetMultilineText(text string) {
 	t.multilineText = text
 	t.multilineTextSet = true
 }
 
-func (t *TextFieldsModel) HorizontalAlign() basicwidget.HorizontalAlign {
+func (t *TextInputsModel) HorizontalAlign() basicwidget.HorizontalAlign {
 	return t.horizontalAlign
 }
 
-func (t *TextFieldsModel) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
+func (t *TextInputsModel) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
 	t.horizontalAlign = align
 }
 
-func (t *TextFieldsModel) VerticalAlign() basicwidget.VerticalAlign {
+func (t *TextInputsModel) VerticalAlign() basicwidget.VerticalAlign {
 	return t.verticalAlign
 }
 
-func (t *TextFieldsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
+func (t *TextInputsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
 	t.verticalAlign = align
 }
 
-func (t *TextFieldsModel) AutoWrap() bool {
+func (t *TextInputsModel) AutoWrap() bool {
 	return t.autoWrap
 }
 
-func (t *TextFieldsModel) SetAutoWrap(autoWrap bool) {
+func (t *TextInputsModel) SetAutoWrap(autoWrap bool) {
 	t.autoWrap = autoWrap
 }
 
-func (t *TextFieldsModel) Enabled() bool {
+func (t *TextInputsModel) Enabled() bool {
 	return !t.disabled
 }
 
-func (t *TextFieldsModel) SetEnabled(enabled bool) {
+func (t *TextInputsModel) SetEnabled(enabled bool) {
 	t.disabled = !enabled
 }

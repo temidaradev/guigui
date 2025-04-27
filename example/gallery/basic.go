@@ -17,8 +17,8 @@ type Basic struct {
 	textButton     basicwidget.TextButton
 	toggleText     basicwidget.Text
 	toggle         basicwidget.Toggle
-	textFieldText  basicwidget.Text
-	textField      basicwidget.TextField
+	textInputText  basicwidget.Text
+	textInput      basicwidget.TextInput
 	textListText   basicwidget.Text
 	textList       basicwidget.TextList[int]
 }
@@ -27,8 +27,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Click Me!")
 	b.toggleText.SetText("Toggle")
-	b.textFieldText.SetText("Text Field")
-	b.textField.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
+	b.textInputText.SetText("Text Field")
+	b.textInput.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
 	b.textListText.SetText("Text List")
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
@@ -42,8 +42,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &b.toggle,
 		},
 		{
-			PrimaryWidget:   &b.textFieldText,
-			SecondaryWidget: &b.textField,
+			PrimaryWidget:   &b.textInputText,
+			SecondaryWidget: &b.textInput,
 		},
 		{
 			PrimaryWidget:   &b.textListText,
