@@ -74,6 +74,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		t.model.TextInputs().SetNumberFieldValue1(value)
 	})
 	t.numberInput1.SetValue(t.model.TextInputs().NumberFieldValue1())
+	context.SetEnabled(&t.numberInput1, t.model.TextInputs().Enabled())
 	context.SetSize(&t.numberInput1, image.Pt(width, guigui.DefaultSize))
 
 	t.numberInput2Text.SetText("Number Field w/ Range and Step")
@@ -84,6 +85,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.numberInput2.SetMaximumValue(100)
 	t.numberInput2.SetStep(5)
 	t.numberInput2.SetValue(t.model.TextInputs().NumberFieldValue2())
+	context.SetEnabled(&t.numberInput2, t.model.TextInputs().Enabled())
 	context.SetSize(&t.numberInput2, image.Pt(width, guigui.DefaultSize))
 
 	t.textInputForm.SetItems([]*basicwidget.FormItem{
