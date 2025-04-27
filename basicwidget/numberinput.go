@@ -7,6 +7,8 @@ import (
 	"image"
 	"strconv"
 
+	"github.com/hajimehoshi/ebiten/v2"
+
 	"github.com/hajimehoshi/guigui"
 )
 
@@ -16,6 +18,7 @@ type NumberInput struct {
 	textInput TextInput
 
 	nextValue string
+	value     int64
 
 	onValueChanged func(value int64)
 }
@@ -24,8 +27,13 @@ func (n *NumberInput) SetOnValueChanged(f func(value int64)) {
 	n.onValueChanged = f
 }
 
+func (n *NumberInput) Value() int64 {
+	return n.value
+}
+
 func (n *NumberInput) SetValue(value int64) {
 	n.nextValue = strconv.FormatInt(value, 10)
+	n.value = value
 }
 
 func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -50,6 +58,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if err != nil {
 			return
 		}
+		n.value = i
 		if n.onValueChanged != nil {
 			n.onValueChanged(i)
 		}
@@ -62,6 +71,18 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	}
 
 	return nil
+}
+
+func (n *NumberInput) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
+	if isKeyRepeating(ebiten.KeyUp) {
+		n.textInput.SetText(strconv.FormatInt(n.value+1, 10))
+		return guigui.HandleInputByWidget(n)
+	}
+	if isKeyRepeating(ebiten.KeyDown) {
+		n.textInput.SetText(strconv.FormatInt(n.value-1, 10))
+		return guigui.HandleInputByWidget(n)
+	}
+	return guigui.HandleInputResult{}
 }
 
 func (n *NumberInput) DefaultSize(context *guigui.Context) image.Point {

@@ -580,6 +580,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			if t.onEnterPressed != nil {
 				t.onEnterPressed(t.field.Text())
 			}
+			return guigui.HandleInputByWidget(t)
 		case isKeyRepeating(ebiten.KeyBackspace) ||
 			useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyH):
 			start, end := t.field.Selection()
@@ -590,6 +591,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				text, pos := textutil.BackspaceOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
+			return guigui.HandleInputByWidget(t)
 		case !useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD) ||
 			useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyD):
 			// Delete
@@ -601,13 +603,14 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				text, pos := textutil.DeleteOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
+			return guigui.HandleInputByWidget(t)
 		case isKeyRepeating(ebiten.KeyDelete):
 			// Delete one cluster
 			if _, end := t.field.Selection(); end < len(t.field.Text()) {
 				text, pos := textutil.DeleteOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(text, pos, pos, -1)
 			}
-
+			return guigui.HandleInputByWidget(t)
 		case !useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyX) ||
 			useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyX):
 			// Cut
@@ -620,6 +623,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				text := t.field.Text()[:start] + t.field.Text()[end:]
 				t.setTextAndSelection(text, start, start, -1)
 			}
+			return guigui.HandleInputByWidget(t)
 		case !useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyV) ||
 			useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyV):
 			// Paste
@@ -631,6 +635,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			}
 			text := t.field.Text()[:start] + ct + t.field.Text()[end:]
 			t.setTextAndSelection(text, start+len(ct), start+len(ct), -1)
+			return guigui.HandleInputByWidget(t)
 		}
 	}
 
@@ -654,6 +659,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
 			}
 		}
+		return guigui.HandleInputByWidget(t)
 	case isKeyRepeating(ebiten.KeyRight) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyF):
 		start, end := t.field.Selection()
@@ -673,7 +679,8 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				t.setTextAndSelection(t.field.Text(), pos, pos, -1)
 			}
 		}
-	case isKeyRepeating(ebiten.KeyUp) ||
+		return guigui.HandleInputByWidget(t)
+	case t.multiline && isKeyRepeating(ebiten.KeyUp) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyP):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
@@ -697,7 +704,8 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 			}
 		}
-	case isKeyRepeating(ebiten.KeyDown) ||
+		return guigui.HandleInputByWidget(t)
+	case t.multiline && isKeyRepeating(ebiten.KeyDown) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyN):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
@@ -721,6 +729,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 			}
 		}
+		return guigui.HandleInputByWidget(t)
 	case useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA):
 		idx := 0
 		start, end := t.field.Selection()
@@ -732,6 +741,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		} else {
 			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 		}
+		return guigui.HandleInputByWidget(t)
 	case useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyE):
 		idx := len(t.field.Text())
 		start, end := t.field.Selection()
@@ -743,9 +753,11 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		} else {
 			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 		}
+		return guigui.HandleInputByWidget(t)
 	case !useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyA) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyA):
 		t.selectAll()
+		return guigui.HandleInputByWidget(t)
 	case !useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyC) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyMeta) && isKeyRepeating(ebiten.KeyC):
 		// Copy
@@ -756,6 +768,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				return guigui.AbortHandlingInputByWidget(t)
 			}
 		}
+		return guigui.HandleInputByWidget(t)
 	case useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyK):
 		// 'Kill' the text after the cursor or the selection.
 		start, end := t.field.Selection()
@@ -772,6 +785,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		t.temporaryClipboard = t.field.Text()[start:end]
 		text := t.field.Text()[:start] + t.field.Text()[end:]
 		t.setTextAndSelection(text, start, start, -1)
+		return guigui.HandleInputByWidget(t)
 	case useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyY):
 		// 'Yank' the killed text.
 		if t.temporaryClipboard != "" {
@@ -779,9 +793,10 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			text := t.field.Text()[:start] + t.temporaryClipboard + t.field.Text()[start:]
 			t.setTextAndSelection(text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
 		}
+		return guigui.HandleInputByWidget(t)
 	}
 
-	return guigui.HandleInputByWidget(t)
+	return guigui.HandleInputResult{}
 }
 
 func (t *Text) applyFilter() {
