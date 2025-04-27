@@ -201,7 +201,6 @@ func (t *Text) SetText(text string) {
 
 func (t *Text) SetFilter(filter TextFilter) {
 	t.filter = filter
-	t.applyFilter()
 }
 
 func (t *Text) selectAll() {
@@ -755,11 +754,12 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 }
 
 func (t *Text) applyFilter() {
-	if t.filter != nil {
-		start, end := t.field.Selection()
-		text, start, end := t.filter(t.field.Text(), start, end)
-		t.setTextAndSelection(text, start, end, -1)
+	if t.filter == nil {
+		return
 	}
+	start, end := t.field.Selection()
+	text, start, end := t.filter(t.field.Text(), start, end)
+	t.setTextAndSelection(text, start, end, -1)
 }
 
 func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {

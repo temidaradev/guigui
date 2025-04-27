@@ -19,6 +19,8 @@ type TextInputs struct {
 	singleLineTextInput basicwidget.TextInput
 	multilineText       basicwidget.Text
 	multilineTextInput  basicwidget.TextInput
+	numberInputText     basicwidget.Text
+	numberInput         basicwidget.NumberInput
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -64,6 +66,28 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.multilineTextInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
+
+	t.numberInputText.SetText("Number Field")
+	t.numberInput.SetOnValueChanged(func(value int64) {
+		t.model.TextInputs().SetNumberFieldValue(value)
+	})
+	t.numberInput.SetValue(t.model.TextInputs().NumberFieldValue())
+	context.SetSize(&t.numberInput, image.Pt(width, guigui.DefaultSize))
+
+	t.textInputForm.SetItems([]*basicwidget.FormItem{
+		{
+			PrimaryWidget:   &t.singleLineText,
+			SecondaryWidget: &t.singleLineTextInput,
+		},
+		{
+			PrimaryWidget:   &t.multilineText,
+			SecondaryWidget: &t.multilineTextInput,
+		},
+		{
+			PrimaryWidget:   &t.numberInputText,
+			SecondaryWidget: &t.numberInput,
+		},
+	})
 
 	// Configurations
 	t.horizontalAlignText.SetText("Horizontal Align")
@@ -144,17 +168,6 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.enabledText,
 			SecondaryWidget: &t.enabledToggle,
-		},
-	})
-
-	t.textInputForm.SetItems([]*basicwidget.FormItem{
-		{
-			PrimaryWidget:   &t.singleLineText,
-			SecondaryWidget: &t.singleLineTextInput,
-		},
-		{
-			PrimaryWidget:   &t.multilineText,
-			SecondaryWidget: &t.multilineTextInput,
 		},
 	})
 

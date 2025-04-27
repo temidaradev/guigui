@@ -69,6 +69,10 @@ func (t *TextInput) SelectAll() {
 	t.text.selectAll()
 }
 
+func (t *TextInput) SetFilter(filter TextFilter) {
+	t.text.SetFilter(filter)
+}
+
 func textInputPadding(context *guigui.Context) image.Point {
 	x := UnitSize(context) / 2
 	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
