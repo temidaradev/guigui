@@ -27,7 +27,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Click Me!")
 	b.toggleText.SetText("Toggle")
-	b.textInputText.SetText("Text Field")
+	b.textInputText.SetText("Text Input")
 	b.textInput.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
 	b.textListText.SetText("Text List")
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})

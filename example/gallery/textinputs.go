@@ -44,7 +44,7 @@ func (t *TextInputs) SetModel(model *Model) {
 func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := basicwidget.UnitSize(context)
 
-	// Text Fields
+	// Text Inputs
 	width := 12 * u
 
 	t.singleLineText.SetText("Single Line")
