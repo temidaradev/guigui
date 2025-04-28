@@ -5,14 +5,14 @@ package basicwidget
 
 import (
 	"embed"
-	"image/color"
-	"image/draw"
+	"image"
 	"image/png"
 	"path"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 //go:embed resource/*.png
@@ -49,24 +49,38 @@ func (i *resourceImages) Get(name string, colorMode guigui.ColorMode) (*ebiten.I
 	if err != nil {
 		return nil, err
 	}
-	if colorMode == guigui.ColorModeLight {
-		// Create a black image for light mode.
-		rgbaImg := pImg.(draw.Image)
-		b := rgbaImg.Bounds()
-		for j := b.Min.Y; j < b.Max.Y; j++ {
-			for i := b.Min.X; i < b.Max.X; i++ {
-				if _, _, _, a := rgbaImg.At(i, j).RGBA(); a > 0 {
-					a16 := uint16(a)
-					rgbaImg.Set(i, j, color.RGBA64{0, 0, 0, a16})
-				}
-			}
-		}
-		pImg = rgbaImg
-	}
+	pImg = CreateMonochromeImage(colorMode, pImg)
 	img := ebiten.NewImageFromImage(pImg)
 	if i.m == nil {
 		i.m = map[imageCacheKey]*ebiten.Image{}
 	}
 	i.m[key] = img
 	return img, nil
+}
+
+func CreateMonochromeImage(colorMode guigui.ColorMode, img image.Image) image.Image {
+	base := draw.Color(colorMode, draw.ColorTypeBase, 0)
+	r, g, b, _ := base.RGBA()
+
+	bounds := img.Bounds()
+	pix := make([]byte, 4*bounds.Dx()*bounds.Dy())
+	for j := range bounds.Dy() {
+		for i := range bounds.Dx() {
+			_, _, _, a := img.At(i, j).RGBA()
+			if a == 0 {
+				continue
+			}
+
+			pix[4*(j*bounds.Dx()+i)] = byte((r * a / 0xFFFF) >> 8)
+			pix[4*(j*bounds.Dx()+i)+1] = byte((g * a / 0xFFFF) >> 8)
+			pix[4*(j*bounds.Dx()+i)+2] = byte((b * a / 0xFFFF) >> 8)
+			pix[4*(j*bounds.Dx()+i)+3] = uint8(a >> 8)
+		}
+	}
+
+	return &image.RGBA{
+		Pix:    pix,
+		Stride: 4 * bounds.Dx(),
+		Rect:   bounds,
+	}
 }

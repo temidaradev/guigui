@@ -5,13 +5,12 @@ package main
 
 import (
 	"embed"
-	"image/color"
-	"image/draw"
 	"image/png"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget"
 )
 
 //go:embed *.png
@@ -48,20 +47,9 @@ func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image
 	if err != nil {
 		return nil, err
 	}
-	if colorMode == guigui.ColorModeLight {
-		// Create a white image for light mode.
-		rgbaImg := pImg.(draw.Image)
-		b := rgbaImg.Bounds()
-		for j := b.Min.Y; j < b.Max.Y; j++ {
-			for i := b.Min.X; i < b.Max.X; i++ {
-				if _, _, _, a := rgbaImg.At(i, j).RGBA(); a > 0 {
-					a16 := uint16(a)
-					rgbaImg.Set(i, j, color.RGBA64{0, 0, 0, a16})
-				}
-			}
-		}
-		pImg = rgbaImg
-	}
+
+	pImg = basicwidget.CreateMonochromeImage(colorMode, pImg)
+
 	img := ebiten.NewImageFromImage(pImg)
 	if i.m == nil {
 		i.m = map[imageCacheKey]*ebiten.Image{}
