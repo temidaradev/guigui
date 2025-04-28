@@ -8,6 +8,7 @@ import "github.com/hajimehoshi/guigui/basicwidget"
 type Model struct {
 	mode string
 
+	buttons    ButtonsModel
 	texts      TextsModel
 	textInputs TextInputsModel
 }
@@ -23,12 +24,28 @@ func (m *Model) SetMode(mode string) {
 	m.mode = mode
 }
 
+func (m *Model) Buttons() *ButtonsModel {
+	return &m.buttons
+}
+
 func (m *Model) Texts() *TextsModel {
 	return &m.texts
 }
 
 func (m *Model) TextInputs() *TextInputsModel {
 	return &m.textInputs
+}
+
+type ButtonsModel struct {
+	disabled bool
+}
+
+func (b *ButtonsModel) Enabled() bool {
+	return !b.disabled
+}
+
+func (b *ButtonsModel) SetEnabled(enabled bool) {
+	b.disabled = !enabled
 }
 
 type TextsModel struct {

@@ -53,6 +53,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
+	r.buttons.SetModel(&r.model)
 	r.texts.SetModel(&r.model)
 	r.textInputs.SetModel(&r.model)
 	r.sidebar.SetModel(&r.model)

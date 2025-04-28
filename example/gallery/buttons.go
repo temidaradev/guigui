@@ -12,7 +12,7 @@ import (
 type Buttons struct {
 	guigui.DefaultWidget
 
-	form                  basicwidget.Form
+	buttonsForm           basicwidget.Form
 	textButtonText        basicwidget.Text
 	textButton            basicwidget.TextButton
 	textImageButtonText   basicwidget.Text
@@ -21,11 +21,23 @@ type Buttons struct {
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
 	segmentedControlV     basicwidget.SegmentedControl[int]
+
+	configForm    basicwidget.Form
+	enabledText   basicwidget.Text
+	enabledToggle basicwidget.Toggle
+
+	model *Model
+}
+
+func (b *Buttons) SetModel(model *Model) {
+	b.model = model
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	b.textButtonText.SetText("Text Button")
 	b.textButton.SetText("Button")
+	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
+
 	b.textImageButtonText.SetText("Text w/ Image Button")
 	b.textImageButton.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
@@ -33,6 +45,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		return err
 	}
 	b.textImageButton.SetImage(img)
+	context.SetEnabled(&b.textImageButton, b.model.Buttons().Enabled())
 
 	b.segmentedControlHText.SetText("Segmented Control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
@@ -47,6 +60,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		},
 	})
 	b.segmentedControlH.SetDirection(basicwidget.SegmentedControlDirectionHorizontal)
+	context.SetEnabled(&b.segmentedControlH, b.model.Buttons().Enabled())
 
 	b.segmentedControlVText.SetText("Segmented Control (Vertical)")
 	b.segmentedControlV.SetItems([]basicwidget.SegmentedControlItem[int]{
@@ -61,8 +75,9 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		},
 	})
 	b.segmentedControlV.SetDirection(basicwidget.SegmentedControlDirectionVertical)
+	context.SetEnabled(&b.segmentedControlV, b.model.Buttons().Enabled())
 
-	b.form.SetItems([]*basicwidget.FormItem{
+	b.buttonsForm.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
 			SecondaryWidget: &b.textButton,
@@ -81,23 +96,35 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		},
 	})
 
+	b.enabledText.SetText("Enabled")
+	b.enabledToggle.SetOnValueChanged(func(enabled bool) {
+		b.model.Buttons().SetEnabled(enabled)
+	})
+	b.enabledToggle.SetValue(b.model.Buttons().Enabled())
+
+	b.configForm.SetItems([]*basicwidget.FormItem{
+		{
+			PrimaryWidget:   &b.enabledText,
+			SecondaryWidget: &b.enabledToggle,
+		},
+	})
+
 	u := basicwidget.UnitSize(context)
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(b).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.MaxContentSize(func(index int) int {
-				if index >= 1 {
-					return 0
-				}
-				return b.form.DefaultSize(context).Y
-			}),
+			layout.FixedSize(b.buttonsForm.DefaultSize(context).Y),
+			layout.FlexibleSize(1),
+			layout.FixedSize(b.configForm.DefaultSize(context).Y),
 		},
 		RowGap: u / 2,
-	}).RepeatingCellBounds() {
-		if i >= 1 {
-			break
+	}).CellBounds() {
+		switch i {
+		case 0:
+			appender.AppendChildWidgetWithBounds(&b.buttonsForm, bounds)
+		case 2:
+			appender.AppendChildWidgetWithBounds(&b.configForm, bounds)
 		}
-		appender.AppendChildWidgetWithBounds(&b.form, bounds)
 	}
 
 	return nil

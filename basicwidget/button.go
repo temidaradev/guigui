@@ -75,19 +75,18 @@ func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, b
 }
 
 func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
-	// TODO: In the dark theme, the color should be different.
-	// At least, shadow should be darker.
-	// See macOS's buttons.
 	cm := context.ColorMode()
 	backgroundColor := draw.ControlColor(context.ColorMode(), context.IsEnabled(b))
-	if b.isPressed(context) {
-		if b.useAccentColor {
-			backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.875, 0.5)
-		} else {
-			backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
+	if context.IsEnabled(b) {
+		if b.isPressed(context) {
+			if b.useAccentColor {
+				backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.875, 0.5)
+			} else {
+				backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
+			}
+		} else if b.canPress(context) {
+			backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
 		}
-	} else if b.canPress(context) {
-		backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
 	}
 
 	bounds := context.Bounds(b)
@@ -101,13 +100,15 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	if border {
-		borderType := draw.RoundedRectBorderTypeOutset
-		if b.isPressed(context) {
-			borderType = draw.RoundedRectBorderTypeInset
-		} else if !context.IsEnabled(b) {
-			borderType = draw.RoundedRectBorderTypeRegular
+		borderType := draw.RoundedRectBorderTypeRegular
+		if context.IsEnabled(b) {
+			if b.isPressed(context) {
+				borderType = draw.RoundedRectBorderTypeInset
+			} else {
+				borderType = draw.RoundedRectBorderTypeOutset
+			}
 		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context))
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context) && context.IsEnabled(b))
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
