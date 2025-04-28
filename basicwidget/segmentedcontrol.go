@@ -4,11 +4,19 @@
 package basicwidget
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 	"github.com/hajimehoshi/guigui/layout"
+)
+
+type SegmentedControlDirection int
+
+const (
+	SegmentedControlDirectionHorizontal SegmentedControlDirection = iota
+	SegmentedControlDirectionVertical
 )
 
 type SegmentedControlItem[T comparable] struct {
@@ -26,6 +34,16 @@ type SegmentedControl[T comparable] struct {
 
 	abstractList abstractList[T, SegmentedControlItem[T]]
 	textButtons  []TextButton
+
+	direction SegmentedControlDirection
+}
+
+func (s *SegmentedControl[T]) SetDirection(direction SegmentedControlDirection) {
+	if s.direction == direction {
+		return
+	}
+	s.direction = direction
+	guigui.RequestRedraw(s)
 }
 
 func (s *SegmentedControl[T]) SetOnItemSelected(f func(index int)) {
@@ -63,7 +81,7 @@ func (s *SegmentedControl[T]) SelectItemByTag(tag T) {
 func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.textButtons = adjustSliceSize(s.textButtons, s.abstractList.ItemCount())
 
-	widths := make([]layout.Size, s.abstractList.ItemCount())
+	sizes := make([]layout.Size, s.abstractList.ItemCount())
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
@@ -72,15 +90,31 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 		if s.abstractList.ItemCount() > 1 {
 			switch i {
 			case 0:
-				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-					UpperRight: true,
-					LowerRight: true,
-				})
+				switch s.direction {
+				case SegmentedControlDirectionHorizontal:
+					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+						UpperRight: true,
+						LowerRight: true,
+					})
+				case SegmentedControlDirectionVertical:
+					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+						LowerLeft:  true,
+						LowerRight: true,
+					})
+				}
 			case s.abstractList.ItemCount() - 1:
-				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-					UpperLeft: true,
-					LowerLeft: true,
-				})
+				switch s.direction {
+				case SegmentedControlDirectionHorizontal:
+					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+						UpperLeft: true,
+						LowerLeft: true,
+					})
+				case SegmentedControlDirectionVertical:
+					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
+						UpperRight: true,
+						UpperLeft:  true,
+					})
+				}
 			default:
 				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
 					UpperLeft:  true,
@@ -95,13 +129,24 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 		s.textButtons[i].SetOnDown(func() {
 			s.SelectItemByIndex(i)
 		})
-		widths[i] = layout.FlexibleSize(1)
+		sizes[i] = layout.FlexibleSize(1)
 	}
 
-	for i, bounds := range (layout.GridLayout{
-		Bounds: context.Bounds(s),
-		Widths: widths,
-	}).CellBounds() {
+	var g layout.GridLayout
+	switch s.direction {
+	case SegmentedControlDirectionHorizontal:
+		g = layout.GridLayout{
+			Bounds: context.Bounds(s),
+			Widths: sizes,
+		}
+	case SegmentedControlDirectionVertical:
+		g = layout.GridLayout{
+			Bounds:  context.Bounds(s),
+			Heights: sizes,
+		}
+	}
+
+	for i, bounds := range g.CellBounds() {
 		appender.AppendChildWidgetWithBounds(&s.textButtons[i], bounds)
 	}
 	return nil
@@ -117,5 +162,12 @@ func (s *SegmentedControl[T]) DefaultSize(context *guigui.Context) image.Point {
 		w = max(w, t.DefaultSize(context).X)
 		h = max(h, t.DefaultSize(context).Y)
 	}
-	return image.Pt(w*len(s.textButtons), h)
+	switch s.direction {
+	case SegmentedControlDirectionHorizontal:
+		return image.Pt(w*len(s.textButtons), h)
+	case SegmentedControlDirectionVertical:
+		return image.Pt(w, h*len(s.textButtons))
+	default:
+		panic(fmt.Sprintf("basicwidget: unknown direction %d", s.direction))
+	}
 }

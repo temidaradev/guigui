@@ -12,13 +12,15 @@ import (
 type Buttons struct {
 	guigui.DefaultWidget
 
-	form                     basicwidget.Form
-	textButtonText           basicwidget.Text
-	textButton               basicwidget.TextButton
-	textImageButtonText      basicwidget.Text
-	textImageButton          basicwidget.TextButton
-	textSegmentedControlText basicwidget.Text
-	textSegmentedControl     basicwidget.SegmentedControl[int]
+	form                  basicwidget.Form
+	textButtonText        basicwidget.Text
+	textButton            basicwidget.TextButton
+	textImageButtonText   basicwidget.Text
+	textImageButton       basicwidget.TextButton
+	segmentedControlHText basicwidget.Text
+	segmentedControlH     basicwidget.SegmentedControl[int]
+	segmentedControlVText basicwidget.Text
+	segmentedControlV     basicwidget.SegmentedControl[int]
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -31,8 +33,9 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		return err
 	}
 	b.textImageButton.SetImage(img)
-	b.textSegmentedControlText.SetText("Segmented Control")
-	b.textSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[int]{
+
+	b.segmentedControlHText.SetText("Segmented Control (Horizontal)")
+	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
 		{
 			Text: "One",
 		},
@@ -43,6 +46,21 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			Text: "Three",
 		},
 	})
+	b.segmentedControlH.SetDirection(basicwidget.SegmentedControlDirectionHorizontal)
+
+	b.segmentedControlVText.SetText("Segmented Control (Vertical)")
+	b.segmentedControlV.SetItems([]basicwidget.SegmentedControlItem[int]{
+		{
+			Text: "One",
+		},
+		{
+			Text: "Two",
+		},
+		{
+			Text: "Three",
+		},
+	})
+	b.segmentedControlV.SetDirection(basicwidget.SegmentedControlDirectionVertical)
 
 	b.form.SetItems([]*basicwidget.FormItem{
 		{
@@ -54,8 +72,12 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			SecondaryWidget: &b.textImageButton,
 		},
 		{
-			PrimaryWidget:   &b.textSegmentedControlText,
-			SecondaryWidget: &b.textSegmentedControl,
+			PrimaryWidget:   &b.segmentedControlHText,
+			SecondaryWidget: &b.segmentedControlH,
+		},
+		{
+			PrimaryWidget:   &b.segmentedControlVText,
+			SecondaryWidget: &b.segmentedControlV,
 		},
 	})
 
