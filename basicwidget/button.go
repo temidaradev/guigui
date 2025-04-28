@@ -92,7 +92,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(b)
 	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
 	border := !b.borderInvisible
-	if context.IsEnabled(b) && b.isHovered(context) || b.keepPressed {
+	if context.IsEnabled(b) && (b.isHovered(context) || b.keepPressed) {
 		border = true
 	}
 	if border || b.isPressed(context) {
@@ -108,7 +108,7 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 				borderType = draw.RoundedRectBorderTypeOutset
 			}
 		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context) && context.IsEnabled(b))
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context))
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
@@ -126,7 +126,7 @@ func (b *Button) isActive(context *guigui.Context) bool {
 }
 
 func (b *Button) isPressed(context *guigui.Context) bool {
-	return b.isActive(context) || b.keepPressed
+	return context.IsEnabled(b) && (b.isActive(context) || b.keepPressed)
 }
 
 func (b *Button) setKeepPressed(keep bool) {
