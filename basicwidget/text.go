@@ -111,6 +111,7 @@ type Text struct {
 	cursor textCursor
 
 	temporaryClipboard string
+	temporaryLocales   []language.Tag
 
 	cachedTextSizePlus1         image.Point
 	cachedAutoWrapTextSizePlus1 image.Point
@@ -396,8 +397,10 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	if len(t.locales) > 0 {
 		lang = t.locales[0]
 	} else {
-		if locales := context.AppendLocales(nil); len(locales) > 0 {
-			lang = locales[0]
+		t.temporaryLocales = slices.Delete(t.temporaryLocales, 0, len(t.temporaryLocales))
+		t.temporaryLocales = context.AppendLocales(t.temporaryLocales)
+		if len(t.temporaryLocales) > 0 {
+			lang = t.temporaryLocales[0]
 		}
 	}
 	return fontFace(size, weight, features, lang)
