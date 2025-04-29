@@ -7,7 +7,6 @@ import (
 	"image"
 	"math"
 	"strconv"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -81,22 +80,8 @@ func (n *NumberInput) SetStep(step int64) {
 	n.stepMinus1 = step - 1
 }
 
-var numberTextReplacer = strings.NewReplacer(
-	"０", "0",
-	"１", "1",
-	"２", "2",
-	"３", "3",
-	"４", "4",
-	"５", "5",
-	"６", "6",
-	"７", "7",
-	"８", "8",
-	"９", "9",
-)
-
 func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	n.textInput.SetFilter(func(text string, start, end int) (string, int, int) {
-		text = numberTextReplacer.Replace(text)
 		for len(text) > 0 {
 			if _, err := strconv.ParseInt(text, 10, 64); err == nil {
 				return text, start, end
@@ -114,7 +99,6 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if text == "" {
 			return
 		}
-		text = numberTextReplacer.Replace(text)
 		i, err := strconv.ParseInt(text, 10, 64)
 		if err != nil {
 			return
