@@ -124,11 +124,12 @@ func (t *TextList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 	// To use HasFocusedChildWidget correctly, create the tree first.
 	appender.AppendChildWidgetWithPosition(&t.list, context.Position(t))
 
+	focused := context.HasFocusedChildWidget(t)
 	for i := range t.textListItemWidgets {
 		item := &t.textListItemWidgets[i]
 		item.text.SetBold(item.textListItem.Header || t.list.style == ListStyleSidebar && t.SelectedItemIndex() == i)
 		switch {
-		case t.list.style == ListStyleNormal && context.HasFocusedChildWidget(t) && t.list.SelectedItemIndex() == i && item.selectable():
+		case t.list.style == ListStyleNormal && focused && t.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
 		case t.list.style == ListStyleSidebar && t.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
