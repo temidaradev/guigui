@@ -44,40 +44,41 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		origStr := str
-		// Use []byte instead of string for efficient concatenations.
-		var line []byte
+		var lineStart int
+		var lineEnd int
 		var pos int
 		state := -1
 		for len(str) > 0 {
 			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
-			if len(line) > 0 && autoWrap {
-				l := string(line) + string(segment)
+			if lineEnd-lineStart > 0 && autoWrap {
+				l := origStr[lineStart : lineEnd+len(segment)]
 				// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
 				if text.Advance(l[:len(l)-tailingLineBreakLen(l)], face) > float64(width) {
-					if !yield(pos, string(line)) {
+					if !yield(pos, origStr[lineStart:lineEnd]) {
 						return
 					}
-					pos += len(line)
-					line = line[:0]
+					pos += lineEnd - lineStart
+					lineStart = lineEnd
 				}
 			}
-			line = append(line, segment...)
+			lineEnd += len(segment)
 			if mustBreak {
-				if !yield(pos, string(line)) {
+				if !yield(pos, origStr[lineStart:lineEnd]) {
 					return
 				}
-				pos += len(line)
-				line = line[:0]
+				pos += lineEnd - lineStart
+				lineStart = lineEnd
 			}
 			str = nextStr
 			state = nextState
 		}
 
-		if len(line) > 0 {
-			if !yield(pos, string(line)) {
+		if lineEnd-lineStart > 0 {
+			if !yield(pos, origStr[lineStart:lineEnd]) {
 				return
 			}
-			pos += len(line)
+			pos += lineEnd - lineStart
+			lineStart = lineEnd
 		}
 
 		// If the string ends with a line break, or an empty line, add an extra empty line.
