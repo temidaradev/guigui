@@ -42,6 +42,31 @@ func (t *TextInputs) SetModel(model *Model) {
 }
 
 func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	imgAlignStart, err := theImageCache.Get("format_align_left", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgAlignCenter, err := theImageCache.Get("format_align_center", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgAlignEnd, err := theImageCache.Get("format_align_right", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgAlignTop, err := theImageCache.Get("vertical_align_top", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgAlignMiddle, err := theImageCache.Get("vertical_align_center", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgAlignBottom, err := theImageCache.Get("vertical_align_bottom", context.ColorMode())
+	if err != nil {
+		return err
+	}
+
 	u := basicwidget.UnitSize(context)
 
 	// Text Inputs
@@ -111,16 +136,16 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.horizontalAlignText.SetText("Horizontal Align")
 	t.horizontalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.HorizontalAlign]{
 		{
-			Text: "Start",
-			Tag:  basicwidget.HorizontalAlignStart,
+			Image: imgAlignStart,
+			Tag:   basicwidget.HorizontalAlignStart,
 		},
 		{
-			Text: "Center",
-			Tag:  basicwidget.HorizontalAlignCenter,
+			Image: imgAlignCenter,
+			Tag:   basicwidget.HorizontalAlignCenter,
 		},
 		{
-			Text: "End",
-			Tag:  basicwidget.HorizontalAlignEnd,
+			Image: imgAlignEnd,
+			Tag:   basicwidget.HorizontalAlignEnd,
 		},
 	})
 	t.horizontalAlignSegmentedControl.SetOnItemSelected(func(index int) {
@@ -136,16 +161,16 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.verticalAlignText.SetText("Vertical Align")
 	t.verticalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.VerticalAlign]{
 		{
-			Text: "Top",
-			Tag:  basicwidget.VerticalAlignTop,
+			Image: imgAlignTop,
+			Tag:   basicwidget.VerticalAlignTop,
 		},
 		{
-			Text: "Middle",
-			Tag:  basicwidget.VerticalAlignMiddle,
+			Image: imgAlignMiddle,
+			Tag:   basicwidget.VerticalAlignMiddle,
 		},
 		{
-			Text: "Bottom",
-			Tag:  basicwidget.VerticalAlignBottom,
+			Image: imgAlignBottom,
+			Tag:   basicwidget.VerticalAlignBottom,
 		},
 	})
 	t.verticalAlignSegmentedControl.SetOnItemSelected(func(index int) {

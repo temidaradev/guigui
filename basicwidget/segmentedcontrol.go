@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 	"github.com/hajimehoshi/guigui/layout"
@@ -21,6 +22,7 @@ const (
 
 type SegmentedControlItem[T comparable] struct {
 	Text     string
+	Image    *ebiten.Image
 	Disabled bool
 	Tag      T
 }
@@ -87,6 +89,7 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
+		s.textButtons[i].SetImage(item.Image)
 		s.textButtons[i].SetTextBold(s.abstractList.SelectedItemIndex() == i && context.IsEnabled(s))
 		s.textButtons[i].setUseAccentColor(true)
 		if s.abstractList.ItemCount() > 1 {
@@ -159,6 +162,7 @@ func (s *SegmentedControl[T]) DefaultSize(context *guigui.Context) image.Point {
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.tmpTextButton.SetText(item.Text)
+		s.tmpTextButton.SetImage(item.Image)
 		s.tmpTextButton.SetTextBold(true)
 		w = max(w, s.tmpTextButton.DefaultSize(context).X)
 		h = max(h, s.tmpTextButton.DefaultSize(context).Y)

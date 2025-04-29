@@ -87,7 +87,10 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 
 	imgP := context.Position(t)
-	imgP.X = textP.X + tw + textButtonTextAndImagePadding(context)
+	imgP.X = textP.X
+	if t.text.Text() != "" {
+		imgP.X += tw + textButtonTextAndImagePadding(context)
+	}
 	imgP.Y += (s.Y - imgSize) / 2
 	if t.button.isPressed(context) {
 		imgP.Y += int(1 * context.Scale())
@@ -105,7 +108,11 @@ func (t *TextButton) DefaultSize(context *guigui.Context) image.Point {
 	w := t.text.TextSize(context).X
 	if t.image.HasImage() {
 		imgSize := textButtonImageSize(context)
-		return image.Pt(w+textButtonTextAndImagePadding(context)+imgSize+UnitSize(context)*3/4, dh)
+		if t.text.Text() != "" {
+			w += textButtonTextAndImagePadding(context)
+		}
+		w += imgSize + UnitSize(context)*3/4
+		return image.Pt(w, dh)
 	}
 	return image.Pt(w+UnitSize(context), dh)
 }
