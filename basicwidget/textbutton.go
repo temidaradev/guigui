@@ -31,6 +31,10 @@ func (t *TextButton) SetOnUp(f func()) {
 	t.button.SetOnUp(f)
 }
 
+func (b *TextButton) setOnRepeat(f func()) {
+	b.button.setOnRepeat(f)
+}
+
 func (t *TextButton) SetText(text string) {
 	t.text.SetText(text)
 }

@@ -23,8 +23,9 @@ type Button struct {
 	prevHovered     bool
 	sharpenCorners  draw.SharpenCorners
 
-	onDown func()
-	onUp   func()
+	onDown   func()
+	onUp     func()
+	onRepeat func()
 }
 
 func (b *Button) SetOnDown(f func()) {
@@ -33,6 +34,10 @@ func (b *Button) SetOnDown(f func()) {
 
 func (b *Button) SetOnUp(f func()) {
 	b.onUp = f
+}
+
+func (b *Button) setOnRepeat(f func()) {
+	b.onRepeat = f
 }
 
 func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -50,6 +55,17 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 			b.pressed = true
 			if b.onDown != nil {
 				b.onDown()
+			}
+			if isMouseButtonRepeating(ebiten.MouseButtonLeft) {
+				if b.onRepeat != nil {
+					b.onRepeat()
+				}
+			}
+			return guigui.HandleInputByWidget(b)
+		}
+		if b.pressed && isMouseButtonRepeating(ebiten.MouseButtonLeft) {
+			if b.onRepeat != nil {
+				b.onRepeat()
 			}
 			return guigui.HandleInputByWidget(b)
 		}

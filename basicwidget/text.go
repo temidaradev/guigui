@@ -41,16 +41,23 @@ const (
 	VerticalAlignBottom VerticalAlign = VerticalAlign(textutil.VerticalAlignBottom)
 )
 
+func isMouseButtonRepeating(button ebiten.MouseButton) bool {
+	return repeat(inpututil.MouseButtonPressDuration(button))
+}
+
 func isKeyRepeating(key ebiten.Key) bool {
-	d := inpututil.KeyPressDuration(key)
-	if d == 1 {
+	return repeat(inpututil.KeyPressDuration(key))
+}
+
+func repeat(duration int) bool {
+	if duration == 1 {
 		return true
 	}
 	delay := ebiten.TPS() * 24 / 60
-	if d < delay {
+	if duration < delay {
 		return false
 	}
-	return (d-delay)%4 == 0
+	return (duration-delay)%4 == 0
 }
 
 func findWordBoundaries(text string, idx int) (start, end int) {
