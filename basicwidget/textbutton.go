@@ -60,7 +60,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 	s := context.Size(t)
 
-	imgSize := textButtonImageSize(context)
+	imgSize := t.textButtonImageSize(context)
 
 	tw := t.text.TextSize(context).X
 	if t.textColor != nil {
@@ -107,7 +107,7 @@ func (t *TextButton) DefaultSize(context *guigui.Context) image.Point {
 	dh := defaultButtonSize(context).Y
 	w := t.text.TextSize(context).X
 	if t.image.HasImage() {
-		imgSize := textButtonImageSize(context)
+		imgSize := t.defaultTextButtonImageSize(context)
 		if t.text.Text() != "" {
 			w += textButtonTextAndImagePadding(context)
 		}
@@ -121,8 +121,13 @@ func (t *TextButton) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
 	t.button.setSharpenCorners(sharpenCorners)
 }
 
-func textButtonImageSize(context *guigui.Context) int {
+func (t *TextButton) defaultTextButtonImageSize(context *guigui.Context) int {
 	return int(LineHeight(context))
+}
+
+func (t *TextButton) textButtonImageSize(context *guigui.Context) int {
+	s := context.Size(t)
+	return min(t.defaultTextButtonImageSize(context), s.X, s.Y)
 }
 
 func textButtonTextAndImagePadding(context *guigui.Context) int {

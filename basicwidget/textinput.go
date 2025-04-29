@@ -22,6 +22,9 @@ type TextInput struct {
 	scrollOverlay ScrollOverlay
 	focus         textInputFocus
 
+	paddingLeft  int
+	paddingRight int
+
 	prevFocused bool
 	prevStart   int
 	prevEnd     int
@@ -77,15 +80,31 @@ func (t *TextInput) SetNumber(number bool) {
 	t.text.SetNumber(number)
 }
 
-func textInputPadding(context *guigui.Context) image.Point {
+func (t *TextInput) setPaddingLeft(padding int) {
+	if t.paddingLeft == padding {
+		return
+	}
+	t.paddingLeft = padding
+	guigui.RequestRedraw(t)
+}
+
+func (t *TextInput) setPaddingRight(padding int) {
+	if t.paddingRight == padding {
+		return
+	}
+	t.paddingRight = padding
+	guigui.RequestRedraw(t)
+}
+
+func (t *TextInput) textInputPaddingInScrollableContent(context *guigui.Context) (left, top, right, bottom int) {
 	x := UnitSize(context) / 2
 	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
-	return image.Pt(x, y)
+	return x + t.paddingLeft, y, x + t.paddingRight, y
 }
 
 func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
-	padding := textInputPadding(context)
-	return t.text.TextSize(context).Add(image.Pt(2*padding.X, 2*padding.Y))
+	left, top, right, bottom := t.textInputPaddingInScrollableContent(context)
+	return t.text.TextSize(context).Add(image.Pt(left+right, top+bottom))
 }
 
 func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -98,7 +117,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		guigui.RequestRedraw(t)
 	}
 
-	padding := textInputPadding(context)
+	paddingLeft, paddingTop, paddingRight, paddingBottom := t.textInputPaddingInScrollableContent(context)
 
 	t.scrollOverlay.SetContentSize(context, t.scrollContentSize(context))
 
@@ -109,20 +128,21 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 	pt := context.Position(t)
 	s := t.text.TextSize(context)
-	s.X = max(s.X, context.Size(t).X-2*padding.X)
-	s.Y = max(s.Y, context.Size(t).Y-2*padding.Y)
-	b := image.Rectangle{
+	s.X = max(s.X, context.Size(t).X-paddingLeft-paddingRight)
+	s.Y = max(s.Y, context.Size(t).Y-paddingTop-paddingBottom)
+	textBounds := image.Rectangle{
 		Min: pt,
 		Max: pt.Add(s),
 	}
-	b = b.Add(padding)
+	textBounds = textBounds.Add(image.Pt(paddingLeft, paddingTop))
 
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
-	context.SetSize(&t.text, b.Size())
+	context.SetSize(&t.text, textBounds.Size())
 	t.adjustScrollOffsetIfNeeded(context)
 	offsetX, offsetY := t.scrollOverlay.Offset()
-	b = b.Add(image.Pt(int(offsetX), int(offsetY)))
-	appender.AppendChildWidgetWithPosition(&t.text, b.Min)
+	tp := textBounds.Min
+	tp = tp.Add(image.Pt(int(offsetX), int(offsetY)))
+	appender.AppendChildWidgetWithPosition(&t.text, tp)
 
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
 
@@ -150,15 +170,15 @@ func (t *TextInput) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 	t.prevStart = start
 	t.prevEnd = end
 	bounds := context.Bounds(t)
-	padding := textInputPadding(context)
+	paddingLeft, paddingTop, paddingRight, paddingBottom := t.textInputPaddingInScrollableContent(context)
 	if pos, ok := t.text.textPosition(context, end, true); ok {
-		dx := min(float64(bounds.Max.X-padding.X)-pos.X, 0)
-		dy := min(float64(bounds.Max.Y-padding.Y)-pos.Bottom, 0)
+		dx := min(float64(bounds.Max.X-paddingRight)-pos.X, 0)
+		dy := min(float64(bounds.Max.Y-paddingBottom)-pos.Bottom, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
 	}
 	if pos, ok := t.text.textPosition(context, start, true); ok {
-		dx := max(float64(bounds.Min.X+padding.X)-pos.X, 0)
-		dy := max(float64(bounds.Min.Y+padding.Y)-pos.Top, 0)
+		dx := max(float64(bounds.Min.X+paddingLeft)-pos.X, 0)
+		dy := max(float64(bounds.Min.Y+paddingTop)-pos.Top, 0)
 		t.scrollOverlay.SetOffsetByDelta(context, t.scrollContentSize(context), dx, dy)
 	}
 }

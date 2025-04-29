@@ -11,12 +11,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/hajimehoshi/guigui"
+	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
 type NumberInput struct {
 	guigui.DefaultWidget
 
-	textInput TextInput
+	textInput  TextInput
+	upButton   TextButton
+	downButton TextButton
 
 	value      int64
 	min        int64
@@ -91,6 +94,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	})
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
 	n.textInput.SetNumber(true)
+	n.textInput.setPaddingRight(UnitSize(context) / 2)
 	n.textInput.SetOnValueChanged(func(text string) {
 		if text == "" {
 			return
@@ -110,23 +114,78 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		n.textInput.SetText(strconv.FormatInt(n.value, 10))
 	}
 
+	imgUp, err := theResourceImages.Get("keyboard_arrow_up", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	imgDown, err := theResourceImages.Get("keyboard_arrow_down", context.ColorMode())
+	if err != nil {
+		return err
+	}
+
+	n.upButton.SetImage(imgUp)
+	n.upButton.setSharpenCorners(draw.SharpenCorners{
+		LowerLeft:  true,
+		LowerRight: true,
+	})
+	n.upButton.SetOnDown(func() {
+		n.increment()
+	})
+
+	b := context.Bounds(n)
+	appender.AppendChildWidgetWithBounds(&n.upButton, image.Rectangle{
+		Min: image.Point{
+			X: b.Max.X - UnitSize(context)*3/4,
+			Y: b.Min.Y,
+		},
+		Max: image.Point{
+			X: b.Max.X,
+			Y: b.Min.Y + b.Dy()/2,
+		},
+	})
+
+	n.downButton.SetImage(imgDown)
+	n.downButton.setSharpenCorners(draw.SharpenCorners{
+		UpperLeft:  true,
+		UpperRight: true,
+	})
+	n.downButton.SetOnDown(func() {
+		n.decrement()
+	})
+
+	appender.AppendChildWidgetWithBounds(&n.downButton, image.Rectangle{
+		Min: image.Point{
+			X: b.Max.X - UnitSize(context)*3/4,
+			Y: b.Min.Y + b.Dy()/2,
+		},
+		Max: b.Max,
+	})
+
 	return nil
 }
 
 func (n *NumberInput) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
 	if isKeyRepeating(ebiten.KeyUp) {
-		step := n.stepMinus1 + 1
-		n.SetValue(n.value + step)
-		n.textInput.SetText(strconv.FormatInt(n.value, 10))
+		n.increment()
 		return guigui.HandleInputByWidget(n)
 	}
 	if isKeyRepeating(ebiten.KeyDown) {
-		step := n.stepMinus1 + 1
-		n.SetValue(n.value - step)
-		n.textInput.SetText(strconv.FormatInt(n.value, 10))
+		n.decrement()
 		return guigui.HandleInputByWidget(n)
 	}
 	return guigui.HandleInputResult{}
+}
+
+func (n *NumberInput) increment() {
+	step := n.stepMinus1 + 1
+	n.SetValue(n.value + step)
+	n.textInput.SetText(strconv.FormatInt(n.value, 10))
+}
+
+func (n *NumberInput) decrement() {
+	step := n.stepMinus1 + 1
+	n.SetValue(n.value - step)
+	n.textInput.SetText(strconv.FormatInt(n.value, 10))
 }
 
 func (n *NumberInput) DefaultSize(context *guigui.Context) image.Point {
