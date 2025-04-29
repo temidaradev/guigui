@@ -311,10 +311,11 @@ func (c *Context) IsFocused(widget Widget) bool {
 }
 
 func (c *Context) HasFocusedChildWidget(widget Widget) bool {
-	widgetState := widget.widgetState()
 	if c.IsFocused(widget) {
 		return true
 	}
+
+	widgetState := widget.widgetState()
 	for _, child := range widgetState.children {
 		if c.HasFocusedChildWidget(child) {
 			return true
