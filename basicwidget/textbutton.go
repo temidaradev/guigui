@@ -55,6 +55,10 @@ func (t *TextButton) SetTextColor(clr color.Color) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *TextButton) setPairedButton(pair *TextButton) {
+	t.button.setPairedButton(&pair.button)
+}
+
 func (t *TextButton) setKeepPressed(keep bool) {
 	t.button.setKeepPressed(keep)
 }

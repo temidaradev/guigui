@@ -22,6 +22,7 @@ type Button struct {
 	borderInvisible bool
 	prevHovered     bool
 	sharpenCorners  draw.SharpenCorners
+	pairedButton    *Button
 
 	onDown   func()
 	onUp     func()
@@ -38,6 +39,10 @@ func (b *Button) SetOnUp(f func()) {
 
 func (b *Button) setOnRepeat(f func()) {
 	b.onRepeat = f
+}
+
+func (b *Button) setPairedButton(pair *Button) {
+	b.pairedButton = pair
 }
 
 func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -63,7 +68,7 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 			}
 			return guigui.HandleInputByWidget(b)
 		}
-		if b.pressed && isMouseButtonRepeating(ebiten.MouseButtonLeft) {
+		if (b.pressed || b.pairedButton != nil && b.pairedButton.pressed) && isMouseButtonRepeating(ebiten.MouseButtonLeft) {
 			if b.onRepeat != nil {
 				b.onRepeat()
 			}
@@ -84,7 +89,7 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 }
 
 func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if (b.canPress(context) || b.pressed) && !b.keepPressed {
+	if (b.canPress(context) || b.pressed || b.pairedButton != nil && b.pairedButton.pressed) && !b.keepPressed {
 		return ebiten.CursorShapePointer, true
 	}
 	return 0, true
@@ -138,7 +143,7 @@ func (b *Button) isHovered(context *guigui.Context) bool {
 }
 
 func (b *Button) isActive(context *guigui.Context) bool {
-	return context.IsEnabled(b) && b.isHovered(context) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && b.pressed
+	return context.IsEnabled(b) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && b.isHovered(context) && (b.pressed || b.pairedButton != nil && b.pairedButton.pressed)
 }
 
 func (b *Button) isPressed(context *guigui.Context) bool {

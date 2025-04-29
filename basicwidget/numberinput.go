@@ -128,6 +128,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		LowerLeft:  true,
 		LowerRight: true,
 	})
+	n.upButton.setPairedButton(&n.downButton)
 	n.upButton.setOnRepeat(func() {
 		n.increment()
 	})
@@ -149,6 +150,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		UpperLeft:  true,
 		UpperRight: true,
 	})
+	n.downButton.setPairedButton(&n.upButton)
 	n.downButton.setOnRepeat(func() {
 		n.decrement()
 	})
