@@ -41,49 +41,67 @@ func visibleCulsters(str string, face text.Face) []text.Glyph {
 	return text.AppendGlyphs(nil, str, face, nil)
 }
 
-func lines(width int, str string, autoWrap bool, face text.Face) iter.Seq2[int, string] {
+func lines(width int, str string, autoWrap bool, advance func(str string) float64) iter.Seq2[int, string] {
 	return func(yield func(pos int, s string) bool) {
 		origStr := str
-		var lineStart int
-		var lineEnd int
-		var pos int
-		state := -1
-		for len(str) > 0 {
-			segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
-			if lineEnd-lineStart > 0 && autoWrap {
-				l := origStr[lineStart : lineEnd+len(segment)]
-				// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
-				if text.Advance(l[:len(l)-tailingLineBreakLen(l)], face) > float64(width) {
+
+		if !autoWrap {
+			var pos int
+			for pos < len(str) {
+				p, l := firstLineBreakPositionAndLen(str[pos:])
+				if p == -1 {
+					if !yield(pos, str[pos:]) {
+						return
+					}
+					break
+				}
+				if !yield(pos, str[pos:pos+p+l]) {
+					return
+				}
+				pos += p + l
+			}
+		} else {
+			var lineStart int
+			var lineEnd int
+			var pos int
+			state := -1
+			for len(str) > 0 {
+				segment, nextStr, mustBreak, nextState := uniseg.FirstLineSegmentInString(str, state)
+				if lineEnd-lineStart > 0 {
+					l := origStr[lineStart : lineEnd+len(segment)]
+					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
+					if advance(l[:len(l)-tailingLineBreakLen(l)]) > float64(width) {
+						if !yield(pos, origStr[lineStart:lineEnd]) {
+							return
+						}
+						pos += lineEnd - lineStart
+						lineStart = lineEnd
+					}
+				}
+				lineEnd += len(segment)
+				if mustBreak {
 					if !yield(pos, origStr[lineStart:lineEnd]) {
 						return
 					}
 					pos += lineEnd - lineStart
 					lineStart = lineEnd
 				}
+				str = nextStr
+				state = nextState
 			}
-			lineEnd += len(segment)
-			if mustBreak {
+
+			if lineEnd-lineStart > 0 {
 				if !yield(pos, origStr[lineStart:lineEnd]) {
 					return
 				}
 				pos += lineEnd - lineStart
 				lineStart = lineEnd
 			}
-			str = nextStr
-			state = nextState
-		}
-
-		if lineEnd-lineStart > 0 {
-			if !yield(pos, origStr[lineStart:lineEnd]) {
-				return
-			}
-			pos += lineEnd - lineStart
-			lineStart = lineEnd
 		}
 
 		// If the string ends with a line break, or an empty line, add an extra empty line.
 		if tailingLineBreakLen(origStr) > 0 || origStr == "" {
-			if !yield(pos, "") {
+			if !yield(len(origStr), "") {
 				return
 			}
 		}
@@ -112,7 +130,9 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var pos int
 	var line string
 	var lineIndex int
-	for p, l := range lines(width, str, options.AutoWrap, options.Face) {
+	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
+		return text.Advance(str, options.Face)
+	}) {
 		line = l
 		pos = p
 		if lineIndex >= n {
@@ -157,7 +177,9 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	var indexInLine0, indexInLine1 int
 	var line0, line1 string
 	var found0, found1 bool
-	for p, l := range lines(width, str, options.AutoWrap, options.Face) {
+	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
+		return text.Advance(str, options.Face)
+	}) {
 		// When auto wrap is on, there can be two positions:
 		// one in the tail of the previous line and one in the head of the next line.
 		if tailingLineBreakLen(l) == 0 && index == p+len(l) {
@@ -209,6 +231,28 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	return pos0, pos1, 2
 }
 
+func firstLineBreakPositionAndLen(str string) (pos, length int) {
+	for i, r := range str {
+		if r == 0x000a || r == 0x000b || r == 0x000c {
+			return i, 1
+		}
+		if r == 0x0085 {
+			return i, 2
+		}
+		if r == 0x2028 || r == 0x2029 {
+			return i, 3
+		}
+		if r == 0x000d {
+			// \r\n
+			if len(str[i:]) > 0 && str[i+1] == 0x000a {
+				return i, 2
+			}
+			return i, 1
+		}
+	}
+	return -1, 0
+}
+
 func tailingLineBreakLen(str string) int {
 	// uniseg.HasTrailingLineBreakInString is slow and doesn't check \r\n.
 	// Hard-code the check here.
@@ -218,6 +262,7 @@ func tailingLineBreakLen(str string) int {
 			return s
 		}
 		if r == 0x000a {
+			// \r\n
 			if r, s := utf8.DecodeLastRuneInString(str[:len(str)-s]); s > 0 && r == 0x000d {
 				return 2
 			}
@@ -240,7 +285,9 @@ func trimTailingLineBreak(str string) string {
 
 func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 	var count int
-	for range lines(width, str, autoWrap, face) {
+	for range lines(width, str, autoWrap, func(str string) float64 {
+		return text.Advance(str, face)
+	}) {
 		count++
 	}
 	return count
@@ -248,7 +295,9 @@ func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 
 func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64) (float64, float64) {
 	var maxWidth, height float64
-	for _, line := range lines(width, str, autoWrap, face) {
+	for _, line := range lines(width, str, autoWrap, func(str string) float64 {
+		return text.Advance(str, face)
+	}) {
 		line = trimTailingLineBreak(line)
 		maxWidth = max(maxWidth, text.Advance(line, face))
 		// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.

@@ -56,7 +56,9 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 	yOffset := TextPositionYOffset(bounds.Size(), str, &options.Options)
 	op.GeoM.Translate(0, yOffset)
 
-	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, options.Face) {
+	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, func(str string) float64 {
+		return text.Advance(str, options.Face)
+	}) {
 		start := pos
 		end := pos + len(line) - tailingLineBreakLen(line)
 
