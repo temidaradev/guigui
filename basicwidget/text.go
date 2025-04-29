@@ -110,8 +110,7 @@ type Text struct {
 
 	cursor textCursor
 
-	temporaryClipboard string
-	temporaryLocales   []language.Tag
+	tmpClipboard string
 
 	cachedTextSizePlus1         image.Point
 	cachedAutoWrapTextSizePlus1 image.Point
@@ -121,6 +120,8 @@ type Text struct {
 
 	onValueChanged func(text string)
 	onEnterPressed func(text string)
+
+	tmpLocales []language.Tag
 }
 
 func (t *Text) SetOnValueChanged(f func(text string)) {
@@ -397,10 +398,10 @@ func (t *Text) face(context *guigui.Context) text.Face {
 	if len(t.locales) > 0 {
 		lang = t.locales[0]
 	} else {
-		t.temporaryLocales = slices.Delete(t.temporaryLocales, 0, len(t.temporaryLocales))
-		t.temporaryLocales = context.AppendLocales(t.temporaryLocales)
-		if len(t.temporaryLocales) > 0 {
-			lang = t.temporaryLocales[0]
+		t.tmpLocales = slices.Delete(t.tmpLocales, 0, len(t.tmpLocales))
+		t.tmpLocales = context.AppendLocales(t.tmpLocales)
+		if len(t.tmpLocales) > 0 {
+			lang = t.tmpLocales[0]
 		}
 	}
 	return fontFace(size, weight, features, lang)
@@ -785,16 +786,16 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				end += start
 			}
 		}
-		t.temporaryClipboard = t.field.Text()[start:end]
+		t.tmpClipboard = t.field.Text()[start:end]
 		text := t.field.Text()[:start] + t.field.Text()[end:]
 		t.setTextAndSelection(text, start, start, -1)
 		return guigui.HandleInputByWidget(t)
 	case useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyY):
 		// 'Yank' the killed text.
-		if t.temporaryClipboard != "" {
+		if t.tmpClipboard != "" {
 			start, _ := t.field.Selection()
-			text := t.field.Text()[:start] + t.temporaryClipboard + t.field.Text()[start:]
-			t.setTextAndSelection(text, start+len(t.temporaryClipboard), start+len(t.temporaryClipboard), -1)
+			text := t.field.Text()[:start] + t.tmpClipboard + t.field.Text()[start:]
+			t.setTextAndSelection(text, start+len(t.tmpClipboard), start+len(t.tmpClipboard), -1)
 		}
 		return guigui.HandleInputByWidget(t)
 	}

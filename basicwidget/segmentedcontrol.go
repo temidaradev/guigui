@@ -36,6 +36,8 @@ type SegmentedControl[T comparable] struct {
 	textButtons  []TextButton
 
 	direction SegmentedControlDirection
+
+	tmpTextButton TextButton
 }
 
 func (s *SegmentedControl[T]) SetDirection(direction SegmentedControlDirection) {
@@ -155,12 +157,11 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 func (s *SegmentedControl[T]) DefaultSize(context *guigui.Context) image.Point {
 	var w, h int
 	for i := range s.abstractList.ItemCount() {
-		var t TextButton
 		item, _ := s.abstractList.ItemByIndex(i)
-		t.SetText(item.Text)
-		t.SetTextBold(true)
-		w = max(w, t.DefaultSize(context).X)
-		h = max(h, t.DefaultSize(context).Y)
+		s.tmpTextButton.SetText(item.Text)
+		s.tmpTextButton.SetTextBold(true)
+		w = max(w, s.tmpTextButton.DefaultSize(context).X)
+		h = max(h, s.tmpTextButton.DefaultSize(context).Y)
 	}
 	switch s.direction {
 	case SegmentedControlDirectionHorizontal:

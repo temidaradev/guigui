@@ -223,6 +223,8 @@ type textListItemWidget[T comparable] struct {
 	textListItem TextListItem[T]
 
 	text Text
+
+	tmpText Text
 }
 
 func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem[T]) {
@@ -271,10 +273,9 @@ func (t *textListItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image)
 
 func (t *textListItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
 	// Assume that every item can use a bold font.
-	var tmpText Text
-	tmpText.SetText(t.textString())
-	tmpText.SetBold(true)
-	w := tmpText.TextSize(context).X
+	t.tmpText.SetText(t.textString())
+	t.tmpText.SetBold(true)
+	w := t.tmpText.TextSize(context).X
 	if t.textListItem.Border {
 		return image.Pt(w, UnitSize(context)/2)
 	}
