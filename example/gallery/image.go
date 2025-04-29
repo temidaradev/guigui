@@ -13,7 +13,7 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget"
 )
 
-//go:embed *.png
+//go:embed resource/*.png
 var pngImages embed.FS
 
 type imageCacheKey struct {
@@ -36,7 +36,7 @@ func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image
 		return img, nil
 	}
 
-	f, err := pngImages.Open(name + ".png")
+	f, err := pngImages.Open("resource/" + name + ".png")
 	if err != nil {
 		return nil, err
 	}
