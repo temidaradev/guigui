@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"iter"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -210,17 +209,21 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 }
 
 func tailingLineBreakLen(str string) int {
-	if !uniseg.HasTrailingLineBreakInString(str) {
-		return 0
+	// uniseg.HasTrailingLineBreakInString is slow and doesn't check \r\n.
+	// Hard-code the check here.
+	// See also: https://en.wikipedia.org/wiki/Newline#Unicode
+	if r, s := utf8.DecodeLastRuneInString(str); s > 0 {
+		if r == 0x000b || r == 0x000c || r == 0x000d || r == 0x0085 || r == 0x2028 || r == 0x2029 {
+			return s
+		}
+		if r == 0x000a {
+			if r, s := utf8.DecodeLastRuneInString(str[:len(str)-s]); s > 0 && r == 0x000d {
+				return 2
+			}
+			return 1
+		}
 	}
-
-	// https://en.wikipedia.org/wiki/Newline#Unicode
-	if strings.HasSuffix(str, "\r\n") {
-		return 2
-	}
-
-	_, s := utf8.DecodeLastRuneInString(str)
-	return s
+	return 0
 }
 
 func trimTailingLineBreak(str string) string {
