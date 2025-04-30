@@ -31,6 +31,10 @@ type NumberInput struct {
 	onValueChanged func(value int64)
 }
 
+func (n *NumberInput) IsEditable() bool {
+	return n.textInput.IsEditable()
+}
+
 func (n *NumberInput) SetEditable(editable bool) {
 	n.textInput.SetEditable(editable)
 }
@@ -136,6 +140,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	n.upButton.setOnRepeat(func() {
 		n.increment()
 	})
+	context.SetEnabled(&n.upButton, n.IsEditable() && n.value < n.MaximumValue())
 
 	b := context.Bounds(n)
 	appender.AppendChildWidgetWithBounds(&n.upButton, image.Rectangle{
@@ -158,6 +163,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	n.downButton.setOnRepeat(func() {
 		n.decrement()
 	})
+	context.SetEnabled(&n.downButton, n.IsEditable() && n.value > n.MinimumValue())
 
 	appender.AppendChildWidgetWithBounds(&n.downButton, image.Rectangle{
 		Min: image.Point{
@@ -183,12 +189,18 @@ func (n *NumberInput) HandleButtonInput(context *guigui.Context) guigui.HandleIn
 }
 
 func (n *NumberInput) increment() {
+	if !n.IsEditable() {
+		return
+	}
 	step := n.stepMinus1 + 1
 	n.SetValue(n.value + step)
 	n.textInput.SetText(strconv.FormatInt(n.value, 10))
 }
 
 func (n *NumberInput) decrement() {
+	if !n.IsEditable() {
+		return
+	}
 	step := n.stepMinus1 + 1
 	n.SetValue(n.value - step)
 	n.textInput.SetText(strconv.FormatInt(n.value, 10))

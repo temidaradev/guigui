@@ -81,6 +81,10 @@ func (t *TextInput) SetNumber(number bool) {
 	t.text.SetNumber(number)
 }
 
+func (t *TextInput) IsEditable() bool {
+	return !t.readonly
+}
+
 func (t *TextInput) SetEditable(editable bool) {
 	t.readonly = !editable
 	t.text.SetEditable(editable)

@@ -320,6 +320,10 @@ func (t *Text) SetOpacity(opacity float64) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *Text) IsEditable() bool {
+	return t.editable
+}
+
 func (t *Text) SetEditable(editable bool) {
 	if t.editable == editable {
 		return
