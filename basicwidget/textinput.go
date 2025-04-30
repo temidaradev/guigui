@@ -86,8 +86,12 @@ func (t *TextInput) IsEditable() bool {
 }
 
 func (t *TextInput) SetEditable(editable bool) {
+	if t.readonly == !editable {
+		return
+	}
 	t.readonly = !editable
 	t.text.SetEditable(editable)
+	guigui.RequestRedraw(t)
 }
 
 func (t *TextInput) setPaddingLeft(padding int) {
@@ -131,6 +135,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 	t.scrollOverlay.SetContentSize(context, t.scrollContentSize(context))
 
+	t.background.textInput = t
 	appender.AppendChildWidgetWithBounds(&t.background, context.Bounds(t))
 
 	t.text.SetEditable(!t.readonly)
@@ -220,11 +225,13 @@ func (t *TextInput) DefaultSize(context *guigui.Context) image.Point {
 
 type textInputBackground struct {
 	guigui.DefaultWidget
+
+	textInput *TextInput
 }
 
 func (t *textInputBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
-	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t))
+	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t) && t.textInput.IsEditable())
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 

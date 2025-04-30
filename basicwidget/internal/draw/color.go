@@ -135,7 +135,7 @@ func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType, 
 	case RoundedRectBorderTypeRegular:
 		return Color2(colorMode, typ1, 0.8, 0.1), Color2(colorMode, typ2, 0.8, 0.1)
 	case RoundedRectBorderTypeInset:
-		return Color2(colorMode, typ1, 0.7, 0.2), Color2(colorMode, typ2, 0.85, 0.3)
+		return Color2(colorMode, typ1, 0.7, 0), Color2(colorMode, typ2, 0.85, 0.15)
 	case RoundedRectBorderTypeOutset:
 		return Color2(colorMode, typ1, 0.85, 0.5), Color2(colorMode, typ2, 0.7, 0.2)
 	}
@@ -151,7 +151,7 @@ func TextColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 
 func ControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	if !enabled {
-		return Color2(colorMode, ColorTypeBase, 0.9, 0.25)
+		return Color2(colorMode, ColorTypeBase, 0.9, 0.1)
 	}
 	return Color2(colorMode, ColorTypeBase, 1, 0.3)
 }
