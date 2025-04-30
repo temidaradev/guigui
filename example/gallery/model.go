@@ -140,7 +140,7 @@ type TextInputsModel struct {
 
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
-	autoWrap        bool
+	noWrap          bool
 	readonly        bool
 	disabled        bool
 }
@@ -186,11 +186,11 @@ func (t *TextInputsModel) SetVerticalAlign(align basicwidget.VerticalAlign) {
 }
 
 func (t *TextInputsModel) AutoWrap() bool {
-	return t.autoWrap
+	return !t.noWrap
 }
 
 func (t *TextInputsModel) SetAutoWrap(autoWrap bool) {
-	t.autoWrap = autoWrap
+	t.noWrap = !autoWrap
 }
 
 func (t *TextInputsModel) Editable() bool {
