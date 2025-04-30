@@ -327,6 +327,7 @@ func (t *Text) SetEditable(editable bool) {
 
 	if editable {
 		t.selectionDragStart = -1
+		t.selectionDragEnd = -1
 		t.selectionShiftIndex = -1
 	}
 	t.editable = editable
