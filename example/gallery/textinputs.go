@@ -19,10 +19,6 @@ type TextInputs struct {
 	singleLineTextInput basicwidget.TextInput
 	multilineText       basicwidget.Text
 	multilineTextInput  basicwidget.TextInput
-	numberInput1Text    basicwidget.Text
-	numberInput1        basicwidget.NumberInput
-	numberInput2Text    basicwidget.Text
-	numberInput2        basicwidget.NumberInput
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -98,27 +94,6 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
-	t.numberInput1Text.SetText("Number Field")
-	t.numberInput1.SetOnValueChanged(func(value int64) {
-		t.model.TextInputs().SetNumberFieldValue1(value)
-	})
-	t.numberInput1.SetValue(t.model.TextInputs().NumberFieldValue1())
-	t.numberInput1.SetEditable(t.model.TextInputs().Editable())
-	context.SetEnabled(&t.numberInput1, t.model.TextInputs().Enabled())
-	context.SetSize(&t.numberInput1, image.Pt(width, guigui.DefaultSize))
-
-	t.numberInput2Text.SetText("Number Field w/ Range and Step")
-	t.numberInput2.SetOnValueChanged(func(value int64) {
-		t.model.TextInputs().SetNumberFieldValue2(value)
-	})
-	t.numberInput2.SetMinimumValue(-100)
-	t.numberInput2.SetMaximumValue(100)
-	t.numberInput2.SetStep(5)
-	t.numberInput2.SetValue(t.model.TextInputs().NumberFieldValue2())
-	t.numberInput2.SetEditable(t.model.TextInputs().Editable())
-	context.SetEnabled(&t.numberInput2, t.model.TextInputs().Enabled())
-	context.SetSize(&t.numberInput2, image.Pt(width, guigui.DefaultSize))
-
 	t.textInputForm.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
@@ -127,14 +102,6 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.multilineText,
 			SecondaryWidget: &t.multilineTextInput,
-		},
-		{
-			PrimaryWidget:   &t.numberInput1Text,
-			SecondaryWidget: &t.numberInput1,
-		},
-		{
-			PrimaryWidget:   &t.numberInput2Text,
-			SecondaryWidget: &t.numberInput2,
 		},
 	})
 

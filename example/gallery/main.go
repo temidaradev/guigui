@@ -21,15 +21,16 @@ func init() {
 type Root struct {
 	guigui.RootWidget
 
-	background basicwidget.Background
-	sidebar    Sidebar
-	settings   Settings
-	basic      Basic
-	buttons    Buttons
-	texts      Texts
-	textInputs TextInputs
-	lists      Lists
-	popups     Popups
+	background   basicwidget.Background
+	sidebar      Sidebar
+	settings     Settings
+	basic        Basic
+	buttons      Buttons
+	texts        Texts
+	textInputs   TextInputs
+	numberInputs NumberInputs
+	lists        Lists
+	popups       Popups
 
 	model Model
 }
@@ -56,6 +57,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.buttons.SetModel(&r.model)
 	r.texts.SetModel(&r.model)
 	r.textInputs.SetModel(&r.model)
+	r.numberInputs.SetModel(&r.model)
 	r.sidebar.SetModel(&r.model)
 
 	for i, bounds := range (layout.GridLayout{
@@ -80,6 +82,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 				appender.AppendChildWidgetWithBounds(&r.texts, bounds)
 			case "textinputs":
 				appender.AppendChildWidgetWithBounds(&r.textInputs, bounds)
+			case "numberinputs":
+				appender.AppendChildWidgetWithBounds(&r.numberInputs, bounds)
 			case "lists":
 				appender.AppendChildWidgetWithBounds(&r.lists, bounds)
 			case "popups":

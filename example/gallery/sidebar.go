@@ -65,6 +65,10 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 			Tag:  "textinputs",
 		},
 		{
+			Text: "Number Inputs",
+			Tag:  "numberinputs",
+		},
+		{
 			Text: "Lists",
 			Tag:  "lists",
 		},
