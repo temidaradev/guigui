@@ -553,38 +553,38 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		return guigui.HandleInputResult{}
 	}
 
-	origText := t.field.Text()
-	start, _ := t.field.Selection()
-	var processed bool
-	if pos, ok := t.textPosition(context, start, false); ok {
-		var err error
-		processed, err = t.field.HandleInput(int(pos.X), int(pos.Bottom))
-		if err != nil {
-			slog.Error(err.Error())
-			return guigui.AbortHandlingInputByWidget(t)
-		}
-	}
-	if processed {
-		guigui.RequestRedraw(t)
-		// Reset the cache size before adjust the scroll offset in order to get the correct text size.
-		t.resetCachedTextSize()
-		if t.field.Text() != origText {
-			if t.onValueChanged != nil {
-				t.onValueChanged(t.field.Text())
+	if t.editable {
+		origText := t.field.Text()
+		start, _ := t.field.Selection()
+		var processed bool
+		if pos, ok := t.textPosition(context, start, false); ok {
+			var err error
+			processed, err = t.field.HandleInput(int(pos.X), int(pos.Bottom))
+			if err != nil {
+				slog.Error(err.Error())
+				return guigui.AbortHandlingInputByWidget(t)
 			}
 		}
-		return guigui.HandleInputByWidget(t)
-	}
+		if processed {
+			guigui.RequestRedraw(t)
+			// Reset the cache size before adjust the scroll offset in order to get the correct text size.
+			t.resetCachedTextSize()
+			if t.field.Text() != origText {
+				if t.onValueChanged != nil {
+					t.onValueChanged(t.field.Text())
+				}
+			}
+			return guigui.HandleInputByWidget(t)
+		}
 
-	// Do not accept key inputs when compositing.
-	if _, _, ok := t.field.CompositionSelection(); ok {
-		return guigui.HandleInputByWidget(t)
-	}
+		// Do not accept key inputs when compositing.
+		if _, _, ok := t.field.CompositionSelection(); ok {
+			return guigui.HandleInputByWidget(t)
+		}
 
-	// For Windows key binds, see:
-	// https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec#textediting
+		// For Windows key binds, see:
+		// https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec#textediting
 
-	if t.editable {
 		switch {
 		case inpututil.IsKeyJustPressed(ebiten.KeyEnter):
 			if t.multiline {
