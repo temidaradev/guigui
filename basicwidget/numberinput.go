@@ -31,6 +31,10 @@ type NumberInput struct {
 	onValueChanged func(value int64)
 }
 
+func (n *NumberInput) SetEditable(editable bool) {
+	n.textInput.SetEditable(editable)
+}
+
 func (n *NumberInput) SetOnValueChanged(f func(value int64)) {
 	n.onValueChanged = f
 }

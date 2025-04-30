@@ -22,6 +22,7 @@ type TextInput struct {
 	scrollOverlay ScrollOverlay
 	focus         textInputFocus
 
+	readonly     bool
 	paddingLeft  int
 	paddingRight int
 
@@ -80,6 +81,11 @@ func (t *TextInput) SetNumber(number bool) {
 	t.text.SetNumber(number)
 }
 
+func (t *TextInput) SetEditable(editable bool) {
+	t.readonly = !editable
+	t.text.SetEditable(editable)
+}
+
 func (t *TextInput) setPaddingLeft(padding int) {
 	if t.paddingLeft == padding {
 		return
@@ -123,7 +129,8 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 
 	appender.AppendChildWidgetWithBounds(&t.background, context.Bounds(t))
 
-	t.text.SetEditable(true)
+	t.text.SetEditable(!t.readonly)
+	t.text.SetSelectable(true)
 	t.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(t)))
 
 	pt := context.Position(t)

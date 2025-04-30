@@ -31,6 +31,8 @@ type TextInputs struct {
 	verticalAlignSegmentedControl   basicwidget.SegmentedControl[basicwidget.VerticalAlign]
 	autoWrapText                    basicwidget.Text
 	autoWrapToggle                  basicwidget.Toggle
+	editableText                    basicwidget.Text
+	editableToggle                  basicwidget.Toggle
 	enabledText                     basicwidget.Text
 	enabledToggle                   basicwidget.Toggle
 
@@ -79,6 +81,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.singleLineTextInput.SetText(t.model.TextInputs().SingleLineText())
 	t.singleLineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
 	t.singleLineTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.singleLineTextInput.SetEditable(t.model.TextInputs().Editable())
 	context.SetEnabled(&t.singleLineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.singleLineTextInput, image.Pt(width, guigui.DefaultSize))
 
@@ -91,6 +94,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.multilineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
 	t.multilineTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
 	t.multilineTextInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
+	t.multilineTextInput.SetEditable(t.model.TextInputs().Editable())
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
@@ -99,6 +103,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		t.model.TextInputs().SetNumberFieldValue1(value)
 	})
 	t.numberInput1.SetValue(t.model.TextInputs().NumberFieldValue1())
+	t.numberInput1.SetEditable(t.model.TextInputs().Editable())
 	context.SetEnabled(&t.numberInput1, t.model.TextInputs().Enabled())
 	context.SetSize(&t.numberInput1, image.Pt(width, guigui.DefaultSize))
 
@@ -110,6 +115,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.numberInput2.SetMaximumValue(100)
 	t.numberInput2.SetStep(5)
 	t.numberInput2.SetValue(t.model.TextInputs().NumberFieldValue2())
+	t.numberInput2.SetEditable(t.model.TextInputs().Editable())
 	context.SetEnabled(&t.numberInput2, t.model.TextInputs().Enabled())
 	context.SetSize(&t.numberInput2, image.Pt(width, guigui.DefaultSize))
 
@@ -189,6 +195,12 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.autoWrapToggle.SetValue(t.model.TextInputs().AutoWrap())
 
+	t.editableText.SetText("Editable")
+	t.editableToggle.SetOnValueChanged(func(value bool) {
+		t.model.TextInputs().SetEditable(value)
+	})
+	t.editableToggle.SetValue(t.model.TextInputs().Editable())
+
 	t.enabledText.SetText("Enabled")
 	t.enabledToggle.SetOnValueChanged(func(value bool) {
 		t.model.TextInputs().SetEnabled(value)
@@ -207,6 +219,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.autoWrapText,
 			SecondaryWidget: &t.autoWrapToggle,
+		},
+		{
+			PrimaryWidget:   &t.editableText,
+			SecondaryWidget: &t.editableToggle,
 		},
 		{
 			PrimaryWidget:   &t.enabledText,
