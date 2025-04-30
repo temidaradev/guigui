@@ -99,15 +99,15 @@ type Text struct {
 	bold        bool
 	number      bool
 
-	selectable          bool
-	editable            bool
-	multiline           bool
-	autoWrap            bool
-	selectionDragStart  int
-	selectionDragEnd    int
-	selectionShiftIndex int
-	dragging            bool
-	prevFocused         bool
+	selectable               bool
+	editable                 bool
+	multiline                bool
+	autoWrap                 bool
+	selectionDragStartPlus1  int
+	selectionDragEndPlus1    int
+	selectionShiftIndexPlus1 int
+	dragging                 bool
+	prevFocused              bool
 
 	clickCount         int
 	lastClickTick      int64
@@ -188,9 +188,9 @@ func (t *Text) SetSelectable(selectable bool) {
 		return
 	}
 	t.selectable = selectable
-	t.selectionDragStart = -1
-	t.selectionDragEnd = -1
-	t.selectionShiftIndex = -1
+	t.selectionDragStartPlus1 = 0
+	t.selectionDragEndPlus1 = 0
+	t.selectionShiftIndexPlus1 = 0
 	if !t.selectable {
 		t.setTextAndSelection(t.field.Text(), 0, 0, -1)
 	}
@@ -221,7 +221,7 @@ func (t *Text) setSelection(start, end int) {
 }
 
 func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) {
-	t.selectionShiftIndex = shiftIndex
+	t.selectionShiftIndexPlus1 = shiftIndex + 1
 	if start > end {
 		start, end = end, start
 	}
@@ -326,9 +326,9 @@ func (t *Text) SetEditable(editable bool) {
 	}
 
 	if editable {
-		t.selectionDragStart = -1
-		t.selectionDragEnd = -1
-		t.selectionShiftIndex = -1
+		t.selectionDragStartPlus1 = 0
+		t.selectionDragEndPlus1 = 0
+		t.selectionShiftIndexPlus1 = 0
 	}
 	t.editable = editable
 	guigui.RequestRedraw(t)
@@ -428,14 +428,19 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	if t.dragging {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			idx := t.textIndexFromPosition(context, cursorPosition, false)
-			start := min(idx, t.selectionDragStart)
-			end := max(idx, t.selectionDragEnd)
+			start, end := idx, idx
+			if t.selectionDragStartPlus1-1 >= 0 {
+				start = min(start, t.selectionDragStartPlus1-1)
+			}
+			if t.selectionDragEndPlus1-1 >= 0 {
+				end = max(idx, t.selectionDragEndPlus1-1)
+			}
 			t.setTextAndSelection(t.field.Text(), start, end, -1)
 		}
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			t.dragging = false
-			t.selectionDragStart = -1
-			t.selectionDragEnd = -1
+			t.selectionDragStartPlus1 = 0
+			t.selectionDragEndPlus1 = 0
 		}
 		return guigui.HandleInputByWidget(t)
 	}
@@ -453,8 +458,8 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 			switch t.clickCount {
 			case 1:
 				t.dragging = true
-				t.selectionDragStart = idx
-				t.selectionDragEnd = idx
+				t.selectionDragStartPlus1 = idx + 1
+				t.selectionDragEndPlus1 = idx + 1
 				if start, end := t.field.Selection(); start != idx || end != idx {
 					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
 				}
@@ -462,8 +467,8 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 				t.dragging = true
 				text := t.field.Text()
 				start, end := findWordBoundaries(text, idx)
-				t.selectionDragStart = start
-				t.selectionDragEnd = end
+				t.selectionDragStartPlus1 = start + 1
+				t.selectionDragEndPlus1 = end + 1
 				t.setTextAndSelection(text, start, end, -1)
 			case 3:
 				t.selectAll()
@@ -656,7 +661,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyB):
 		start, end := t.field.Selection()
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			if t.selectionShiftIndex == end {
+			if t.selectionShiftIndexPlus1-1 == end {
 				pos := textutil.PrevPositionOnGraphemes(t.field.Text(), end)
 				t.setTextAndSelection(t.field.Text(), start, pos, pos)
 			} else {
@@ -676,7 +681,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyF):
 		start, end := t.field.Selection()
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			if t.selectionShiftIndex == start {
+			if t.selectionShiftIndexPlus1-1 == start {
 				pos := textutil.NextPositionOnGraphemes(t.field.Text(), start)
 				t.setTextAndSelection(t.field.Text(), pos, end, pos)
 			} else {
@@ -699,7 +704,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		var moveEnd bool
 		start, end := t.field.Selection()
 		idx := start
-		if shift && t.selectionShiftIndex == end {
+		if shift && t.selectionShiftIndexPlus1-1 == end {
 			idx = end
 			moveEnd = true
 		}
@@ -724,7 +729,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		var moveStart bool
 		start, end := t.field.Selection()
 		idx := end
-		if shift && t.selectionShiftIndex == start {
+		if shift && t.selectionShiftIndexPlus1-1 == start {
 			idx = start
 			moveStart = true
 		}
