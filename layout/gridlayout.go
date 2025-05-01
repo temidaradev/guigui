@@ -109,6 +109,8 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 					default:
 						panic("layout: only FixedSize and FlexibleSize are supported for LazySize")
 					}
+				} else {
+					widthsInPixels[i] = 0
 				}
 			}
 			restW -= widthsInPixels[i]
@@ -174,6 +176,8 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 						default:
 							panic("layout: only FixedSize and FlexibleSize are supported for LazySize")
 						}
+					} else {
+						heightsInPixels[j] = 0
 					}
 				}
 				restH -= heightsInPixels[j]
