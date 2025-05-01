@@ -194,11 +194,11 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(t),
 		Heights: []layout.Size{
-			layout.MaxContentSize(func(index int) int {
-				if index >= len(t.taskWidgets) {
-					return 0
+			layout.LazySize(func(row int) layout.Size {
+				if row >= len(t.taskWidgets) {
+					return layout.FixedSize(0)
 				}
-				return context.Size(&t.taskWidgets[index]).Y
+				return layout.FixedSize(context.Size(&t.taskWidgets[row]).Y)
 			}),
 		},
 		RowGap: u / 4,

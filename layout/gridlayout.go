@@ -12,6 +12,7 @@ type Size struct {
 	typ     sizeType
 	value   int
 	content func(index int) int
+	lazy    func(rowOrColumn int) Size
 }
 
 type sizeType int
@@ -19,7 +20,7 @@ type sizeType int
 const (
 	sizeTypeFixed sizeType = iota
 	sizeTypeFlexible
-	sizeTypeMaxContent
+	sizeTypeLazy
 )
 
 func FixedSize(value int) Size {
@@ -36,11 +37,11 @@ func FlexibleSize(value int) Size {
 	}
 }
 
-func MaxContentSize(f func(index int) int) Size {
+func LazySize(f func(rowOrColumn int) Size) Size {
 	return Size{
-		typ:     sizeTypeMaxContent,
-		value:   0,
-		content: f,
+		typ:   sizeTypeLazy,
+		value: 0,
+		lazy:  f,
 	}
 }
 
@@ -93,19 +94,21 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			case sizeTypeFlexible:
 				widthsInPixels[i] = 0
 				denomW += width.value
-			case sizeTypeMaxContent:
+			case sizeTypeLazy:
 				if count < 0 {
-					panic("layout: MaxContentSize is not supported with infinite count")
+					panic("layout: LazySize is not supported with infinite count")
 				}
-				widthsInPixels[i] = 0
-				for j := range (count-1)/len(widths) + 1 {
-					if j*len(widths)+i >= count {
-						break
+				if width.lazy != nil {
+					size := width.lazy(i)
+					switch size.typ {
+					case sizeTypeFixed:
+						widthsInPixels[i] = size.value
+					case sizeTypeFlexible:
+						widthsInPixels[i] = 0
+						denomW += size.value
+					default:
+						panic("layout: only FixedSize and FlexibleSize are supported for LazySize")
 					}
-					if width.content == nil {
-						continue
-					}
-					widthsInPixels[i] = max(widthsInPixels[i], width.content(j*len(widths)+i))
 				}
 			}
 			restW -= widthsInPixels[i]
@@ -159,16 +162,18 @@ func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 				case sizeTypeFlexible:
 					heightsInPixels[j] = 0
 					denomH += height.value
-				case sizeTypeMaxContent:
-					heightsInPixels[j] = 0
-					for i := range widths {
-						if count >= 0 && j*len(widths)+i >= count {
-							break
+				case sizeTypeLazy:
+					if height.lazy != nil {
+						size := height.lazy(j)
+						switch size.typ {
+						case sizeTypeFixed:
+							heightsInPixels[j] = size.value
+						case sizeTypeFlexible:
+							heightsInPixels[j] = 0
+							denomH += size.value
+						default:
+							panic("layout: only FixedSize and FlexibleSize are supported for LazySize")
 						}
-						if height.content == nil {
-							continue
-						}
-						heightsInPixels[j] = max(heightsInPixels[j], height.content(widgetBaseIdx+j*len(widths)+i))
 					}
 				}
 				restH -= heightsInPixels[j]

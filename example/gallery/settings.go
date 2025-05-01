@@ -136,11 +136,11 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(s).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.MaxContentSize(func(index int) int {
-				if index >= 1 {
-					return 0
+			layout.LazySize(func(row int) layout.Size {
+				if row >= 1 {
+					return layout.FixedSize(0)
 				}
-				return s.form.DefaultSize(context).Y
+				return layout.FixedSize(s.form.DefaultSize(context).Y)
 			}),
 		},
 		RowGap: u / 2,

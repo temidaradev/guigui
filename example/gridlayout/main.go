@@ -59,11 +59,11 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(int(u / 2)),
 		Heights: []layout.Size{
-			layout.MaxContentSize(func(index int) int {
-				if index == 0 {
-					return context.Size(&r.configForm).Y
+			layout.LazySize(func(row int) layout.Size {
+				if row == 0 {
+					return layout.FixedSize(context.Size(&r.configForm).Y)
 				}
-				return 0
+				return layout.FixedSize(0)
 			}),
 			layout.FlexibleSize(1),
 		},
@@ -76,16 +76,24 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		g := layout.GridLayout{
 			Bounds: bounds,
 			Widths: []layout.Size{
-				layout.MaxContentSize(func(index int) int {
-					return r.buttons[index].DefaultSize(context).X
+				layout.LazySize(func(column int) layout.Size {
+					var width int
+					for j := range 4 {
+						width = max(width, r.buttons[4*j+column].DefaultSize(context).X)
+					}
+					return layout.FixedSize(width)
 				}),
 				layout.FixedSize(200),
 				layout.FlexibleSize(1),
 				layout.FlexibleSize(2),
 			},
 			Heights: []layout.Size{
-				layout.MaxContentSize(func(index int) int {
-					return r.buttons[index].DefaultSize(context).Y
+				layout.LazySize(func(row int) layout.Size {
+					var height int
+					for i := range 4 {
+						height = max(height, r.buttons[4*row+i].DefaultSize(context).Y)
+					}
+					return layout.FixedSize(height)
 				}),
 				layout.FixedSize(100),
 				layout.FlexibleSize(1),

@@ -69,11 +69,11 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	for i, bounds := range (layout.GridLayout{
 		Bounds: context.Bounds(p).Inset(u / 2),
 		Heights: []layout.Size{
-			layout.MaxContentSize(func(index int) int {
-				if index >= len(p.forms) {
-					return 0
+			layout.LazySize(func(row int) layout.Size {
+				if row >= len(p.forms) {
+					return layout.FixedSize(0)
 				}
-				return p.forms[index].DefaultSize(context).Y
+				return layout.FixedSize(p.forms[row].DefaultSize(context).Y)
 			}),
 		},
 		RowGap: u / 2,
@@ -145,11 +145,11 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 		Bounds: context.Bounds(s).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FlexibleSize(1),
-			layout.MaxContentSize(func(index int) int {
-				if index != 1 {
-					return 0
+			layout.LazySize(func(row int) layout.Size {
+				if row != 1 {
+					return layout.FixedSize(0)
 				}
-				return s.closeButton.DefaultSize(context).Y
+				return layout.FixedSize(s.closeButton.DefaultSize(context).Y)
 			}),
 		},
 	}).CellBounds() {
@@ -161,11 +161,11 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 				Bounds: bounds,
 				Widths: []layout.Size{
 					layout.FlexibleSize(1),
-					layout.MaxContentSize(func(index int) int {
+					layout.LazySize(func(index int) layout.Size {
 						if index != 1 {
-							return 0
+							return layout.FixedSize(0)
 						}
-						return s.closeButton.DefaultSize(context).X
+						return layout.FixedSize(s.closeButton.DefaultSize(context).X)
 					}),
 				},
 			}).CellBounds() {
