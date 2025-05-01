@@ -56,7 +56,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.configForm.SetItems(formItems)
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(int(u / 2)),
 		Heights: []layout.Size{
 			layout.LazySize(func(row int) layout.Size {
@@ -68,7 +68,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			layout.FlexibleSize(1),
 		},
 		RowGap: int(u / 2),
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		if i == 0 {
 			appender.AppendChildWidgetWithBounds(&r.configForm, bounds)
 			continue

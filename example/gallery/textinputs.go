@@ -197,7 +197,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		},
 	})
 
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(t).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FixedSize(t.textInputForm.DefaultSize(context).Y),
@@ -205,7 +205,8 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 			layout.FixedSize(t.configForm.DefaultSize(context).Y),
 		},
 		RowGap: u / 2,
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&t.textInputForm, bounds)

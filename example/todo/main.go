@@ -64,24 +64,26 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FixedSize(u),
 			layout.FlexibleSize(1),
 		},
 		RowGap: u / 2,
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
-			for i, bounds := range (layout.GridLayout{
+			gl := layout.GridLayout{
 				Bounds: bounds,
 				Widths: []layout.Size{
 					layout.FlexibleSize(1),
 					layout.FixedSize(5 * u),
 				},
 				ColumnGap: u / 2,
-			}).CellBounds() {
+			}
+			for i, bounds := range gl.CellBounds() {
 				switch i {
 				case 0:
 					appender.AppendChildWidgetWithBounds(&r.textInput, bounds)
@@ -132,14 +134,15 @@ func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.text.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(t),
 		Widths: []layout.Size{
 			layout.FixedSize(3 * u),
 			layout.FlexibleSize(1),
 		},
 		ColumnGap: u / 2,
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&t.doneButton, bounds)
@@ -191,7 +194,7 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 
 	u := basicwidget.UnitSize(context)
 
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(t),
 		Heights: []layout.Size{
 			layout.LazySize(func(row int) layout.Size {
@@ -202,7 +205,8 @@ func (t *tasksPanelContent) Build(context *guigui.Context, appender *guigui.Chil
 			}),
 		},
 		RowGap: u / 4,
-	}).RepeatingCellBounds() {
+	}
+	for i, bounds := range gl.RepeatingCellBounds() {
 		if i >= len(t.taskWidgets) {
 			break
 		}

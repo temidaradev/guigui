@@ -57,15 +57,15 @@ type GridLayout struct {
 	RowGap    int
 }
 
-func (g GridLayout) CellBounds() iter.Seq2[int, image.Rectangle] {
+func (g *GridLayout) CellBounds() iter.Seq2[int, image.Rectangle] {
 	return g.cellBounds(max(len(g.Widths), 1) * max(len(g.Heights), 1))
 }
 
-func (g GridLayout) RepeatingCellBounds() iter.Seq2[int, image.Rectangle] {
+func (g *GridLayout) RepeatingCellBounds() iter.Seq2[int, image.Rectangle] {
 	return g.cellBounds(-1)
 }
 
-func (g GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
+func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 	return func(yield func(index int, bounds image.Rectangle) bool) {
 		widths := g.Widths
 		if len(widths) == 0 {

@@ -60,13 +60,14 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.numberInputs.SetModel(&r.model)
 	r.sidebar.SetModel(&r.model)
 
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(r),
 		Widths: []layout.Size{
 			layout.FixedSize(8 * basicwidget.UnitSize(context)),
 			layout.FlexibleSize(1),
 		},
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&r.sidebar, bounds)

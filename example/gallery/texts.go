@@ -176,14 +176,15 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	}
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(t).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FlexibleSize(1),
 			layout.FixedSize(t.form.DefaultSize(context).Y),
 		},
 		RowGap: u / 2,
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&t.sampleText, bounds)

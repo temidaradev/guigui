@@ -66,7 +66,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	})
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(p).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.LazySize(func(row int) layout.Size {
@@ -77,7 +77,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 			}),
 		},
 		RowGap: u / 2,
-	}).RepeatingCellBounds() {
+	}
+	for i, bounds := range gl.RepeatingCellBounds() {
 		if i >= len(p.forms) {
 			break
 		}
@@ -141,7 +142,7 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 		s.popup.Close()
 	})
 
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(s).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.FlexibleSize(1),
@@ -152,12 +153,13 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 				return layout.FixedSize(s.closeButton.DefaultSize(context).Y)
 			}),
 		},
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&s.titleText, bounds)
 		case 1:
-			for i, bounds := range (layout.GridLayout{
+			gl := layout.GridLayout{
 				Bounds: bounds,
 				Widths: []layout.Size{
 					layout.FlexibleSize(1),
@@ -168,7 +170,8 @@ func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.Chi
 						return layout.FixedSize(s.closeButton.DefaultSize(context).X)
 					}),
 				},
-			}).CellBounds() {
+			}
+			for i, bounds := range gl.CellBounds() {
 				if i != 1 {
 					continue
 				}

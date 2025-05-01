@@ -133,7 +133,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(s).Inset(u / 2),
 		Heights: []layout.Size{
 			layout.LazySize(func(row int) layout.Size {
@@ -144,7 +144,8 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			}),
 		},
 		RowGap: u / 2,
-	}).RepeatingCellBounds() {
+	}
+	for i, bounds := range gl.RepeatingCellBounds() {
 		if i >= 1 {
 			break
 		}

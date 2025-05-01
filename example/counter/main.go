@@ -52,19 +52,20 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	})
 
 	u := basicwidget.UnitSize(context)
-	for i, bounds := range (layout.GridLayout{
+	gl := layout.GridLayout{
 		Bounds: context.Bounds(r).Inset(u),
 		Heights: []layout.Size{
 			layout.FlexibleSize(1),
 			layout.FixedSize(u),
 		},
 		RowGap: u,
-	}).CellBounds() {
+	}
+	for i, bounds := range gl.CellBounds() {
 		switch i {
 		case 0:
 			appender.AppendChildWidgetWithBounds(&r.counterText, bounds)
 		case 1:
-			for i, bounds := range (layout.GridLayout{
+			gl := layout.GridLayout{
 				Bounds: bounds,
 				Widths: []layout.Size{
 					layout.FixedSize(6 * u),
@@ -73,7 +74,8 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 					layout.FixedSize(6 * u),
 				},
 				ColumnGap: u / 2,
-			}).CellBounds() {
+			}
+			for i, bounds := range gl.CellBounds() {
 				switch i {
 				case 0:
 					appender.AppendChildWidgetWithBounds(&r.resetButton, bounds)
