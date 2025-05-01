@@ -9,10 +9,9 @@ import (
 )
 
 type Size struct {
-	typ     sizeType
-	value   int
-	content func(index int) int
-	lazy    func(rowOrColumn int) Size
+	typ   sizeType
+	value int
+	lazy  func(rowOrColumn int) Size
 }
 
 type sizeType int
