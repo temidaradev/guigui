@@ -23,6 +23,8 @@ type Settings struct {
 	scaleSegmentedControl     basicwidget.SegmentedControl[float64]
 }
 
+var hongKongChinese = language.MustParse("zh-HK")
+
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetText("Color Mode")
 	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[guigui.ColorMode]{
@@ -70,6 +72,10 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		{
 			Text: "Traditional Chinese",
 			Tag:  language.TraditionalChinese,
+		},
+		{
+			Text: "Hong Kong Chinese",
+			Tag:  hongKongChinese,
 		},
 	})
 	s.localeDropdownList.SetOnItemSelected(func(index int) {
