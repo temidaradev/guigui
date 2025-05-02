@@ -71,10 +71,6 @@ func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 		if len(widths) == 0 {
 			widths = defaultWidths
 		}
-		heights := g.Heights
-		if len(heights) == 0 {
-			heights = defaultHeights
-		}
 
 		widthsInPixels := make([]int, len(widths))
 
@@ -143,6 +139,10 @@ func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 			}
 		}
 
+		heights := g.Heights
+		if len(heights) == 0 {
+			heights = defaultHeights
+		}
 		y := g.Bounds.Min.Y
 		heightsInPixels := make([]int, len(heights))
 		var widgetIdx int
