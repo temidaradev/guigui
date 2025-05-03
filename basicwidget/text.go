@@ -83,8 +83,6 @@ func findWordBoundaries(text string, idx int) (start, end int) {
 	return start, end
 }
 
-type TextFilter func(text string, start, end int) (string, int, int)
-
 type Text struct {
 	guigui.DefaultWidget
 
@@ -114,8 +112,6 @@ type Text struct {
 	clickCount         int
 	lastClickTick      int64
 	lastClickTextIndex int
-
-	filter TextFilter
 
 	cursor textCursor
 
@@ -228,10 +224,6 @@ func (t *Text) setText(text string) {
 	t.setTextAndSelection(text, start, end, -1)
 	t.nextText = ""
 	t.nextTextSet = false
-}
-
-func (t *Text) SetFilter(filter TextFilter) {
-	t.filter = filter
 }
 
 func (t *Text) selectAll() {
@@ -848,21 +840,11 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 }
 
 func (t *Text) commit() {
-	t.applyFilter()
 	if t.onValueChanged != nil {
 		t.onValueChanged(t.field.Text(), true)
 	}
 	t.nextText = ""
 	t.nextTextSet = false
-}
-
-func (t *Text) applyFilter() {
-	if t.filter == nil {
-		return
-	}
-	start, end := t.field.Selection()
-	text, start, end := t.filter(t.field.Text(), start, end)
-	t.setTextAndSelection(text, start, end, -1)
 }
 
 func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {

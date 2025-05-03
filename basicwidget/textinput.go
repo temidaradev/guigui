@@ -77,10 +77,6 @@ func (t *TextInput) SelectAll() {
 	t.text.selectAll()
 }
 
-func (t *TextInput) SetFilter(filter TextFilter) {
-	t.text.SetFilter(filter)
-}
-
 func (t *TextInput) SetNumber(number bool) {
 	t.text.SetNumber(number)
 }

@@ -5,6 +5,7 @@ package basicwidget
 
 import (
 	"image"
+	"math/big"
 	"strconv"
 	"unsafe"
 
@@ -100,23 +101,6 @@ func (n *NumberInput[T]) SetStep(step T) {
 }
 
 func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	n.textInput.SetFilter(func(text string, start, end int) (string, int, int) {
-		for len(text) > 0 {
-			if isSigned[T]() {
-				if _, err := strconv.ParseInt(text, 10, 64); err == nil {
-					return text, start, end
-				}
-			} else {
-				if _, err := strconv.ParseUint(text, 10, 64); err == nil {
-					return text, start, end
-				}
-			}
-			text = text[:len(text)-1]
-			start = min(start, len(text))
-			end = min(end, len(text))
-		}
-		return "0", min(start, 1), min(end, 1)
-	})
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
 	n.textInput.SetNumber(true)
 	n.textInput.setPaddingRight(UnitSize(context) / 2)
@@ -124,22 +108,35 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 		if !committed {
 			return
 		}
-		if text == "" {
+		var i big.Int
+		if _, ok := i.SetString(text, 10); !ok {
 			return
 		}
 		var v T
 		if isSigned[T]() {
-			i, err := strconv.ParseInt(text, 10, 64)
-			if err != nil {
-				return
+			var min big.Int
+			min.SetInt64(int64(n.MinimumValue()))
+			var max big.Int
+			max.SetInt64(int64(n.MaximumValue()))
+			if i.Cmp(&min) < 0 {
+				v = T(n.MinimumValue())
+			} else if i.Cmp(&max) > 0 {
+				v = T(n.MaximumValue())
+			} else {
+				v = T(i.Int64())
 			}
-			v = T(i)
 		} else {
-			u, err := strconv.ParseUint(text, 10, 64)
-			if err != nil {
-				return
+			var min big.Int
+			min.SetUint64(uint64(n.MinimumValue()))
+			var max big.Int
+			max.SetUint64(uint64(n.MaximumValue()))
+			if i.Cmp(&min) < 0 {
+				v = T(n.MinimumValue())
+			} else if i.Cmp(&max) > 0 {
+				v = T(n.MaximumValue())
+			} else {
+				v = T(i.Uint64())
 			}
-			v = T(u)
 		}
 		n.SetValue(v)
 		if n.onValueChanged != nil {
