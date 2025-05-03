@@ -214,16 +214,19 @@ type NumberInputsModel struct {
 	numberInputValue2 uint64
 	numberInputValue3 int
 
-	readonly bool
-	disabled bool
+	uneditable bool
+	disabled   bool
 }
 
 func (n *NumberInputsModel) Editable() bool {
-	return !n.readonly
+	return !n.uneditable
 }
 
 func (n *NumberInputsModel) SetEditable(editable bool) {
-	n.readonly = !editable
+	n.uneditable = !editable
+	if editable {
+		n.disabled = false
+	}
 }
 
 func (n *NumberInputsModel) Enabled() bool {
@@ -232,6 +235,9 @@ func (n *NumberInputsModel) Enabled() bool {
 
 func (n *NumberInputsModel) SetEnabled(enabled bool) {
 	n.disabled = !enabled
+	if !enabled {
+		n.uneditable = true
+	}
 }
 
 func (n *NumberInputsModel) NumberInputValue1() int {
