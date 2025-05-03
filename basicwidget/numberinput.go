@@ -54,15 +54,27 @@ func (n *NumberInput[T]) Value() T {
 }
 
 func (n *NumberInput[T]) SetValue(value T) {
+	n.setValue(value, false)
+}
+
+func (n *NumberInput[T]) setValue(value T, force bool) {
 	value = min(max(value, n.MinimumValue()), n.MaximumValue())
 	if n.value == value {
 		return
 	}
 	n.value = value
 	if isSigned[T]() {
-		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+		if force {
+			n.textInput.ForceSetText(strconv.FormatInt(int64(n.value), 10))
+		} else {
+			n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+		}
 	} else {
-		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+		if force {
+			n.textInput.ForceSetText(strconv.FormatUint(uint64(n.value), 10))
+		} else {
+			n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+		}
 	}
 	if n.onValueChanged != nil {
 		n.onValueChanged(value)
@@ -108,40 +120,7 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 		if !committed {
 			return
 		}
-		var i big.Int
-		if _, ok := i.SetString(text, 10); !ok {
-			return
-		}
-		var v T
-		if isSigned[T]() {
-			var min big.Int
-			min.SetInt64(int64(n.MinimumValue()))
-			var max big.Int
-			max.SetInt64(int64(n.MaximumValue()))
-			if i.Cmp(&min) < 0 {
-				v = T(n.MinimumValue())
-			} else if i.Cmp(&max) > 0 {
-				v = T(n.MaximumValue())
-			} else {
-				v = T(i.Int64())
-			}
-		} else {
-			var min big.Int
-			min.SetUint64(uint64(n.MinimumValue()))
-			var max big.Int
-			max.SetUint64(uint64(n.MaximumValue()))
-			if i.Cmp(&min) < 0 {
-				v = T(n.MinimumValue())
-			} else if i.Cmp(&max) > 0 {
-				v = T(n.MaximumValue())
-			} else {
-				v = T(i.Uint64())
-			}
-		}
-		n.SetValue(v)
-		if n.onValueChanged != nil {
-			n.onValueChanged(v)
-		}
+		n.commit(text)
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
 	// HasFocusedChildWidget works after appending the child widget.
@@ -207,6 +186,43 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 	return nil
 }
 
+func (n *NumberInput[T]) commit(text string) {
+	var i big.Int
+	if _, ok := i.SetString(text, 10); !ok {
+		return
+	}
+	var v T
+	if isSigned[T]() {
+		var min big.Int
+		min.SetInt64(int64(n.MinimumValue()))
+		var max big.Int
+		max.SetInt64(int64(n.MaximumValue()))
+		if i.Cmp(&min) < 0 {
+			v = T(n.MinimumValue())
+		} else if i.Cmp(&max) > 0 {
+			v = T(n.MaximumValue())
+		} else {
+			v = T(i.Int64())
+		}
+	} else {
+		var min big.Int
+		min.SetUint64(uint64(n.MinimumValue()))
+		var max big.Int
+		max.SetUint64(uint64(n.MaximumValue()))
+		if i.Cmp(&min) < 0 {
+			v = T(n.MinimumValue())
+		} else if i.Cmp(&max) > 0 {
+			v = T(n.MaximumValue())
+		} else {
+			v = T(i.Uint64())
+		}
+	}
+	n.SetValue(v)
+	if n.onValueChanged != nil {
+		n.onValueChanged(v)
+	}
+}
+
 func (n *NumberInput[T]) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
 	if isKeyRepeating(ebiten.KeyUp) {
 		n.increment()
@@ -223,22 +239,24 @@ func (n *NumberInput[T]) increment() {
 	if !n.IsEditable() {
 		return
 	}
+	n.commit(n.textInput.Text())
 	var step T = 1
 	if n.stepSet {
 		step = n.step
 	}
-	n.SetValue(min(increment(n.value, step), n.MaximumValue()))
+	n.setValue(min(increment(n.value, step), n.MaximumValue()), true)
 }
 
 func (n *NumberInput[T]) decrement() {
 	if !n.IsEditable() {
 		return
 	}
+	n.commit(n.textInput.Text())
 	var step T = 1
 	if n.stepSet {
 		step = n.step
 	}
-	n.SetValue(max(decrement(n.value, step), n.MinimumValue()))
+	n.setValue(max(decrement(n.value, step), n.MinimumValue()), true)
 }
 
 func (n *NumberInput[T]) DefaultSize(context *guigui.Context) image.Point {
