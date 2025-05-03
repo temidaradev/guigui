@@ -97,8 +97,14 @@ func (n *NumberInput[T]) SetStep(step T) {
 func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	n.textInput.SetFilter(func(text string, start, end int) (string, int, int) {
 		for len(text) > 0 {
-			if _, err := strconv.ParseInt(text, 10, 64); err == nil {
-				return text, start, end
+			if isSigned[T]() {
+				if _, err := strconv.ParseInt(text, 10, 64); err == nil {
+					return text, start, end
+				}
+			} else {
+				if _, err := strconv.ParseUint(text, 10, 64); err == nil {
+					return text, start, end
+				}
 			}
 			text = text[:len(text)-1]
 			start = min(start, len(text))
@@ -113,19 +119,33 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 		if text == "" {
 			return
 		}
-		i, err := strconv.ParseInt(text, 10, 64)
-		if err != nil {
-			return
+		var v T
+		if isSigned[T]() {
+			i, err := strconv.ParseInt(text, 10, 64)
+			if err != nil {
+				return
+			}
+			v = T(i)
+		} else {
+			u, err := strconv.ParseUint(text, 10, 64)
+			if err != nil {
+				return
+			}
+			v = T(u)
 		}
-		n.SetValue(T(i))
+		n.SetValue(v)
 		if n.onValueChanged != nil {
-			n.onValueChanged(T(i))
+			n.onValueChanged(v)
 		}
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
 	// HasFocusedChildWidget works after appending the child widget.
 	if !context.HasFocusedChildWidget(n) {
-		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+		if isSigned[T]() {
+			n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+		} else {
+			n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+		}
 	}
 
 	imgUp, err := theResourceImages.Get("keyboard_arrow_up", context.ColorMode())
@@ -203,7 +223,11 @@ func (n *NumberInput[T]) increment() {
 		step = n.step
 	}
 	n.SetValue(min(increment(n.value, step), n.MaximumValue()))
-	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+	if isSigned[T]() {
+		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+	} else {
+		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+	}
 }
 
 func (n *NumberInput[T]) decrement() {
@@ -215,7 +239,11 @@ func (n *NumberInput[T]) decrement() {
 		step = n.step
 	}
 	n.SetValue(max(decrement(n.value, step), n.MinimumValue()))
-	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+	if isSigned[T]() {
+		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+	} else {
+		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+	}
 }
 
 func (n *NumberInput[T]) DefaultSize(context *guigui.Context) image.Point {

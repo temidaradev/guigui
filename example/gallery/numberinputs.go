@@ -18,7 +18,9 @@ type NumberInputs struct {
 	numberInput1Text basicwidget.Text
 	numberInput1     basicwidget.NumberInput[int]
 	numberInput2Text basicwidget.Text
-	numberInput2     basicwidget.NumberInput[int]
+	numberInput2     basicwidget.NumberInput[uint64]
+	numberInput3Text basicwidget.Text
+	numberInput3     basicwidget.NumberInput[int]
 
 	configForm     basicwidget.Form
 	editableText   basicwidget.Text
@@ -39,26 +41,35 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	// Number Inputs
 	width := 12 * u
 
-	n.numberInput1Text.SetText("Number Field")
+	n.numberInput1Text.SetText("Number Input")
 	n.numberInput1.SetOnValueChanged(func(value int) {
-		n.model.NumberInputs().SetNumberFieldValue1(value)
+		n.model.NumberInputs().SetNumberInputValue1(value)
 	})
-	n.numberInput1.SetValue(n.model.NumberInputs().NumberFieldValue1())
+	n.numberInput1.SetValue(n.model.NumberInputs().NumberInputValue1())
 	n.numberInput1.SetEditable(n.model.NumberInputs().Editable())
 	context.SetEnabled(&n.numberInput1, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.numberInput1, image.Pt(width, guigui.DefaultSize))
 
-	n.numberInput2Text.SetText("Number Field w/ Range and Step")
-	n.numberInput2.SetOnValueChanged(func(value int) {
-		n.model.NumberInputs().SetNumberFieldValue2(value)
+	n.numberInput2Text.SetText("Number Input (uint64)")
+	n.numberInput2.SetOnValueChanged(func(value uint64) {
+		n.model.NumberInputs().SetNumberInputValue2(value)
 	})
-	n.numberInput2.SetMinimumValue(-100)
-	n.numberInput2.SetMaximumValue(100)
-	n.numberInput2.SetStep(5)
-	n.numberInput2.SetValue(n.model.NumberInputs().NumberFieldValue2())
+	n.numberInput2.SetValue(n.model.NumberInputs().NumberInputValue2())
 	n.numberInput2.SetEditable(n.model.NumberInputs().Editable())
 	context.SetEnabled(&n.numberInput2, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.numberInput2, image.Pt(width, guigui.DefaultSize))
+
+	n.numberInput3Text.SetText("Number Input w/ Range and Step")
+	n.numberInput3.SetOnValueChanged(func(value int) {
+		n.model.NumberInputs().SetNumberInputValue3(value)
+	})
+	n.numberInput3.SetMinimumValue(-100)
+	n.numberInput3.SetMaximumValue(100)
+	n.numberInput3.SetStep(5)
+	n.numberInput3.SetValue(n.model.NumberInputs().NumberInputValue3())
+	n.numberInput3.SetEditable(n.model.NumberInputs().Editable())
+	context.SetEnabled(&n.numberInput3, n.model.NumberInputs().Enabled())
+	context.SetSize(&n.numberInput3, image.Pt(width, guigui.DefaultSize))
 
 	n.numberInputForm.SetItems([]*basicwidget.FormItem{
 		{
@@ -68,6 +79,10 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 		{
 			PrimaryWidget:   &n.numberInput2Text,
 			SecondaryWidget: &n.numberInput2,
+		},
+		{
+			PrimaryWidget:   &n.numberInput3Text,
+			SecondaryWidget: &n.numberInput3,
 		},
 	})
 

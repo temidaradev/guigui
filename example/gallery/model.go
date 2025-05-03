@@ -210,8 +210,9 @@ func (t *TextInputsModel) SetEnabled(enabled bool) {
 }
 
 type NumberInputsModel struct {
-	numberFieldValue1 int
-	numberFieldValue2 int
+	numberInputValue1 int
+	numberInputValue2 uint64
+	numberInputValue3 int
 
 	readonly bool
 	disabled bool
@@ -233,18 +234,26 @@ func (n *NumberInputsModel) SetEnabled(enabled bool) {
 	n.disabled = !enabled
 }
 
-func (n *NumberInputsModel) NumberFieldValue1() int {
-	return n.numberFieldValue1
+func (n *NumberInputsModel) NumberInputValue1() int {
+	return n.numberInputValue1
 }
 
-func (n *NumberInputsModel) SetNumberFieldValue1(value int) {
-	n.numberFieldValue1 = value
+func (n *NumberInputsModel) SetNumberInputValue1(value int) {
+	n.numberInputValue1 = value
 }
 
-func (n *NumberInputsModel) NumberFieldValue2() int {
-	return n.numberFieldValue2
+func (n *NumberInputsModel) NumberInputValue2() uint64 {
+	return n.numberInputValue2
 }
 
-func (n *NumberInputsModel) SetNumberFieldValue2(value int) {
-	n.numberFieldValue2 = value
+func (n *NumberInputsModel) SetNumberInputValue2(value uint64) {
+	n.numberInputValue2 = value
+}
+
+func (n *NumberInputsModel) NumberInputValue3() int {
+	return n.numberInputValue3
+}
+
+func (n *NumberInputsModel) SetNumberInputValue3(value int) {
+	n.numberInputValue3 = value
 }
