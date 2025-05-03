@@ -59,7 +59,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetEnabled(&n.numberInput2, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.numberInput2, image.Pt(width, guigui.DefaultSize))
 
-	n.numberInput3Text.SetValue("Number Input w/ Range and Step")
+	n.numberInput3Text.SetValue("Number Input (Range: [-100, 100], Step: 5)")
 	n.numberInput3.SetOnValueChanged(func(value int) {
 		n.model.NumberInputs().SetNumberInputValue3(value)
 	})
