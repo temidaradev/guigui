@@ -188,18 +188,21 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 }
 
 var numberTextReplacer = strings.NewReplacer(
-	"０", "0",
-	"１", "1",
-	"２", "2",
-	"３", "3",
-	"４", "4",
-	"５", "5",
-	"６", "6",
-	"７", "7",
-	"８", "8",
-	"９", "9",
-	"−", "-",
-	"＋", "+",
+	"\u2212", "-",
+	"\ufe62", "+",
+	"\ufe63", "-",
+	"\uff0b", "+",
+	"\uff0d", "-",
+	"\uff10", "0",
+	"\uff11", "1",
+	"\uff12", "2",
+	"\uff13", "3",
+	"\uff14", "4",
+	"\uff15", "5",
+	"\uff16", "6",
+	"\uff17", "7",
+	"\uff18", "8",
+	"\uff19", "9",
 )
 
 func (n *NumberInput[T]) commit(text string) {
