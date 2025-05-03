@@ -95,7 +95,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 func (r *Root) tryCreateTask(text string) {
 	if r.model.TryAddTask(text) {
-		r.textInput.SetText("")
+		r.textInput.ForceSetText("")
 	}
 }
 

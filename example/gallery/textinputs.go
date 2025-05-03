@@ -71,8 +71,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	width := 12 * u
 
 	t.singleLineText.SetText("Single Line")
-	t.singleLineTextInput.SetOnValueChanged(func(text string) {
-		t.model.TextInputs().SetSingleLineText(text)
+	t.singleLineTextInput.SetOnValueChanged(func(text string, committed bool) {
+		if committed {
+			t.model.TextInputs().SetSingleLineText(text)
+		}
 	})
 	t.singleLineTextInput.SetText(t.model.TextInputs().SingleLineText())
 	t.singleLineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
@@ -82,8 +84,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetSize(&t.singleLineTextInput, image.Pt(width, guigui.DefaultSize))
 
 	t.multilineText.SetText("Multiline")
-	t.multilineTextInput.SetOnValueChanged(func(text string) {
-		t.model.TextInputs().SetMultilineText(text)
+	t.multilineTextInput.SetOnValueChanged(func(text string, committed bool) {
+		if committed {
+			t.model.TextInputs().SetMultilineText(text)
+		}
 	})
 	t.multilineTextInput.SetText(t.model.TextInputs().MultilineText())
 	t.multilineTextInput.SetMultiline(true)

@@ -37,7 +37,7 @@ func (t *TextInput) SetOnEnterPressed(f func(text string)) {
 	t.text.SetOnEnterPressed(f)
 }
 
-func (t *TextInput) SetOnValueChanged(f func(text string)) {
+func (t *TextInput) SetOnValueChanged(f func(text string, committed bool)) {
 	t.text.SetOnValueChanged(f)
 }
 
@@ -51,6 +51,10 @@ func (t *TextInput) Text() string {
 
 func (t *TextInput) SetText(text string) {
 	t.text.SetText(text)
+}
+
+func (t *TextInput) ForceSetText(text string) {
+	t.text.ForceSetText(text)
 }
 
 func (t *TextInput) SetMultiline(multiline bool) {

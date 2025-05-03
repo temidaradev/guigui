@@ -168,8 +168,10 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.sampleText.SetBold(t.model.Texts().Bold())
 	t.sampleText.SetSelectable(t.model.Texts().Selectable())
 	t.sampleText.SetEditable(t.model.Texts().Editable())
-	t.sampleText.SetOnValueChanged(func(text string) {
-		t.model.Texts().SetText(text)
+	t.sampleText.SetOnValueChanged(func(text string, committed bool) {
+		if committed {
+			t.model.Texts().SetText(text)
+		}
 	})
 	if !context.HasFocusedChildWidget(&t.sampleText) {
 		t.sampleText.SetText(t.model.Texts().Text())

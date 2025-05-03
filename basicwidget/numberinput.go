@@ -120,7 +120,10 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
 	n.textInput.SetNumber(true)
 	n.textInput.setPaddingRight(UnitSize(context) / 2)
-	n.textInput.SetOnValueChanged(func(text string) {
+	n.textInput.SetOnValueChanged(func(text string, committed bool) {
+		if !committed {
+			return
+		}
 		if text == "" {
 			return
 		}

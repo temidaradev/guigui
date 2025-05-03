@@ -88,7 +88,9 @@ type TextFilter func(text string, start, end int) (string, int, int)
 type Text struct {
 	guigui.DefaultWidget
 
-	field textinput.Field
+	field       textinput.Field
+	nextText    string
+	nextTextSet bool
 
 	hAlign      HorizontalAlign
 	vAlign      VerticalAlign
@@ -125,13 +127,13 @@ type Text struct {
 	lastAppScale                float64
 	lastWidth                   int
 
-	onValueChanged func(text string)
+	onValueChanged func(text string, committed bool)
 	onEnterPressed func(text string)
 
 	tmpLocales []language.Tag
 }
 
-func (t *Text) SetOnValueChanged(f func(text string)) {
+func (t *Text) SetOnValueChanged(f func(text string, committed bool)) {
 	t.onValueChanged = f
 }
 
@@ -162,16 +164,23 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetAutoWrapCachedTextSize()
 	}
 
-	if !t.prevFocused && context.IsFocused(t) {
-		t.field.Focus()
-		t.cursor.resetCounter()
-		start, end := t.field.Selection()
-		if start < 0 || end < 0 {
-			t.selectAll()
+	if context.IsFocused(t) {
+		if !t.prevFocused {
+			t.field.Focus()
+			t.cursor.resetCounter()
+			start, end := t.field.Selection()
+			if start < 0 || end < 0 {
+				t.selectAll()
+			}
 		}
-	} else if t.prevFocused && !context.IsFocused(t) {
-		t.applyFilter()
+	} else {
+		if t.prevFocused {
+			t.commit()
+		} else if t.nextTextSet {
+			t.setText(t.nextText)
+		}
 	}
+
 	t.prevFocused = context.IsFocused(t)
 
 	if t.selectable || t.editable {
@@ -202,10 +211,23 @@ func (t *Text) Text() string {
 }
 
 func (t *Text) SetText(text string) {
+	// When a user is editing, the text should not be changed.
+	// Update the actual value later.
+	t.nextText = text
+	t.nextTextSet = true
+}
+
+func (t *Text) ForceSetText(text string) {
+	t.setText(text)
+}
+
+func (t *Text) setText(text string) {
 	start, end := t.field.Selection()
 	start = min(start, len(text))
 	end = min(end, len(text))
 	t.setTextAndSelection(text, start, end, -1)
+	t.nextText = ""
+	t.nextTextSet = false
 }
 
 func (t *Text) SetFilter(filter TextFilter) {
@@ -235,7 +257,7 @@ func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) 
 	if textChanged {
 		t.resetCachedTextSize()
 		if t.onValueChanged != nil {
-			t.onValueChanged(t.field.Text())
+			t.onValueChanged(t.field.Text(), false)
 		}
 	}
 }
@@ -502,7 +524,10 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	return guigui.HandleInputResult{}
 }
 
-func (t *Text) textToDraw(showComposition bool) string {
+func (t *Text) textToDraw(context *guigui.Context, showComposition bool) string {
+	if !context.IsFocused(t) && t.nextTextSet {
+		return t.nextText
+	}
 	if showComposition {
 		return t.field.TextForRendering()
 	}
@@ -575,7 +600,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			t.resetCachedTextSize()
 			if t.field.Text() != origText {
 				if t.onValueChanged != nil {
-					t.onValueChanged(t.field.Text())
+					t.onValueChanged(t.field.Text(), false)
 				}
 			}
 			return guigui.HandleInputByWidget(t)
@@ -596,7 +621,9 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 				text := t.field.Text()[:start] + "\n" + t.field.Text()[end:]
 				t.setTextAndSelection(text, start+len("\n"), start+len("\n"), -1)
 			}
-			t.applyFilter()
+			if !t.multiline {
+				t.commit()
+			}
 			// TODO: This is not reached on browsers. Fix this.
 			if t.onEnterPressed != nil {
 				t.onEnterPressed(t.field.Text())
@@ -820,6 +847,15 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 	return guigui.HandleInputResult{}
 }
 
+func (t *Text) commit() {
+	t.applyFilter()
+	if t.onValueChanged != nil {
+		t.onValueChanged(t.field.Text(), true)
+	}
+	t.nextText = ""
+	t.nextTextSet = false
+}
+
 func (t *Text) applyFilter() {
 	if t.filter == nil {
 		return
@@ -875,7 +911,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		op.ActiveCompositionColor = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.4)
 		op.CompositionBorderWidth = float32(textCursorWidth(context))
 	}
-	textutil.Draw(textBounds, dst, t.textToDraw(true), op)
+	textutil.Draw(textBounds, dst, t.textToDraw(context, true), op)
 }
 
 func (t *Text) DefaultSize(context *guigui.Context) image.Point {
@@ -898,7 +934,7 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool) image.Point {
 		}
 	}
 
-	txt := t.textToDraw(true)
+	txt := t.textToDraw(context, true)
 	var w, h float64
 	if useAutoWrap {
 		cw := context.Size(t).X
@@ -954,7 +990,7 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 	if position.Y < textBounds.Min.Y {
 		return 0
 	}
-	txt := t.textToDraw(showComposition)
+	txt := t.textToDraw(context, showComposition)
 	if position.Y >= textBounds.Max.Y {
 		return len(txt)
 	}
@@ -977,10 +1013,10 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 
 func (t *Text) textPosition(context *guigui.Context, index int, showComposition bool) (position textutil.TextPosition, ok bool) {
 	textBounds := t.textBounds(context)
-	if !textBounds.Overlaps(context.VisibleBounds(t)) && t.textToDraw(showComposition) != "" {
+	if !textBounds.Overlaps(context.VisibleBounds(t)) && t.textToDraw(context, showComposition) != "" {
 		return textutil.TextPosition{}, false
 	}
-	txt := t.textToDraw(showComposition)
+	txt := t.textToDraw(context, showComposition)
 	op := &textutil.Options{
 		AutoWrap:        t.autoWrap,
 		Face:            t.face(context),
