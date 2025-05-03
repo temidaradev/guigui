@@ -141,7 +141,7 @@ type TextInputsModel struct {
 	horizontalAlign basicwidget.HorizontalAlign
 	verticalAlign   basicwidget.VerticalAlign
 	noWrap          bool
-	readonly        bool
+	uneditable      bool
 	disabled        bool
 }
 
@@ -194,11 +194,14 @@ func (t *TextInputsModel) SetAutoWrap(autoWrap bool) {
 }
 
 func (t *TextInputsModel) Editable() bool {
-	return !t.readonly
+	return !t.uneditable
 }
 
 func (t *TextInputsModel) SetEditable(editable bool) {
-	t.readonly = !editable
+	t.uneditable = !editable
+	if editable {
+		t.disabled = false
+	}
 }
 
 func (t *TextInputsModel) Enabled() bool {
@@ -207,6 +210,9 @@ func (t *TextInputsModel) Enabled() bool {
 
 func (t *TextInputsModel) SetEnabled(enabled bool) {
 	t.disabled = !enabled
+	if !enabled {
+		t.uneditable = true
+	}
 }
 
 type NumberInputsModel struct {
