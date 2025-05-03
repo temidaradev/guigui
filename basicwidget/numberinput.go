@@ -7,6 +7,7 @@ import (
 	"image"
 	"math/big"
 	"strconv"
+	"strings"
 	"unsafe"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -186,7 +187,25 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 	return nil
 }
 
+var numberTextReplacer = strings.NewReplacer(
+	"０", "0",
+	"１", "1",
+	"２", "2",
+	"３", "3",
+	"４", "4",
+	"５", "5",
+	"６", "6",
+	"７", "7",
+	"８", "8",
+	"９", "9",
+	"−", "-",
+	"＋", "+",
+)
+
 func (n *NumberInput[T]) commit(text string) {
+	text = strings.TrimSpace(text)
+	text = numberTextReplacer.Replace(text)
+
 	var i big.Int
 	if _, ok := i.SetString(text, 10); !ok {
 		return
