@@ -202,18 +202,18 @@ func (t *Text) SetSelectable(selectable bool) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *Text) Text() string {
+func (t *Text) Value() string {
 	return t.field.Text()
 }
 
-func (t *Text) SetText(text string) {
+func (t *Text) SetValue(text string) {
 	// When a user is editing, the text should not be changed.
 	// Update the actual value later.
 	t.nextText = text
 	t.nextTextSet = true
 }
 
-func (t *Text) ForceSetText(text string) {
+func (t *Text) ForceSetValue(text string) {
 	t.setText(text)
 }
 

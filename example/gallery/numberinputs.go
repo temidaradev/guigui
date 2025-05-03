@@ -41,7 +41,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	// Number Inputs
 	width := 12 * u
 
-	n.numberInput1Text.SetText("Number Input")
+	n.numberInput1Text.SetValue("Number Input")
 	n.numberInput1.SetOnValueChanged(func(value int) {
 		n.model.NumberInputs().SetNumberInputValue1(value)
 	})
@@ -50,7 +50,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetEnabled(&n.numberInput1, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.numberInput1, image.Pt(width, guigui.DefaultSize))
 
-	n.numberInput2Text.SetText("Number Input (uint64)")
+	n.numberInput2Text.SetValue("Number Input (uint64)")
 	n.numberInput2.SetOnValueChanged(func(value uint64) {
 		n.model.NumberInputs().SetNumberInputValue2(value)
 	})
@@ -59,7 +59,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetEnabled(&n.numberInput2, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.numberInput2, image.Pt(width, guigui.DefaultSize))
 
-	n.numberInput3Text.SetText("Number Input w/ Range and Step")
+	n.numberInput3Text.SetValue("Number Input w/ Range and Step")
 	n.numberInput3.SetOnValueChanged(func(value int) {
 		n.model.NumberInputs().SetNumberInputValue3(value)
 	})
@@ -87,13 +87,13 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	})
 
 	// Configurations
-	n.editableText.SetText("Editable")
+	n.editableText.SetValue("Editable")
 	n.editableToggle.SetOnValueChanged(func(value bool) {
 		n.model.NumberInputs().SetEditable(value)
 	})
 	n.editableToggle.SetValue(n.model.NumberInputs().Editable())
 
-	n.enabledText.SetText("Enabled")
+	n.enabledText.SetValue("Enabled")
 	n.enabledToggle.SetOnValueChanged(func(value bool) {
 		n.model.NumberInputs().SetEnabled(value)
 	})

@@ -34,8 +34,8 @@ type Popups struct {
 }
 
 func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.blurBackgroundText.SetText("Blur Background")
-	p.closeByClickingOutsideText.SetText("Close by Clicking Outside")
+	p.blurBackgroundText.SetValue("Blur Background")
+	p.closeByClickingOutsideText.SetValue("Close by Clicking Outside")
 	p.showButton.SetText("Show")
 	p.showButton.SetOnUp(func() {
 		p.simplePopup.Open(context)
@@ -55,8 +55,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		},
 	})
 
-	p.contextMenuPopupText.SetText("Context Menu")
-	p.contextMenuPopupClickHereText.SetText("Click Here by the Right Button")
+	p.contextMenuPopupText.SetValue("Context Menu")
+	p.contextMenuPopupClickHereText.SetValue("Click Here by the Right Button")
 
 	p.forms[1].SetItems([]*basicwidget.FormItem{
 		{
@@ -131,7 +131,7 @@ type simplePopupContent struct {
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := basicwidget.UnitSize(context)
 
-	s.titleText.SetText("Hello!")
+	s.titleText.SetValue("Hello!")
 	s.titleText.SetBold(true)
 
 	s.closeButton.SetText("Close")

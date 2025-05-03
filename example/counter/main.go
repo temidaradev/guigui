@@ -33,7 +33,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.counterText.SetHorizontalAlign(basicwidget.HorizontalAlignCenter)
 	r.counterText.SetVerticalAlign(basicwidget.VerticalAlignMiddle)
 	r.counterText.SetScale(4)
-	r.counterText.SetText(fmt.Sprintf("%d", r.counter))
+	r.counterText.SetValue(fmt.Sprintf("%d", r.counter))
 
 	r.resetButton.SetText("Reset")
 	r.resetButton.SetOnUp(func() {

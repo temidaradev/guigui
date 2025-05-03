@@ -33,12 +33,12 @@ type Root struct {
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
-	r.fillText.SetText("Fill Widgets into Grid Cells")
+	r.fillText.SetValue("Fill Widgets into Grid Cells")
 	r.fillToggle.SetValue(r.fill)
 	r.fillToggle.SetOnValueChanged(func(value bool) {
 		r.fill = value
 	})
-	r.gapText.SetText("Use Gap")
+	r.gapText.SetValue("Use Gap")
 	r.gapToggle.SetValue(r.gap)
 	r.gapToggle.SetOnValueChanged(func(value bool) {
 		r.gap = value

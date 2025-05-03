@@ -45,16 +45,16 @@ func (t *TextInput) SetTextAndSelectionChanged(f func(text string, start, end in
 	t.onTextAndSelectionChanged = f
 }
 
-func (t *TextInput) Text() string {
-	return t.text.Text()
+func (t *TextInput) Value() string {
+	return t.text.Value()
 }
 
-func (t *TextInput) SetText(text string) {
-	t.text.SetText(text)
+func (t *TextInput) SetValue(text string) {
+	t.text.SetValue(text)
 }
 
-func (t *TextInput) ForceSetText(text string) {
-	t.text.ForceSetText(text)
+func (t *TextInput) ForceSetValue(text string) {
+	t.text.ForceSetValue(text)
 }
 
 func (t *TextInput) SetMultiline(multiline bool) {

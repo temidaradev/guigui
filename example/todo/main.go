@@ -53,9 +53,9 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	r.createButton.SetText("Create")
 	r.createButton.SetOnUp(func() {
-		r.tryCreateTask(r.textInput.Text())
+		r.tryCreateTask(r.textInput.Value())
 	})
-	context.SetEnabled(&r.createButton, r.model.CanAddTask(r.textInput.Text()))
+	context.SetEnabled(&r.createButton, r.model.CanAddTask(r.textInput.Value()))
 
 	r.tasksPanelContent.SetModel(&r.model)
 	r.tasksPanelContent.SetOnDeleted(func(id int) {
@@ -95,7 +95,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 func (r *Root) tryCreateTask(text string) {
 	if r.model.TryAddTask(text) {
-		r.textInput.ForceSetText("")
+		r.textInput.ForceSetValue("")
 	}
 }
 
@@ -113,7 +113,7 @@ func (t *taskWidget) SetOnDoneButtonPressed(f func()) {
 }
 
 func (t *taskWidget) SetText(text string) {
-	t.text.SetText(text)
+	t.text.SetValue(text)
 }
 
 func (t *taskWidget) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

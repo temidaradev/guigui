@@ -66,15 +66,15 @@ func (n *NumberInput[T]) setValue(value T, force bool) {
 	n.value = value
 	if isSigned[T]() {
 		if force {
-			n.textInput.ForceSetText(strconv.FormatInt(int64(n.value), 10))
+			n.textInput.ForceSetValue(strconv.FormatInt(int64(n.value), 10))
 		} else {
-			n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+			n.textInput.SetValue(strconv.FormatInt(int64(n.value), 10))
 		}
 	} else {
 		if force {
-			n.textInput.ForceSetText(strconv.FormatUint(uint64(n.value), 10))
+			n.textInput.ForceSetValue(strconv.FormatUint(uint64(n.value), 10))
 		} else {
-			n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+			n.textInput.SetValue(strconv.FormatUint(uint64(n.value), 10))
 		}
 	}
 	if n.onValueChanged != nil {
@@ -127,9 +127,9 @@ func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWi
 	// HasFocusedChildWidget works after appending the child widget.
 	if !context.HasFocusedChildWidget(n) {
 		if isSigned[T]() {
-			n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+			n.textInput.SetValue(strconv.FormatInt(int64(n.value), 10))
 		} else {
-			n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+			n.textInput.SetValue(strconv.FormatUint(uint64(n.value), 10))
 		}
 	}
 
@@ -261,7 +261,7 @@ func (n *NumberInput[T]) increment() {
 	if !n.IsEditable() {
 		return
 	}
-	n.commit(n.textInput.Text())
+	n.commit(n.textInput.Value())
 	var step T = 1
 	if n.stepSet {
 		step = n.step
@@ -273,7 +273,7 @@ func (n *NumberInput[T]) decrement() {
 	if !n.IsEditable() {
 		return
 	}
-	n.commit(n.textInput.Text())
+	n.commit(n.textInput.Value())
 	var step T = 1
 	if n.stepSet {
 		step = n.step
