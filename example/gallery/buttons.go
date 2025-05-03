@@ -119,14 +119,8 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.CellBounds() {
-		switch i {
-		case 0:
-			appender.AppendChildWidgetWithBounds(&b.buttonsForm, bounds)
-		case 2:
-			appender.AppendChildWidgetWithBounds(&b.configForm, bounds)
-		}
-	}
+	appender.AppendChildWidgetWithBounds(&b.buttonsForm, gl.CellBounds(0, 0))
+	appender.AppendChildWidgetWithBounds(&b.configForm, gl.CellBounds(0, 2))
 
 	return nil
 }

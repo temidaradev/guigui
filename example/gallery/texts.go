@@ -184,14 +184,8 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.CellBounds() {
-		switch i {
-		case 0:
-			appender.AppendChildWidgetWithBounds(&t.sampleText, bounds)
-		case 1:
-			appender.AppendChildWidgetWithBounds(&t.form, bounds)
-		}
-	}
+	appender.AppendChildWidgetWithBounds(&t.sampleText, gl.CellBounds(0, 0))
+	appender.AppendChildWidgetWithBounds(&t.form, gl.CellBounds(0, 1))
 
 	return nil
 }

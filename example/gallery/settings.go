@@ -151,12 +151,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.RepeatingCellBounds() {
-		if i >= 1 {
-			break
-		}
-		appender.AppendChildWidgetWithBounds(&s.form, bounds)
-	}
+	appender.AppendChildWidgetWithBounds(&s.form, gl.CellBounds(0, 0))
 
 	return nil
 }

@@ -104,14 +104,8 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.CellBounds() {
-		switch i {
-		case 0:
-			appender.AppendChildWidgetWithBounds(&n.numberInputForm, bounds)
-		case 2:
-			appender.AppendChildWidgetWithBounds(&n.configForm, bounds)
-		}
-	}
+	appender.AppendChildWidgetWithBounds(&n.numberInputForm, gl.CellBounds(0, 0))
+	appender.AppendChildWidgetWithBounds(&n.configForm, gl.CellBounds(0, 2))
 
 	return nil
 }

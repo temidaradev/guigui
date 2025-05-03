@@ -206,13 +206,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.CellBounds() {
-		switch i {
-		case 0:
-			appender.AppendChildWidgetWithBounds(&t.textInputForm, bounds)
-		case 2:
-			appender.AppendChildWidgetWithBounds(&t.configForm, bounds)
-		}
-	}
+	appender.AppendChildWidgetWithBounds(&t.textInputForm, gl.CellBounds(0, 0))
+	appender.AppendChildWidgetWithBounds(&t.configForm, gl.CellBounds(0, 2))
 	return nil
 }

@@ -51,12 +51,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		},
 		RowGap: u / 2,
 	}
-	for i, bounds := range gl.RepeatingCellBounds() {
-		if i >= 1 {
-			break
-		}
-		appender.AppendChildWidgetWithBounds(&l.form, bounds)
-	}
+	appender.AppendChildWidgetWithBounds(&l.form, gl.CellBounds(0, 0))
 
 	return nil
 }

@@ -57,15 +57,24 @@ type GridLayout struct {
 	RowGap    int
 }
 
-func (g *GridLayout) CellBounds() iter.Seq2[int, image.Rectangle] {
-	return g.cellBounds(max(len(g.Widths), 1) * max(len(g.Heights), 1))
+func (g *GridLayout) CellBounds(column, row int) image.Rectangle {
+	if column < 0 || column >= max(len(g.Widths), 1) {
+		return image.Rectangle{}
+	}
+	if row < 0 {
+		return image.Rectangle{}
+	}
+	// TODO: This implementation is inefficient. Improve it.
+	idx := column + row*max(len(g.Widths), 1)
+	for i, bounds := range g.cellBounds() {
+		if i == idx {
+			return bounds
+		}
+	}
+	return image.Rectangle{}
 }
 
-func (g *GridLayout) RepeatingCellBounds() iter.Seq2[int, image.Rectangle] {
-	return g.cellBounds(-1)
-}
-
-func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
+func (g *GridLayout) cellBounds() iter.Seq2[int, image.Rectangle] {
 	return func(yield func(index int, bounds image.Rectangle) bool) {
 		widths := g.Widths
 		if len(widths) == 0 {
@@ -130,7 +139,7 @@ func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 		y := g.Bounds.Min.Y
 		heightsInPixels := make([]int, len(heights))
 		var widgetIdx int
-		for widgetBaseIdx := 0; count < 0 || widgetBaseIdx < count; widgetBaseIdx += len(widths) * len(heights) {
+		for widgetBaseIdx := 0; ; widgetBaseIdx += len(widths) * len(heights) {
 			// Calculate hights in pixels.
 			// This is needed for each loop since the index starts with widgetBaseIdx for sizeTypeMaxContent.
 			restH := g.Bounds.Dy()
@@ -203,9 +212,6 @@ func (g *GridLayout) cellBounds(count int) iter.Seq2[int, image.Rectangle] {
 					x += widthsInPixels[i]
 					x += g.ColumnGap
 					widgetIdx++
-					if count >= 0 && widgetIdx >= count {
-						return
-					}
 				}
 				y += heightsInPixels[j]
 				y += g.RowGap
