@@ -16,9 +16,9 @@ type NumberInputs struct {
 
 	numberInputForm  basicwidget.Form
 	numberInput1Text basicwidget.Text
-	numberInput1     basicwidget.NumberInput
+	numberInput1     basicwidget.NumberInput[int]
 	numberInput2Text basicwidget.Text
-	numberInput2     basicwidget.NumberInput
+	numberInput2     basicwidget.NumberInput[int]
 
 	configForm     basicwidget.Form
 	editableText   basicwidget.Text
@@ -40,7 +40,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	width := 12 * u
 
 	n.numberInput1Text.SetText("Number Field")
-	n.numberInput1.SetOnValueChanged(func(value int64) {
+	n.numberInput1.SetOnValueChanged(func(value int) {
 		n.model.NumberInputs().SetNumberFieldValue1(value)
 	})
 	n.numberInput1.SetValue(n.model.NumberInputs().NumberFieldValue1())
@@ -49,7 +49,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetSize(&n.numberInput1, image.Pt(width, guigui.DefaultSize))
 
 	n.numberInput2Text.SetText("Number Field w/ Range and Step")
-	n.numberInput2.SetOnValueChanged(func(value int64) {
+	n.numberInput2.SetOnValueChanged(func(value int) {
 		n.model.NumberInputs().SetNumberFieldValue2(value)
 	})
 	n.numberInput2.SetMinimumValue(-100)
