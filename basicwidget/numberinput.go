@@ -202,7 +202,7 @@ func (n *NumberInput[T]) increment() {
 	if n.stepSet {
 		step = n.step
 	}
-	n.SetValue(n.value + step)
+	n.SetValue(min(increment(n.value, step), n.MaximumValue()))
 	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
 }
 
@@ -214,7 +214,7 @@ func (n *NumberInput[T]) decrement() {
 	if n.stepSet {
 		step = n.step
 	}
-	n.SetValue(n.value - step)
+	n.SetValue(max(decrement(n.value, step), n.MinimumValue()))
 	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
 }
 
@@ -242,4 +242,18 @@ func minInteger[T Integer]() T {
 		return 1 << (unsafe.Sizeof(zero)*8 - 1)
 	}
 	return 0
+}
+
+func increment[T Integer](value T, step T) T {
+	if value+step < value {
+		return maxInteger[T]()
+	}
+	return value + step
+}
+
+func decrement[T Integer](value T, step T) T {
+	if value-step > value {
+		return minInteger[T]()
+	}
+	return value - step
 }
