@@ -25,12 +25,13 @@ type NumberInput[T Integer] struct {
 	upButton   TextButton
 	downButton TextButton
 
-	value      T
-	min        T
-	minSet     bool
-	max        T
-	maxSet     bool
-	stepMinus1 T
+	value   T
+	min     T
+	minSet  bool
+	max     T
+	maxSet  bool
+	step    T
+	stepSet bool
 
 	onValueChanged func(value T)
 }
@@ -89,7 +90,8 @@ func (n *NumberInput[T]) SetMaximumValue(maximum T) {
 }
 
 func (n *NumberInput[T]) SetStep(step T) {
-	n.stepMinus1 = step - 1
+	n.step = step
+	n.stepSet = true
 }
 
 func (n *NumberInput[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -196,7 +198,10 @@ func (n *NumberInput[T]) increment() {
 	if !n.IsEditable() {
 		return
 	}
-	step := n.stepMinus1 + 1
+	var step T = 1
+	if n.stepSet {
+		step = n.step
+	}
 	n.SetValue(n.value + step)
 	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
 }
@@ -205,7 +210,10 @@ func (n *NumberInput[T]) decrement() {
 	if !n.IsEditable() {
 		return
 	}
-	step := n.stepMinus1 + 1
+	var step T = 1
+	if n.stepSet {
+		step = n.step
+	}
 	n.SetValue(n.value - step)
 	n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
 }
