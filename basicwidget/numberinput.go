@@ -58,6 +58,11 @@ func (n *NumberInput[T]) SetValue(value T) {
 		return
 	}
 	n.value = value
+	if isSigned[T]() {
+		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
+	} else {
+		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
+	}
 	if n.onValueChanged != nil {
 		n.onValueChanged(value)
 	}
@@ -223,11 +228,6 @@ func (n *NumberInput[T]) increment() {
 		step = n.step
 	}
 	n.SetValue(min(increment(n.value, step), n.MaximumValue()))
-	if isSigned[T]() {
-		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
-	} else {
-		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
-	}
 }
 
 func (n *NumberInput[T]) decrement() {
@@ -239,11 +239,6 @@ func (n *NumberInput[T]) decrement() {
 		step = n.step
 	}
 	n.SetValue(max(decrement(n.value, step), n.MinimumValue()))
-	if isSigned[T]() {
-		n.textInput.SetText(strconv.FormatInt(int64(n.value), 10))
-	} else {
-		n.textInput.SetText(strconv.FormatUint(uint64(n.value), 10))
-	}
 }
 
 func (n *NumberInput[T]) DefaultSize(context *guigui.Context) image.Point {
