@@ -11,8 +11,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/hajimehoshi/guigui/internal/locale"
 	"golang.org/x/text/language"
+
+	"github.com/hajimehoshi/guigui/internal/locale"
 )
 
 type ColorMode int
