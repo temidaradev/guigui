@@ -7,7 +7,6 @@ import (
 	"image"
 	"math"
 	"math/big"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -141,7 +140,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if !committed {
 			return
 		}
-		n.abstractNumberInput.Commit(text)
+		n.abstractNumberInput.CommitString(text)
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
 	// HasFocusedChildWidget works after appending the child widget.
@@ -203,24 +202,6 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	return nil
 }
 
-var numberTextReplacer = strings.NewReplacer(
-	"\u2212", "-",
-	"\ufe62", "+",
-	"\ufe63", "-",
-	"\uff0b", "+",
-	"\uff0d", "-",
-	"\uff10", "0",
-	"\uff11", "1",
-	"\uff12", "2",
-	"\uff13", "3",
-	"\uff14", "4",
-	"\uff15", "5",
-	"\uff16", "6",
-	"\uff17", "7",
-	"\uff18", "8",
-	"\uff19", "9",
-)
-
 func (n *NumberInput) HandleButtonInput(context *guigui.Context) guigui.HandleInputResult {
 	if isKeyRepeating(ebiten.KeyUp) {
 		n.increment()
@@ -241,7 +222,7 @@ func (n *NumberInput) increment() {
 	if !n.IsEditable() {
 		return
 	}
-	n.abstractNumberInput.Commit(n.textInput.Value())
+	n.abstractNumberInput.CommitString(n.textInput.Value())
 	n.abstractNumberInput.Increment()
 }
 
@@ -249,6 +230,6 @@ func (n *NumberInput) decrement() {
 	if !n.IsEditable() {
 		return
 	}
-	n.abstractNumberInput.Commit(n.textInput.Value())
+	n.abstractNumberInput.CommitString(n.textInput.Value())
 	n.abstractNumberInput.Decrement()
 }

@@ -219,7 +219,25 @@ func (a *abstractNumberInput) clamp(value *big.Int) {
 	}
 }
 
-func (a *abstractNumberInput) Commit(text string) {
+var numberTextReplacer = strings.NewReplacer(
+	"\u2212", "-",
+	"\ufe62", "+",
+	"\ufe63", "-",
+	"\uff0b", "+",
+	"\uff0d", "-",
+	"\uff10", "0",
+	"\uff11", "1",
+	"\uff12", "2",
+	"\uff13", "3",
+	"\uff14", "4",
+	"\uff15", "5",
+	"\uff16", "6",
+	"\uff17", "7",
+	"\uff18", "8",
+	"\uff19", "9",
+)
+
+func (a *abstractNumberInput) CommitString(text string) {
 	text = strings.TrimSpace(text)
 	text = numberTextReplacer.Replace(text)
 
