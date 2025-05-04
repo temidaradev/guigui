@@ -120,7 +120,7 @@ type Text struct {
 	cachedTextSizePlus1         image.Point
 	cachedAutoWrapTextSizePlus1 image.Point
 	lastFace                    text.Face
-	lastAppScale                float64
+	lastScale                   float64
 	lastWidth                   int
 
 	onValueChanged func(text string, committed bool)
@@ -151,8 +151,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.lastFace = f
 		t.resetCachedTextSize()
 	}
-	if t.lastAppScale != context.AppScale() {
-		t.lastAppScale = context.AppScale()
+	if t.lastScale != context.Scale() {
+		t.lastScale = context.Scale()
 		t.resetCachedTextSize()
 	}
 	if t.autoWrap && t.lastWidth != context.Size(t).X {
