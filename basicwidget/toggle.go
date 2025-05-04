@@ -56,8 +56,7 @@ func toggleMaxCount() int {
 }
 
 func (t *Toggle) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	hovered := t.isHovered(context)
-	if t.prevHovered != hovered {
+	if hovered := t.isHovered(context); t.prevHovered != hovered {
 		t.prevHovered = hovered
 		guigui.RequestRedraw(t)
 	}

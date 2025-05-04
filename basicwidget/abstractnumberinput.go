@@ -201,6 +201,24 @@ func (a *abstractNumberInput) clamp(value *big.Int) {
 	}
 }
 
+func (a *abstractNumberInput) Rate() float64 {
+	if !a.maxSet || !a.minSet {
+		return math.NaN()
+	}
+
+	numer := (&big.Int{}).Sub(&a.value, &a.min)
+	denom := (&big.Int{}).Sub(&a.max, &a.min)
+	if denom.Sign() == 0 {
+		return math.NaN()
+	}
+
+	x, _ := (&big.Rat{}).Quo((&big.Rat{}).SetInt(numer), (&big.Rat{}).SetInt(denom)).Float64()
+	return x
+}
+
+func (a *abstractNumberInput) SetRate(rate float64) {
+}
+
 var numberTextReplacer = strings.NewReplacer(
 	"\u2212", "-",
 	"\ufe62", "+",
