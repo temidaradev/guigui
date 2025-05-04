@@ -65,6 +65,7 @@ func (t *Toggle) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 func (t *Toggle) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if context.IsEnabled(t) && t.isHovered(context) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		context.SetFocused(t, true)
 		t.pressed = true
 		t.SetValue(!t.value)
 		return guigui.HandleInputByWidget(t)
