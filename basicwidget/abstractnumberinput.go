@@ -60,17 +60,17 @@ func (a *abstractNumberInput) ValueString() string {
 }
 
 func (a *abstractNumberInput) ValueBigInt() *big.Int {
-	var v big.Int
-	v.Set(&a.value)
-	return &v
+	return (&big.Int{}).Set(&a.value)
 }
 
 func (a *abstractNumberInput) ValueInt64() int64 {
 	if a.value.IsInt64() {
 		return a.value.Int64()
-	} else if a.value.Cmp(&maxInt64) > 0 {
+	}
+	if a.value.Cmp(&maxInt64) > 0 {
 		return math.MaxInt64
-	} else if a.value.Cmp(&minInt64) < 0 {
+	}
+	if a.value.Cmp(&minInt64) < 0 {
 		return math.MinInt64
 	}
 	return 0
@@ -79,9 +79,11 @@ func (a *abstractNumberInput) ValueInt64() int64 {
 func (a *abstractNumberInput) ValueUint64() uint64 {
 	if a.value.IsUint64() {
 		return a.value.Uint64()
-	} else if a.value.Cmp(&maxUint64) > 0 {
+	}
+	if a.value.Cmp(&maxUint64) > 0 {
 		return math.MaxUint64
-	} else if a.value.Cmp(big.NewInt(0)) < 0 {
+	}
+	if a.value.Cmp(big.NewInt(0)) < 0 {
 		return 0
 	}
 	return 0
@@ -92,15 +94,11 @@ func (a *abstractNumberInput) SetValueBigInt(value *big.Int) {
 }
 
 func (a *abstractNumberInput) SetValueInt64(value int64) {
-	var v big.Int
-	v.SetInt64(value)
-	a.setValue(&v, false)
+	a.setValue((&big.Int{}).SetInt64(value), false)
 }
 
 func (a *abstractNumberInput) SetValueUint64(value uint64) {
-	var v big.Int
-	v.SetUint64(value)
-	a.setValue(&v, false)
+	a.setValue((&big.Int{}).SetUint64(value), false)
 }
 
 func (a *abstractNumberInput) setValue(value *big.Int, force bool) {
@@ -116,9 +114,7 @@ func (a *abstractNumberInput) MinimumValueBigInt() *big.Int {
 	if !a.minSet {
 		return nil
 	}
-	var v big.Int
-	v.Set(&a.min)
-	return &v
+	return (&big.Int{}).Set(&a.min)
 }
 
 func (a *abstractNumberInput) SetMinimumValueBigInt(minimum *big.Int) {
@@ -129,34 +125,26 @@ func (a *abstractNumberInput) SetMinimumValueBigInt(minimum *big.Int) {
 	}
 	a.min.Set(minimum)
 	a.minSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) SetMinimumValueInt64(minimum int64) {
 	a.min.SetInt64(minimum)
 	a.minSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) SetMinimumValueUint64(minimum uint64) {
 	a.min.SetUint64(minimum)
 	a.minSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) MaximumValueBigInt() *big.Int {
 	if !a.maxSet {
 		return nil
 	}
-	var v big.Int
-	v.Set(&a.max)
-	return &v
+	return (&big.Int{}).Set(&a.max)
 }
 
 func (a *abstractNumberInput) SetMaximumValueBigInt(maximum *big.Int) {
@@ -167,25 +155,19 @@ func (a *abstractNumberInput) SetMaximumValueBigInt(maximum *big.Int) {
 	}
 	a.max.Set(maximum)
 	a.maxSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) SetMaximumValueInt64(maximum int64) {
 	a.max.SetInt64(maximum)
 	a.maxSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) SetMaximumValueUint64(maximum uint64) {
 	a.max.SetUint64(maximum)
 	a.maxSet = true
-	var v big.Int
-	v.Set(&a.value)
-	a.SetValueBigInt(&v)
+	a.SetValueBigInt((&big.Int{}).Set(&a.value))
 }
 
 func (a *abstractNumberInput) SetStepBigInt(step *big.Int) {
@@ -256,9 +238,7 @@ func (n *abstractNumberInput) Increment() {
 	} else {
 		step.SetInt64(1)
 	}
-	var newValue big.Int
-	newValue.Add(&n.value, &step)
-	n.setValue(&newValue, true)
+	n.setValue((&big.Int{}).Add(&n.value, &step), true)
 }
 
 func (n *abstractNumberInput) Decrement() {
@@ -268,9 +248,7 @@ func (n *abstractNumberInput) Decrement() {
 	} else {
 		step.SetInt64(1)
 	}
-	var newValue big.Int
-	newValue.Sub(&n.value, &step)
-	n.setValue(&newValue, true)
+	n.setValue((&big.Int{}).Sub(&n.value, &step), true)
 }
 
 func (n *abstractNumberInput) CanIncrement() bool {
