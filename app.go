@@ -387,7 +387,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 		return HandleInputResult{}
 	}
 
-	if typ == handleInputTypeButton && !a.context.HasFocusedChildWidget(widget) {
+	if typ == handleInputTypeButton && !a.context.IsFocusedOrHasFocusedChild(widget) {
 		return HandleInputResult{}
 	}
 

@@ -144,7 +144,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
 	// HasFocusedChildWidget works after appending the child widget.
-	if !context.HasFocusedChildWidget(n) {
+	if !context.IsFocusedOrHasFocusedChild(n) {
 		n.textInput.SetValue(n.abstractNumberInput.ValueString())
 	}
 

@@ -302,7 +302,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 				return guigui.HandleInputByWidget(l)
 			}
 
-			wasFocused := context.IsFocused(l)
+			wasFocused := context.IsFocusedOrHasFocusedChild(l)
 			context.SetFocused(l, true)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
 				l.SelectItemByIndex(index)
@@ -380,7 +380,7 @@ func (l *List[T]) selectedItemColor(context *guigui.Context) color.Color {
 	if l.style == ListStyleMenu {
 		return nil
 	}
-	if context.IsFocused(l) || l.style == ListStyleSidebar {
+	if context.IsFocusedOrHasFocusedChild(l) || l.style == ListStyleSidebar {
 		return draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	}
 	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
