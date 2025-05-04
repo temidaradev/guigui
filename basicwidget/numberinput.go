@@ -34,10 +34,13 @@ type NumberInput struct {
 	upButton   TextButton
 	downButton TextButton
 
-	value big.Int
-	min   *big.Int
-	max   *big.Int
-	step  *big.Int
+	value   big.Int
+	min     big.Int
+	minSet  bool
+	max     big.Int
+	maxSet  bool
+	step    big.Int
+	stepSet bool
 
 	onValueChangedBigInt func(value *big.Int)
 	onValueChangedInt64  func(value int64)
@@ -123,86 +126,76 @@ func (n *NumberInput) setValue(value *big.Int, force bool) {
 }
 
 func (n *NumberInput) MinimumValueBigInt() *big.Int {
-	if n.min == nil {
+	if !n.minSet {
 		return nil
 	}
 	var v big.Int
-	v.Set(n.min)
+	v.Set(&n.min)
 	return &v
 }
 
 func (n *NumberInput) SetMinimumValueBigInt(minimum *big.Int) {
 	if minimum == nil {
-		n.min = nil
+		n.min = big.Int{}
+		n.minSet = false
 		return
 	}
-	if n.min == nil {
-		n.min = &big.Int{}
-	}
 	n.min.Set(minimum)
+	n.minSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
 }
 
 func (n *NumberInput) SetMinimumValueInt64(minimum int64) {
-	if n.min == nil {
-		n.min = &big.Int{}
-	}
 	n.min.SetInt64(minimum)
+	n.minSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
 }
 
 func (n *NumberInput) SetMinimumValueUint64(minimum uint64) {
-	if n.min == nil {
-		n.min = &big.Int{}
-	}
 	n.min.SetUint64(minimum)
+	n.minSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
 }
 
 func (n *NumberInput) MaximumValueBigInt() *big.Int {
-	if n.max == nil {
+	if !n.maxSet {
 		return nil
 	}
 	var v big.Int
-	v.Set(n.max)
+	v.Set(&n.max)
 	return &v
 }
 
 func (n *NumberInput) SetMaximumValueBigInt(maximum *big.Int) {
 	if maximum == nil {
-		n.max = nil
+		n.max = big.Int{}
+		n.maxSet = false
 		return
 	}
-	if n.max == nil {
-		n.max = &big.Int{}
-	}
 	n.max.Set(maximum)
+	n.maxSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
 }
 
 func (n *NumberInput) SetMaximumValueInt64(maximum int64) {
-	if n.max == nil {
-		n.max = &big.Int{}
-	}
 	n.max.SetInt64(maximum)
+	n.maxSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
 }
 
 func (n *NumberInput) SetMaximumValueUint64(maximum uint64) {
-	if n.max == nil {
-		n.max = &big.Int{}
-	}
 	n.max.SetUint64(maximum)
+	n.maxSet = true
 	var v big.Int
 	v.Set(&n.value)
 	n.SetValueBigInt(&v)
@@ -210,27 +203,22 @@ func (n *NumberInput) SetMaximumValueUint64(maximum uint64) {
 
 func (n *NumberInput) SetStepBigInt(step *big.Int) {
 	if step == nil {
-		n.step = nil
+		n.step = big.Int{}
+		n.stepSet = false
 		return
 	}
-	if n.step == nil {
-		n.step = &big.Int{}
-	}
 	n.step.Set(step)
+	n.stepSet = true
 }
 
 func (n *NumberInput) SetStepInt64(step int64) {
-	if n.step == nil {
-		n.step = &big.Int{}
-	}
 	n.step.SetInt64(step)
+	n.stepSet = true
 }
 
 func (n *NumberInput) SetStepUint64(step uint64) {
-	if n.step == nil {
-		n.step = &big.Int{}
-	}
 	n.step.SetUint64(step)
+	n.stepSet = true
 }
 
 func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -267,7 +255,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	n.upButton.setOnRepeat(func() {
 		n.increment()
 	})
-	context.SetEnabled(&n.upButton, n.IsEditable() && (n.max == nil || n.value.Cmp(n.max) < 0))
+	context.SetEnabled(&n.upButton, n.IsEditable() && (!n.maxSet || n.value.Cmp(&n.max) < 0))
 
 	b := context.Bounds(n)
 	appender.AppendChildWidgetWithBounds(&n.upButton, image.Rectangle{
@@ -290,7 +278,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 	n.downButton.setOnRepeat(func() {
 		n.decrement()
 	})
-	context.SetEnabled(&n.downButton, n.IsEditable() && (n.min == nil || n.value.Cmp(n.min) > 0))
+	context.SetEnabled(&n.downButton, n.IsEditable() && (!n.minSet || n.value.Cmp(&n.min) > 0))
 
 	appender.AppendChildWidgetWithBounds(&n.downButton, image.Rectangle{
 		Min: image.Point{
@@ -363,8 +351,8 @@ func (n *NumberInput) increment() {
 	}
 	n.commit(n.textInput.Value())
 	var step big.Int
-	if n.step != nil {
-		step.Set(n.step)
+	if n.stepSet {
+		step.Set(&n.step)
 	} else {
 		step.SetInt64(1)
 	}
@@ -379,8 +367,8 @@ func (n *NumberInput) decrement() {
 	}
 	n.commit(n.textInput.Value())
 	var step big.Int
-	if n.step != nil {
-		step.Set(n.step)
+	if n.stepSet {
+		step.Set(&n.step)
 	} else {
 		step.SetInt64(1)
 	}
@@ -394,12 +382,12 @@ func (n *NumberInput) DefaultSize(context *guigui.Context) image.Point {
 }
 
 func (n *NumberInput) clamp(value *big.Int) {
-	if m := n.min; m != nil && value.Cmp(m) < 0 {
-		value.Set(m)
+	if n.minSet && value.Cmp(&n.min) < 0 {
+		value.Set(&n.min)
 		return
 	}
-	if m := n.max; m != nil && value.Cmp(m) > 0 {
-		value.Set(m)
+	if n.maxSet && value.Cmp(&n.max) > 0 {
+		value.Set(&n.max)
 		return
 	}
 }
