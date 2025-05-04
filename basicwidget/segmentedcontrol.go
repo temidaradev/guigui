@@ -159,6 +159,11 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 			appender.AppendChildWidgetWithBounds(&s.textButtons[i], g.CellBounds(0, i))
 		}
 	}
+
+	// tmpTextButton must be in a tree to get its correct size.
+	context.SetVisible(&s.tmpTextButton, false)
+	appender.AppendChildWidget(&s.tmpTextButton)
+
 	return nil
 }
 

@@ -211,10 +211,18 @@ func (t *Text) Value() string {
 }
 
 func (t *Text) SetValue(text string) {
+	if t.nextTextSet && t.nextText == text {
+		return
+	}
+	if !t.nextTextSet && t.field.Text() == text {
+		return
+	}
+
 	// When a user is editing, the text should not be changed.
 	// Update the actual value later.
 	t.nextText = text
 	t.nextTextSet = true
+	t.resetCachedTextSize()
 }
 
 func (t *Text) ForceSetValue(text string) {
