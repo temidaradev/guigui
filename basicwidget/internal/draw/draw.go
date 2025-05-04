@@ -341,6 +341,9 @@ func DrawRoundedRectWithSharpenCorners(context *guigui.Context, dst *ebiten.Imag
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
+	if radius == 0 {
+		return
+	}
 
 	if sharpenCorners == (SharpenCorners{}) {
 		drawNinePatch(dst, bounds, ensureWhiteRoundedRect(radius), clr, clr)
@@ -364,6 +367,9 @@ func DrawRoundedShadowRect(context *guigui.Context, dst *ebiten.Image, bounds im
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
 	}
+	if radius == 0 {
+		return
+	}
 	drawNinePatch(dst, bounds, ensureWhiteRoundedShadowRect(radius), clr, clr)
 }
 
@@ -380,6 +386,9 @@ func DrawRoundedRectBorderWithSharpenCorners(context *guigui.Context, dst *ebite
 	}
 	if bounds.Dy()/2-1 < radius {
 		radius = bounds.Dy()/2 - 1
+	}
+	if radius == 0 {
+		return
 	}
 
 	if sharpenCorners == (SharpenCorners{}) {

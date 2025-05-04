@@ -10,7 +10,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 
 	"github.com/hajimehoshi/guigui"
@@ -211,14 +210,15 @@ func (s *Slider) Draw(context *guigui.Context, dst *ebiten.Image) {
 	rate := s.abstractNumberInput.Rate()
 
 	b := context.Bounds(s)
-	x0 := float32(b.Min.X + UnitSize(context)/2)
+	x0 := b.Min.X + UnitSize(context)/2
 	x1 := x0
 	if !math.IsNaN(rate) {
-		x1 += float32(s.barWidth(context)) * float32(rate)
+		x1 += int(float64(s.barWidth(context)) * float64(rate))
 	}
-	x2 := float32(b.Max.X - UnitSize(context)/2)
-	y := float32(b.Min.Y+b.Max.Y) / 2
-	strokeWidth := float32(2 * context.Scale())
+	x2 := b.Max.X - UnitSize(context)/2
+	strokeWidth := int(4 * context.Scale())
+	y0 := (b.Min.Y+b.Max.Y)/2 - strokeWidth/2
+	y1 := (b.Min.Y+b.Max.Y)/2 + strokeWidth/2
 
 	bgColorOn := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	bgColorOff := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
@@ -226,8 +226,15 @@ func (s *Slider) Draw(context *guigui.Context, dst *ebiten.Image) {
 		bgColorOn = bgColorOff
 	}
 
-	vector.StrokeLine(dst, x0, y, x1, y, strokeWidth, bgColorOn, false)
-	vector.StrokeLine(dst, x1, y, x2, y, strokeWidth, bgColorOff, false)
+	if x0 < x1 {
+		b := image.Rect(x0, y0, x1, y1)
+		draw.DrawRoundedRect(context, dst, b, bgColorOn, strokeWidth/2)
+	}
+
+	if x1 < x2 {
+		b := image.Rect(x1, y0, x2, y1)
+		draw.DrawRoundedRect(context, dst, b, bgColorOff, strokeWidth/2)
+	}
 
 	if thumbBounds := s.thumbBounds(context); !thumbBounds.Empty() {
 		cm := context.ColorMode()
