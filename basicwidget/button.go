@@ -122,13 +122,9 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	if border {
-		borderType := draw.RoundedRectBorderTypeRegular
-		if context.IsEnabled(b) {
-			if b.isPressed(context) {
-				borderType = draw.RoundedRectBorderTypeInset
-			} else {
-				borderType = draw.RoundedRectBorderTypeOutset
-			}
+		borderType := draw.RoundedRectBorderTypeOutset
+		if context.IsEnabled(b) && b.isPressed(context) {
+			borderType = draw.RoundedRectBorderTypeInset
 		}
 		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context))
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
