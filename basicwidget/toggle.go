@@ -109,7 +109,7 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bgColorOff := backgroundColor
 	bgColorOn := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	var bgColor color.Color
-	if t.value {
+	if t.value && context.IsEnabled(t) {
 		bgColor = draw.MixColor(bgColorOff, bgColorOn, rate)
 	} else {
 		bgColor = draw.MixColor(bgColorOn, bgColorOff, rate)
@@ -120,12 +120,7 @@ func (t *Toggle) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// Border (upper)
 	b := bounds
 	b.Max.Y = b.Min.Y + b.Dy()/2
-	var borderClr1, borderClr2 color.Color
-	if context.IsEnabled(t) {
-		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, t.value)
-	} else {
-		borderClr1, borderClr2 = draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeRegular, false)
-	}
+	borderClr1, borderClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, t.value && context.IsEnabled(t))
 	draw.DrawRoundedRectBorder(context, dst.SubImage(b).(*ebiten.Image), bounds, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 
 	// Thumb

@@ -21,6 +21,8 @@ type Buttons struct {
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
 	segmentedControlV     basicwidget.SegmentedControl[int]
+	toggleText            basicwidget.Text
+	toggle                basicwidget.Toggle
 
 	configForm    basicwidget.Form
 	enabledText   basicwidget.Text
@@ -77,6 +79,9 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.segmentedControlV.SetDirection(basicwidget.SegmentedControlDirectionVertical)
 	context.SetEnabled(&b.segmentedControlV, b.model.Buttons().Enabled())
 
+	b.toggleText.SetValue("Toggle")
+	context.SetEnabled(&b.toggle, b.model.Buttons().Enabled())
+
 	b.buttonsForm.SetItems([]*basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
@@ -93,6 +98,10 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		{
 			PrimaryWidget:   &b.segmentedControlVText,
 			SecondaryWidget: &b.segmentedControlV,
+		},
+		{
+			PrimaryWidget:   &b.toggleText,
+			SecondaryWidget: &b.toggle,
 		},
 	})
 
