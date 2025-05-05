@@ -76,7 +76,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Top) + float32(bounds.Min.Y) + float32(yOffset)
+						y := float32(posStart.Top) + float32(bounds.Min.Y)
 						width := float32(posEnd.X - posStart.X)
 						height := float32(posStart.Bottom - posStart.Top)
 						vector.DrawFilledRect(dst, x, y, width, height, options.SelectionColor, false)
@@ -99,7 +99,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Bottom) + float32(bounds.Min.Y) + float32(yOffset) - options.CompositionBorderWidth
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
 						w := float32(posEnd.X - posStart.X)
 						h := options.CompositionBorderWidth
 						vector.DrawFilledRect(dst, x, y, w, h, options.InactiveCompositionColor, false)
@@ -119,7 +119,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 						}
 						posEnd := posEnd0
 						x := float32(posStart.X) + float32(bounds.Min.X)
-						y := float32(posStart.Bottom) + float32(bounds.Min.Y) + float32(yOffset) - options.CompositionBorderWidth
+						y := float32(posStart.Bottom) + float32(bounds.Min.Y) - options.CompositionBorderWidth
 						w := float32(posEnd.X - posStart.X)
 						h := options.CompositionBorderWidth
 						vector.DrawFilledRect(dst, x, y, w, h, options.ActiveCompositionColor, false)

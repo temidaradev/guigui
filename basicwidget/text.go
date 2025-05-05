@@ -1002,8 +1002,6 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
 	}
 	position = position.Sub(textBounds.Min)
-	yOffset := textutil.TextPositionYOffset(textBounds.Size(), txt, op)
-	position = position.Sub(image.Pt(0, int(yOffset)))
 	idx := textutil.TextIndexFromPosition(textBounds.Dx(), position, txt, op)
 	if idx < 0 || idx > len(txt) {
 		return -1
@@ -1032,11 +1030,10 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 	if count == 2 {
 		pos = pos1
 	}
-	yOffset := textutil.TextPositionYOffset(textBounds.Size(), txt, op)
 	return textutil.TextPosition{
 		X:      pos.X + float64(textBounds.Min.X),
-		Top:    pos.Top + float64(textBounds.Min.Y) + yOffset,
-		Bottom: pos.Bottom + float64(textBounds.Min.Y) + yOffset,
+		Top:    pos.Top + float64(textBounds.Min.Y),
+		Bottom: pos.Bottom + float64(textBounds.Min.Y),
 	}, true
 }
 
