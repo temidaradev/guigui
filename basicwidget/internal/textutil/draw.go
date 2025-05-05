@@ -53,7 +53,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		op.PrimaryAlign = text.AlignEnd
 	}
 
-	yOffset := TextPositionYOffset(bounds.Size(), str, &options.Options)
+	yOffset := textPositionYOffset(bounds.Size(), str, &options.Options)
 	op.GeoM.Translate(0, yOffset)
 
 	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, func(str string) float64 {

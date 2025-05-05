@@ -313,7 +313,7 @@ func textPadding(face text.Face, lineHeight float64) float64 {
 	return padding
 }
 
-func TextPositionYOffset(size image.Point, str string, options *Options) float64 {
+func textPositionYOffset(size image.Point, str string, options *Options) float64 {
 	c := lineCount(size.X, str, options.AutoWrap, options.Face)
 	textHeight := options.LineHeight * float64(c)
 	yOffset := textPadding(options.Face, options.LineHeight)
