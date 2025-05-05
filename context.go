@@ -78,7 +78,7 @@ type Context struct {
 
 	appScaleMinus1 float64
 	colorMode      ColorMode
-	hasColorMode   bool
+	colorModeSet   bool
 	locales        []language.Tag
 }
 
@@ -103,24 +103,24 @@ func (c *Context) SetAppScale(scale float64) {
 }
 
 func (c *Context) ColorMode() ColorMode {
-	if c.hasColorMode {
+	if c.colorModeSet {
 		return c.colorMode
 	}
 	return defaultColorMode
 }
 
 func (c *Context) SetColorMode(mode ColorMode) {
-	if c.hasColorMode && mode == c.colorMode {
+	if c.colorModeSet && mode == c.colorMode {
 		return
 	}
 
 	c.colorMode = mode
-	c.hasColorMode = true
+	c.colorModeSet = true
 	c.app.requestRedraw(c.app.bounds())
 }
 
 func (c *Context) ResetColorMode() {
-	c.hasColorMode = false
+	c.colorModeSet = false
 }
 
 func (c *Context) AppendLocales(locales []language.Tag) []language.Tag {
