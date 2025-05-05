@@ -63,16 +63,16 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.horizontalAlignText.SetValue("Horizontal Align")
 	t.horizontalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.HorizontalAlign]{
 		{
-			Image: imgAlignStart,
-			Tag:   basicwidget.HorizontalAlignStart,
+			Icon: imgAlignStart,
+			Tag:  basicwidget.HorizontalAlignStart,
 		},
 		{
-			Image: imgAlignCenter,
-			Tag:   basicwidget.HorizontalAlignCenter,
+			Icon: imgAlignCenter,
+			Tag:  basicwidget.HorizontalAlignCenter,
 		},
 		{
-			Image: imgAlignEnd,
-			Tag:   basicwidget.HorizontalAlignEnd,
+			Icon: imgAlignEnd,
+			Tag:  basicwidget.HorizontalAlignEnd,
 		},
 	})
 	t.horizontalAlignSegmentedControl.SetOnItemSelected(func(index int) {
@@ -88,16 +88,16 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	t.verticalAlignText.SetValue("Vertical Align")
 	t.verticalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.VerticalAlign]{
 		{
-			Image: imgAlignTop,
-			Tag:   basicwidget.VerticalAlignTop,
+			Icon: imgAlignTop,
+			Tag:  basicwidget.VerticalAlignTop,
 		},
 		{
-			Image: imgAlignMiddle,
-			Tag:   basicwidget.VerticalAlignMiddle,
+			Icon: imgAlignMiddle,
+			Tag:  basicwidget.VerticalAlignMiddle,
 		},
 		{
-			Image: imgAlignBottom,
-			Tag:   basicwidget.VerticalAlignBottom,
+			Icon: imgAlignBottom,
+			Tag:  basicwidget.VerticalAlignBottom,
 		},
 	})
 	t.verticalAlignSegmentedControl.SetOnItemSelected(func(index int) {

@@ -22,7 +22,7 @@ const (
 
 type SegmentedControlItem[T comparable] struct {
 	Text     string
-	Image    *ebiten.Image
+	Icon     *ebiten.Image
 	Disabled bool
 	Tag      T
 }
@@ -87,7 +87,7 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
-		s.textButtons[i].SetIcon(item.Image)
+		s.textButtons[i].SetIcon(item.Icon)
 		s.textButtons[i].SetTextBold(s.abstractList.SelectedItemIndex() == i)
 		s.textButtons[i].setUseAccentColor(true)
 		if s.abstractList.ItemCount() > 1 {
