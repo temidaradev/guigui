@@ -55,7 +55,7 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 }
 
 func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if context.IsEnabled(b) && b.isHovered(context) && !b.keepPressed {
+	if b.isHovered(context) && !b.keepPressed {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			context.SetFocused(b, true)
 			b.pressed = true
@@ -83,7 +83,7 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 			return guigui.HandleInputByWidget(b)
 		}
 	}
-	if !context.IsEnabled(b) || !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		b.pressed = false
 	}
 	return guigui.HandleInputResult{}
