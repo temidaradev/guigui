@@ -26,18 +26,27 @@ type Settings struct {
 var hongKongChinese = language.MustParse("zh-HK")
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	lightModeImg, err := theImageCache.Get("light_mode", context.ColorMode())
+	if err != nil {
+		return err
+	}
+	darkModeImg, err := theImageCache.Get("dark_mode", context.ColorMode())
+	if err != nil {
+		return err
+	}
+
 	s.colorModeText.SetValue("Color Mode")
 	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[string]{
 		{
-			Text: "System",
+			Text: "Default",
 			Tag:  "",
 		},
 		{
-			Text: "Light",
+			Icon: lightModeImg,
 			Tag:  "light",
 		},
 		{
-			Text: "Dark",
+			Icon: darkModeImg,
 			Tag:  "dark",
 		},
 	})
