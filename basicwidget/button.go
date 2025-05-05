@@ -123,10 +123,10 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	if border {
 		borderType := draw.RoundedRectBorderTypeOutset
-		if context.IsEnabled(b) && b.isPressed(context) {
+		if b.isPressed(context) {
 			borderType = draw.RoundedRectBorderTypeInset
 		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context))
+		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context) && context.IsEnabled(b))
 		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
 	}
 }
@@ -144,7 +144,7 @@ func (b *Button) isActive(context *guigui.Context) bool {
 }
 
 func (b *Button) isPressed(context *guigui.Context) bool {
-	return context.IsEnabled(b) && (b.isActive(context) || b.keepPressed)
+	return context.IsEnabled(b) && b.isActive(context) || b.keepPressed
 }
 
 func (b *Button) setKeepPressed(keep bool) {
