@@ -21,8 +21,6 @@ type Settings struct {
 	localeDropdownList        basicwidget.DropdownList[language.Tag]
 	scaleText                 basicwidget.Text
 	scaleSegmentedControl     basicwidget.SegmentedControl[float64]
-
-	colorModeInited bool
 }
 
 var hongKongChinese = language.MustParse("zh-HK")
@@ -55,12 +53,20 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		case "dark":
 			context.SetColorMode(guigui.ColorModeDark)
 		default:
-			context.ResetColorMode()
+			context.UseDefaultColorMode()
 		}
 	})
-	if !s.colorModeInited {
+	if context.IsDefaultColorModeUsed() {
 		s.colorModeSegmentedControl.SelectItemByTag("")
-		s.colorModeInited = true
+	} else {
+		switch context.ColorMode() {
+		case guigui.ColorModeLight:
+			s.colorModeSegmentedControl.SelectItemByTag("light")
+		case guigui.ColorModeDark:
+			s.colorModeSegmentedControl.SelectItemByTag("dark")
+		default:
+			s.colorModeSegmentedControl.SelectItemByTag("")
+		}
 	}
 
 	s.localeText.SetValue("Locale")
