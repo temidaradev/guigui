@@ -35,7 +35,6 @@ type TextList[T comparable] struct {
 
 type TextListItem[T comparable] struct {
 	Text      string
-	DummyText string
 	Color     color.Color
 	Header    bool
 	Disabled  bool
@@ -228,7 +227,7 @@ type textListItemWidget[T comparable] struct {
 
 func (t *textListItemWidget[T]) setTextListItem(textListItem TextListItem[T]) {
 	t.textListItem = textListItem
-	t.text.SetValue(t.textString())
+	t.text.SetValue(textListItem.Text)
 }
 
 func (t *textListItemWidget[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -239,18 +238,11 @@ func (t *textListItemWidget[T]) Build(context *guigui.Context, appender *guigui.
 	} else {
 		context.SetSize(&t.text, context.Size(t))
 	}
-	t.text.SetValue(t.textString())
+	t.text.SetValue(t.textListItem.Text)
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
 	appender.AppendChildWidgetWithPosition(&t.text, p)
 
 	return nil
-}
-
-func (t *textListItemWidget[T]) textString() string {
-	if t.textListItem.DummyText != "" {
-		return t.textListItem.DummyText
-	}
-	return t.textListItem.Text
 }
 
 func (t *textListItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
