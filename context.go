@@ -102,7 +102,11 @@ func (c *Context) SetColorMode(mode ColorMode) {
 }
 
 func (c *Context) ResetColorMode() {
+	if !c.colorModeSet {
+		return
+	}
 	c.colorModeSet = false
+	c.app.requestRedraw(c.app.bounds())
 }
 
 func (c *Context) defaultColorMode() ColorMode {
