@@ -423,6 +423,9 @@ func (a *app) cursorShape() bool {
 		if z(widget) < firstZ {
 			break
 		}
+		if !widget.widgetState().isEnabled() {
+			return false
+		}
 		shape, ok := widget.CursorShape(&a.context)
 		if !ok {
 			continue
@@ -613,9 +616,6 @@ func (a *app) widgetsInDescendingZOrderAt(point image.Point) []Widget {
 
 func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, widget Widget) []Widget {
 	if !widget.widgetState().isVisible() {
-		return widgets
-	}
-	if !widget.widgetState().isEnabled() {
 		return widgets
 	}
 	if widget.PassThrough() {
