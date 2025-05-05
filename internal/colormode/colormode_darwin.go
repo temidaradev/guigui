@@ -4,17 +4,30 @@
 package colormode
 
 import (
-	"os/exec"
 	"strings"
+
+	"github.com/ebitengine/purego/objc"
+)
+
+var (
+	idNSApplication = objc.ID(objc.GetClass("NSApplication"))
+
+	selEffectiveAppearance = objc.RegisterName("effectiveAppearance")
+	selName                = objc.RegisterName("name")
+	selSharedApplication   = objc.RegisterName("sharedApplication")
+	selUTF8String          = objc.RegisterName("UTF8String")
 )
 
 func systemColorMode() ColorMode {
-	out, err := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle").Output()
-	if err != nil {
-		// For the light mode, the command returns an empty output with the exit code 1.
-		return Light
-	}
-	if strings.TrimSpace(string(out)) == "Dark" {
+	// "effectiveAppearance" works from macOS 10.14. As Go 1.23 supports macOS 11, it's OK to use it.
+	//
+	// See also:
+	// * https://developer.apple.com/documentation/appkit/nsapplication/effectiveappearance?language=objc
+	// * https://go.dev/wiki/MinimumRequirements
+	objcName := idNSApplication.Send(selSharedApplication).Send(selEffectiveAppearance).Send(selName)
+	name := objc.Send[string](objcName, selUTF8String)
+	// https://developer.apple.com/documentation/appkit/nsappearance/name-swift.struct?language=objc
+	if strings.Contains(name, "Dark") {
 		return Dark
 	}
 	return Unknown
