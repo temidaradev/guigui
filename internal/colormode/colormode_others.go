@@ -6,5 +6,5 @@
 package colormode
 
 func systemColorMode() ColorMode {
-	return Light
+	return Unknown
 }

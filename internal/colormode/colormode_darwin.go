@@ -17,5 +17,5 @@ func systemColorMode() ColorMode {
 	if strings.TrimSpace(string(out)) == "Dark" {
 		return Dark
 	}
-	return Light
+	return Unknown
 }
