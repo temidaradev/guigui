@@ -70,13 +70,13 @@ func (s *SegmentedControl[T]) ItemByIndex(index int) (SegmentedControlItem[T], b
 }
 
 func (s *SegmentedControl[T]) SelectItemByIndex(index int) {
-	if s.abstractList.SelectItemByIndex(index) {
+	if s.abstractList.SelectItemByIndex(index, false) {
 		guigui.RequestRedraw(s)
 	}
 }
 
 func (s *SegmentedControl[T]) SelectItemByTag(tag T) {
-	if s.abstractList.SelectItemByTag(tag) {
+	if s.abstractList.SelectItemByTag(tag, false) {
 		guigui.RequestRedraw(s)
 	}
 }

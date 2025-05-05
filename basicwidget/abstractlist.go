@@ -39,7 +39,7 @@ func (a *abstractList[Tag, Item]) ItemByIndex(index int) (Item, bool) {
 	return a.items[index], true
 }
 
-func (a *abstractList[Tag, Item]) SelectItemByIndex(index int) bool {
+func (a *abstractList[Tag, Item]) SelectItemByIndex(index int, forceFireEvents bool) bool {
 	if index < 0 || index >= len(a.items) {
 		if len(a.selectedIndices) == 0 {
 			return false
@@ -48,14 +48,14 @@ func (a *abstractList[Tag, Item]) SelectItemByIndex(index int) bool {
 		return true
 	}
 
-	if len(a.selectedIndices) == 1 && a.selectedIndices[0] == index {
+	if len(a.selectedIndices) == 1 && a.selectedIndices[0] == index && !forceFireEvents {
 		return false
 	}
 
 	selected := slices.Contains(a.selectedIndices, index)
 	a.selectedIndices = adjustSliceSize(a.selectedIndices, 1)
 	a.selectedIndices[0] = index
-	if !selected {
+	if !selected || forceFireEvents {
 		if a.onItemSelected != nil {
 			a.onItemSelected(index)
 		}
@@ -63,11 +63,11 @@ func (a *abstractList[Tag, Item]) SelectItemByIndex(index int) bool {
 	return true
 }
 
-func (a *abstractList[Tag, Item]) SelectItemByTag(tag Tag) bool {
+func (a *abstractList[Tag, Item]) SelectItemByTag(tag Tag, forceFireEvents bool) bool {
 	idx := slices.IndexFunc(a.items, func(item Item) bool {
 		return item.tag() == tag
 	})
-	return a.SelectItemByIndex(idx)
+	return a.SelectItemByIndex(idx, forceFireEvents)
 }
 
 func (a *abstractList[Tag, Item]) SelectedItem() (Item, bool) {

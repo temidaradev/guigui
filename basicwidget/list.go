@@ -196,13 +196,17 @@ func (l *List[T]) SetItems(items []ListItem[T]) {
 }
 
 func (l *List[T]) SelectItemByIndex(index int) {
-	if l.abstractList.SelectItemByIndex(index) {
+	l.selectItemByIndex(index, false)
+}
+
+func (l *List[T]) selectItemByIndex(index int, forceFireEvents bool) {
+	if l.abstractList.SelectItemByIndex(index, forceFireEvents) {
 		guigui.RequestRedraw(l)
 	}
 }
 
 func (l *List[T]) SelectItemByTag(tag T) {
-	if l.abstractList.SelectItemByTag(tag) {
+	if l.abstractList.SelectItemByTag(tag, false) {
 		guigui.RequestRedraw(l)
 	}
 }
@@ -305,7 +309,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 			wasFocused := context.IsFocusedOrHasFocusedChild(l)
 			context.SetFocused(l, true)
 			if l.SelectedItemIndex() != index || !wasFocused || l.style == ListStyleMenu {
-				l.SelectItemByIndex(index)
+				l.selectItemByIndex(index, true)
 				l.lastSelectingItemTime = time.Now()
 			}
 			l.pressStartX = x
