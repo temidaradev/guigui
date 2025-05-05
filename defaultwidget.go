@@ -43,6 +43,9 @@ func (d *DefaultWidget) ZDelta() int {
 }
 
 func (d *DefaultWidget) DefaultSize(context *Context) image.Point {
+	if d.widgetState().root {
+		return context.app.bounds().Size()
+	}
 	return image.Pt(int(144*context.Scale()), int(144*context.Scale()))
 }
 
@@ -52,12 +55,4 @@ func (d *DefaultWidget) PassThrough() bool {
 
 func (d *DefaultWidget) widgetState() *widgetState {
 	return &d.s
-}
-
-type RootWidget struct {
-	DefaultWidget
-}
-
-func (d *RootWidget) DefaultSize(context *Context) image.Point {
-	return context.app.bounds().Size()
 }

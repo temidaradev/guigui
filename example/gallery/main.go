@@ -19,7 +19,7 @@ func init() {
 }
 
 type Root struct {
-	guigui.RootWidget
+	guigui.DefaultWidget
 
 	background   basicwidget.Background
 	sidebar      Sidebar

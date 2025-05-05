@@ -15,7 +15,7 @@ import (
 )
 
 type Root struct {
-	guigui.RootWidget
+	guigui.DefaultWidget
 
 	fill bool
 	gap  bool
