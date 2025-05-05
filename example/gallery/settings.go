@@ -40,7 +40,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	s.colorModeText.SetValue("Color Mode")
 	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[string]{
 		{
-			Text: "Default",
+			Text: "Auto",
 			Tag:  "",
 		},
 		{
@@ -64,10 +64,10 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		case "dark":
 			context.SetColorMode(guigui.ColorModeDark)
 		default:
-			context.UseDefaultColorMode()
+			context.UseAutoColorMode()
 		}
 	})
-	if context.IsDefaultColorModeUsed() {
+	if context.IsAutoColorModeUsed() {
 		s.colorModeSegmentedControl.SelectItemByTag("")
 	} else {
 		switch context.ColorMode() {

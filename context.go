@@ -88,7 +88,7 @@ func (c *Context) ColorMode() ColorMode {
 	if c.colorModeSet {
 		return c.colorMode
 	}
-	return c.defaultColorMode()
+	return c.autoColorMode()
 }
 
 func (c *Context) SetColorMode(mode ColorMode) {
@@ -101,7 +101,7 @@ func (c *Context) SetColorMode(mode ColorMode) {
 	c.app.requestRedraw(c.app.bounds())
 }
 
-func (c *Context) UseDefaultColorMode() {
+func (c *Context) UseAutoColorMode() {
 	if !c.colorModeSet {
 		return
 	}
@@ -109,11 +109,11 @@ func (c *Context) UseDefaultColorMode() {
 	c.app.requestRedraw(c.app.bounds())
 }
 
-func (c *Context) IsDefaultColorModeUsed() bool {
+func (c *Context) IsAutoColorModeUsed() bool {
 	return !c.colorModeSet
 }
 
-func (c *Context) defaultColorMode() ColorMode {
+func (c *Context) autoColorMode() ColorMode {
 	// TODO: Consider the system color mode.
 	switch mode := os.Getenv("GUIGUI_COLOR_MODE"); mode {
 	case "light":
