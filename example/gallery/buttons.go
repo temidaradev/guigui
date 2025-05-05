@@ -15,8 +15,10 @@ type Buttons struct {
 	buttonsForm           basicwidget.Form
 	textButtonText        basicwidget.Text
 	textButton            basicwidget.TextButton
-	textIconButtonText    basicwidget.Text
-	textIconButton        basicwidget.TextButton
+	textIconButton1Text   basicwidget.Text
+	textIconButton1       basicwidget.TextButton
+	textIconButton2Text   basicwidget.Text
+	textIconButton2       basicwidget.TextButton
 	segmentedControlHText basicwidget.Text
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
@@ -40,14 +42,20 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.textButton.SetText("Button")
 	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
 
-	b.textIconButtonText.SetValue("Text w/ Icon Button")
-	b.textIconButton.SetText("Button")
+	b.textIconButton1Text.SetValue("Text w/ Icon Button (1)")
+	b.textIconButton1.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	b.textIconButton.SetIcon(img)
-	context.SetEnabled(&b.textIconButton, b.model.Buttons().Enabled())
+	b.textIconButton1.SetIcon(img)
+	context.SetEnabled(&b.textIconButton1, b.model.Buttons().Enabled())
+
+	b.textIconButton2Text.SetValue("Text w/ Icon Button (2)")
+	b.textIconButton2.SetText("Button")
+	b.textIconButton2.SetIcon(img)
+	b.textIconButton2.SetIconAlign(basicwidget.IconAlignEnd)
+	context.SetEnabled(&b.textIconButton2, b.model.Buttons().Enabled())
 
 	b.segmentedControlHText.SetValue("Segmented Control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
@@ -88,8 +96,12 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			SecondaryWidget: &b.textButton,
 		},
 		{
-			PrimaryWidget:   &b.textIconButtonText,
-			SecondaryWidget: &b.textIconButton,
+			PrimaryWidget:   &b.textIconButton1Text,
+			SecondaryWidget: &b.textIconButton1,
+		},
+		{
+			PrimaryWidget:   &b.textIconButton2Text,
+			SecondaryWidget: &b.textIconButton2,
 		},
 		{
 			PrimaryWidget:   &b.segmentedControlHText,

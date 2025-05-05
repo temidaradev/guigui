@@ -50,6 +50,7 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 		d.popupMenu.Open(context)
 	})
 	d.textButton.setKeepPressed(d.popupMenu.IsOpen())
+	d.textButton.SetIconAlign(IconAlignEnd)
 
 	appender.AppendChildWidgetWithPosition(&d.textButton, context.Position(d))
 

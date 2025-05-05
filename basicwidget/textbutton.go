@@ -13,12 +13,20 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
+type IconAlign int
+
+const (
+	IconAlignStart IconAlign = iota
+	IconAlignEnd
+)
+
 type TextButton struct {
 	guigui.DefaultWidget
 
-	button Button
-	text   Text
-	icon   Image
+	button    Button
+	text      Text
+	icon      Image
+	IconAlign IconAlign
 
 	textColor color.Color
 }
@@ -45,6 +53,14 @@ func (t *TextButton) SetTextBold(bold bool) {
 
 func (t *TextButton) SetIcon(icon *ebiten.Image) {
 	t.icon.SetImage(icon)
+}
+
+func (t *TextButton) SetIconAlign(align IconAlign) {
+	if t.IconAlign == align {
+		return
+	}
+	t.IconAlign = align
+	guigui.RequestRedraw(t)
 }
 
 func (t *TextButton) SetTextColor(clr color.Color) {
@@ -81,8 +97,12 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 	textP := context.Position(t)
 	if t.icon.HasImage() {
-		textP.X += (s.X - tw + UnitSize(context)/4) / 2
-		textP.X -= (textButtonTextAndIconPadding(context) + imgSize) / 2
+		switch t.IconAlign {
+		case IconAlignStart:
+			textP.X += s.X - tw - UnitSize(context)/2
+		case IconAlignEnd:
+			textP.X += UnitSize(context) / 2
+		}
 	} else {
 		textP.X += (s.X - tw) / 2
 	}
@@ -95,9 +115,15 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 
 	imgP := context.Position(t)
-	imgP.X = textP.X
 	if t.text.Value() != "" {
-		imgP.X += tw + textButtonTextAndIconPadding(context)
+		switch t.IconAlign {
+		case IconAlignStart:
+			imgP.X += UnitSize(context) / 4
+		case IconAlignEnd:
+			imgP.X += s.X - imgSize - UnitSize(context)/4
+		}
+	} else {
+		imgP.X += (s.X - imgSize) / 2
 	}
 	imgP.Y += (s.Y - imgSize) / 2
 	if t.button.isPressed(context) {
@@ -124,11 +150,14 @@ func (t *TextButton) defaultSize(context *guigui.Context, forceBold bool) image.
 		w = t.text.TextSize(context).X
 	}
 	if t.icon.HasImage() {
-		imgSize := t.defaultIconSize(context)
+		w += t.defaultIconSize(context)
 		if t.text.Value() != "" {
-			w += textButtonTextAndIconPadding(context)
+			// Add a padding between the text and the icon.
+			w += UnitSize(context) / 4
 		}
-		w += imgSize + UnitSize(context)*3/4
+		// 1/4 units is for padding between the edge and the icon,
+		// and 1/2 units is for padding between the edge and the text.
+		w += UnitSize(context) * 3 / 4
 		return image.Pt(w, dh)
 	}
 	return image.Pt(w+UnitSize(context), dh)
@@ -145,10 +174,6 @@ func (t *TextButton) defaultIconSize(context *guigui.Context) int {
 func (t *TextButton) iconSize(context *guigui.Context) int {
 	s := context.Size(t)
 	return min(t.defaultIconSize(context), s.X, s.Y)
-}
-
-func textButtonTextAndIconPadding(context *guigui.Context) int {
-	return UnitSize(context) / 4
 }
 
 func (t *TextButton) setUseAccentColor(use bool) {
