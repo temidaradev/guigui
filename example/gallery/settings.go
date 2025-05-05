@@ -16,25 +16,31 @@ type Settings struct {
 
 	form                      basicwidget.Form
 	colorModeText             basicwidget.Text
-	colorModeSegmentedControl basicwidget.SegmentedControl[guigui.ColorMode]
+	colorModeSegmentedControl basicwidget.SegmentedControl[string]
 	localeText                basicwidget.Text
 	localeDropdownList        basicwidget.DropdownList[language.Tag]
 	scaleText                 basicwidget.Text
 	scaleSegmentedControl     basicwidget.SegmentedControl[float64]
+
+	colorModeInited bool
 }
 
 var hongKongChinese = language.MustParse("zh-HK")
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.colorModeText.SetValue("Color Mode")
-	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[guigui.ColorMode]{
+	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[string]{
+		{
+			Text: "System",
+			Tag:  "",
+		},
 		{
 			Text: "Light",
-			Tag:  guigui.ColorModeLight,
+			Tag:  "light",
 		},
 		{
 			Text: "Dark",
-			Tag:  guigui.ColorModeDark,
+			Tag:  "dark",
 		},
 	})
 	s.colorModeSegmentedControl.SetOnItemSelected(func(index int) {
@@ -43,9 +49,19 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 			context.SetColorMode(guigui.ColorModeLight)
 			return
 		}
-		context.SetColorMode(item.Tag)
+		switch item.Tag {
+		case "light":
+			context.SetColorMode(guigui.ColorModeLight)
+		case "dark":
+			context.SetColorMode(guigui.ColorModeDark)
+		default:
+			context.ResetColorMode()
+		}
 	})
-	s.colorModeSegmentedControl.SelectItemByTag(context.ColorMode())
+	if !s.colorModeInited {
+		s.colorModeSegmentedControl.SelectItemByTag("")
+		s.colorModeInited = true
+	}
 
 	s.localeText.SetValue("Locale")
 	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
