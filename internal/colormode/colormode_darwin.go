@@ -30,5 +30,5 @@ func systemColorMode() ColorMode {
 	if strings.Contains(name, "Dark") {
 		return Dark
 	}
-	return Unknown
+	return Light
 }
