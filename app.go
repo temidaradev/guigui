@@ -152,7 +152,7 @@ func deviceScaleFactor() float64 {
 	return ebiten.Monitor().DeviceScaleFactor()
 }
 
-func (a app) bounds() image.Rectangle {
+func (a *app) bounds() image.Rectangle {
 	return image.Rect(0, 0, int(math.Ceil(a.screenWidth)), int(math.Ceil(a.screenHeight)))
 }
 
