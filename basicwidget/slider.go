@@ -216,9 +216,10 @@ func (s *Slider) Draw(context *guigui.Context, dst *ebiten.Image) {
 		x1 += int(float64(s.barWidth(context)) * float64(rate))
 	}
 	x2 := b.Max.X - UnitSize(context)/2
-	strokeWidth := int(4 * context.Scale())
-	y0 := (b.Min.Y+b.Max.Y)/2 - strokeWidth/2
-	y1 := (b.Min.Y+b.Max.Y)/2 + strokeWidth/2
+	strokeWidth := int(5 * context.Scale())
+	r := strokeWidth / 2
+	y0 := (b.Min.Y+b.Max.Y)/2 - r
+	y1 := (b.Min.Y+b.Max.Y)/2 + r
 
 	bgColorOn := draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	bgColorOff := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
@@ -228,12 +229,20 @@ func (s *Slider) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	if x0 < x1 {
 		b := image.Rect(x0, y0, x1, y1)
-		draw.DrawRoundedRect(context, dst, b, bgColorOn, strokeWidth/2)
+		draw.DrawRoundedRect(context, dst, b, bgColorOn, r)
+
+		if !context.IsEnabled(s) {
+			borderClr1, borderClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, false)
+			draw.DrawRoundedRectBorder(context, dst, b, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
+		}
 	}
 
 	if x1 < x2 {
 		b := image.Rect(x1, y0, x2, y1)
-		draw.DrawRoundedRect(context, dst, b, bgColorOff, strokeWidth/2)
+		draw.DrawRoundedRect(context, dst, b, bgColorOff, r)
+
+		borderClr1, borderClr2 := draw.BorderColors(context.ColorMode(), draw.RoundedRectBorderTypeInset, false)
+		draw.DrawRoundedRectBorder(context, dst, b, borderClr1, borderClr2, r, float32(1*context.Scale()), draw.RoundedRectBorderTypeInset)
 	}
 
 	if thumbBounds := s.thumbBounds(context); !thumbBounds.Empty() {
