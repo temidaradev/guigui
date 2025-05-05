@@ -210,7 +210,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		pos0 = TextPosition{
 			X:      x0,
 			Top:    y0 + paddingY,
-			Bottom: y0 + options.LineHeight + paddingY,
+			Bottom: y0 + options.LineHeight - paddingY,
 		}
 	}
 	if found1 {
