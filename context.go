@@ -10,6 +10,8 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"sync"
+	"time"
 
 	"golang.org/x/text/language"
 
@@ -18,29 +20,6 @@ import (
 )
 
 type ColorMode int
-
-var defaultColorMode ColorMode
-
-func init() {
-	// TODO: Consider the system color mode.
-	switch mode := os.Getenv("GUIGUI_COLOR_MODE"); mode {
-	case "light":
-		defaultColorMode = ColorModeLight
-	case "dark":
-		defaultColorMode = ColorModeDark
-	case "":
-		switch colormode.SystemColorMode() {
-		case colormode.Light:
-			defaultColorMode = ColorModeLight
-		case colormode.Dark:
-			defaultColorMode = ColorModeDark
-		default:
-			defaultColorMode = ColorModeLight
-		}
-	default:
-		slog.Warn(fmt.Sprintf("invalid GUIGUI_COLOR_MODE: %s", mode))
-	}
-}
 
 var envLocales []language.Tag
 
@@ -76,10 +55,13 @@ const (
 type Context struct {
 	app *app
 
-	appScaleMinus1 float64
-	colorMode      ColorMode
-	colorModeSet   bool
-	locales        []language.Tag
+	appScaleMinus1             float64
+	colorMode                  ColorMode
+	colorModeSet               bool
+	cachedDefaultColorMode     colormode.ColorMode
+	cachedDefaultColorModeTime time.Time
+	defaultColorWarnOnce       sync.Once
+	locales                    []language.Tag
 }
 
 func (c *Context) Scale() float64 {
@@ -106,7 +88,7 @@ func (c *Context) ColorMode() ColorMode {
 	if c.colorModeSet {
 		return c.colorMode
 	}
-	return defaultColorMode
+	return c.defaultColorMode()
 }
 
 func (c *Context) SetColorMode(mode ColorMode) {
@@ -121,6 +103,37 @@ func (c *Context) SetColorMode(mode ColorMode) {
 
 func (c *Context) ResetColorMode() {
 	c.colorModeSet = false
+}
+
+func (c *Context) defaultColorMode() ColorMode {
+	// TODO: Consider the system color mode.
+	switch mode := os.Getenv("GUIGUI_COLOR_MODE"); mode {
+	case "light":
+		return ColorModeLight
+	case "dark":
+		return ColorModeDark
+	case "":
+		if time.Since(c.cachedDefaultColorModeTime) >= time.Second {
+			m := colormode.SystemColorMode()
+			if c.cachedDefaultColorMode != m {
+				c.app.requestRedraw(c.app.bounds())
+			}
+			c.cachedDefaultColorMode = m
+			c.cachedDefaultColorModeTime = time.Now()
+		}
+		switch c.cachedDefaultColorMode {
+		case colormode.Light:
+			return ColorModeLight
+		case colormode.Dark:
+			return ColorModeDark
+		}
+	default:
+		c.defaultColorWarnOnce.Do(func() {
+			slog.Warn(fmt.Sprintf("invalid GUIGUI_COLOR_MODE: %s", mode))
+		})
+	}
+
+	return ColorModeLight
 }
 
 func (c *Context) AppendLocales(locales []language.Tag) []language.Tag {
