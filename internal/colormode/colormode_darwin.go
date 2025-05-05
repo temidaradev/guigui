@@ -11,6 +11,7 @@ import (
 func systemColorMode() ColorMode {
 	out, err := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle").Output()
 	if err != nil {
+		// For the light mode, the command returns an empty output with the exit code 1.
 		return Light
 	}
 	if strings.TrimSpace(string(out)) == "Dark" {
