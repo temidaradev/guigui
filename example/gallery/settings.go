@@ -4,6 +4,8 @@
 package main
 
 import (
+	"image"
+
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
@@ -17,7 +19,7 @@ type Settings struct {
 	form                      basicwidget.Form
 	colorModeText             basicwidget.Text
 	colorModeSegmentedControl basicwidget.SegmentedControl[string]
-	localeText                basicwidget.Text
+	localeText                textWithSubText
 	localeDropdownList        basicwidget.DropdownList[language.Tag]
 	scaleText                 basicwidget.Text
 	scaleSegmentedControl     basicwidget.SegmentedControl[float64]
@@ -78,7 +80,9 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		}
 	}
 
-	s.localeText.SetValue("Locale")
+	s.localeText.text.SetValue("Locale")
+	s.localeText.subText.SetValue("The locale affects the glyphs for Chinese characters.")
+
 	s.localeDropdownList.SetItems([]basicwidget.DropdownListItem[language.Tag]{
 		{
 			Text: "(Default)",
@@ -185,4 +189,31 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	appender.AppendChildWidgetWithBounds(&s.form, gl.CellBounds(0, 0))
 
 	return nil
+}
+
+type textWithSubText struct {
+	guigui.DefaultWidget
+
+	text    basicwidget.Text
+	subText basicwidget.Text
+}
+
+func (t *textWithSubText) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	pt := context.Position(t)
+	appender.AppendChildWidgetWithPosition(&t.text, pt)
+
+	pt.Y += context.Size(&t.text).Y
+	t.subText.SetScale(0.875)
+	t.subText.SetMultiline(true)
+	t.subText.SetAutoWrap(true)
+	t.subText.SetOpacity(0.675)
+	appender.AppendChildWidgetWithPosition(&t.subText, pt)
+
+	return nil
+}
+
+func (t *textWithSubText) DefaultSize(context *guigui.Context) image.Point {
+	s1 := t.text.DefaultSize(context)
+	s2 := t.subText.DefaultSize(context)
+	return image.Pt(max(s1.X, s2.X), s1.Y+s2.Y)
 }

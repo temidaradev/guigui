@@ -90,9 +90,7 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 			ws := context.Size(item.PrimaryWidget)
 			bounds.Max.X = bounds.Min.X + ws.X
 			pY := (h + 2*paddingY - ws.Y) / 2
-			if ws.Y < UnitSize(context)+2*paddingY {
-				pY = min(pY, max(0, (UnitSize(context)+2*paddingY-ws.Y)/2))
-			}
+			pY = min(pY, paddingY+int((float64(UnitSize(context))-LineHeight(context))/2))
 			bounds.Min.Y += pY
 			bounds.Max.Y += pY
 			f.primaryBounds[i] = bounds
