@@ -18,7 +18,7 @@ type TextButton struct {
 
 	button Button
 	text   Text
-	image  Image
+	icon   Image
 
 	textColor color.Color
 }
@@ -43,8 +43,8 @@ func (t *TextButton) SetTextBold(bold bool) {
 	t.text.SetBold(bold)
 }
 
-func (t *TextButton) SetImage(image *ebiten.Image) {
-	t.image.SetImage(image)
+func (t *TextButton) SetIcon(icon *ebiten.Image) {
+	t.icon.SetImage(icon)
 }
 
 func (t *TextButton) SetTextColor(clr color.Color) {
@@ -68,7 +68,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 	s := context.Size(t)
 
-	imgSize := t.imageSize(context)
+	imgSize := t.iconSize(context)
 
 	tw := t.text.TextSize(context).X
 	if t.textColor != nil {
@@ -80,9 +80,9 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
 
 	textP := context.Position(t)
-	if t.image.HasImage() {
+	if t.icon.HasImage() {
 		textP.X += (s.X - tw + UnitSize(context)/4) / 2
-		textP.X -= (textButtonTextAndImagePadding(context) + imgSize) / 2
+		textP.X -= (textButtonTextAndIconPadding(context) + imgSize) / 2
 	} else {
 		textP.X += (s.X - tw) / 2
 	}
@@ -97,13 +97,13 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	imgP := context.Position(t)
 	imgP.X = textP.X
 	if t.text.Value() != "" {
-		imgP.X += tw + textButtonTextAndImagePadding(context)
+		imgP.X += tw + textButtonTextAndIconPadding(context)
 	}
 	imgP.Y += (s.Y - imgSize) / 2
 	if t.button.isPressed(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
-	appender.AppendChildWidgetWithBounds(&t.image, image.Rectangle{
+	appender.AppendChildWidgetWithBounds(&t.icon, image.Rectangle{
 		Min: imgP,
 		Max: imgP.Add(image.Pt(imgSize, imgSize)),
 	})
@@ -123,10 +123,10 @@ func (t *TextButton) defaultSize(context *guigui.Context, forceBold bool) image.
 	} else {
 		w = t.text.TextSize(context).X
 	}
-	if t.image.HasImage() {
-		imgSize := t.defaultImageSize(context)
+	if t.icon.HasImage() {
+		imgSize := t.defaultIconSize(context)
 		if t.text.Value() != "" {
-			w += textButtonTextAndImagePadding(context)
+			w += textButtonTextAndIconPadding(context)
 		}
 		w += imgSize + UnitSize(context)*3/4
 		return image.Pt(w, dh)
@@ -138,16 +138,16 @@ func (t *TextButton) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
 	t.button.setSharpenCorners(sharpenCorners)
 }
 
-func (t *TextButton) defaultImageSize(context *guigui.Context) int {
+func (t *TextButton) defaultIconSize(context *guigui.Context) int {
 	return int(LineHeight(context))
 }
 
-func (t *TextButton) imageSize(context *guigui.Context) int {
+func (t *TextButton) iconSize(context *guigui.Context) int {
 	s := context.Size(t)
-	return min(t.defaultImageSize(context), s.X, s.Y)
+	return min(t.defaultIconSize(context), s.X, s.Y)
 }
 
-func textButtonTextAndImagePadding(context *guigui.Context) int {
+func textButtonTextAndIconPadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 

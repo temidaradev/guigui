@@ -157,7 +157,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		return err
 	}
 
-	n.upButton.SetImage(imgUp)
+	n.upButton.SetIcon(imgUp)
 	n.upButton.setSharpenCorners(draw.SharpenCorners{
 		LowerLeft:  true,
 		LowerRight: true,
@@ -180,7 +180,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		},
 	})
 
-	n.downButton.SetImage(imgDown)
+	n.downButton.SetIcon(imgDown)
 	n.downButton.setSharpenCorners(draw.SharpenCorners{
 		UpperLeft:  true,
 		UpperRight: true,

@@ -39,7 +39,7 @@ func (d *DropdownList[T]) updateButtonImage(context *guigui.Context) {
 		slog.Error(err.Error())
 		return
 	}
-	d.textButton.SetImage(img)
+	d.textButton.SetIcon(img)
 }
 
 func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

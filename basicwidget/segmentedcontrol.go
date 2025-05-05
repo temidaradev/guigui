@@ -87,7 +87,7 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 	for i := range s.abstractList.ItemCount() {
 		item, _ := s.abstractList.ItemByIndex(i)
 		s.textButtons[i].SetText(item.Text)
-		s.textButtons[i].SetImage(item.Image)
+		s.textButtons[i].SetIcon(item.Image)
 		s.textButtons[i].SetTextBold(s.abstractList.SelectedItemIndex() == i)
 		s.textButtons[i].setUseAccentColor(true)
 		if s.abstractList.ItemCount() > 1 {

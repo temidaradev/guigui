@@ -15,8 +15,8 @@ type Buttons struct {
 	buttonsForm           basicwidget.Form
 	textButtonText        basicwidget.Text
 	textButton            basicwidget.TextButton
-	textImageButtonText   basicwidget.Text
-	textImageButton       basicwidget.TextButton
+	textIconButtonText    basicwidget.Text
+	textIconButton        basicwidget.TextButton
 	segmentedControlHText basicwidget.Text
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
@@ -40,14 +40,14 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.textButton.SetText("Button")
 	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
 
-	b.textImageButtonText.SetValue("Text w/ Image Button")
-	b.textImageButton.SetText("Button")
+	b.textIconButtonText.SetValue("Text w/ Icon Button")
+	b.textIconButton.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	b.textImageButton.SetImage(img)
-	context.SetEnabled(&b.textImageButton, b.model.Buttons().Enabled())
+	b.textIconButton.SetIcon(img)
+	context.SetEnabled(&b.textIconButton, b.model.Buttons().Enabled())
 
 	b.segmentedControlHText.SetValue("Segmented Control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
@@ -88,8 +88,8 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			SecondaryWidget: &b.textButton,
 		},
 		{
-			PrimaryWidget:   &b.textImageButtonText,
-			SecondaryWidget: &b.textImageButton,
+			PrimaryWidget:   &b.textIconButtonText,
+			SecondaryWidget: &b.textIconButton,
 		},
 		{
 			PrimaryWidget:   &b.segmentedControlHText,
