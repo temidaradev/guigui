@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"log/slog"
+	"math"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -947,9 +948,11 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool, forceBold boo
 	if t.cachedTextSize == nil {
 		t.cachedTextSize = map[textSizeCacheKey]image.Point{}
 	}
-	t.cachedTextSize[key] = image.Pt(int(w), int(h))
 
-	return image.Pt(int(w), int(h))
+	s := image.Pt(int(math.Ceil(w)), int(math.Ceil(h)))
+	t.cachedTextSize[key] = s
+
+	return s
 }
 
 func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
