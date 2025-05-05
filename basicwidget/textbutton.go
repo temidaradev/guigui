@@ -95,13 +95,16 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.text.SetHorizontalAlign(HorizontalAlignCenter)
 	t.text.SetVerticalAlign(VerticalAlignMiddle)
 
+	ds := t.defaultSize(context, false)
 	textP := context.Position(t)
 	if t.icon.HasImage() {
+		textP.X += (s.X - ds.X) / 2
 		switch t.IconAlign {
 		case IconAlignStart:
-			textP.X += s.X - tw - UnitSize(context)/2
+			textP.X += textButtonEdgeAndImagePadding(context)
+			textP.X += imgSize + textButtonTextAndImagePadding(context)
 		case IconAlignEnd:
-			textP.X += UnitSize(context) / 2
+			textP.X += textButtonEdgeAndTextPadding(context)
 		}
 	} else {
 		textP.X += (s.X - tw) / 2
@@ -116,11 +119,13 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 
 	imgP := context.Position(t)
 	if t.text.Value() != "" {
+		imgP.X += (s.X - ds.X) / 2
 		switch t.IconAlign {
 		case IconAlignStart:
-			imgP.X += UnitSize(context) / 4
+			imgP.X += textButtonEdgeAndImagePadding(context)
 		case IconAlignEnd:
-			imgP.X += s.X - imgSize - UnitSize(context)/4
+			imgP.X += textButtonEdgeAndTextPadding(context)
+			imgP.X += tw + textButtonTextAndImagePadding(context)
 		}
 	} else {
 		imgP.X += (s.X - imgSize) / 2
@@ -152,12 +157,10 @@ func (t *TextButton) defaultSize(context *guigui.Context, forceBold bool) image.
 	if t.icon.HasImage() {
 		w += t.defaultIconSize(context)
 		if t.text.Value() != "" {
-			// Add a padding between the text and the icon.
-			w += UnitSize(context) / 4
+			w += textButtonTextAndImagePadding(context)
 		}
-		// 1/4 units is for padding between the edge and the icon,
-		// and 1/2 units is for padding between the edge and the text.
-		w += UnitSize(context) * 3 / 4
+		w += textButtonEdgeAndTextPadding(context)
+		w += textButtonEdgeAndImagePadding(context)
 		return image.Pt(w, dh)
 	}
 	return image.Pt(w+UnitSize(context), dh)
@@ -165,6 +168,18 @@ func (t *TextButton) defaultSize(context *guigui.Context, forceBold bool) image.
 
 func (t *TextButton) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
 	t.button.setSharpenCorners(sharpenCorners)
+}
+
+func textButtonTextAndImagePadding(context *guigui.Context) int {
+	return UnitSize(context) / 4
+}
+
+func textButtonEdgeAndTextPadding(context *guigui.Context) int {
+	return UnitSize(context) / 2
+}
+
+func textButtonEdgeAndImagePadding(context *guigui.Context) int {
+	return UnitSize(context) / 4
 }
 
 func (t *TextButton) defaultIconSize(context *guigui.Context) int {

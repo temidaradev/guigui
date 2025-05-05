@@ -4,6 +4,8 @@
 package main
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	"github.com/hajimehoshi/guigui/layout"
@@ -50,12 +52,14 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	}
 	b.textIconButton1.SetIcon(img)
 	context.SetEnabled(&b.textIconButton1, b.model.Buttons().Enabled())
+	context.SetSize(&b.textIconButton1, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 
 	b.textIconButton2Text.SetValue("Text w/ Icon Button (2)")
 	b.textIconButton2.SetText("Button")
 	b.textIconButton2.SetIcon(img)
 	b.textIconButton2.SetIconAlign(basicwidget.IconAlignEnd)
 	context.SetEnabled(&b.textIconButton2, b.model.Buttons().Enabled())
+	context.SetSize(&b.textIconButton2, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 
 	b.segmentedControlHText.SetValue("Segmented Control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
