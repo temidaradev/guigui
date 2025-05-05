@@ -335,12 +335,7 @@ func DrawRoundedRectWithSharpenCorners(context *guigui.Context, dst *ebiten.Imag
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	if bounds.Dx()/2-1 < radius {
-		radius = bounds.Dx()/2 - 1
-	}
-	if bounds.Dy()/2-1 < radius {
-		radius = bounds.Dy()/2 - 1
-	}
+	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
 	if radius == 0 {
 		return
 	}
@@ -361,12 +356,7 @@ func DrawRoundedShadowRect(context *guigui.Context, dst *ebiten.Image, bounds im
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	if bounds.Dx()/2-1 < radius {
-		radius = bounds.Dx()/2 - 1
-	}
-	if bounds.Dy()/2-1 < radius {
-		radius = bounds.Dy()/2 - 1
-	}
+	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
 	if radius == 0 {
 		return
 	}
@@ -381,12 +371,7 @@ func DrawRoundedRectBorderWithSharpenCorners(context *guigui.Context, dst *ebite
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	if bounds.Dx()/2-1 < radius {
-		radius = bounds.Dx()/2 - 1
-	}
-	if bounds.Dy()/2-1 < radius {
-		radius = bounds.Dy()/2 - 1
-	}
+	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
 	if radius == 0 {
 		return
 	}
