@@ -940,7 +940,6 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool, forceBold boo
 		// context.Size is not available as this causes infinite recursion, and is not needed. Give 0 as a width.
 		w, h = textutil.Measure(0, txt, false, t.face(context, forceBold), t.lineHeight(context))
 	}
-	w *= t.scaleMinus1 + 1
 	// If width is 0, the text's bounds and visible bounds are empty, and nothing including its cursor is rendered.
 	// Force to set a positive number as the width.
 	w = max(w, 1)
