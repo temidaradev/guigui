@@ -16,21 +16,27 @@ func adjustSliceSize[T any](slice []T, size int) []T {
 }
 
 func MoveItemsInSlice[T any](slice []T, from int, count int, to int) int {
+	if count < 0 {
+		panic("basicwidget: count must be non-negative")
+	}
 	if count == 0 {
 		return from
 	}
 	if from <= to && to <= from+count {
 		return from
 	}
+
+	slices.Reverse(slice[from : from+count])
 	if from < to {
-		to -= count
+		slices.Reverse(slice[from+count : to])
+		slices.Reverse(slice[from:to])
+	} else {
+		slices.Reverse(slice[to:from])
+		slices.Reverse(slice[to : from+count])
 	}
 
-	s := make([]T, count)
-	copy(s, slice[from:from+count])
-	slice = slices.Delete(slice, from, from+count)
-	// Assume that the slice has enough capacity, then the underlying array should not change.
-	_ = slices.Insert(slice, to, s...)
-
+	if from < to {
+		return to - count
+	}
 	return to
 }
