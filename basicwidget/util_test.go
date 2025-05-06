@@ -96,12 +96,14 @@ func TestMoveItemsInSlice(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		origSlice := make([]int, len(tc.slice))
+		copy(origSlice, tc.slice)
 		idx := basicwidget.MoveItemsInSlice(tc.slice, tc.from, tc.count, tc.to)
 		if got, want := tc.slice, tc.outSlice; !slices.Equal(got, want) {
-			t.Errorf("MoveItemsInSlice(%v, %d, %d, %d); got %v, want %v", tc.slice, tc.from, tc.count, tc.to, got, want)
+			t.Errorf("MoveItemsInSlice(%v, %d, %d, %d); got %v, want %v", origSlice, tc.from, tc.count, tc.to, got, want)
 		}
 		if got, want := idx, tc.outIndex; got != want {
-			t.Errorf("MoveItemsInSlice(%v, %d, %d, %d) = %d; want %d", tc.slice, tc.from, tc.count, tc.to, got, want)
+			t.Errorf("MoveItemsInSlice(%v, %d, %d, %d) = %d; want %d", origSlice, tc.from, tc.count, tc.to, got, want)
 		}
 	}
 }
