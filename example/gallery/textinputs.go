@@ -110,7 +110,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 
 	// Configurations
-	t.horizontalAlignText.SetValue("Horizontal Align")
+	t.horizontalAlignText.SetValue("Horizontal align")
 	t.horizontalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.HorizontalAlign]{
 		{
 			Icon: imgAlignStart,
@@ -135,7 +135,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.horizontalAlignSegmentedControl.SelectItemByTag(t.model.TextInputs().HorizontalAlign())
 
-	t.verticalAlignText.SetValue("Vertical Align")
+	t.verticalAlignText.SetValue("Vertical align")
 	t.verticalAlignSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[basicwidget.VerticalAlign]{
 		{
 			Icon: imgAlignTop,
@@ -160,7 +160,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.verticalAlignSegmentedControl.SelectItemByTag(t.model.TextInputs().VerticalAlign())
 
-	t.autoWrapText.SetValue("Auto Wrap")
+	t.autoWrapText.SetValue("Auto wrap")
 	t.autoWrapToggle.SetOnValueChanged(func(value bool) {
 		t.model.TextInputs().SetAutoWrap(value)
 	})

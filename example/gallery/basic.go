@@ -28,16 +28,16 @@ type Basic struct {
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetValue("Text Button")
-	b.textButton.SetText("Click Me!")
+	b.textButtonText.SetValue("Text button")
+	b.textButton.SetText("Click me!")
 	b.toggleText.SetValue("Toggle")
-	b.textInputText.SetValue("Text Input")
+	b.textInputText.SetValue("Text input")
 	b.textInput.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
-	b.numberInputText.SetValue("Number Input")
+	b.numberInputText.SetValue("Number input")
 	b.sliderText.SetValue("Slider")
 	b.slider.SetMinimumValueInt64(0)
 	b.slider.SetMaximumValueInt64(100)
-	b.textListText.SetValue("Text List")
+	b.textListText.SetValue("Text list")
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
 	b.form.SetItems([]*basicwidget.FormItem{

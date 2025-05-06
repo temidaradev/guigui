@@ -35,7 +35,7 @@ func (l *Lists) SetModel(model *Model) {
 
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	// Lists
-	l.textListText.SetValue("Text List")
+	l.textListText.SetValue("Text list")
 
 	l.textList.SetOnItemsMoved(func(from, count, to int) {
 		idx := l.model.Lists().MoveListItems(from, count, to)
@@ -56,7 +56,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	// Configurations
-	l.movableText.SetValue("Movable")
+	l.movableText.SetValue("Enable to move items")
 	l.movableToggle.SetValue(l.model.Lists().Movable())
 	l.movableToggle.SetOnValueChanged(func(value bool) {
 		l.model.Lists().SetMovable(value)

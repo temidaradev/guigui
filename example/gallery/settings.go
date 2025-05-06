@@ -37,7 +37,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 		return err
 	}
 
-	s.colorModeText.SetValue("Color Mode")
+	s.colorModeText.SetValue("Color mode")
 	s.colorModeSegmentedControl.SetItems([]basicwidget.SegmentedControlItem[string]{
 		{
 			Text: "Auto",

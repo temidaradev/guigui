@@ -40,11 +40,11 @@ func (b *Buttons) SetModel(model *Model) {
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetValue("Text Button")
+	b.textButtonText.SetValue("Text button")
 	b.textButton.SetText("Button")
 	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
 
-	b.textIconButton1Text.SetValue("Text w/ Icon Button (1)")
+	b.textIconButton1Text.SetValue("Button w/ text and icon (1)")
 	b.textIconButton1.SetText("Button")
 	img, err := theImageCache.Get("check", context.ColorMode())
 	if err != nil {
@@ -54,14 +54,14 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	context.SetEnabled(&b.textIconButton1, b.model.Buttons().Enabled())
 	context.SetSize(&b.textIconButton1, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 
-	b.textIconButton2Text.SetValue("Text w/ Icon Button (2)")
+	b.textIconButton2Text.SetValue("Button w/ text and icon (2)")
 	b.textIconButton2.SetText("Button")
 	b.textIconButton2.SetIcon(img)
 	b.textIconButton2.SetIconAlign(basicwidget.IconAlignEnd)
 	context.SetEnabled(&b.textIconButton2, b.model.Buttons().Enabled())
 	context.SetSize(&b.textIconButton2, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
 
-	b.segmentedControlHText.SetValue("Segmented Control (Horizontal)")
+	b.segmentedControlHText.SetValue("Segmented control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
 		{
 			Text: "One",
@@ -76,7 +76,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.segmentedControlH.SetDirection(basicwidget.SegmentedControlDirectionHorizontal)
 	context.SetEnabled(&b.segmentedControlH, b.model.Buttons().Enabled())
 
-	b.segmentedControlVText.SetValue("Segmented Control (Vertical)")
+	b.segmentedControlVText.SetValue("Segmented control (Vertical)")
 	b.segmentedControlV.SetItems([]basicwidget.SegmentedControlItem[int]{
 		{
 			Text: "One",
