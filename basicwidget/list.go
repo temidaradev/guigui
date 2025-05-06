@@ -4,6 +4,7 @@
 package basicwidget
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"slices"
@@ -445,15 +446,20 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	// Draw a drag indicator.
-	/*if l.hoveredItemIndex >= 0 && l.hoveredItemIndex < l.abstractList.ItemCount() && l.items[l.hoveredItemIndex].Draggable && !l.dragDropOverlayWidget.Behavior().(*DragDropOverlay).IsDragging() {
-		img := resource.Image("dragindicator", l.settings.Theme().UIForegroundColor)
-		op := &ebiten.DrawImageOptions{}
-		s := float64(2*RoundedCornerRadius(context)) / float64(img.Bounds().Dy())
-		op.GeoM.Scale(s, s)
-		r := l.itemRect(context, widget, l.hoveredItemIndex)
-		op.GeoM.Translate(float64(r.Min.X-2*RoundedCornerRadius(context)), float64(r.Min.Y)+(float64(r.Dy())-float64(img.Bounds().Dy())*s)/2)
-		dst.DrawImage(img, op)
-	}*/
+	if item, ok := l.abstractList.ItemByIndex(hoveredItemIndex); ok {
+		if item.Movable && !l.dragDropOverlay.IsDragging() {
+			img, err := theResourceImages.Get("drag_indicator", context.ColorMode())
+			if err != nil {
+				panic(fmt.Sprintf("basicwidget: failed to get drag indicator image: %v", err))
+			}
+			op := &ebiten.DrawImageOptions{}
+			s := float64(2*RoundedCornerRadius(context)) / float64(img.Bounds().Dy())
+			op.GeoM.Scale(s, s)
+			r := l.itemRect(context, hoveredItemIndex)
+			op.GeoM.Translate(float64(r.Min.X-2*RoundedCornerRadius(context)), float64(r.Min.Y)+(float64(r.Dy())-float64(img.Bounds().Dy())*s)/2)
+			dst.DrawImage(img, op)
+		}
+	}
 
 	// Draw a dragging guideline.
 	if l.dropDstIndexPlus1 > 0 {
@@ -464,7 +470,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		y += float32(l.itemYFromIndex(context, l.dropDstIndexPlus1-1))
 		_, offsetY := l.scrollOverlay.Offset()
 		y += float32(offsetY)
-		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.1), false)
+		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5), false)
 	}
 }
 
