@@ -464,6 +464,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			op.GeoM.Scale(s, s)
 			r := l.itemRect(context, hoveredItemIndex)
 			op.GeoM.Translate(float64(r.Min.X-2*RoundedCornerRadius(context)), float64(r.Min.Y)+(float64(r.Dy())-float64(img.Bounds().Dy())*s)/2)
+			op.ColorScale.ScaleAlpha(0.5)
 			dst.DrawImage(img, op)
 		}
 	}
