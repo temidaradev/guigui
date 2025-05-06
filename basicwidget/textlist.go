@@ -88,6 +88,10 @@ func (t *TextListItem[T]) selectable() bool {
 	return t
 }*/
 
+func (t *TextList[T]) SetItemBorderVisible(visible bool) {
+	t.list.SetStripeVisible(visible)
+}
+
 func (t *TextList[T]) SetItemHeight(height int) {
 	if t.listItemHeightPlus1 == height+1 {
 		return

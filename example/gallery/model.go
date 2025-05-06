@@ -285,8 +285,9 @@ func (n *NumberInputsModel) SetNumberInputValue3(value int) {
 type ListsModel struct {
 	listItems []basicwidget.TextListItem[int]
 
-	unmovable bool
-	disabled  bool
+	stripeVisible bool
+	unmovable     bool
+	disabled      bool
 }
 
 func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []basicwidget.TextListItem[int] {
@@ -305,6 +306,14 @@ func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []ba
 
 func (l *ListsModel) MoveListItems(from int, count int, to int) int {
 	return basicwidget.MoveItemsInSlice(l.listItems, from, count, to)
+}
+
+func (l *ListsModel) IsStripeVisible() bool {
+	return l.stripeVisible
+}
+
+func (l *ListsModel) SetStripeVisible(visible bool) {
+	l.stripeVisible = visible
 }
 
 func (l *ListsModel) Movable() bool {

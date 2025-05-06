@@ -156,6 +156,13 @@ func ControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	return Color2(colorMode, ColorTypeBase, 1, 0.3)
 }
 
+func SecondaryControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
+	if !enabled {
+		return Color2(colorMode, ColorTypeBase, 0.85, 0.05)
+	}
+	return Color2(colorMode, ColorTypeBase, 0.95, 0.25)
+}
+
 func ThumbColor(colorMode guigui.ColorMode, enabled bool) color.Color {
 	if !enabled {
 		return Color2(colorMode, ColorTypeBase, 0.9, 0.55)

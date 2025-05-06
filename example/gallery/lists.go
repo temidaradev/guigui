@@ -19,11 +19,13 @@ type Lists struct {
 	textListText basicwidget.Text
 	textList     basicwidget.TextList[int]
 
-	configForm    basicwidget.Form
-	movableText   basicwidget.Text
-	movableToggle basicwidget.Toggle
-	enabledText   basicwidget.Text
-	enabledToggle basicwidget.Toggle
+	configForm       basicwidget.Form
+	showStripeText   basicwidget.Text
+	showStripeToggle basicwidget.Toggle
+	movableText      basicwidget.Text
+	movableToggle    basicwidget.Toggle
+	enabledText      basicwidget.Text
+	enabledToggle    basicwidget.Toggle
 
 	model *Model
 	items []basicwidget.TextListItem[int]
@@ -37,6 +39,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	// Lists
 	l.textListText.SetValue("Text list")
 
+	l.textList.SetItemBorderVisible(l.model.Lists().IsStripeVisible())
 	l.textList.SetOnItemsMoved(func(from, count, to int) {
 		idx := l.model.Lists().MoveListItems(from, count, to)
 		l.textList.SelectItemByIndex(idx)
@@ -56,6 +59,11 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	// Configurations
+	l.showStripeText.SetValue("Show stripe")
+	l.showStripeToggle.SetOnValueChanged(func(value bool) {
+		l.model.Lists().SetStripeVisible(value)
+	})
+	l.showStripeToggle.SetValue(l.model.Lists().IsStripeVisible())
 	l.movableText.SetValue("Enable to move items")
 	l.movableToggle.SetValue(l.model.Lists().Movable())
 	l.movableToggle.SetOnValueChanged(func(value bool) {
@@ -68,6 +76,10 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	l.enabledToggle.SetValue(l.model.Lists().Enabled())
 
 	l.configForm.SetItems([]*basicwidget.FormItem{
+		{
+			PrimaryWidget:   &l.showStripeText,
+			SecondaryWidget: &l.showStripeToggle,
+		},
 		{
 			PrimaryWidget:   &l.movableText,
 			SecondaryWidget: &l.movableToggle,

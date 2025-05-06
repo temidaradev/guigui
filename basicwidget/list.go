@@ -53,7 +53,7 @@ type List[T comparable] struct {
 	dragDropOverlay dragDropOverlay[int]
 
 	abstractList               abstractList[T, ListItem[T]]
-	itemBorderVisible          bool
+	stripeVisible              bool
 	style                      ListStyle
 	checkmarkIndexPlus1        int
 	lastHoverredItemIndexPlus1 int
@@ -225,11 +225,11 @@ func (l *List[T]) JumpToItemIndex(index int) {
 	l.indexToJumpPlus1 = index + 1
 }
 
-func (l *List[T]) SetItemBorderVisible(visible bool) {
-	if l.itemBorderVisible == visible {
+func (l *List[T]) SetStripeVisible(visible bool) {
+	if l.stripeVisible == visible {
 		return
 	}
-	l.itemBorderVisible = visible
+	l.stripeVisible = visible
 	guigui.RequestRedraw(l)
 }
 
@@ -405,26 +405,26 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 	}
 
+	vb := context.VisibleBounds(l)
+
 	// Draw item borders.
-	if l.itemBorderVisible && l.abstractList.ItemCount() > 0 {
-		_, offsetY := l.scrollOverlay.Offset()
+	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
 		p := context.Position(l)
 		w := context.Size(l).X
-		y := float32(p.Y) + float32(RoundedCornerRadius(context)) + float32(offsetY)
 		for i := range l.abstractList.ItemCount() {
-			item, _ := l.abstractList.ItemByIndex(i)
-			y += float32(context.Size(item.Content).Y)
-			if i == l.SelectedItemIndex() || i+1 == l.SelectedItemIndex() {
+			if i%2 == 0 {
 				continue
 			}
-			if i == l.abstractList.ItemCount()-1 {
+			r := l.itemRect(context, i)
+			if !r.Overlaps(vb) {
 				continue
 			}
-			x0 := p.X + RoundedCornerRadius(context)
-			x1 := p.X + w - RoundedCornerRadius(context)
-			width := 1 * float32(context.Scale())
-			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.5)
-			vector.StrokeLine(dst, float32(x0), y, float32(x1), y, width, clr, false)
+			b := image.Rectangle{
+				Min: image.Pt(p.X, r.Min.Y),
+				Max: image.Pt(p.X+w, r.Max.Y),
+			}
+			clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+			dst.SubImage(b).(*ebiten.Image).Fill(clr)
 		}
 	}
 
@@ -432,7 +432,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r := l.itemRect(context, l.SelectedItemIndex())
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
-		if r.Overlaps(context.VisibleBounds(l)) {
+		if r.Overlaps(vb) {
 			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
 		}
 	}
@@ -443,7 +443,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		r := l.itemRect(context, hoveredItemIndex)
 		r.Min.X -= RoundedCornerRadius(context)
 		r.Max.X += RoundedCornerRadius(context)
-		if r.Overlaps(context.VisibleBounds(l)) {
+		if r.Overlaps(vb) {
 			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.9)
 			if l.style == ListStyleMenu {
 				clr = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
@@ -453,8 +453,8 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	// Draw a drag indicator.
-	if item, ok := l.abstractList.ItemByIndex(hoveredItemIndex); ok {
-		if item.Movable && !l.dragDropOverlay.IsDragging() {
+	if context.IsEnabled(l) && !l.dragDropOverlay.IsDragging() {
+		if item, ok := l.abstractList.ItemByIndex(hoveredItemIndex); ok && item.Movable {
 			img, err := theResourceImages.Get("drag_indicator", context.ColorMode())
 			if err != nil {
 				panic(fmt.Sprintf("basicwidget: failed to get drag indicator image: %v", err))
