@@ -16,7 +16,7 @@ type PopupMenuItem[T comparable] struct {
 	Header   bool
 	Disabled bool
 	Border   bool
-	Tag      T
+	ID       T
 }
 
 type PopupMenu[T comparable] struct {
@@ -112,7 +112,7 @@ func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
 			Header:   item.Header,
 			Disabled: item.Disabled,
 			Border:   item.Border,
-			Tag:      item.Tag,
+			ID:       item.ID,
 		})
 	}
 	p.textList.SetItems(textListItems)
@@ -133,7 +133,7 @@ func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
 		Header:   textListItem.Header,
 		Disabled: textListItem.Disabled,
 		Border:   textListItem.Border,
-		Tag:      textListItem.Tag,
+		ID:       textListItem.ID,
 	}, true
 }
 
@@ -148,7 +148,7 @@ func (p *PopupMenu[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
 		Header:   textListItem.Header,
 		Disabled: textListItem.Disabled,
 		Border:   textListItem.Border,
-		Tag:      textListItem.Tag,
+		ID:       textListItem.ID,
 	}, true
 }
 
@@ -160,6 +160,6 @@ func (p *PopupMenu[T]) SelectItemByIndex(index int) {
 	p.textList.SelectItemByIndex(index)
 }
 
-func (p *PopupMenu[T]) SelectItemByTag(tag T) {
-	p.textList.SelectItemByTag(tag)
+func (p *PopupMenu[T]) SelectItemByID(id T) {
+	p.textList.SelectItemByID(id)
 }

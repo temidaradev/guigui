@@ -17,7 +17,7 @@ type DropdownListItem[T comparable] struct {
 	Header   bool
 	Disabled bool
 	Border   bool
-	Tag      T
+	ID       T
 }
 
 type DropdownList[T comparable] struct {
@@ -122,8 +122,8 @@ func (d *DropdownList[T]) SelectItemByIndex(index int) {
 	d.updateText()
 }
 
-func (d *DropdownList[T]) SelectItemByTag(tag T) {
-	d.popupMenu.SelectItemByTag(tag)
+func (d *DropdownList[T]) SelectItemByID(id T) {
+	d.popupMenu.SelectItemByID(id)
 	d.updateText()
 }
 

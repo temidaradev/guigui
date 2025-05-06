@@ -7,31 +7,31 @@ import (
 	"slices"
 )
 
-type tagger[Tag comparable] interface {
-	tag() Tag
+type ider[ID comparable] interface {
+	id() ID
 }
 
-type abstractList[Tag comparable, Item tagger[Tag]] struct {
+type abstractList[ID comparable, Item ider[ID]] struct {
 	items           []Item
 	selectedIndices []int
 
 	onItemSelected func(index int)
 }
 
-func (a *abstractList[Tag, Item]) SetOnItemSelected(f func(index int)) {
+func (a *abstractList[ID, Item]) SetOnItemSelected(f func(index int)) {
 	a.onItemSelected = f
 }
 
-func (a *abstractList[Tag, Item]) SetItems(items []Item) {
+func (a *abstractList[ID, Item]) SetItems(items []Item) {
 	a.items = adjustSliceSize(items, len(items))
 	copy(a.items, items)
 }
 
-func (a *abstractList[Tag, Item]) ItemCount() int {
+func (a *abstractList[ID, Item]) ItemCount() int {
 	return len(a.items)
 }
 
-func (a *abstractList[Tag, Item]) ItemByIndex(index int) (Item, bool) {
+func (a *abstractList[ID, Item]) ItemByIndex(index int) (Item, bool) {
 	if index < 0 || index >= len(a.items) {
 		var item Item
 		return item, false
@@ -39,7 +39,7 @@ func (a *abstractList[Tag, Item]) ItemByIndex(index int) (Item, bool) {
 	return a.items[index], true
 }
 
-func (a *abstractList[Tag, Item]) SelectItemByIndex(index int, forceFireEvents bool) bool {
+func (a *abstractList[ID, Item]) SelectItemByIndex(index int, forceFireEvents bool) bool {
 	if index < 0 || index >= len(a.items) {
 		if len(a.selectedIndices) == 0 {
 			return false
@@ -63,14 +63,14 @@ func (a *abstractList[Tag, Item]) SelectItemByIndex(index int, forceFireEvents b
 	return true
 }
 
-func (a *abstractList[Tag, Item]) SelectItemByTag(tag Tag, forceFireEvents bool) bool {
+func (a *abstractList[ID, Item]) SelectItemByID(id ID, forceFireEvents bool) bool {
 	idx := slices.IndexFunc(a.items, func(item Item) bool {
-		return item.tag() == tag
+		return item.id() == id
 	})
 	return a.SelectItemByIndex(idx, forceFireEvents)
 }
 
-func (a *abstractList[Tag, Item]) SelectedItem() (Item, bool) {
+func (a *abstractList[ID, Item]) SelectedItem() (Item, bool) {
 	if len(a.selectedIndices) == 0 {
 		var item Item
 		return item, false
@@ -78,7 +78,7 @@ func (a *abstractList[Tag, Item]) SelectedItem() (Item, bool) {
 	return a.items[a.selectedIndices[0]], true
 }
 
-func (a *abstractList[Tag, Item]) SelectedItemIndex() int {
+func (a *abstractList[ID, Item]) SelectedItemIndex() int {
 	if len(a.selectedIndices) == 0 {
 		return -1
 	}

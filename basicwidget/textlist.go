@@ -40,7 +40,7 @@ type TextListItem[T comparable] struct {
 	Disabled bool
 	Border   bool
 	Movable  bool
-	Tag      T
+	ID       T
 }
 
 func (t *TextListItem[T]) selectable() bool {
@@ -197,16 +197,16 @@ func (t *TextList[T]) ItemsCount() int {
 	return len(t.textListItemWidgets)
 }
 
-func (t *TextList[T]) Tag(index int) any {
-	return t.textListItemWidgets[index].textListItem.Tag
+func (t *TextList[T]) ID(index int) any {
+	return t.textListItemWidgets[index].textListItem.ID
 }
 
 func (t *TextList[T]) SelectItemByIndex(index int) {
 	t.list.SelectItemByIndex(index)
 }
 
-func (t *TextList[T]) SelectItemByTag(tag T) {
-	t.list.SelectItemByTag(tag)
+func (t *TextList[T]) SelectItemByID(id T) {
+	t.list.SelectItemByID(id)
 }
 
 func (t *TextList[T]) JumpToItemIndex(index int) {
@@ -297,7 +297,7 @@ func (t *textListItemWidget[T]) listItem() ListItem[T] {
 		Content:    t,
 		Selectable: t.selectable(),
 		Movable:    t.textListItem.Movable,
-		Tag:        t.textListItem.Tag,
+		ID:         t.textListItem.ID,
 	}
 }
 

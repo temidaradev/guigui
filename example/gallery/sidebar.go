@@ -46,40 +46,40 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 	items := []basicwidget.TextListItem[string]{
 		{
 			Text: "Settings",
-			Tag:  "settings",
+			ID:   "settings",
 		},
 		{
 			Text: "Basic",
-			Tag:  "basic",
+			ID:   "basic",
 		},
 		{
 			Text: "Buttons",
-			Tag:  "buttons",
+			ID:   "buttons",
 		},
 		{
 			Text: "Texts",
-			Tag:  "texts",
+			ID:   "texts",
 		},
 		{
 			Text: "Text Inputs",
-			Tag:  "textinputs",
+			ID:   "textinputs",
 		},
 		{
 			Text: "Number Inputs",
-			Tag:  "numberinputs",
+			ID:   "numberinputs",
 		},
 		{
 			Text: "Lists",
-			Tag:  "lists",
+			ID:   "lists",
 		},
 		{
 			Text: "Popups",
-			Tag:  "popups",
+			ID:   "popups",
 		},
 	}
 
 	s.list.SetItems(items)
-	s.list.SelectItemByTag(s.model.Mode())
+	s.list.SelectItemByID(s.model.Mode())
 	s.list.SetItemHeight(basicwidget.UnitSize(context))
 	s.list.SetOnItemSelected(func(index int) {
 		item, ok := s.list.ItemByIndex(index)
@@ -87,7 +87,7 @@ func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWi
 			s.model.SetMode("")
 			return
 		}
-		s.model.SetMode(item.Tag)
+		s.model.SetMode(item.ID)
 	})
 
 	appender.AppendChildWidgetWithBounds(&s.list, context.Bounds(s))

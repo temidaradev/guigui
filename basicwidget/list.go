@@ -29,11 +29,11 @@ type ListItem[T comparable] struct {
 	Content    guigui.Widget
 	Selectable bool
 	Movable    bool
-	Tag        T
+	ID         T
 }
 
-func (l ListItem[T]) tag() T {
-	return l.Tag
+func (l ListItem[T]) id() T {
+	return l.ID
 }
 
 func DefaultActiveListItemTextColor(context *guigui.Context) color.Color {
@@ -212,8 +212,8 @@ func (l *List[T]) selectItemByIndex(index int, forceFireEvents bool) {
 	}
 }
 
-func (l *List[T]) SelectItemByTag(tag T) {
-	if l.abstractList.SelectItemByTag(tag, false) {
+func (l *List[T]) SelectItemByID(tag T) {
+	if l.abstractList.SelectItemByID(tag, false) {
 		guigui.RequestRedraw(l)
 	}
 }
