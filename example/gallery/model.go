@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -282,7 +283,20 @@ func (n *NumberInputsModel) SetNumberInputValue3(value int) {
 }
 
 type ListsModel struct {
+	listItems []basicwidget.TextListItem[int]
+
 	disabled bool
+}
+
+func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []basicwidget.TextListItem[int] {
+	if l.listItems == nil {
+		for i := 0; i < 100; i++ {
+			l.listItems = append(l.listItems, basicwidget.TextListItem[int]{
+				Text: fmt.Sprintf("Item %d", i),
+			})
+		}
+	}
+	return append(items, l.listItems...)
 }
 
 func (l *ListsModel) Enabled() bool {

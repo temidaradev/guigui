@@ -4,8 +4,8 @@
 package main
 
 import (
-	"fmt"
 	"image"
+	"slices"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -24,6 +24,7 @@ type Lists struct {
 	enabledToggle basicwidget.Toggle
 
 	model *Model
+	items []basicwidget.TextListItem[int]
 }
 
 func (l *Lists) SetModel(model *Model) {
@@ -33,13 +34,10 @@ func (l *Lists) SetModel(model *Model) {
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	// Lists
 	l.textListText.SetValue("Text List")
-	var items []basicwidget.TextListItem[int]
-	for i := 0; i < 100; i++ {
-		items = append(items, basicwidget.TextListItem[int]{
-			Text: fmt.Sprintf("Item %d", i),
-		})
-	}
-	l.textList.SetItems(items)
+
+	l.items = slices.Delete(l.items, 0, len(l.items))
+	l.items = l.model.lists.AppendListItems(l.items)
+	l.textList.SetItems(l.items)
 	context.SetSize(&l.textList, image.Pt(guigui.DefaultSize, 6*basicwidget.UnitSize(context)))
 	context.SetEnabled(&l.textList, l.model.Lists().Enabled())
 
