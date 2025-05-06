@@ -100,8 +100,8 @@ func (t *TextList[T]) SetOnItemSelected(f func(index int)) {
 	t.list.SetOnItemSelected(f)
 }
 
-func (t *TextList[T]) SetOnItemsDropped(f func(from, count, to int)) {
-	t.list.SetOnItemsDropped(f)
+func (t *TextList[T]) SetOnItemsMoved(f func(from, count, to int)) {
+	t.list.SetOnItemsMoved(f)
 }
 
 func (t *TextList[T]) SetCheckmarkIndex(index int) {

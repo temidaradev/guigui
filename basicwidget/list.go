@@ -70,7 +70,7 @@ type List[T comparable] struct {
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
 
-	onItemsDropped func(from, count, to int)
+	onItemsMoved func(from, count, to int)
 }
 
 func listItemPadding(context *guigui.Context) int {
@@ -81,8 +81,8 @@ func (l *List[T]) SetOnItemSelected(f func(index int)) {
 	l.abstractList.SetOnItemSelected(f)
 }
 
-func (l *List[T]) SetOnItemsDropped(f func(from, count, to int)) {
-	l.onItemsDropped = f
+func (l *List[T]) SetOnItemsMoved(f func(from, count, to int)) {
+	l.onItemsMoved = f
 }
 
 func (l *List[T]) SetCheckmarkIndex(index int) {
@@ -285,10 +285,11 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 	var dropped bool
 	if l.dropSrcIndexPlus1 > 0 && l.dropDstIndexPlus1 > 0 {
 		dropped = true
-		if l.onItemsDropped != nil {
+		if l.onItemsMoved != nil {
 			// TODO: Implement multiple items drop.
-			l.onItemsDropped(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
+			l.onItemsMoved(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
 		}
+		// TODO: Reselecting the item should be done in the callback.
 		nextIndex := l.dropDstIndexPlus1 - 1
 		if l.dropSrcIndexPlus1 < l.dropDstIndexPlus1 {
 			nextIndex--
