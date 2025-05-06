@@ -34,13 +34,13 @@ type TextList[T comparable] struct {
 }*/
 
 type TextListItem[T comparable] struct {
-	Text      string
-	Color     color.Color
-	Header    bool
-	Disabled  bool
-	Border    bool
-	Draggable bool
-	Tag       T
+	Text     string
+	Color    color.Color
+	Header   bool
+	Disabled bool
+	Border   bool
+	Movable  bool
+	Tag      T
 }
 
 func (t *TextListItem[T]) selectable() bool {
@@ -288,7 +288,7 @@ func (t *textListItemWidget[T]) listItem() ListItem[T] {
 	return ListItem[T]{
 		Content:    t,
 		Selectable: t.selectable(),
-		Draggable:  t.textListItem.Draggable,
+		Movable:    t.textListItem.Movable,
 		Tag:        t.textListItem.Tag,
 	}
 }

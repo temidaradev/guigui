@@ -28,7 +28,7 @@ const (
 type ListItem[T comparable] struct {
 	Content    guigui.Widget
 	Selectable bool
-	Draggable  bool
+	Movable    bool
 	Tag        T
 }
 
@@ -325,7 +325,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 
 		case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
 			item, _ := l.abstractList.ItemByIndex(index)
-			if item.Draggable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
+			if item.Movable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
 				l.dragDropOverlay.Start(index)
 			}
 
