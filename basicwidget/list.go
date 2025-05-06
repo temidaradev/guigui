@@ -101,11 +101,6 @@ func (l *List[T]) contentSize(context *guigui.Context) image.Point {
 }
 
 func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
-		l.listFrame.list = l
-		appender.AppendChildWidgetWithPosition(&l.listFrame, context.Position(l))
-	}
-
 	l.scrollOverlay.SetContentSize(context, l.contentSize(context))
 
 	if idx := l.indexToJumpPlus1 - 1; idx >= 0 {
@@ -150,6 +145,11 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		}
 		appender.AppendChildWidgetWithPosition(item.Content, itemP)
 		p.Y += context.Size(item.Content).Y
+	}
+
+	if l.style != ListStyleSidebar && l.style != ListStyleMenu {
+		l.listFrame.list = l
+		appender.AppendChildWidgetWithBounds(&l.listFrame, context.Bounds(l))
 	}
 
 	l.dragDropOverlay.SetOnDropped(func(data int) {
@@ -536,10 +536,6 @@ func (l *listFrame[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	clr1, clr2 := draw.BorderColors(context.ColorMode(), border, false)
 	borderWidth := float32(1 * context.Scale())
 	draw.DrawRoundedRectBorder(context, dst, bounds, clr1, clr2, RoundedCornerRadius(context), borderWidth, border)
-}
-
-func (l *listFrame[T]) DefaultSize(context *guigui.Context) image.Point {
-	return context.Size(l.list)
 }
 
 func listItemCheckmarkSize(context *guigui.Context) int {
