@@ -289,12 +289,6 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 			// TODO: Implement multiple items drop.
 			l.onItemsMoved(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
 		}
-		// TODO: Reselecting the item should be done in the callback.
-		nextIndex := l.dropDstIndexPlus1 - 1
-		if l.dropSrcIndexPlus1 < l.dropDstIndexPlus1 {
-			nextIndex--
-		}
-		l.abstractList.SelectItemByIndex(nextIndex, false)
 	}
 
 	l.dropSrcIndexPlus1 = 0

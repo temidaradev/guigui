@@ -15,12 +15,12 @@ func adjustSliceSize[T any](slice []T, size int) []T {
 	return slices.Delete(slice, size, len(slice))
 }
 
-func MoveItemsInSlice[T any](slice []T, from int, count int, to int) {
+func MoveItemsInSlice[T any](slice []T, from int, count int, to int) int {
 	if count == 0 {
-		return
+		return from
 	}
 	if from <= to && to <= from+count {
-		return
+		return from
 	}
 	if from < to {
 		to -= count
@@ -31,4 +31,6 @@ func MoveItemsInSlice[T any](slice []T, from int, count int, to int) {
 	slice = slices.Delete(slice, from, from+count)
 	// Assume that the slice has enough capacity, then the underlying array should not change.
 	_ = slices.Insert(slice, to, s...)
+
+	return to
 }

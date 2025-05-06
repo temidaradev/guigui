@@ -300,8 +300,8 @@ func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []ba
 	return append(items, l.listItems...)
 }
 
-func (l *ListsModel) MoveListItems(from int, count int, to int) {
-	basicwidget.MoveItemsInSlice(l.listItems, from, count, to)
+func (l *ListsModel) MoveListItems(from int, count int, to int) int {
+	return basicwidget.MoveItemsInSlice(l.listItems, from, count, to)
 }
 
 func (l *ListsModel) Enabled() bool {
