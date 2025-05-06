@@ -285,23 +285,34 @@ func (n *NumberInputsModel) SetNumberInputValue3(value int) {
 type ListsModel struct {
 	listItems []basicwidget.TextListItem[int]
 
-	disabled bool
+	unmovable bool
+	disabled  bool
 }
 
 func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []basicwidget.TextListItem[int] {
 	if l.listItems == nil {
 		for i := 0; i < 100; i++ {
 			l.listItems = append(l.listItems, basicwidget.TextListItem[int]{
-				Text:    fmt.Sprintf("Item %d", i),
-				Movable: true,
+				Text: fmt.Sprintf("Item %d", i),
 			})
 		}
+	}
+	for i := range l.listItems {
+		l.listItems[i].Movable = !l.unmovable
 	}
 	return append(items, l.listItems...)
 }
 
 func (l *ListsModel) MoveListItems(from int, count int, to int) int {
 	return basicwidget.MoveItemsInSlice(l.listItems, from, count, to)
+}
+
+func (l *ListsModel) Movable() bool {
+	return !l.unmovable
+}
+
+func (l *ListsModel) SetMovable(movable bool) {
+	l.unmovable = !movable
 }
 
 func (l *ListsModel) Enabled() bool {

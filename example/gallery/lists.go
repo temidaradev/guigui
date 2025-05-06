@@ -20,6 +20,8 @@ type Lists struct {
 	textList     basicwidget.TextList[int]
 
 	configForm    basicwidget.Form
+	movableText   basicwidget.Text
+	movableToggle basicwidget.Toggle
 	enabledText   basicwidget.Text
 	enabledToggle basicwidget.Toggle
 
@@ -39,6 +41,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 		idx := l.model.Lists().MoveListItems(from, count, to)
 		l.textList.SelectItemByIndex(idx)
 	})
+
 	l.items = slices.Delete(l.items, 0, len(l.items))
 	l.items = l.model.lists.AppendListItems(l.items)
 	l.textList.SetItems(l.items)
@@ -53,6 +56,11 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 
 	// Configurations
+	l.movableText.SetValue("Movable")
+	l.movableToggle.SetValue(l.model.Lists().Movable())
+	l.movableToggle.SetOnValueChanged(func(value bool) {
+		l.model.Lists().SetMovable(value)
+	})
 	l.enabledText.SetValue("Enabled")
 	l.enabledToggle.SetOnValueChanged(func(value bool) {
 		l.model.Lists().SetEnabled(value)
@@ -60,6 +68,10 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	l.enabledToggle.SetValue(l.model.Lists().Enabled())
 
 	l.configForm.SetItems([]*basicwidget.FormItem{
+		{
+			PrimaryWidget:   &l.movableText,
+			SecondaryWidget: &l.movableToggle,
+		},
 		{
 			PrimaryWidget:   &l.enabledText,
 			SecondaryWidget: &l.enabledToggle,
