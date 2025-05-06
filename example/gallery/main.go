@@ -54,11 +54,12 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
+	r.sidebar.SetModel(&r.model)
 	r.buttons.SetModel(&r.model)
 	r.texts.SetModel(&r.model)
 	r.textInputs.SetModel(&r.model)
 	r.numberInputs.SetModel(&r.model)
-	r.sidebar.SetModel(&r.model)
+	r.lists.SetModel(&r.model)
 
 	gl := layout.GridLayout{
 		Bounds: context.Bounds(r),

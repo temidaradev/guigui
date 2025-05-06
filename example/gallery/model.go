@@ -16,6 +16,7 @@ type Model struct {
 	texts        TextsModel
 	textInputs   TextInputsModel
 	numberInputs NumberInputsModel
+	lists        ListsModel
 }
 
 func (m *Model) Mode() string {
@@ -43,6 +44,10 @@ func (m *Model) TextInputs() *TextInputsModel {
 
 func (m *Model) NumberInputs() *NumberInputsModel {
 	return &m.numberInputs
+}
+
+func (m *Model) Lists() *ListsModel {
+	return &m.lists
 }
 
 type ButtonsModel struct {
@@ -274,4 +279,16 @@ func (n *NumberInputsModel) NumberInputValue3() int {
 
 func (n *NumberInputsModel) SetNumberInputValue3(value int) {
 	n.numberInputValue3 = value
+}
+
+type ListsModel struct {
+	disabled bool
+}
+
+func (l *ListsModel) Enabled() bool {
+	return !l.disabled
+}
+
+func (l *ListsModel) SetEnabled(enabled bool) {
+	l.disabled = !enabled
 }
