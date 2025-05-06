@@ -408,6 +408,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	vb := context.VisibleBounds(l)
 
 	// Draw item borders.
+	// TODO: Get indices of items that are visible.
 	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
 		p := context.Position(l)
 		w := context.Size(l).X
@@ -416,6 +417,9 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 				continue
 			}
 			r := l.itemRect(context, i)
+			if r.Min.Y > vb.Max.Y {
+				break
+			}
 			if !r.Overlaps(vb) {
 				continue
 			}
