@@ -35,6 +35,9 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	// Lists
 	l.textListText.SetValue("Text List")
 
+	l.textList.SetOnItemsDropped(func(from, count, to int) {
+		l.model.Lists().MoveListItems(from, count, to)
+	})
 	l.items = slices.Delete(l.items, 0, len(l.items))
 	l.items = l.model.lists.AppendListItems(l.items)
 	l.textList.SetItems(l.items)

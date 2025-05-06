@@ -14,3 +14,21 @@ func adjustSliceSize[T any](slice []T, size int) []T {
 	}
 	return slices.Delete(slice, size, len(slice))
 }
+
+func MoveItemsInSlice[T any](slice []T, from int, count int, to int) {
+	if count == 0 {
+		return
+	}
+	if from <= to && to <= from+count {
+		return
+	}
+	if from < to {
+		to -= count
+	}
+
+	s := make([]T, count)
+	copy(s, slice[from:from+count])
+	slice = slices.Delete(slice, from, from+count)
+	// Assume that the slice has enough capacity, then the underlying array should not change.
+	_ = slices.Insert(slice, to, s...)
+}

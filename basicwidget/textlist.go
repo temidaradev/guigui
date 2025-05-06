@@ -96,8 +96,12 @@ func (t *TextList[T]) SetItemHeight(height int) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *TextList[T]) SetOnItemSelected(callback func(index int)) {
-	t.list.SetOnItemSelected(callback)
+func (t *TextList[T]) SetOnItemSelected(f func(index int)) {
+	t.list.SetOnItemSelected(f)
+}
+
+func (t *TextList[T]) SetOnItemsDropped(f func(from, count, to int)) {
+	t.list.SetOnItemsDropped(f)
 }
 
 func (t *TextList[T]) SetCheckmarkIndex(index int) {

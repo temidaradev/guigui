@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"slices"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -51,7 +50,7 @@ type List[T comparable] struct {
 	checkmark       Image
 	listFrame       listFrame[T]
 	scrollOverlay   ScrollOverlay
-	dragDropOverlay DragDropOverlay
+	dragDropOverlay dragDropOverlay[int]
 
 	abstractList               abstractList[T, ListItem[T]]
 	itemBorderVisible          bool
@@ -70,6 +69,8 @@ type List[T comparable] struct {
 
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
+
+	onItemsDropped func(from, count, to int)
 }
 
 func listItemPadding(context *guigui.Context) int {
@@ -78,6 +79,10 @@ func listItemPadding(context *guigui.Context) int {
 
 func (l *List[T]) SetOnItemSelected(f func(index int)) {
 	l.abstractList.SetOnItemSelected(f)
+}
+
+func (l *List[T]) SetOnItemsDropped(f func(from, count, to int)) {
+	l.onItemsDropped = f
 }
 
 func (l *List[T]) SetCheckmarkIndex(index int) {
@@ -147,13 +152,14 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		p.Y += context.Size(item.Content).Y
 	}
 
-	appender.AppendChildWidgetWithPosition(&l.dragDropOverlay, context.Position(l))
+	l.dragDropOverlay.SetOnDropped(func(data int) {
+		l.dropSrcIndexPlus1 = data + 1
+	})
+	appender.AppendChildWidgetWithBounds(&l.dragDropOverlay, context.Bounds(l))
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
-		if l.isHoveringVisible() {
-			guigui.RequestRedraw(l)
-		}
+		guigui.RequestRedraw(l)
 	}
 
 	return nil
@@ -279,9 +285,15 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 	var dropped bool
 	if l.dropSrcIndexPlus1 > 0 && l.dropDstIndexPlus1 > 0 {
 		dropped = true
-		/*if l.callback != nil && l.callback.OnItemDropped != nil {
-			l.callback.OnItemDropped(l.dropSrcIndex, l.dropDstIndex)
-		}*/
+		if l.onItemsDropped != nil {
+			// TODO: Implement multiple items drop.
+			l.onItemsDropped(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
+		}
+		nextIndex := l.dropDstIndexPlus1 - 1
+		if l.dropSrcIndexPlus1 < l.dropDstIndexPlus1 {
+			nextIndex--
+		}
+		l.abstractList.SelectItemByIndex(nextIndex, false)
 	}
 
 	l.dropSrcIndexPlus1 = 0
@@ -474,10 +486,6 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 }
 
-/*func (l *List[T]) onDrop(data any) {
-	l.dropSrcIndex = data.(int)
-}*/
-
 func (l *List[T]) defaultWidth(context *guigui.Context) int {
 	if l.cachedDefaultWidth > 0 {
 		return l.cachedDefaultWidth
@@ -536,24 +544,6 @@ func (l *listFrame[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 func (l *listFrame[T]) DefaultSize(context *guigui.Context) image.Point {
 	return context.Size(l.list)
-}
-
-func moveItemInSlice[T any](slice []T, from int, count int, to int) {
-	if count == 0 {
-		return
-	}
-	if from <= to && to <= from+count {
-		return
-	}
-	if from < to {
-		to -= count
-	}
-
-	s := make([]T, count)
-	copy(s, slice[from:from+count])
-	slice = slices.Delete(slice, from, from+count)
-	// Assume that the slice has enough capacity, then the underlying array should not change.
-	_ = slices.Insert(slice, to, s...)
 }
 
 func listItemCheckmarkSize(context *guigui.Context) int {

@@ -12,39 +12,45 @@ import (
 	"github.com/hajimehoshi/guigui"
 )
 
-type DragDropOverlay struct {
+type dragDropOverlay[T any] struct {
 	guigui.DefaultWidget
 
-	object any
+	object    T
+	objectSet bool
 
-	onDropped func(object any)
+	onDropped func(object T)
 }
 
-func (d *DragDropOverlay) SetOnDropped(f func(object any)) {
+func (d *dragDropOverlay[T]) SetOnDropped(f func(object T)) {
 	d.onDropped = f
 }
 
-func (d *DragDropOverlay) IsDragging() bool {
-	return d.object != nil
+func (d *dragDropOverlay[T]) IsDragging() bool {
+	return d.objectSet
 }
 
-func (d *DragDropOverlay) Start(object any) {
+func (d *dragDropOverlay[T]) Start(object T) {
 	d.object = object
+	d.objectSet = true
 }
 
-func (d *DragDropOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if d.object != nil {
+func (d *dragDropOverlay[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+	if d.objectSet {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(d)) {
 				if d.onDropped != nil {
 					d.onDropped(d.object)
 				}
 			}
-			d.object = nil
+			var zero T
+			d.object = zero
+			d.objectSet = false
 			return guigui.HandleInputResult{}
 		}
 		if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			d.object = nil
+			var zero T
+			d.object = zero
+			d.objectSet = false
 		}
 		return guigui.HandleInputResult{}
 	}
