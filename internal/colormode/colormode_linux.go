@@ -29,7 +29,7 @@ func systemColorMode() ColorMode {
 		return mode
 	}
 
-	return Light
+	return Unknown
 }
 
 func checkGSettings() ColorMode {
