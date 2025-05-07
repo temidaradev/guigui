@@ -17,7 +17,7 @@ func systemColorMode() ColorMode {
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return Light
+		return Unknown
 	}
 	mode = checkGtkSettingsFile(homeDir + "/.config/gtk-4.0/settings.ini")
 	if mode != Unknown {
