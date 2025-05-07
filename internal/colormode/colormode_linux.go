@@ -6,6 +6,7 @@ package colormode
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -19,12 +20,12 @@ func systemColorMode() ColorMode {
 	if err != nil {
 		return Unknown
 	}
-	mode = checkGtkSettingsFile(homeDir + "/.config/gtk-4.0/settings.ini")
+	mode = checkGTKSettingsFile(filepath.Join(homeDir + "/.config/gtk-4.0/settings.ini"))
 	if mode != Unknown {
 		return mode
 	}
 
-	mode = checkGtkSettingsFile(homeDir + "/.config/gtk-3.0/settings.ini")
+	mode = checkGTKSettingsFile(filepath.Join(homeDir + "/.config/gtk-3.0/settings.ini"))
 	if mode != Unknown {
 		return mode
 	}
@@ -51,7 +52,7 @@ func checkGSettings() ColorMode {
 	}
 }
 
-func checkGtkSettingsFile(path string) ColorMode {
+func checkGTKSettingsFile(path string) ColorMode {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return Unknown
