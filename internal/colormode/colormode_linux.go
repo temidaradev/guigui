@@ -20,12 +20,12 @@ func systemColorMode() ColorMode {
 	if err != nil {
 		return Unknown
 	}
-	mode = checkGTKSettingsFile(filepath.Join(homeDir + "/.config/gtk-4.0/settings.ini"))
+	mode = checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-4.0", "settings.ini"))
 	if mode != Unknown {
 		return mode
 	}
 
-	mode = checkGTKSettingsFile(filepath.Join(homeDir + "/.config/gtk-3.0/settings.ini"))
+	mode = checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-3.0", "settings.ini"))
 	if mode != Unknown {
 		return mode
 	}
