@@ -331,11 +331,15 @@ func DrawRoundedRect(context *guigui.Context, dst *ebiten.Image, bounds image.Re
 	DrawRoundedRectWithSharpenCorners(context, dst, bounds, clr, radius, SharpenCorners{})
 }
 
+func adjustRadius(radius int, bounds image.Rectangle) int {
+	return min(radius, bounds.Dx()/2, bounds.Dy()/2)
+}
+
 func DrawRoundedRectWithSharpenCorners(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, clr color.Color, radius int, sharpenCorners SharpenCorners) {
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
+	radius = adjustRadius(radius, bounds)
 	if radius == 0 {
 		return
 	}
@@ -356,7 +360,7 @@ func DrawRoundedShadowRect(context *guigui.Context, dst *ebiten.Image, bounds im
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
+	radius = adjustRadius(radius, bounds)
 	if radius == 0 {
 		return
 	}
@@ -371,7 +375,7 @@ func DrawRoundedRectBorderWithSharpenCorners(context *guigui.Context, dst *ebite
 	if !dst.Bounds().Overlaps(bounds) {
 		return
 	}
-	radius = min(radius, bounds.Dx()/2, bounds.Dy()/2)
+	radius = adjustRadius(radius, bounds)
 	if radius == 0 {
 		return
 	}
@@ -515,4 +519,118 @@ func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH in
 	}
 
 	return vs, is, op
+}
+
+var (
+	theRoundedCornerMaskImageCache map[int]*ebiten.Image
+	theRoundedCornerImage          *ebiten.Image
+)
+
+func roundedCornerMaskImage(radius int) *ebiten.Image {
+	if img, ok := theRoundedCornerMaskImageCache[radius]; ok {
+		return img
+	}
+
+	var path vector.Path
+	path.MoveTo(0, 0)
+	path.LineTo(2*float32(radius), 0)
+	path.LineTo(2*float32(radius), 2*float32(radius))
+	path.LineTo(0, 2*float32(radius))
+	path.LineTo(0, 0)
+	path.MoveTo(2*float32(radius), float32(radius))
+	path.Arc(float32(radius), float32(radius), float32(radius), 0, 2*math.Pi, vector.CounterClockwise)
+	path.Close()
+
+	img := ebiten.NewImage(2*radius, 2*radius)
+	vector.DrawFilledPath(img, &path, color.White, true, vector.FillRuleNonZero)
+
+	if theRoundedCornerMaskImageCache == nil {
+		theRoundedCornerMaskImageCache = map[int]*ebiten.Image{}
+	}
+	theRoundedCornerMaskImageCache[radius] = img
+
+	return img
+}
+
+func DrawInRoundedCornerRect(dst *ebiten.Image, bounds image.Rectangle, radius int, f func(dst *ebiten.Image)) {
+	radius = adjustRadius(radius, bounds)
+	if radius == 0 {
+		f(dst.SubImage(bounds).(*ebiten.Image))
+		return
+	}
+
+	// Prepare the corner image.
+	if theRoundedCornerImage != nil && (theRoundedCornerImage.Bounds().Dx() < 2*radius || theRoundedCornerImage.Bounds().Dy() < 2*radius) {
+		theRoundedCornerImage.Deallocate()
+		theRoundedCornerImage = nil
+	}
+	if theRoundedCornerImage == nil {
+		theRoundedCornerImage = ebiten.NewImage(2*radius, 2*radius)
+	}
+	op := &ebiten.DrawImageOptions{}
+	op.Blend = ebiten.BlendCopy
+	theRoundedCornerImage.DrawImage(roundedCornerMaskImage(radius), op)
+
+	// Copy corners.
+	b0 := image.Rectangle{
+		Min: bounds.Min,
+		Max: bounds.Min.Add(image.Pt(radius, radius)),
+	}
+	b1 := image.Rectangle{
+		Min: bounds.Min.Add(image.Pt(bounds.Dx()-radius, 0)),
+		Max: bounds.Min.Add(image.Pt(bounds.Dx(), radius)),
+	}
+	b2 := image.Rectangle{
+		Min: bounds.Min.Add(image.Pt(0, bounds.Dy()-radius)),
+		Max: bounds.Min.Add(image.Pt(radius, bounds.Dy())),
+	}
+	b3 := image.Rectangle{
+		Min: bounds.Min.Add(image.Pt(bounds.Dx()-radius, bounds.Dy()-radius)),
+		Max: bounds.Min.Add(image.Pt(bounds.Dx(), bounds.Dy())),
+	}
+	op = &ebiten.DrawImageOptions{}
+	// BlendSourceIn indicates that the image is drawn only in the area where the destination is not transparent.
+	op.Blend = ebiten.BlendSourceIn
+	theRoundedCornerImage.DrawImage(dst.SubImage(b0).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(radius), 0)
+	theRoundedCornerImage.DrawImage(dst.SubImage(b1).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(0, float64(radius))
+	theRoundedCornerImage.DrawImage(dst.SubImage(b2).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(radius), float64(radius))
+	theRoundedCornerImage.DrawImage(dst.SubImage(b3).(*ebiten.Image), op)
+
+	f(dst.SubImage(bounds).(*ebiten.Image))
+
+	// Draw copied corners.
+	b0 = image.Rectangle{
+		Min: image.Pt(0, 0),
+		Max: image.Pt(radius, radius),
+	}
+	b1 = image.Rectangle{
+		Min: image.Pt(radius, 0),
+		Max: image.Pt(radius*2, radius),
+	}
+	b2 = image.Rectangle{
+		Min: image.Pt(0, radius),
+		Max: image.Pt(radius, radius*2),
+	}
+	b3 = image.Rectangle{
+		Min: image.Pt(radius, radius),
+		Max: image.Pt(radius*2, radius*2),
+	}
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(bounds.Min.X), float64(bounds.Min.Y))
+	dst.DrawImage(theRoundedCornerImage.SubImage(b0).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(bounds.Max.X-radius), float64(bounds.Min.Y))
+	dst.DrawImage(theRoundedCornerImage.SubImage(b1).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(bounds.Min.X), float64(bounds.Max.Y-radius))
+	dst.DrawImage(theRoundedCornerImage.SubImage(b2).(*ebiten.Image), op)
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(bounds.Max.X-radius), float64(bounds.Max.Y-radius))
+	dst.DrawImage(theRoundedCornerImage.SubImage(b3).(*ebiten.Image), op)
 }
