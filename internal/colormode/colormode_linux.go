@@ -11,8 +11,7 @@ import (
 )
 
 func systemColorMode() ColorMode {
-	mode := checkGSettings()
-	if mode != Unknown {
+	if mode := checkGSettings(); mode != Unknown {
 		return mode
 	}
 
@@ -20,13 +19,11 @@ func systemColorMode() ColorMode {
 	if err != nil {
 		return Unknown
 	}
-	mode = checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-4.0", "settings.ini"))
-	if mode != Unknown {
+	if mode := checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-4.0", "settings.ini")); mode != Unknown {
 		return mode
 	}
 
-	mode = checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-3.0", "settings.ini"))
-	if mode != Unknown {
+	if mode := checkGTKSettingsFile(filepath.Join(homeDir+".config", "gtk-3.0", "settings.ini")); mode != Unknown {
 		return mode
 	}
 
