@@ -156,9 +156,16 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	context.SetSize(&t.text, textBounds.Size())
 	t.adjustScrollOffsetIfNeeded(context)
 	offsetX, offsetY := t.scrollOverlay.Offset()
-	tp := textBounds.Min
-	tp = tp.Add(image.Pt(int(offsetX), int(offsetY)))
-	appender.AppendChildWidgetWithPosition(&t.text, tp)
+	textBounds.Min = textBounds.Min.Add(image.Pt(int(offsetX), int(offsetY)))
+	appender.AppendChildWidgetWithPosition(&t.text, textBounds.Min)
+	if draw.OverlapsWithRoundedCorner(context.Bounds(t), RoundedCornerRadius(context), textBounds) {
+		// CustomDraw might be too generic and overkill for this case.
+		context.SetCustomDraw(&t.text, func(dst, widgetImage *ebiten.Image, op *ebiten.DrawImageOptions) {
+			draw.DrawInRoundedCornerRect(context, dst, context.Bounds(t), RoundedCornerRadius(context), widgetImage, op.GeoM, op.ColorScale)
+		})
+	} else {
+		context.SetCustomDraw(&t.text, nil)
+	}
 
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
 

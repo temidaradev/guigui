@@ -66,6 +66,8 @@ func (w *widgetsAndVisibleBounds) redrawIfDifferentParentZ(app *app) {
 	}
 }
 
+type CustomDrawFunc func(dst, widgetImage *ebiten.Image, op *ebiten.DrawImageOptions)
+
 type widgetState struct {
 	root bool
 
@@ -80,6 +82,7 @@ type widgetState struct {
 	hidden       bool
 	disabled     bool
 	transparency float64
+	customDraw   CustomDrawFunc
 
 	offscreen *ebiten.Image
 

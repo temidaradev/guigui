@@ -573,6 +573,15 @@ func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds 
 	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), maskShader, op)
 }
 
+func FillInRoundedConerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, srcBounds image.Rectangle, clr color.Color) {
+	var geoM ebiten.GeoM
+	geoM.Scale(float64(srcBounds.Dx()), float64(srcBounds.Dy()))
+	geoM.Translate(float64(srcBounds.Min.X), float64(srcBounds.Min.Y))
+	var colorScale ebiten.ColorScale
+	colorScale.ScaleWithColor(clr)
+	DrawInRoundedCornerRect(context, dst, bounds, radius, whiteSubImage, geoM, colorScale)
+}
+
 func OverlapsWithRoundedCorner(bounds image.Rectangle, radius int, srcBounds image.Rectangle) bool {
 	b1 := image.Rectangle{
 		Min: bounds.Min,

@@ -431,12 +431,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, b) {
 				dst.SubImage(b).(*ebiten.Image).Fill(clr)
 			} else {
-				var geoM ebiten.GeoM
-				geoM.Scale(float64(b.Dx()), float64(b.Dy()))
-				geoM.Translate(float64(b.Min.X), float64(b.Min.Y))
-				var colorScale ebiten.ColorScale
-				colorScale.ScaleWithColor(clr)
-				draw.DrawInRoundedCornerRect(context, dst, context.Bounds(l), r, whiteSubImage, geoM, colorScale)
+				draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, b, clr)
 			}
 		}
 	}
@@ -445,7 +440,12 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		b := l.itemBounds(context, l.SelectedItemIndex(), l.stripeVisible)
 		if b.Overlaps(vb) {
 			if l.stripeVisible {
-				dst.SubImage(b).(*ebiten.Image).Fill(clr)
+				r := RoundedCornerRadius(context)
+				if !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, b) {
+					dst.SubImage(b).(*ebiten.Image).Fill(clr)
+				} else {
+					draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, b, clr)
+				}
 			} else {
 				b.Min.X -= RoundedCornerRadius(context)
 				b.Max.X += RoundedCornerRadius(context)

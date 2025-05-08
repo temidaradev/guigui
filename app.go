@@ -513,10 +513,13 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 		return
 	}
 
+	customDraw := widgetState.customDraw
+	useOffscreen := widgetState.opacity() < 1 || customDraw != nil
+
 	var origDst *ebiten.Image
 	renderCurrent := zToRender == z(widget)
 	if renderCurrent {
-		if widgetState.opacity() < 1 {
+		if useOffscreen {
 			origDst = dst
 			dst = widgetState.ensureOffscreen(dst.Bounds())
 			dst.Clear()
@@ -529,11 +532,15 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 	}
 
 	if renderCurrent {
-		if widgetState.opacity() < 1 {
+		if useOffscreen {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(dst.Bounds().Min.X), float64(dst.Bounds().Min.Y))
 			op.ColorScale.ScaleAlpha(float32(widgetState.opacity()))
-			origDst.DrawImage(dst, op)
+			if customDraw != nil {
+				customDraw(origDst.SubImage(vb).(*ebiten.Image), dst, op)
+			} else {
+				origDst.DrawImage(dst, op)
+			}
 		}
 	}
 }
