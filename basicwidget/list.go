@@ -409,24 +409,30 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	vb := context.VisibleBounds(l)
 
-	// Draw item stripes.
-	// TODO: Get indices of items that are visible.
-	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
-		for i := range l.abstractList.ItemCount() {
-			if i%2 == 0 {
-				continue
-			}
-			b := l.itemRect(context, i, true)
-			if b.Min.Y > vb.Max.Y {
-				break
-			}
-			if !b.Overlaps(vb) {
-				continue
-			}
-			clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
-			dst.SubImage(b).(*ebiten.Image).Fill(clr)
-		}
+	maskR := RoundedCornerRadius(context)
+	if l.style != ListStyleNormal {
+		maskR = 0
 	}
+	draw.DrawInRoundedCornerRect(dst, context.Bounds(l), maskR, func(dst *ebiten.Image) {
+		// Draw item stripes.
+		// TODO: Get indices of items that are visible.
+		if l.stripeVisible && l.abstractList.ItemCount() > 0 {
+			for i := range l.abstractList.ItemCount() {
+				if i%2 == 0 {
+					continue
+				}
+				b := l.itemRect(context, i, true)
+				if b.Min.Y > vb.Max.Y {
+					break
+				}
+				if !b.Overlaps(vb) {
+					continue
+				}
+				clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+				dst.SubImage(b).(*ebiten.Image).Fill(clr)
+			}
+		}
+	})
 
 	if clr := l.selectedItemColor(context); clr != nil && l.SelectedItemIndex() >= 0 && l.SelectedItemIndex() < l.abstractList.ItemCount() {
 		r := l.itemRect(context, l.SelectedItemIndex(), l.stripeVisible)
