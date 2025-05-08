@@ -533,12 +533,12 @@ func roundedCornerMaskImage(radius int) *ebiten.Image {
 
 	var path vector.Path
 	path.MoveTo(0, 0)
-	path.LineTo(0, 2*float32(radius))
-	path.LineTo(2*float32(radius), 2*float32(radius))
 	path.LineTo(2*float32(radius), 0)
+	path.LineTo(2*float32(radius), 2*float32(radius))
+	path.LineTo(0, 2*float32(radius))
 	path.LineTo(0, 0)
 	path.MoveTo(2*float32(radius), float32(radius))
-	path.Arc(float32(radius), float32(radius), float32(radius), 0, 2*math.Pi, vector.Clockwise)
+	path.Arc(float32(radius), float32(radius), float32(radius), 0, 2*math.Pi, vector.CounterClockwise)
 	path.Close()
 
 	img := ebiten.NewImage(2*radius, 2*radius)
