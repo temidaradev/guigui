@@ -77,8 +77,8 @@ func (t *TextInput) SelectAll() {
 	t.text.selectAll()
 }
 
-func (t *TextInput) SetNumber(number bool) {
-	t.text.SetNumber(number)
+func (t *TextInput) SetTabular(tabular bool) {
+	t.text.SetTabular(tabular)
 }
 
 func (t *TextInput) IsEditable() bool {
