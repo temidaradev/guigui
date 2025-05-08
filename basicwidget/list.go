@@ -409,7 +409,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 	vb := context.VisibleBounds(l)
 
-	// Draw item borders.
+	// Draw item stripes.
 	// TODO: Get indices of items that are visible.
 	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
 		for i := range l.abstractList.ItemCount() {
