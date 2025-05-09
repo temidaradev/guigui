@@ -414,24 +414,31 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		if l.style != ListStyleNormal {
 			r = 0
 		}
-		draw.DrawInRoundedCornerRect(dst, context.Bounds(l), r, func(dst *ebiten.Image) {
-			// Draw item stripes.
-			// TODO: Get indices of items that are visible.
-			for i := range l.abstractList.ItemCount() {
-				if i%2 == 0 {
-					continue
-				}
-				b := l.itemRect(context, i, true)
-				if b.Min.Y > vb.Max.Y {
-					break
-				}
-				if !b.Overlaps(vb) {
-					continue
-				}
-				clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
-				dst.SubImage(b).(*ebiten.Image).Fill(clr)
+		// Draw item stripes.
+		// TODO: Get indices of items that are visible.
+		for i := range l.abstractList.ItemCount() {
+			if i%2 == 0 {
+				continue
 			}
-		})
+			b := l.itemRect(context, i, true)
+			if b.Min.Y > vb.Max.Y {
+				break
+			}
+			if !b.Overlaps(vb) {
+				continue
+			}
+			clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+			if r == 0 || !draw.IncludesRoundedCorner(context.Bounds(l), r, b) {
+				dst.SubImage(b).(*ebiten.Image).Fill(clr)
+			} else {
+				var geoM ebiten.GeoM
+				geoM.Scale(float64(b.Dx()), float64(b.Dy()))
+				geoM.Translate(float64(b.Min.X), float64(b.Min.Y))
+				var colorScale ebiten.ColorScale
+				colorScale.ScaleWithColor(clr)
+				draw.DrawInRoundedCornerRect(context, dst, whiteSubImage, context.Bounds(l), r, geoM, colorScale)
+			}
+		}
 	}
 
 	if clr := l.selectedItemColor(context); clr != nil && l.SelectedItemIndex() >= 0 && l.SelectedItemIndex() < l.abstractList.ItemCount() {
