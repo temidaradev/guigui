@@ -385,6 +385,19 @@ func (l *List[T]) selectedItemColor(context *guigui.Context) color.Color {
 	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 }
 
+func (l *List[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle) {
+	r := RoundedCornerRadius(context)
+	if l.style != ListStyleNormal {
+		r = 0
+	}
+	clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+	if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, bounds) {
+		dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
+	} else {
+		draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, bounds, clr)
+	}
+}
+
 func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if l.style != ListStyleSidebar {
 		clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(l))
@@ -395,10 +408,6 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	vb := context.VisibleBounds(l)
 
 	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
-		r := RoundedCornerRadius(context)
-		if l.style != ListStyleNormal {
-			r = 0
-		}
 		// Draw item stripes.
 		// TODO: Get indices of items that are visible.
 		for i := range l.abstractList.ItemCount() {
@@ -412,11 +421,24 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			if !b.Overlaps(vb) {
 				continue
 			}
-			clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
-			if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, b) {
-				dst.SubImage(b).(*ebiten.Image).Fill(clr)
-			} else {
-				draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, b, clr)
+			l.drawStripe(context, dst, b)
+		}
+
+		// Draw the top stripe.
+		{
+			b := l.itemBounds(context, 0, true)
+			b.Min.Y, b.Max.Y = b.Min.Y-RoundedCornerRadius(context), b.Min.Y
+			if b.Overlaps(vb) {
+				l.drawStripe(context, dst, b)
+			}
+		}
+
+		// Draw the bottom stripe.
+		if l.abstractList.ItemCount()%2 == 1 {
+			b := l.itemBounds(context, l.abstractList.ItemCount()-1, true)
+			b.Max.Y, b.Min.Y = b.Max.Y+RoundedCornerRadius(context), b.Max.Y
+			if b.Overlaps(vb) {
+				l.drawStripe(context, dst, b)
 			}
 		}
 	}
