@@ -161,7 +161,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	if draw.OverlapsWithRoundedCorner(context.Bounds(t), RoundedCornerRadius(context), textBounds) {
 		// CustomDraw might be too generic and overkill for this case.
 		context.SetCustomDraw(&t.text, func(dst, widgetImage *ebiten.Image, op *ebiten.DrawImageOptions) {
-			draw.DrawInRoundedCornerRect(context, dst, context.Bounds(t), RoundedCornerRadius(context), widgetImage, op.GeoM, op.ColorScale)
+			draw.DrawInRoundedCornerRect(context, dst, context.Bounds(t), RoundedCornerRadius(context), widgetImage, op)
 		})
 	} else {
 		context.SetCustomDraw(&t.text, nil)

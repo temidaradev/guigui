@@ -555,13 +555,15 @@ func init() {
 	maskShader = s
 }
 
-func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, src *ebiten.Image, geoM ebiten.GeoM, colorScale ebiten.ColorScale) {
+func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, src *ebiten.Image, op *ebiten.DrawImageOptions) {
 	radius = adjustRadius(radius, bounds)
-	op := &ebiten.DrawRectShaderOptions{}
-	op.GeoM = geoM
-	op.ColorScale = colorScale
-	op.Images[0] = src
-	op.Uniforms = map[string]interface{}{
+	sOp := &ebiten.DrawRectShaderOptions{}
+	sOp.GeoM = op.GeoM
+	sOp.ColorScale = op.ColorScale
+	sOp.CompositeMode = op.CompositeMode
+	sOp.Blend = op.Blend
+	sOp.Images[0] = src
+	sOp.Uniforms = map[string]interface{}{
 		"Bounds": []float32{
 			float32(bounds.Min.X),
 			float32(bounds.Min.Y),
@@ -570,16 +572,16 @@ func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds 
 		},
 		"Radius": float32(radius),
 	}
-	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), maskShader, op)
+	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), maskShader, sOp)
 }
 
 func FillInRoundedConerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, srcBounds image.Rectangle, clr color.Color) {
-	var geoM ebiten.GeoM
-	geoM.Scale(float64(srcBounds.Dx()), float64(srcBounds.Dy()))
-	geoM.Translate(float64(srcBounds.Min.X), float64(srcBounds.Min.Y))
-	var colorScale ebiten.ColorScale
-	colorScale.ScaleWithColor(clr)
-	DrawInRoundedCornerRect(context, dst, bounds, radius, whiteSubImage, geoM, colorScale)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(float64(srcBounds.Dx()), float64(srcBounds.Dy()))
+	op.GeoM.Translate(float64(srcBounds.Min.X), float64(srcBounds.Min.Y))
+	op.ColorScale.ScaleWithColor(clr)
+	op.Blend = ebiten.BlendCopy
+	DrawInRoundedCornerRect(context, dst, bounds, radius, whiteSubImage, op)
 }
 
 func OverlapsWithRoundedCorner(bounds image.Rectangle, radius int, srcBounds image.Rectangle) bool {
