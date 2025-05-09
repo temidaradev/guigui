@@ -294,7 +294,7 @@ func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []ba
 	if l.listItems == nil {
 		for i := range 99 {
 			l.listItems = append(l.listItems, basicwidget.TextListItem[int]{
-				Text: fmt.Sprintf("Item %d", i),
+				Text: fmt.Sprintf("Item %d", i+1),
 			})
 		}
 	}
