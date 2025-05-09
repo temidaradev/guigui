@@ -47,10 +47,9 @@ func DefaultDisabledListItemTextColor(context *guigui.Context) color.Color {
 type List[T comparable] struct {
 	guigui.DefaultWidget
 
-	checkmark       Image
-	listFrame       listFrame[T]
-	scrollOverlay   ScrollOverlay
-	dragDropOverlay dragDropOverlay[int]
+	checkmark     Image
+	listFrame     listFrame[T]
+	scrollOverlay ScrollOverlay
 
 	abstractList               abstractList[T, ListItem[T]]
 	stripeVisible              bool
@@ -60,8 +59,8 @@ type List[T comparable] struct {
 	lastSelectingItemTime      time.Time // TODO: Use ebiten.Tick.
 
 	indexToJumpPlus1        int
-	dropSrcIndexPlus1       int
-	dropDstIndexPlus1       int
+	dragSrcIndexPlus1       int
+	dragDstIndexPlus1       int
 	pressStartX             int
 	pressStartY             int
 	startPressingIndexPlus1 int
@@ -151,11 +150,6 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		l.listFrame.list = l
 		appender.AppendChildWidgetWithBounds(&l.listFrame, context.Bounds(l))
 	}
-
-	l.dragDropOverlay.SetOnDropped(func(data int) {
-		l.dropSrcIndexPlus1 = data + 1
-	})
-	appender.AppendChildWidgetWithBounds(&l.dragDropOverlay, context.Bounds(l))
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
@@ -261,43 +255,34 @@ func (l *List[T]) calcDropDstIndex(context *guigui.Context) int {
 
 func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	// Process dragging.
-	if l.dragDropOverlay.IsDragging() {
-		_, y := ebiten.CursorPosition()
-		p := context.Position(l)
-		h := context.Size(l).Y
-		var dy float64
-		if upperY := p.Y + UnitSize(context); y < upperY {
-			dy = float64(upperY-y) / 4
+	if l.dragSrcIndexPlus1 > 0 {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			_, y := ebiten.CursorPosition()
+			p := context.Position(l)
+			h := context.Size(l).Y
+			var dy float64
+			if upperY := p.Y + UnitSize(context); y < upperY {
+				dy = float64(upperY-y) / 4
+			}
+			if lowerY := p.Y + h - UnitSize(context); y >= lowerY {
+				dy = float64(lowerY-y) / 4
+			}
+			l.scrollOverlay.SetOffsetByDelta(context, l.contentSize(context), 0, dy)
+			if i := l.calcDropDstIndex(context); l.dragDstIndexPlus1-1 != i {
+				l.dragDstIndexPlus1 = i + 1
+				guigui.RequestRedraw(l)
+			}
+			return guigui.HandleInputByWidget(l)
 		}
-		if lowerY := p.Y + h - UnitSize(context); y >= lowerY {
-			dy = float64(lowerY-y) / 4
+		if l.dragDstIndexPlus1 > 0 {
+			if l.onItemsMoved != nil {
+				// TODO: Implement multiple items drop.
+				l.onItemsMoved(l.dragSrcIndexPlus1-1, 1, l.dragDstIndexPlus1-1)
+			}
+			l.dragDstIndexPlus1 = 0
 		}
-		l.scrollOverlay.SetOffsetByDelta(context, l.contentSize(context), 0, dy)
-		i := l.calcDropDstIndex(context)
-		if l.dropDstIndexPlus1-1 != i {
-			l.dropDstIndexPlus1 = i + 1
-			guigui.RequestRedraw(l)
-		}
-		return guigui.HandleInputByWidget(l)
-	}
-
-	// Process dropping.
-	var dropped bool
-	if l.dropSrcIndexPlus1 > 0 && l.dropDstIndexPlus1 > 0 {
-		dropped = true
-		if l.onItemsMoved != nil {
-			// TODO: Implement multiple items drop.
-			l.onItemsMoved(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
-		}
-	}
-
-	l.dropSrcIndexPlus1 = 0
-	if l.dropDstIndexPlus1 != 0 {
-		l.dropDstIndexPlus1 = 0
+		l.dragSrcIndexPlus1 = 0
 		guigui.RequestRedraw(l)
-	}
-
-	if dropped {
 		return guigui.HandleInputByWidget(l)
 	}
 
@@ -334,7 +319,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 		case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
 			item, _ := l.abstractList.ItemByIndex(index)
 			if item.Movable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
-				l.dragDropOverlay.Start(index)
+				l.dragSrcIndexPlus1 = index + 1
 			}
 
 		case inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft):
@@ -352,7 +337,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 		return guigui.HandleInputByWidget(l)
 	}
 
-	l.dropSrcIndexPlus1 = 0
+	l.dragSrcIndexPlus1 = 0
 	l.pressStartX = 0
 	l.pressStartY = 0
 
@@ -470,7 +455,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	// Draw a drag indicator.
-	if context.IsEnabled(l) && !l.dragDropOverlay.IsDragging() {
+	if context.IsEnabled(l) && l.dragSrcIndexPlus1 == 0 {
 		if item, ok := l.abstractList.ItemByIndex(hoveredItemIndex); ok && item.Movable {
 			img, err := theResourceImages.Get("drag_indicator", context.ColorMode())
 			if err != nil {
@@ -487,7 +472,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	}
 
 	// Draw a dragging guideline.
-	if l.dropDstIndexPlus1 > 0 {
+	if l.dragDstIndexPlus1 > 0 {
 		p := context.Position(l)
 		x0 := float32(p.X)
 		x1 := float32(p.X + context.Size(l).X)
@@ -496,7 +481,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			x1 -= float32(listItemPadding(context))
 		}
 		y := float32(p.Y)
-		y += float32(l.itemYFromIndex(context, l.dropDstIndexPlus1-1))
+		y += float32(l.itemYFromIndex(context, l.dragDstIndexPlus1-1))
 		_, offsetY := l.scrollOverlay.Offset()
 		y += float32(offsetY)
 		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5), false)
