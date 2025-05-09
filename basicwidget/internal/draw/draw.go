@@ -555,7 +555,7 @@ func init() {
 	maskShader = s
 }
 
-func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, src *ebiten.Image, bounds image.Rectangle, radius int, geoM ebiten.GeoM, colorScale ebiten.ColorScale) {
+func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, src *ebiten.Image, geoM ebiten.GeoM, colorScale ebiten.ColorScale) {
 	radius = adjustRadius(radius, bounds)
 	op := &ebiten.DrawRectShaderOptions{}
 	op.GeoM = geoM
@@ -573,7 +573,7 @@ func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, src *eb
 	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), maskShader, op)
 }
 
-func IncludesRoundedCorner(bounds image.Rectangle, radius int, srcBounds image.Rectangle) bool {
+func OverlapsWithRoundedCorner(bounds image.Rectangle, radius int, srcBounds image.Rectangle) bool {
 	b1 := image.Rectangle{
 		Min: bounds.Min,
 		Max: bounds.Min.Add(image.Pt(radius, radius)),

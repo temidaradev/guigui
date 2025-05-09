@@ -428,7 +428,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 				continue
 			}
 			clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
-			if r == 0 || !draw.IncludesRoundedCorner(context.Bounds(l), r, b) {
+			if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, b) {
 				dst.SubImage(b).(*ebiten.Image).Fill(clr)
 			} else {
 				var geoM ebiten.GeoM
@@ -436,7 +436,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 				geoM.Translate(float64(b.Min.X), float64(b.Min.Y))
 				var colorScale ebiten.ColorScale
 				colorScale.ScaleWithColor(clr)
-				draw.DrawInRoundedCornerRect(context, dst, whiteSubImage, context.Bounds(l), r, geoM, colorScale)
+				draw.DrawInRoundedCornerRect(context, dst, context.Bounds(l), r, whiteSubImage, geoM, colorScale)
 			}
 		}
 	}
