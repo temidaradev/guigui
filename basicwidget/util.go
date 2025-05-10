@@ -3,7 +3,9 @@
 
 package basicwidget
 
-import "slices"
+import (
+	"slices"
+)
 
 func adjustSliceSize[T any](slice []T, size int) []T {
 	if len(slice) == size {

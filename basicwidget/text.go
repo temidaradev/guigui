@@ -98,7 +98,7 @@ type Text struct {
 	locales     []language.Tag
 	scaleMinus1 float64
 	bold        bool
-	number      bool
+	tabular     bool
 
 	selectable               bool
 	editable                 bool
@@ -285,12 +285,12 @@ func (t *Text) SetBold(bold bool) {
 	guigui.RequestRedraw(t)
 }
 
-func (t *Text) SetNumber(number bool) {
-	if t.number == number {
+func (t *Text) SetTabular(tabular bool) {
+	if t.tabular == tabular {
 		return
 	}
 
-	t.number = number
+	t.tabular = tabular
 	guigui.RequestRedraw(t)
 }
 
@@ -418,7 +418,7 @@ func (t *Text) face(context *guigui.Context, forceBold bool) text.Face {
 		liga = 1
 	}
 	var tnum uint32
-	if t.number {
+	if t.tabular {
 		tnum = 1
 	}
 

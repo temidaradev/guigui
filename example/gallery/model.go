@@ -292,9 +292,9 @@ type ListsModel struct {
 
 func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []basicwidget.TextListItem[int] {
 	if l.listItems == nil {
-		for i := 0; i < 100; i++ {
+		for i := range 99 {
 			l.listItems = append(l.listItems, basicwidget.TextListItem[int]{
-				Text: fmt.Sprintf("Item %d", i),
+				Text: fmt.Sprintf("Item %d", i+1),
 			})
 		}
 	}

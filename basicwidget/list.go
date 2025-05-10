@@ -47,10 +47,9 @@ func DefaultDisabledListItemTextColor(context *guigui.Context) color.Color {
 type List[T comparable] struct {
 	guigui.DefaultWidget
 
-	checkmark       Image
-	listFrame       listFrame[T]
-	scrollOverlay   ScrollOverlay
-	dragDropOverlay dragDropOverlay[int]
+	checkmark     Image
+	listFrame     listFrame[T]
+	scrollOverlay ScrollOverlay
 
 	abstractList               abstractList[T, ListItem[T]]
 	stripeVisible              bool
@@ -60,8 +59,8 @@ type List[T comparable] struct {
 	lastSelectingItemTime      time.Time // TODO: Use ebiten.Tick.
 
 	indexToJumpPlus1        int
-	dropSrcIndexPlus1       int
-	dropDstIndexPlus1       int
+	dragSrcIndexPlus1       int
+	dragDstIndexPlus1       int
 	pressStartX             int
 	pressStartY             int
 	startPressingIndexPlus1 int
@@ -151,11 +150,6 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		l.listFrame.list = l
 		appender.AppendChildWidgetWithBounds(&l.listFrame, context.Bounds(l))
 	}
-
-	l.dragDropOverlay.SetOnDropped(func(data int) {
-		l.dropSrcIndexPlus1 = data + 1
-	})
-	appender.AppendChildWidgetWithBounds(&l.dragDropOverlay, context.Bounds(l))
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
@@ -252,7 +246,7 @@ func (l *List[T]) SetStyle(style ListStyle) {
 func (l *List[T]) calcDropDstIndex(context *guigui.Context) int {
 	_, y := ebiten.CursorPosition()
 	for i := range l.abstractList.ItemCount() {
-		if r := l.itemRect(context, i, true); y < (r.Min.Y+r.Max.Y)/2 {
+		if b := l.itemBounds(context, i, true); y < (b.Min.Y+b.Max.Y)/2 {
 			return i
 		}
 	}
@@ -261,43 +255,34 @@ func (l *List[T]) calcDropDstIndex(context *guigui.Context) int {
 
 func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	// Process dragging.
-	if l.dragDropOverlay.IsDragging() {
-		_, y := ebiten.CursorPosition()
-		p := context.Position(l)
-		h := context.Size(l).Y
-		var dy float64
-		if upperY := p.Y + UnitSize(context); y < upperY {
-			dy = float64(upperY-y) / 4
+	if l.dragSrcIndexPlus1 > 0 {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			_, y := ebiten.CursorPosition()
+			p := context.Position(l)
+			h := context.Size(l).Y
+			var dy float64
+			if upperY := p.Y + UnitSize(context); y < upperY {
+				dy = float64(upperY-y) / 4
+			}
+			if lowerY := p.Y + h - UnitSize(context); y >= lowerY {
+				dy = float64(lowerY-y) / 4
+			}
+			l.scrollOverlay.SetOffsetByDelta(context, l.contentSize(context), 0, dy)
+			if i := l.calcDropDstIndex(context); l.dragDstIndexPlus1-1 != i {
+				l.dragDstIndexPlus1 = i + 1
+				guigui.RequestRedraw(l)
+			}
+			return guigui.HandleInputByWidget(l)
 		}
-		if lowerY := p.Y + h - UnitSize(context); y >= lowerY {
-			dy = float64(lowerY-y) / 4
+		if l.dragDstIndexPlus1 > 0 {
+			if l.onItemsMoved != nil {
+				// TODO: Implement multiple items drop.
+				l.onItemsMoved(l.dragSrcIndexPlus1-1, 1, l.dragDstIndexPlus1-1)
+			}
+			l.dragDstIndexPlus1 = 0
 		}
-		l.scrollOverlay.SetOffsetByDelta(context, l.contentSize(context), 0, dy)
-		i := l.calcDropDstIndex(context)
-		if l.dropDstIndexPlus1-1 != i {
-			l.dropDstIndexPlus1 = i + 1
-			guigui.RequestRedraw(l)
-		}
-		return guigui.HandleInputByWidget(l)
-	}
-
-	// Process dropping.
-	var dropped bool
-	if l.dropSrcIndexPlus1 > 0 && l.dropDstIndexPlus1 > 0 {
-		dropped = true
-		if l.onItemsMoved != nil {
-			// TODO: Implement multiple items drop.
-			l.onItemsMoved(l.dropSrcIndexPlus1-1, 1, l.dropDstIndexPlus1-1)
-		}
-	}
-
-	l.dropSrcIndexPlus1 = 0
-	if l.dropDstIndexPlus1 != 0 {
-		l.dropDstIndexPlus1 = 0
+		l.dragSrcIndexPlus1 = 0
 		guigui.RequestRedraw(l)
-	}
-
-	if dropped {
 		return guigui.HandleInputByWidget(l)
 	}
 
@@ -334,7 +319,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 		case ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft):
 			item, _ := l.abstractList.ItemByIndex(index)
 			if item.Movable && l.SelectedItemIndex() == index && l.startPressingIndexPlus1-1 == index && (l.pressStartX != x || l.pressStartY != y) {
-				l.dragDropOverlay.Start(index)
+				l.dragSrcIndexPlus1 = index + 1
 			}
 
 		case inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft):
@@ -352,7 +337,7 @@ func (l *List[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInpu
 		return guigui.HandleInputByWidget(l)
 	}
 
-	l.dropSrcIndexPlus1 = 0
+	l.dragSrcIndexPlus1 = 0
 	l.pressStartX = 0
 	l.pressStartY = 0
 
@@ -371,7 +356,7 @@ func (l *List[T]) itemYFromIndex(context *guigui.Context, index int) int {
 	return y
 }
 
-func (l *List[T]) itemRect(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
+func (l *List[T]) itemBounds(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
 	_, offsetY := l.scrollOverlay.Offset()
 	b := context.Bounds(l)
 	if !fullWidth {
@@ -400,6 +385,19 @@ func (l *List[T]) selectedItemColor(context *guigui.Context) color.Color {
 	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 }
 
+func (l *List[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle) {
+	r := RoundedCornerRadius(context)
+	if l.style != ListStyleNormal {
+		r = 0
+	}
+	clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+	if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, bounds) {
+		dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
+	} else {
+		draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, bounds, clr)
+	}
+}
+
 func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	if l.style != ListStyleSidebar {
 		clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(l))
@@ -410,39 +408,55 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	vb := context.VisibleBounds(l)
 
 	if l.stripeVisible && l.abstractList.ItemCount() > 0 {
-		r := RoundedCornerRadius(context)
-		if l.style != ListStyleNormal {
-			r = 0
-		}
-		draw.DrawInRoundedCornerRect(dst, context.Bounds(l), r, func(dst *ebiten.Image) {
-			// Draw item stripes.
-			// TODO: Get indices of items that are visible.
-			for i := range l.abstractList.ItemCount() {
-				if i%2 == 0 {
-					continue
-				}
-				b := l.itemRect(context, i, true)
-				if b.Min.Y > vb.Max.Y {
-					break
-				}
-				if !b.Overlaps(vb) {
-					continue
-				}
-				clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
-				dst.SubImage(b).(*ebiten.Image).Fill(clr)
+		// Draw item stripes.
+		// TODO: Get indices of items that are visible.
+		for i := range l.abstractList.ItemCount() {
+			if i%2 == 0 {
+				continue
 			}
-		})
+			b := l.itemBounds(context, i, true)
+			if b.Min.Y > vb.Max.Y {
+				break
+			}
+			if !b.Overlaps(vb) {
+				continue
+			}
+			l.drawStripe(context, dst, b)
+		}
+
+		// Draw the top stripe.
+		{
+			b := l.itemBounds(context, 0, true)
+			b.Min.Y, b.Max.Y = b.Min.Y-RoundedCornerRadius(context), b.Min.Y
+			if b.Overlaps(vb) {
+				l.drawStripe(context, dst, b)
+			}
+		}
+
+		// Draw the bottom stripe.
+		if l.abstractList.ItemCount()%2 == 1 {
+			b := l.itemBounds(context, l.abstractList.ItemCount()-1, true)
+			b.Max.Y, b.Min.Y = b.Max.Y+RoundedCornerRadius(context), b.Max.Y
+			if b.Overlaps(vb) {
+				l.drawStripe(context, dst, b)
+			}
+		}
 	}
 
 	if clr := l.selectedItemColor(context); clr != nil && l.SelectedItemIndex() >= 0 && l.SelectedItemIndex() < l.abstractList.ItemCount() {
-		r := l.itemRect(context, l.SelectedItemIndex(), l.stripeVisible)
-		if r.Overlaps(vb) {
+		b := l.itemBounds(context, l.SelectedItemIndex(), l.stripeVisible)
+		if b.Overlaps(vb) {
 			if l.stripeVisible {
-				dst.SubImage(r).(*ebiten.Image).Fill(clr)
+				r := RoundedCornerRadius(context)
+				if !draw.OverlapsWithRoundedCorner(context.Bounds(l), r, b) {
+					dst.SubImage(b).(*ebiten.Image).Fill(clr)
+				} else {
+					draw.FillInRoundedConerRect(context, dst, context.Bounds(l), r, b, clr)
+				}
 			} else {
-				r.Min.X -= RoundedCornerRadius(context)
-				r.Max.X += RoundedCornerRadius(context)
-				draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
+				b.Min.X -= RoundedCornerRadius(context)
+				b.Max.X += RoundedCornerRadius(context)
+				draw.DrawRoundedRect(context, dst, b, clr, RoundedCornerRadius(context))
 			}
 		}
 	}
@@ -450,20 +464,20 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 	hoveredItemIndex := l.HoveredItemIndex(context)
 	hoveredItem, ok := l.abstractList.ItemByIndex(hoveredItemIndex)
 	if ok && l.isHoveringVisible() && hoveredItemIndex >= 0 && hoveredItemIndex < l.abstractList.ItemCount() && hoveredItem.Selectable {
-		r := l.itemRect(context, hoveredItemIndex, false)
-		r.Min.X -= RoundedCornerRadius(context)
-		r.Max.X += RoundedCornerRadius(context)
-		if r.Overlaps(vb) {
+		b := l.itemBounds(context, hoveredItemIndex, false)
+		b.Min.X -= RoundedCornerRadius(context)
+		b.Max.X += RoundedCornerRadius(context)
+		if b.Overlaps(vb) {
 			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.9)
 			if l.style == ListStyleMenu {
 				clr = draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 			}
-			draw.DrawRoundedRect(context, dst, r, clr, RoundedCornerRadius(context))
+			draw.DrawRoundedRect(context, dst, b, clr, RoundedCornerRadius(context))
 		}
 	}
 
 	// Draw a drag indicator.
-	if context.IsEnabled(l) && !l.dragDropOverlay.IsDragging() {
+	if context.IsEnabled(l) && l.dragSrcIndexPlus1 == 0 {
 		if item, ok := l.abstractList.ItemByIndex(hoveredItemIndex); ok && item.Movable {
 			img, err := theResourceImages.Get("drag_indicator", context.ColorMode())
 			if err != nil {
@@ -472,15 +486,15 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			op := &ebiten.DrawImageOptions{}
 			s := float64(2*RoundedCornerRadius(context)) / float64(img.Bounds().Dy())
 			op.GeoM.Scale(s, s)
-			r := l.itemRect(context, hoveredItemIndex, false)
-			op.GeoM.Translate(float64(r.Min.X-2*RoundedCornerRadius(context)), float64(r.Min.Y)+(float64(r.Dy())-float64(img.Bounds().Dy())*s)/2)
+			b := l.itemBounds(context, hoveredItemIndex, false)
+			op.GeoM.Translate(float64(b.Min.X-2*RoundedCornerRadius(context)), float64(b.Min.Y)+(float64(b.Dy())-float64(img.Bounds().Dy())*s)/2)
 			op.ColorScale.ScaleAlpha(0.5)
 			dst.DrawImage(img, op)
 		}
 	}
 
 	// Draw a dragging guideline.
-	if l.dropDstIndexPlus1 > 0 {
+	if l.dragDstIndexPlus1 > 0 {
 		p := context.Position(l)
 		x0 := float32(p.X)
 		x1 := float32(p.X + context.Size(l).X)
@@ -489,7 +503,7 @@ func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 			x1 -= float32(listItemPadding(context))
 		}
 		y := float32(p.Y)
-		y += float32(l.itemYFromIndex(context, l.dropDstIndexPlus1-1))
+		y += float32(l.itemYFromIndex(context, l.dragDstIndexPlus1-1))
 		_, offsetY := l.scrollOverlay.Offset()
 		y += float32(offsetY)
 		vector.StrokeLine(dst, x0, y, x1, y, 2*float32(context.Scale()), draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5), false)

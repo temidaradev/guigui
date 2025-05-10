@@ -361,12 +361,7 @@ func (c *Context) Opacity(widget Widget) float64 {
 }
 
 func (c *Context) SetOpacity(widget Widget, opacity float64) {
-	if opacity < 0 {
-		opacity = 0
-	}
-	if opacity > 1 {
-		opacity = 1
-	}
+	opacity = min(max(opacity, 0), 1)
 	widgetState := widget.widgetState()
 	if widgetState.transparency == 1-opacity {
 		return
@@ -377,4 +372,8 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 
 func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
 	return c.app.isWidgetHitAt(widget, point)
+}
+
+func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {
+	widget.widgetState().customDraw = customDraw
 }
