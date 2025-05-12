@@ -70,7 +70,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	// Text Inputs
 	width := 12 * u
 
-	t.singleLineText.SetValue("Single Line")
+	t.singleLineText.SetValue("Single line")
 	t.singleLineTextInput.SetOnValueChanged(func(text string, committed bool) {
 		if committed {
 			t.model.TextInputs().SetSingleLineText(text)
