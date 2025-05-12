@@ -8,6 +8,8 @@ import (
 	"image"
 	"os"
 
+	"github.com/hajimehoshi/ebiten/v2"
+
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	"github.com/hajimehoshi/guigui/layout"
@@ -84,6 +86,9 @@ func main() {
 	op := &guigui.RunOptions{
 		Title:         "Counter",
 		WindowMinSize: image.Pt(600, 300),
+		RunGameOptions: &ebiten.RunGameOptions{
+			ApplePressAndHoldEnabled: true,
+		},
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)

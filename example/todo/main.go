@@ -9,7 +9,9 @@ import (
 	"os"
 	"slices"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	"github.com/hajimehoshi/guigui/basicwidget/cjkfont"
@@ -215,6 +217,9 @@ func main() {
 	op := &guigui.RunOptions{
 		Title:         "TODO",
 		WindowMinSize: image.Pt(320, 240),
+		RunGameOptions: &ebiten.RunGameOptions{
+			ApplePressAndHoldEnabled: true,
+		},
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)

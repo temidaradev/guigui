@@ -593,7 +593,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 		var processed bool
 		if pos, ok := t.textPosition(context, start, false); ok {
 			var err error
-			processed, err = t.field.HandleInput(int(pos.X), int(pos.Bottom))
+			processed, err = t.field.HandleInputWithBounds(image.Rect(int(pos.X), int(pos.Top), int(pos.X+1), int(pos.Bottom)))
 			if err != nil {
 				slog.Error(err.Error())
 				return guigui.AbortHandlingInputByWidget(t)

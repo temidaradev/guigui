@@ -8,6 +8,8 @@ import (
 	"image"
 	"os"
 
+	"github.com/hajimehoshi/ebiten/v2"
+
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
 	_ "github.com/hajimehoshi/guigui/basicwidget/cjkfont"
@@ -134,6 +136,9 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 func main() {
 	op := &guigui.RunOptions{
 		Title: "Grid Layout",
+		RunGameOptions: &ebiten.RunGameOptions{
+			ApplePressAndHoldEnabled: true,
+		},
 	}
 	if err := guigui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
