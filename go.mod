@@ -10,9 +10,9 @@ require (
 	github.com/jeandeaual/go-locale v0.0.0-20250421151639-a9d6ed1b3d45
 	github.com/kisielk/errcheck v1.9.0
 	github.com/rivo/uniseg v0.4.7
-	golang.org/x/sys v0.32.0
-	golang.org/x/text v0.24.0
-	golang.org/x/tools v0.32.0
+	golang.org/x/sys v0.33.0
+	golang.org/x/text v0.25.0
+	golang.org/x/tools v0.33.0
 	howett.net/plist v1.0.1
 )
 
@@ -23,5 +23,5 @@ require (
 	github.com/jezek/xgb v1.1.1 // indirect
 	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
 )
