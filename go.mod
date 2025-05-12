@@ -4,8 +4,8 @@ go 1.23.0
 
 require (
 	github.com/atotto/clipboard v0.1.4
-	github.com/ebitengine/purego v0.9.0-alpha.3.0.20250507171635-5047c08daa38
-	github.com/hajimehoshi/ebiten/v2 v2.9.0-alpha.5.0.20250508150639-20a2c2c0a3fb
+	github.com/ebitengine/purego v0.9.0-alpha.4
+	github.com/hajimehoshi/ebiten/v2 v2.9.0-alpha.5.0.20250512134607-c112eb1752b3
 	github.com/hajimehoshi/oklab v0.1.0
 	github.com/jeandeaual/go-locale v0.0.0-20250421151639-a9d6ed1b3d45
 	github.com/kisielk/errcheck v1.9.0
@@ -21,7 +21,7 @@ require (
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
-	golang.org/x/image v0.26.0 // indirect
+	golang.org/x/image v0.27.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 )
