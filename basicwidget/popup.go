@@ -209,10 +209,6 @@ func (p *Popup) ZDelta() int {
 	return popupZ
 }
 
-func (p *Popup) DefaultSize(context *guigui.Context) image.Point {
-	return context.AppSize()
-}
-
 func (p *Popup) PassThrough() bool {
 	return !p.IsOpen()
 }
