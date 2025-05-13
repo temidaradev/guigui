@@ -33,6 +33,11 @@ func (i *ImageButton) Build(context *guigui.Context, appender *guigui.ChildWidge
 	appender.AppendChildWidgetWithBounds(&i.button, context.Bounds(i))
 
 	b := context.Bounds(i)
+	r := RoundedCornerRadius(context)
+	if b.Dx() < 2*r || b.Dy() < 2*r {
+		return nil
+	}
+	b = b.Inset(r)
 	if i.button.isPressed(context) {
 		b = b.Add(image.Pt(0, int(1*context.Scale())))
 	}
