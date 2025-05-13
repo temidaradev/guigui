@@ -22,7 +22,7 @@ type Buttons struct {
 	textIconButton2Text   basicwidget.Text
 	textIconButton2       basicwidget.TextButton
 	imageButtonText       basicwidget.Text
-	imageButton           basicwidget.ImageButton
+	imageButton           basicwidget.TextButton
 	segmentedControlHText basicwidget.Text
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
@@ -70,7 +70,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	if err != nil {
 		return err
 	}
-	b.imageButton.SetImage(img)
+	b.imageButton.SetIcon(img)
 	context.SetEnabled(&b.imageButton, b.model.Buttons().Enabled())
 	context.SetSize(&b.imageButton, image.Pt(2*u, 2*u))
 
