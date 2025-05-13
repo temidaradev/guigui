@@ -31,8 +31,12 @@ func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
 		// TODO: Reduce the saturation?
 		op.ColorScale.ScaleAlpha(0.25)
 	}
-	// TODO: Use a better filter.
-	op.Filter = ebiten.FilterLinear
+	switch {
+	case imgScale < 1:
+		op.Filter = ebiten.FilterLinear
+	case imgScale > 1:
+		op.Filter = ebiten.FilterPixelated
+	}
 	dst.DrawImage(i.image, op)
 }
 
