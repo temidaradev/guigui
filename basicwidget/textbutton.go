@@ -26,7 +26,7 @@ type TextButton struct {
 	button    Button
 	text      Text
 	icon      Image
-	IconAlign IconAlign
+	iconAlign IconAlign
 
 	textColor color.Color
 }
@@ -56,10 +56,10 @@ func (t *TextButton) SetIcon(icon *ebiten.Image) {
 }
 
 func (t *TextButton) SetIconAlign(align IconAlign) {
-	if t.IconAlign == align {
+	if t.iconAlign == align {
 		return
 	}
-	t.IconAlign = align
+	t.iconAlign = align
 	guigui.RequestRedraw(t)
 }
 
@@ -99,7 +99,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	textP := context.Position(t)
 	if t.icon.HasImage() {
 		textP.X += (s.X - ds.X) / 2
-		switch t.IconAlign {
+		switch t.iconAlign {
 		case IconAlignStart:
 			textP.X += textButtonEdgeAndImagePadding(context)
 			textP.X += imgSize + textButtonTextAndImagePadding(context)
@@ -120,7 +120,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	imgP := context.Position(t)
 	if t.text.Value() != "" {
 		imgP.X += (s.X - ds.X) / 2
-		switch t.IconAlign {
+		switch t.iconAlign {
 		case IconAlignStart:
 			imgP.X += textButtonEdgeAndImagePadding(context)
 		case IconAlignEnd:
