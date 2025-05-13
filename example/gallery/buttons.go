@@ -21,6 +21,8 @@ type Buttons struct {
 	textIconButton1       basicwidget.TextButton
 	textIconButton2Text   basicwidget.Text
 	textIconButton2       basicwidget.TextButton
+	imageButtonText       basicwidget.Text
+	imageButton           basicwidget.ImageButton
 	segmentedControlHText basicwidget.Text
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
@@ -40,6 +42,8 @@ func (b *Buttons) SetModel(model *Model) {
 }
 
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	u := basicwidget.UnitSize(context)
+
 	b.textButtonText.SetValue("Text button")
 	b.textButton.SetText("Button")
 	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
@@ -52,14 +56,23 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	}
 	b.textIconButton1.SetIcon(img)
 	context.SetEnabled(&b.textIconButton1, b.model.Buttons().Enabled())
-	context.SetSize(&b.textIconButton1, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
+	context.SetSize(&b.textIconButton1, image.Pt(6*u, guigui.DefaultSize))
 
 	b.textIconButton2Text.SetValue("Button w/ text and icon (2)")
 	b.textIconButton2.SetText("Button")
 	b.textIconButton2.SetIcon(img)
 	b.textIconButton2.SetIconAlign(basicwidget.IconAlignEnd)
 	context.SetEnabled(&b.textIconButton2, b.model.Buttons().Enabled())
-	context.SetSize(&b.textIconButton2, image.Pt(6*basicwidget.UnitSize(context), guigui.DefaultSize))
+	context.SetSize(&b.textIconButton2, image.Pt(6*u, guigui.DefaultSize))
+
+	b.imageButtonText.SetValue("Image button")
+	img, err = theImageCache.GetRaw("gopher")
+	if err != nil {
+		return err
+	}
+	b.imageButton.SetImage(img)
+	context.SetEnabled(&b.imageButton, b.model.Buttons().Enabled())
+	context.SetSize(&b.imageButton, image.Pt(2*u, 2*u))
 
 	b.segmentedControlHText.SetValue("Segmented control (Horizontal)")
 	b.segmentedControlH.SetItems([]basicwidget.SegmentedControlItem[int]{
@@ -108,6 +121,10 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			SecondaryWidget: &b.textIconButton2,
 		},
 		{
+			PrimaryWidget:   &b.imageButtonText,
+			SecondaryWidget: &b.imageButton,
+		},
+		{
 			PrimaryWidget:   &b.segmentedControlHText,
 			SecondaryWidget: &b.segmentedControlH,
 		},
@@ -134,7 +151,6 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 		},
 	})
 
-	u := basicwidget.UnitSize(context)
 	gl := layout.GridLayout{
 		Bounds: context.Bounds(b).Inset(u / 2),
 		Heights: []layout.Size{

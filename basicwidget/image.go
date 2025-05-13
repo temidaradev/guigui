@@ -20,12 +20,13 @@ func (i *Image) Draw(context *guigui.Context, dst *ebiten.Image) {
 		return
 	}
 
-	p := context.Position(i)
-	s := context.Size(i)
-	imgScale := min(float64(s.X)/float64(i.image.Bounds().Dx()), float64(s.Y)/float64(i.image.Bounds().Dy()))
+	b := context.Bounds(i)
+	imgScale := min(float64(b.Dx())/float64(i.image.Bounds().Dx()), float64(b.Dy())/float64(i.image.Bounds().Dy()))
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(imgScale, imgScale)
-	op.GeoM.Translate(float64(p.X), float64(p.Y))
+	op.GeoM.Translate(float64(b.Min.X), float64(b.Min.Y))
+	op.GeoM.Translate((float64(b.Dx())-float64(i.image.Bounds().Dx())*imgScale)/2,
+		(float64(b.Dy())-float64(i.image.Bounds().Dy())*imgScale)/2)
 	if !context.IsEnabled(i) {
 		// TODO: Reduce the saturation?
 		op.ColorScale.ScaleAlpha(0.25)

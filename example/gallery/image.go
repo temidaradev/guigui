@@ -19,6 +19,7 @@ var pngImages embed.FS
 type imageCacheKey struct {
 	name      string
 	colorMode guigui.ColorMode
+	raw       bool
 }
 
 type imageCache struct {
@@ -49,6 +50,36 @@ func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image
 	}
 
 	pImg = basicwidget.CreateMonochromeImage(colorMode, pImg)
+
+	img := ebiten.NewImageFromImage(pImg)
+	if i.m == nil {
+		i.m = map[imageCacheKey]*ebiten.Image{}
+	}
+	i.m[key] = img
+	return img, nil
+}
+
+func (i *imageCache) GetRaw(name string) (*ebiten.Image, error) {
+	key := imageCacheKey{
+		name: name,
+		raw:  true,
+	}
+	if img, ok := i.m[key]; ok {
+		return img, nil
+	}
+
+	f, err := pngImages.Open("resource/" + name + ".png")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+
+	pImg, err := png.Decode(f)
+	if err != nil {
+		return nil, err
+	}
 
 	img := ebiten.NewImageFromImage(pImg)
 	if i.m == nil {

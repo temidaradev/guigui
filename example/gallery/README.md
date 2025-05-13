@@ -1,6 +1,17 @@
 # Licenses
 
-## `resource/*.png`
+## `resource/gopher.png`
+
+The Go Gopher
+
+* https://go.dev/blog/gopher
+
+```
+The Go gopher was designed by Renee French.
+The design is licensed under the Creative Commons 4.0 Attributions license.
+```
+
+## The other images in `resource`
 
 Material Symbols & Icons - Google Fonts
 
