@@ -28,7 +28,7 @@ type imageCache struct {
 
 var theImageCache = &imageCache{}
 
-func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image, error) {
+func (i *imageCache) GetMonochrome(name string, colorMode guigui.ColorMode) (*ebiten.Image, error) {
 	key := imageCacheKey{
 		name:      name,
 		colorMode: colorMode,
@@ -59,7 +59,7 @@ func (i *imageCache) Get(name string, colorMode guigui.ColorMode) (*ebiten.Image
 	return img, nil
 }
 
-func (i *imageCache) GetRaw(name string) (*ebiten.Image, error) {
+func (i *imageCache) Get(name string) (*ebiten.Image, error) {
 	key := imageCacheKey{
 		name: name,
 		raw:  true,
