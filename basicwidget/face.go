@@ -18,11 +18,21 @@ import (
 //go:embed InterVariable.ttf.gz
 var interVariableTTFGz []byte
 
-var theDefaultFaceSource *text.GoTextFaceSource
+var theDefaultFaceSource FaceSourceEntry
+
+type UnicodeRange struct {
+	Min rune
+	Max rune
+}
+
+type FaceSourceEntry struct {
+	FaceSource    *text.GoTextFaceSource
+	UnicodeRanges []UnicodeRange
+}
 
 var (
-	theFaceCache   map[faceCacheKey]text.Face
-	theFaceSources []*text.GoTextFaceSource
+	theFaceCache         map[faceCacheKey]text.Face
+	theFaceSourceEntries []FaceSourceEntry
 )
 
 func init() {
@@ -37,8 +47,11 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	theDefaultFaceSource = f
-	theFaceSources = []*text.GoTextFaceSource{f}
+	e := FaceSourceEntry{
+		FaceSource: f,
+	}
+	theDefaultFaceSource = e
+	theFaceSourceEntries = []FaceSourceEntry{e}
 }
 
 func fontFace(size float64, weight text.Weight, features []fontFeature, lang language.Tag) text.Face {
@@ -53,15 +66,26 @@ func fontFace(size float64, weight text.Weight, features []fontFeature, lang lan
 	}
 
 	var fs []text.Face
-	for _, faceSource := range theFaceSources {
-		f := &text.GoTextFace{
-			Source:   faceSource,
+	for _, entry := range theFaceSourceEntries {
+		gtf := &text.GoTextFace{
+			Source:   entry.FaceSource,
 			Size:     size,
 			Language: lang,
 		}
-		f.SetVariation(text.MustParseTag("wght"), float32(weight))
+		gtf.SetVariation(text.MustParseTag("wght"), float32(weight))
 		for _, ff := range features {
-			f.SetFeature(ff.Tag, ff.Value)
+			gtf.SetFeature(ff.Tag, ff.Value)
+		}
+
+		var f text.Face
+		if len(entry.UnicodeRanges) > 0 {
+			lf := text.NewLimitedFace(gtf)
+			for _, r := range entry.UnicodeRanges {
+				lf.AddUnicodeRange(r.Min, r.Max)
+			}
+			f = lf
+		} else {
+			f = gtf
 		}
 		fs = append(fs, f)
 	}
@@ -78,18 +102,33 @@ func fontFace(size float64, weight text.Weight, features []fontFeature, lang lan
 	return mf
 }
 
-func DefaultFaceSource() *text.GoTextFaceSource {
+func DefaultFaceSourceEntry() FaceSourceEntry {
 	return theDefaultFaceSource
 }
 
-func SetFaceSources(faces []*text.GoTextFaceSource) {
-	if len(faces) == 0 {
-		faces = []*text.GoTextFaceSource{theDefaultFaceSource}
+func areFaceSourceEntriesEqual(a, b []FaceSourceEntry) bool {
+	if len(a) != len(b) {
+		return false
 	}
-	if slices.Equal(theFaceSources, faces) {
+	for i := range a {
+		if a[i].FaceSource != b[i].FaceSource {
+			return false
+		}
+		if !slices.Equal(a[i].UnicodeRanges, b[i].UnicodeRanges) {
+			return false
+		}
+	}
+	return true
+}
+
+func SetFaceSources(entries []FaceSourceEntry) {
+	if len(entries) == 0 {
+		entries = []FaceSourceEntry{theDefaultFaceSource}
+	}
+	if areFaceSourceEntriesEqual(theFaceSourceEntries, entries) {
 		return
 	}
-	theFaceSources = slices.Clone(faces)
+	theFaceSourceEntries = slices.Clone(entries)
 	clear(theFaceCache)
 }
 

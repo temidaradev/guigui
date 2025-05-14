@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget"
@@ -35,24 +36,22 @@ type Root struct {
 	popups       Popups
 
 	model Model
+
+	locales           []language.Tag
+	faceSourceEntries []basicwidget.FaceSourceEntry
+}
+
+func (r *Root) updateFontFaces(context *guigui.Context) {
+	r.locales = slices.Delete(r.locales, 0, len(r.locales))
+	r.locales = context.AppendLocales(r.locales)
+
+	r.faceSourceEntries = slices.Delete(r.faceSourceEntries, 0, len(r.faceSourceEntries))
+	r.faceSourceEntries = cjkfont.AppendRecommendedFaceSourceEntries(r.faceSourceEntries, r.locales)
+	basicwidget.SetFaceSources(r.faceSourceEntries)
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	faceSources := []*text.GoTextFaceSource{
-		basicwidget.DefaultFaceSource(),
-	}
-	for _, locale := range context.AppendLocales(nil) {
-		fs := cjkfont.FaceSourceFromLocale(locale)
-		if fs != nil {
-			faceSources = append(faceSources, fs)
-			break
-		}
-	}
-	if len(faceSources) == 1 {
-		// Set a Japanese font as a fallback. You can use any font you like here.
-		faceSources = append(faceSources, cjkfont.FaceSourceJP())
-	}
-	basicwidget.SetFaceSources(faceSources)
+	r.updateFontFaces(context)
 
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
