@@ -41,7 +41,7 @@ type Root struct {
 	faceSourceEntries []basicwidget.FaceSourceEntry
 }
 
-func (r *Root) updateFontFaces(context *guigui.Context) {
+func (r *Root) updateFontFaceSources(context *guigui.Context) {
 	r.locales = slices.Delete(r.locales, 0, len(r.locales))
 	r.locales = context.AppendLocales(r.locales)
 
@@ -51,7 +51,7 @@ func (r *Root) updateFontFaces(context *guigui.Context) {
 }
 
 func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	r.updateFontFaces(context)
+	r.updateFontFaceSources(context)
 
 	appender.AppendChildWidgetWithBounds(&r.background, context.Bounds(r))
 
