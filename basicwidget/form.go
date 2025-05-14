@@ -52,6 +52,11 @@ func (f *Form) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	return nil
 }
 
+func (f *Form) isItemOmitted(context *guigui.Context, item FormItem) bool {
+	return (item.PrimaryWidget == nil || !context.IsVisible(item.PrimaryWidget)) &&
+		(item.SecondaryWidget == nil || !context.IsVisible(item.SecondaryWidget))
+}
+
 func (f *Form) calcItemBounds(context *guigui.Context) {
 	f.primaryBounds = slices.Delete(f.primaryBounds, 0, len(f.primaryBounds))
 	f.secondaryBounds = slices.Delete(f.secondaryBounds, 0, len(f.secondaryBounds))
@@ -63,11 +68,7 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 		f.primaryBounds = append(f.primaryBounds, image.Rectangle{})
 		f.secondaryBounds = append(f.secondaryBounds, image.Rectangle{})
 
-		if item.PrimaryWidget == nil && item.SecondaryWidget == nil {
-			continue
-		}
-		if item.PrimaryWidget != nil && !context.IsVisible(item.PrimaryWidget) &&
-			item.SecondaryWidget != nil && !context.IsVisible(item.SecondaryWidget) {
+		if f.isItemOmitted(context, item) {
 			continue
 		}
 
@@ -157,8 +158,7 @@ func (f *Form) height(context *guigui.Context) int {
 
 	var y int
 	for _, item := range f.items {
-		if item.PrimaryWidget == nil || item.SecondaryWidget == nil ||
-			(!context.IsVisible(item.PrimaryWidget) && !context.IsVisible(item.SecondaryWidget)) {
+		if f.isItemOmitted(context, item) {
 			continue
 		}
 		var primaryH int
