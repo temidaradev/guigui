@@ -15,6 +15,5 @@ type Background struct {
 }
 
 func (b *Background) Draw(context *guigui.Context, dst *ebiten.Image) {
-	clr := draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(b))
-	dst.Fill(clr)
+	dst.Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95))
 }
