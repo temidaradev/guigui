@@ -66,7 +66,8 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 		if item.PrimaryWidget == nil && item.SecondaryWidget == nil {
 			continue
 		}
-		if !context.IsVisible(item.PrimaryWidget) && !context.IsVisible(item.SecondaryWidget) {
+		if item.PrimaryWidget != nil && !context.IsVisible(item.PrimaryWidget) &&
+			item.SecondaryWidget != nil && !context.IsVisible(item.SecondaryWidget) {
 			continue
 		}
 
