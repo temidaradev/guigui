@@ -76,7 +76,7 @@ func (t *Toggle) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 	return guigui.HandleInputResult{}
 }
 
-func (t *Toggle) Update(context *guigui.Context) error {
+func (t *Toggle) Tick(context *guigui.Context) error {
 	if t.count > 0 {
 		t.count--
 		guigui.RequestRedraw(t)

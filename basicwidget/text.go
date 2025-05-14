@@ -1065,7 +1065,7 @@ func (t *textCursor) resetCounter() {
 	t.counter = 0
 }
 
-func (t *textCursor) Update(context *guigui.Context) error {
+func (t *textCursor) Tick(context *guigui.Context) error {
 	pos, ok := t.text.cursorPosition(context)
 	if t.prevPos != pos {
 		t.resetCounter()

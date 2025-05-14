@@ -164,7 +164,7 @@ func (p *Popup) close(reason PopupClosedReason) {
 	p.openAfterClose = false
 }
 
-func (p *Popup) Update(context *guigui.Context) error {
+func (p *Popup) Tick(context *guigui.Context) error {
 	if p.showing {
 		if p.openingCount < popupMaxOpeningCount() {
 			p.openingCount += 3

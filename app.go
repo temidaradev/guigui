@@ -438,7 +438,7 @@ func (a *app) cursorShape() bool {
 
 func (a *app) updateWidget(widget Widget) error {
 	widgetState := widget.widgetState()
-	if err := widget.Update(&a.context); err != nil {
+	if err := widget.Tick(&a.context); err != nil {
 		return err
 	}
 

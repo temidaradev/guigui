@@ -13,7 +13,7 @@ type Widget interface {
 	Build(context *Context, appender *ChildWidgetAppender) error
 	HandlePointingInput(context *Context) HandleInputResult
 	HandleButtonInput(context *Context) HandleInputResult
-	Update(context *Context) error
+	Tick(context *Context) error
 	CursorShape(context *Context) (ebiten.CursorShapeType, bool)
 	Draw(context *Context, dst *ebiten.Image)
 	ZDelta() int

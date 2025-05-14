@@ -274,7 +274,7 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 	return nil
 }
 
-func (s *ScrollOverlay) Update(context *guigui.Context) error {
+func (s *ScrollOverlay) Tick(context *guigui.Context) error {
 	if s.contentSizeChanged {
 		s.barVisibleTime = barShowingTime()
 		s.contentSizeChanged = false
