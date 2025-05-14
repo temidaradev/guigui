@@ -41,7 +41,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		p.simplePopup.Open(context)
 	})
 
-	p.forms[0].SetItems([]*basicwidget.FormItem{
+	p.forms[0].SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.blurBackgroundText,
 			SecondaryWidget: &p.blurBackgroundToggle,
@@ -58,7 +58,7 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	p.contextMenuPopupText.SetValue("Context menu")
 	p.contextMenuPopupClickHereText.SetValue("Click here by the right button")
 
-	p.forms[1].SetItems([]*basicwidget.FormItem{
+	p.forms[1].SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &p.contextMenuPopupText,
 			SecondaryWidget: &p.contextMenuPopupClickHereText,

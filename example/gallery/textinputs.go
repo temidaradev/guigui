@@ -98,7 +98,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
-	t.textInputForm.SetItems([]*basicwidget.FormItem{
+	t.textInputForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
 			SecondaryWidget: &t.singleLineTextInput,
@@ -178,7 +178,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.enabledToggle.SetValue(t.model.TextInputs().Enabled())
 
-	t.configForm.SetItems([]*basicwidget.FormItem{
+	t.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.horizontalAlignText,
 			SecondaryWidget: &t.horizontalAlignSegmentedControl,

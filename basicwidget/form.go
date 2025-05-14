@@ -22,7 +22,7 @@ type FormItem struct {
 type Form struct {
 	guigui.DefaultWidget
 
-	items []*FormItem
+	items []FormItem
 
 	primaryBounds   []image.Rectangle
 	secondaryBounds []image.Rectangle
@@ -32,7 +32,7 @@ func formItemPadding(context *guigui.Context) (int, int) {
 	return UnitSize(context) / 2, UnitSize(context) / 4
 }
 
-func (f *Form) SetItems(items []*FormItem) {
+func (f *Form) SetItems(items []FormItem) {
 	f.items = slices.Delete(f.items, 0, len(f.items))
 	f.items = append(f.items, items...)
 }

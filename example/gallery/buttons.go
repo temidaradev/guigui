@@ -107,7 +107,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	b.toggleText.SetValue("Toggle")
 	context.SetEnabled(&b.toggle, b.model.Buttons().Enabled())
 
-	b.buttonsForm.SetItems([]*basicwidget.FormItem{
+	b.buttonsForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
 			SecondaryWidget: &b.textButton,
@@ -144,7 +144,7 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	})
 	b.enabledToggle.SetValue(b.model.Buttons().Enabled())
 
-	b.configForm.SetItems([]*basicwidget.FormItem{
+	b.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.enabledText,
 			SecondaryWidget: &b.enabledToggle,

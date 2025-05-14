@@ -134,7 +134,7 @@ func (t *Texts) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 	t.editableToggle.SetValue(t.model.Texts().Editable())
 
-	t.form.SetItems([]*basicwidget.FormItem{
+	t.form.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.horizontalAlignText,
 			SecondaryWidget: &t.horizontalAlignSegmentedControl,

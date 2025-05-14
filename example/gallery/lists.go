@@ -51,7 +51,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	context.SetSize(&l.textList, image.Pt(guigui.DefaultSize, 6*basicwidget.UnitSize(context)))
 	context.SetEnabled(&l.textList, l.model.Lists().Enabled())
 
-	l.listForm.SetItems([]*basicwidget.FormItem{
+	l.listForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &l.textListText,
 			SecondaryWidget: &l.textList,
@@ -75,7 +75,7 @@ func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	})
 	l.enabledToggle.SetValue(l.model.Lists().Enabled())
 
-	l.configForm.SetItems([]*basicwidget.FormItem{
+	l.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &l.showStripeText,
 			SecondaryWidget: &l.showStripeToggle,
