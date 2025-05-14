@@ -94,6 +94,10 @@ type RunOptions struct {
 }
 
 func Run(root Widget, options *RunOptions) error {
+	return RunWithCustomFunc(root, options, ebiten.RunGameWithOptions)
+}
+
+func RunWithCustomFunc(root Widget, options *RunOptions, f func(game ebiten.Game, options *ebiten.RunGameOptions) error) error {
 	if options == nil {
 		options = &RunOptions{}
 	}
@@ -140,7 +144,8 @@ func Run(root Widget, options *RunOptions) error {
 	if eop.ColorSpace == ebiten.ColorSpaceDefault {
 		eop.ColorSpace = ebiten.ColorSpaceSRGB
 	}
-	return ebiten.RunGameWithOptions(a, &eop)
+
+	return f(a, &eop)
 }
 
 func deviceScaleFactor() float64 {
