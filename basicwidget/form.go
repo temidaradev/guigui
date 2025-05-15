@@ -115,8 +115,8 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 }
 
 func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
-	bgClr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.925)
-	borderClr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
+	bgClr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0), 1/32.0)
+	borderClr := draw.ScaleAlpha(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0), 2/32.0)
 
 	bounds := context.Bounds(f)
 	bounds.Max.Y = bounds.Min.Y + f.height(context)
