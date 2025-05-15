@@ -325,7 +325,7 @@ func (c *Context) blur(widget Widget) {
 	}
 	_ = traverseWidget(widget, func(w Widget) error {
 		if c.app.focusedWidget == w {
-			c.app.focusedWidget = nil
+			c.app.focusedWidget = c.app.root
 			return skipTraverse
 		}
 		return nil

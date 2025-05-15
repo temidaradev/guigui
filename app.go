@@ -162,6 +162,10 @@ func (a *app) bounds() image.Rectangle {
 }
 
 func (a *app) Update() error {
+	if a.focusedWidget == nil {
+		a.focusedWidget = a.root
+	}
+
 	rootState := a.root.widgetState()
 	rootState.position = image.Point{}
 
