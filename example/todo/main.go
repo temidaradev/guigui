@@ -24,7 +24,7 @@ type Root struct {
 	background        basicwidget.Background
 	createButton      basicwidget.TextButton
 	textInput         basicwidget.TextInput
-	tasksPanel        basicwidget.ScrollablePanel
+	tasksPanel        basicwidget.Panel
 	tasksPanelContent tasksPanelContent
 
 	model Model

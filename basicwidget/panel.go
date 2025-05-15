@@ -13,51 +13,51 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
-type ScrollablePanel struct {
+type Panel struct {
 	guigui.DefaultWidget
 
 	content      guigui.Widget
 	scollOverlay ScrollOverlay
-	border       scrollablePanelBorder
+	border       panelBorder
 }
 
-func (s *ScrollablePanel) SetContent(widget guigui.Widget) {
-	s.content = widget
+func (p *Panel) SetContent(widget guigui.Widget) {
+	p.content = widget
 }
 
-func (s *ScrollablePanel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	if s.content == nil {
+func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	if p.content == nil {
 		return nil
 	}
 
-	offsetX, offsetY := s.scollOverlay.Offset()
-	appender.AppendChildWidgetWithPosition(s.content, context.Position(s).Add(image.Pt(int(offsetX), int(offsetY))))
+	offsetX, offsetY := p.scollOverlay.Offset()
+	appender.AppendChildWidgetWithPosition(p.content, context.Position(p).Add(image.Pt(int(offsetX), int(offsetY))))
 
-	s.scollOverlay.SetContentSize(context, context.Size(s.content))
-	appender.AppendChildWidgetWithBounds(&s.scollOverlay, context.Bounds(s))
+	p.scollOverlay.SetContentSize(context, context.Size(p.content))
+	appender.AppendChildWidgetWithBounds(&p.scollOverlay, context.Bounds(p))
 
-	s.border.scrollOverlay = &s.scollOverlay
-	appender.AppendChildWidgetWithBounds(&s.border, context.Bounds(s))
+	p.border.scrollOverlay = &p.scollOverlay
+	appender.AppendChildWidgetWithBounds(&p.border, context.Bounds(p))
 
 	return nil
 }
 
-type scrollablePanelBorder struct {
+type panelBorder struct {
 	guigui.DefaultWidget
 
 	scrollOverlay *ScrollOverlay
 }
 
-func (s *scrollablePanelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
+func (p *panelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
 	// Render borders.
 	strokeWidth := float32(1 * context.Scale())
-	bounds := context.Bounds(s)
+	bounds := context.Bounds(p)
 	x0 := float32(bounds.Min.X)
 	x1 := float32(bounds.Max.X)
 	y0 := float32(bounds.Min.Y)
 	y1 := float32(bounds.Max.Y)
-	offsetX, offsetY := s.scrollOverlay.Offset()
-	r := s.scrollOverlay.scrollRange(context)
+	offsetX, offsetY := p.scrollOverlay.Offset()
+	r := p.scrollOverlay.scrollRange(context)
 	if offsetX < float64(r.Max.X) {
 		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85), false)
 	}
