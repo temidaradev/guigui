@@ -399,8 +399,15 @@ func (l *List[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bounds 
 }
 
 func (l *List[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
-	if l.style != ListStyleSidebar {
-		clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(l))
+	var clr color.Color
+	switch l.style {
+	case ListStyleSidebar:
+	case ListStyleNormal:
+		clr = draw.ControlColor(context.ColorMode(), context.IsEnabled(l))
+	case ListStyleMenu:
+		clr = draw.SecondaryControlColor(context.ColorMode(), context.IsEnabled(l))
+	}
+	if clr != nil {
 		bounds := context.Bounds(l)
 		draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 	}

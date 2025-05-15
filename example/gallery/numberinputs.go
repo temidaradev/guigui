@@ -95,7 +95,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	context.SetEnabled(&n.sliderWithoutRange, n.model.NumberInputs().Enabled())
 	context.SetSize(&n.sliderWithoutRange, image.Pt(width, guigui.DefaultSize))
 
-	n.numberInputForm.SetItems([]*basicwidget.FormItem{
+	n.numberInputForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &n.numberInput1Text,
 			SecondaryWidget: &n.numberInput1,
@@ -131,7 +131,7 @@ func (n *NumberInputs) Build(context *guigui.Context, appender *guigui.ChildWidg
 	})
 	n.enabledToggle.SetValue(n.model.NumberInputs().Enabled())
 
-	n.configForm.SetItems([]*basicwidget.FormItem{
+	n.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &n.editableText,
 			SecondaryWidget: &n.editableToggle,

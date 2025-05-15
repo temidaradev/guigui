@@ -27,7 +27,7 @@ func (*DefaultWidget) HandleButtonInput(context *Context) HandleInputResult {
 	return HandleInputResult{}
 }
 
-func (*DefaultWidget) Update(context *Context) error {
+func (*DefaultWidget) Tick(context *Context) error {
 	return nil
 }
 

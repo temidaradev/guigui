@@ -150,8 +150,6 @@ func (p *Popup) Close() {
 }
 
 func (p *Popup) close(reason PopupClosedReason) {
-	p.closedReason = reason
-
 	if p.hiding {
 		return
 	}
@@ -159,12 +157,13 @@ func (p *Popup) close(reason PopupClosedReason) {
 		return
 	}
 
+	p.closedReason = reason
 	p.showing = false
 	p.hiding = true
 	p.openAfterClose = false
 }
 
-func (p *Popup) Update(context *guigui.Context) error {
+func (p *Popup) Tick(context *guigui.Context) error {
 	if p.showing {
 		if p.openingCount < popupMaxOpeningCount() {
 			p.openingCount += 3
@@ -209,10 +208,6 @@ func (p *Popup) ZDelta() int {
 	return popupZ
 }
 
-func (p *Popup) DefaultSize(context *guigui.Context) image.Point {
-	return context.AppSize()
-}
-
 func (p *Popup) PassThrough() bool {
 	return !p.IsOpen()
 }
@@ -245,7 +240,7 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(p)
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 

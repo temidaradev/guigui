@@ -40,7 +40,7 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.textListText.SetValue("Text list")
 	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
-	b.form.SetItems([]*basicwidget.FormItem{
+	b.form.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &b.textButtonText,
 			SecondaryWidget: &b.textButton,

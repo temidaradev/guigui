@@ -94,6 +94,10 @@ type RunOptions struct {
 }
 
 func Run(root Widget, options *RunOptions) error {
+	return RunWithCustomFunc(root, options, ebiten.RunGameWithOptions)
+}
+
+func RunWithCustomFunc(root Widget, options *RunOptions, f func(game ebiten.Game, options *ebiten.RunGameOptions) error) error {
 	if options == nil {
 		options = &RunOptions{}
 	}
@@ -140,7 +144,8 @@ func Run(root Widget, options *RunOptions) error {
 	if eop.ColorSpace == ebiten.ColorSpaceDefault {
 		eop.ColorSpace = ebiten.ColorSpaceSRGB
 	}
-	return ebiten.RunGameWithOptions(a, &eop)
+
+	return f(a, &eop)
 }
 
 func deviceScaleFactor() float64 {
@@ -157,6 +162,10 @@ func (a *app) bounds() image.Rectangle {
 }
 
 func (a *app) Update() error {
+	if a.focusedWidget == nil {
+		a.focusedWidget = a.root
+	}
+
 	rootState := a.root.widgetState()
 	rootState.position = image.Point{}
 
@@ -438,7 +447,7 @@ func (a *app) cursorShape() bool {
 
 func (a *app) updateWidget(widget Widget) error {
 	widgetState := widget.widgetState()
-	if err := widget.Update(&a.context); err != nil {
+	if err := widget.Tick(&a.context); err != nil {
 		return err
 	}
 

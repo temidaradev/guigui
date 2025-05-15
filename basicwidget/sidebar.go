@@ -13,7 +13,7 @@ import (
 type Sidebar struct {
 	guigui.DefaultWidget
 
-	scrollablePanel ScrollablePanel
+	scrollablePanel Panel
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

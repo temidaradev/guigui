@@ -22,7 +22,7 @@ type FormItem struct {
 type Form struct {
 	guigui.DefaultWidget
 
-	items []*FormItem
+	items []FormItem
 
 	primaryBounds   []image.Rectangle
 	secondaryBounds []image.Rectangle
@@ -32,7 +32,7 @@ func formItemPadding(context *guigui.Context) (int, int) {
 	return UnitSize(context) / 2, UnitSize(context) / 4
 }
 
-func (f *Form) SetItems(items []*FormItem) {
+func (f *Form) SetItems(items []FormItem) {
 	f.items = slices.Delete(f.items, 0, len(f.items))
 	f.items = append(f.items, items...)
 }
@@ -52,6 +52,11 @@ func (f *Form) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	return nil
 }
 
+func (f *Form) isItemOmitted(context *guigui.Context, item FormItem) bool {
+	return (item.PrimaryWidget == nil || !context.IsVisible(item.PrimaryWidget)) &&
+		(item.SecondaryWidget == nil || !context.IsVisible(item.SecondaryWidget))
+}
+
 func (f *Form) calcItemBounds(context *guigui.Context) {
 	f.primaryBounds = slices.Delete(f.primaryBounds, 0, len(f.primaryBounds))
 	f.secondaryBounds = slices.Delete(f.secondaryBounds, 0, len(f.secondaryBounds))
@@ -63,10 +68,7 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 		f.primaryBounds = append(f.primaryBounds, image.Rectangle{})
 		f.secondaryBounds = append(f.secondaryBounds, image.Rectangle{})
 
-		if item.PrimaryWidget == nil && item.SecondaryWidget == nil {
-			continue
-		}
-		if !context.IsVisible(item.SecondaryWidget) {
+		if f.isItemOmitted(context, item) {
 			continue
 		}
 
@@ -113,9 +115,12 @@ func (f *Form) calcItemBounds(context *guigui.Context) {
 }
 
 func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
+	bgClr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.925)
+	borderClr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
+
 	bounds := context.Bounds(f)
 	bounds.Max.Y = bounds.Min.Y + f.height(context)
-	draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.925), RoundedCornerRadius(context))
+	draw.DrawRoundedRect(context, dst, bounds, bgClr, RoundedCornerRadius(context))
 
 	if len(f.items) > 0 {
 		paddingX, paddingY := formItemPadding(context)
@@ -136,15 +141,13 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 			x1 := float32(bounds.Max.X - paddingX)
 			yy := float32(y) + float32(paddingY)
 			width := 1 * float32(context.Scale())
-			clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
-			vector.StrokeLine(dst, x0, yy, x1, yy, width, clr, false)
+			vector.StrokeLine(dst, x0, yy, x1, yy, width, borderClr, false)
 
 			y += paddingY
 		}
 	}
 
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875)
-	draw.DrawRoundedRectBorder(context, dst, bounds, clr, clr, RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
+	draw.DrawRoundedRectBorder(context, dst, bounds, borderClr, borderClr, RoundedCornerRadius(context), 1*float32(context.Scale()), draw.RoundedRectBorderTypeRegular)
 }
 
 func (f *Form) DefaultSize(context *guigui.Context) image.Point {
@@ -156,8 +159,7 @@ func (f *Form) height(context *guigui.Context) int {
 
 	var y int
 	for _, item := range f.items {
-		if (item.PrimaryWidget == nil || !context.IsVisible(item.PrimaryWidget)) &&
-			(item.SecondaryWidget == nil || !context.IsVisible(item.SecondaryWidget)) {
+		if f.isItemOmitted(context, item) {
 			continue
 		}
 		var primaryH int

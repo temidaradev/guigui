@@ -45,7 +45,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	r.gapToggle.SetOnValueChanged(func(value bool) {
 		r.gap = value
 	})
-	formItems := []*basicwidget.FormItem{
+	r.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &r.fillText,
 			SecondaryWidget: &r.fillToggle,
@@ -54,8 +54,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 			PrimaryWidget:   &r.gapText,
 			SecondaryWidget: &r.gapToggle,
 		},
-	}
-	r.configForm.SetItems(formItems)
+	})
 
 	u := basicwidget.UnitSize(context)
 	gl := layout.GridLayout{

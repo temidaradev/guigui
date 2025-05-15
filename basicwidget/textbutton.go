@@ -26,7 +26,7 @@ type TextButton struct {
 	button    Button
 	text      Text
 	icon      Image
-	IconAlign IconAlign
+	iconAlign IconAlign
 
 	textColor color.Color
 }
@@ -56,10 +56,10 @@ func (t *TextButton) SetIcon(icon *ebiten.Image) {
 }
 
 func (t *TextButton) SetIconAlign(align IconAlign) {
-	if t.IconAlign == align {
+	if t.iconAlign == align {
 		return
 	}
-	t.IconAlign = align
+	t.iconAlign = align
 	guigui.RequestRedraw(t)
 }
 
@@ -99,10 +99,10 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	textP := context.Position(t)
 	if t.icon.HasImage() {
 		textP.X += (s.X - ds.X) / 2
-		switch t.IconAlign {
+		switch t.iconAlign {
 		case IconAlignStart:
 			textP.X += textButtonEdgeAndImagePadding(context)
-			textP.X += imgSize + textButtonTextAndImagePadding(context)
+			textP.X += imgSize.X + textButtonTextAndImagePadding(context)
 		case IconAlignEnd:
 			textP.X += textButtonEdgeAndTextPadding(context)
 		}
@@ -120,7 +120,7 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 	imgP := context.Position(t)
 	if t.text.Value() != "" {
 		imgP.X += (s.X - ds.X) / 2
-		switch t.IconAlign {
+		switch t.iconAlign {
 		case IconAlignStart:
 			imgP.X += textButtonEdgeAndImagePadding(context)
 		case IconAlignEnd:
@@ -128,15 +128,15 @@ func (t *TextButton) Build(context *guigui.Context, appender *guigui.ChildWidget
 			imgP.X += tw + textButtonTextAndImagePadding(context)
 		}
 	} else {
-		imgP.X += (s.X - imgSize) / 2
+		imgP.X += (s.X - imgSize.X) / 2
 	}
-	imgP.Y += (s.Y - imgSize) / 2
+	imgP.Y += (s.Y - imgSize.Y) / 2
 	if t.button.isPressed(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
 	appender.AppendChildWidgetWithBounds(&t.icon, image.Rectangle{
 		Min: imgP,
-		Max: imgP.Add(image.Pt(imgSize, imgSize)),
+		Max: imgP.Add(imgSize),
 	})
 
 	return nil
@@ -186,9 +186,16 @@ func (t *TextButton) defaultIconSize(context *guigui.Context) int {
 	return int(LineHeight(context))
 }
 
-func (t *TextButton) iconSize(context *guigui.Context) int {
+func (t *TextButton) iconSize(context *guigui.Context) image.Point {
 	s := context.Size(t)
-	return min(t.defaultIconSize(context), s.X, s.Y)
+	if t.text.Value() != "" {
+		s := min(t.defaultIconSize(context), s.X, s.Y)
+		return image.Pt(s, s)
+	}
+	r := t.button.radius(context)
+	w := max(0, s.X-2*r)
+	h := max(int(LineHeight(context)), s.Y-2*r)
+	return image.Pt(w, h)
 }
 
 func (t *TextButton) setUseAccentColor(use bool) {

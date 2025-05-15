@@ -28,11 +28,11 @@ type Settings struct {
 var hongKongChinese = language.MustParse("zh-HK")
 
 func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	lightModeImg, err := theImageCache.Get("light_mode", context.ColorMode())
+	lightModeImg, err := theImageCache.GetMonochrome("light_mode", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	darkModeImg, err := theImageCache.Get("dark_mode", context.ColorMode())
+	darkModeImg, err := theImageCache.GetMonochrome("dark_mode", context.ColorMode())
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (s *Settings) Build(context *guigui.Context, appender *guigui.ChildWidgetAp
 	})
 	s.scaleSegmentedControl.SelectItemByID(context.AppScale())
 
-	s.form.SetItems([]*basicwidget.FormItem{
+	s.form.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &s.colorModeText,
 			SecondaryWidget: &s.colorModeSegmentedControl,

@@ -40,27 +40,27 @@ func (t *TextInputs) SetModel(model *Model) {
 }
 
 func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	imgAlignStart, err := theImageCache.Get("format_align_left", context.ColorMode())
+	imgAlignStart, err := theImageCache.GetMonochrome("format_align_left", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	imgAlignCenter, err := theImageCache.Get("format_align_center", context.ColorMode())
+	imgAlignCenter, err := theImageCache.GetMonochrome("format_align_center", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	imgAlignEnd, err := theImageCache.Get("format_align_right", context.ColorMode())
+	imgAlignEnd, err := theImageCache.GetMonochrome("format_align_right", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	imgAlignTop, err := theImageCache.Get("vertical_align_top", context.ColorMode())
+	imgAlignTop, err := theImageCache.GetMonochrome("vertical_align_top", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	imgAlignMiddle, err := theImageCache.Get("vertical_align_center", context.ColorMode())
+	imgAlignMiddle, err := theImageCache.GetMonochrome("vertical_align_center", context.ColorMode())
 	if err != nil {
 		return err
 	}
-	imgAlignBottom, err := theImageCache.Get("vertical_align_bottom", context.ColorMode())
+	imgAlignBottom, err := theImageCache.GetMonochrome("vertical_align_bottom", context.ColorMode())
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
-	t.textInputForm.SetItems([]*basicwidget.FormItem{
+	t.textInputForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
 			SecondaryWidget: &t.singleLineTextInput,
@@ -178,7 +178,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	})
 	t.enabledToggle.SetValue(t.model.TextInputs().Enabled())
 
-	t.configForm.SetItems([]*basicwidget.FormItem{
+	t.configForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.horizontalAlignText,
 			SecondaryWidget: &t.horizontalAlignSegmentedControl,

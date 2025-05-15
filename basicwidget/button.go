@@ -96,6 +96,11 @@ func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, b
 	return 0, true
 }
 
+func (b *Button) radius(context *guigui.Context) int {
+	bounds := context.Bounds(b)
+	return min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
+}
+
 func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 	cm := context.ColorMode()
 	backgroundColor := draw.ControlColor(context.ColorMode(), context.IsEnabled(b))
@@ -111,12 +116,12 @@ func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	bounds := context.Bounds(b)
-	r := min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
+	r := b.radius(context)
 	border := !b.borderInvisible
 	if context.IsEnabled(b) && (b.isHovered(context) || b.keepPressed) {
 		border = true
 	}
+	bounds := context.Bounds(b)
 	if border || b.isPressed(context) {
 		draw.DrawRoundedRectWithSharpenCorners(context, dst, bounds, backgroundColor, r, b.sharpenCorners)
 	}
