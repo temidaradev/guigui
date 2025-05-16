@@ -62,6 +62,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		r.model.DeleteTaskByID(id)
 	})
 	r.tasksPanel.SetContent(&r.tasksPanelContent)
+	r.tasksPanel.SetAutoBorder(true)
 
 	u := basicwidget.UnitSize(context)
 	gl := layout.GridLayout{
