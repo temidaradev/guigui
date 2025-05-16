@@ -21,7 +21,7 @@ func (s *Sidebar) SetModel(model *Model) {
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.panel.SetStyle(basicwidget.PanelStyleSide)
-	s.panel.SetBorders(basicwidget.PanelBorders{
+	s.panel.SetBorder(basicwidget.PanelBorder{
 		End: true,
 	})
 	context.SetSize(&s.panelContent, context.Size(s))

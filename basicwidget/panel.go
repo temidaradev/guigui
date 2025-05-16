@@ -20,7 +20,7 @@ const (
 	PanelStyleSide
 )
 
-type PanelBorders struct {
+type PanelBorder struct {
 	Start  bool
 	Top    bool
 	End    bool
@@ -48,8 +48,12 @@ func (p *Panel) SetStyle(typ PanelStyle) {
 	guigui.RequestRedraw(p)
 }
 
-func (p *Panel) SetBorders(borders PanelBorders) {
+func (p *Panel) SetBorder(borders PanelBorder) {
 	p.border.setBorders(borders)
+}
+
+func (p *Panel) SetAutoBorder(auto bool) {
+	p.border.SetAutoBorder(auto)
 }
 
 func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -80,14 +84,23 @@ type panelBorder struct {
 	guigui.DefaultWidget
 
 	scrollOverlay *ScrollOverlay
-	borders       PanelBorders
+	borders       PanelBorder
+	autoBorder    bool
 }
 
-func (b *panelBorder) setBorders(borders PanelBorders) {
+func (b *panelBorder) setBorders(borders PanelBorder) {
 	if b.borders == borders {
 		return
 	}
 	b.borders = borders
+	guigui.RequestRedraw(b)
+}
+
+func (b *panelBorder) SetAutoBorder(auto bool) {
+	if b.autoBorder == auto {
+		return
+	}
+	b.autoBorder = auto
 	guigui.RequestRedraw(b)
 }
 
@@ -101,17 +114,17 @@ func (p *panelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
 	y1 := float32(bounds.Max.Y)
 	offsetX, offsetY := p.scrollOverlay.Offset()
 	r := p.scrollOverlay.scrollRange(context)
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.825)
-	if offsetX < float64(r.Max.X) || p.borders.Start {
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
+	if (p.autoBorder && offsetX < float64(r.Max.X)) || p.borders.Start {
 		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, clr, false)
 	}
-	if offsetY < float64(r.Max.Y) || p.borders.Top {
+	if (p.autoBorder && offsetY < float64(r.Max.Y)) || p.borders.Top {
 		vector.StrokeLine(dst, x0, y0+strokeWidth/2, x1, y0+strokeWidth/2, strokeWidth, clr, false)
 	}
-	if offsetX > float64(r.Min.X) || p.borders.End {
+	if (p.autoBorder && offsetX > float64(r.Min.X)) || p.borders.End {
 		vector.StrokeLine(dst, x1-strokeWidth/2, y0, x1-strokeWidth/2, y1, strokeWidth, clr, false)
 	}
-	if offsetY > float64(r.Min.Y) || p.borders.Bottom {
+	if (p.autoBorder && offsetY > float64(r.Min.Y)) || p.borders.Bottom {
 		vector.StrokeLine(dst, x0, y1-strokeWidth/2, x1, y1-strokeWidth/2, strokeWidth, clr, false)
 	}
 }
