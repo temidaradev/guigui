@@ -153,7 +153,9 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
-		guigui.RequestRedraw(l)
+		if l.isHoveringVisible() {
+			guigui.RequestRedraw(l)
+		}
 	}
 
 	return nil

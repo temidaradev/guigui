@@ -240,7 +240,7 @@ func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.Handl
 
 func (p *popupContent) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(p)
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.95)
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 1)
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
 }
 
