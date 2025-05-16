@@ -98,34 +98,34 @@ func (s *SegmentedControl[T]) Build(context *guigui.Context, appender *guigui.Ch
 				switch s.direction {
 				case SegmentedControlDirectionHorizontal:
 					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-						UpperRight: true,
-						LowerRight: true,
+						UpperEnd: true,
+						LowerEnd: true,
 					})
 				case SegmentedControlDirectionVertical:
 					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-						LowerLeft:  true,
-						LowerRight: true,
+						LowerStart: true,
+						LowerEnd:   true,
 					})
 				}
 			case s.abstractList.ItemCount() - 1:
 				switch s.direction {
 				case SegmentedControlDirectionHorizontal:
 					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-						UpperLeft: true,
-						LowerLeft: true,
+						UpperStart: true,
+						LowerStart: true,
 					})
 				case SegmentedControlDirectionVertical:
 					s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-						UpperRight: true,
-						UpperLeft:  true,
+						UpperEnd:   true,
+						UpperStart: true,
 					})
 				}
 			default:
 				s.textButtons[i].setSharpenCorners(draw.SharpenCorners{
-					UpperLeft:  true,
-					LowerLeft:  true,
-					UpperRight: true,
-					LowerRight: true,
+					UpperStart: true,
+					LowerStart: true,
+					UpperEnd:   true,
+					LowerEnd:   true,
 				})
 			}
 		}

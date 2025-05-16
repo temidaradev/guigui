@@ -303,17 +303,17 @@ func whiteRoundedRectBorder(radius int, borderWidth float32, borderType RoundedR
 }
 
 type SharpenCorners struct {
-	UpperLeft  bool
-	UpperRight bool
-	LowerLeft  bool
-	LowerRight bool
+	UpperStart bool
+	UpperEnd   bool
+	LowerStart bool
+	LowerEnd   bool
 }
 
 func (s *SharpenCorners) bools() [3][3]bool {
 	return [3][3]bool{
-		{!s.UpperLeft, true, !s.UpperRight},
+		{!s.UpperStart, true, !s.UpperEnd},
 		{true, true, true},
-		{!s.LowerLeft, true, !s.LowerRight},
+		{!s.LowerStart, true, !s.LowerEnd},
 	}
 }
 

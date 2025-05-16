@@ -41,6 +41,9 @@ func (p *Panel) SetStyle(typ PanelStyle) {
 	guigui.RequestRedraw(p)
 }
 
+func (p *Panel) SetBorder() {
+}
+
 func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content == nil {
 		return nil

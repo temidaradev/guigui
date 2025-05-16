@@ -159,8 +159,8 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	n.upButton.SetIcon(imgUp)
 	n.upButton.setSharpenCorners(draw.SharpenCorners{
-		LowerLeft:  true,
-		LowerRight: true,
+		LowerStart: true,
+		LowerEnd:   true,
 	})
 	n.upButton.setPairedButton(&n.downButton)
 	n.upButton.setOnRepeat(func() {
@@ -182,8 +182,8 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	n.downButton.SetIcon(imgDown)
 	n.downButton.setSharpenCorners(draw.SharpenCorners{
-		UpperLeft:  true,
-		UpperRight: true,
+		UpperStart: true,
+		UpperEnd:   true,
 	})
 	n.downButton.setPairedButton(&n.upButton)
 	n.downButton.setOnRepeat(func() {
