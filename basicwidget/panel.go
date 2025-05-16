@@ -76,7 +76,7 @@ func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 func (p *Panel) Draw(context *guigui.Context, dst *ebiten.Image) {
 	switch p.style {
 	case PanelStyleSide:
-		dst.Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875))
+		dst.Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.9))
 	}
 }
 
@@ -114,7 +114,7 @@ func (p *panelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
 	y1 := float32(bounds.Max.Y)
 	offsetX, offsetY := p.scrollOverlay.Offset()
 	r := p.scrollOverlay.scrollRange(context)
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.775)
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
 	if (p.autoBorder && offsetX < float64(r.Max.X)) || p.borders.Start {
 		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, clr, false)
 	}
