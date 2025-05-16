@@ -11,19 +11,20 @@ import (
 type Sidebar struct {
 	guigui.DefaultWidget
 
-	sidebar        basicwidget.Sidebar
-	sidebarContent sidebarContent
+	panel        basicwidget.Panel
+	panelContent sidebarContent
 }
 
 func (s *Sidebar) SetModel(model *Model) {
-	s.sidebarContent.SetModel(model)
+	s.panelContent.SetModel(model)
 }
 
 func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	context.SetSize(&s.sidebarContent, context.Size(s))
-	s.sidebar.SetContent(&s.sidebarContent)
+	s.panel.SetStyle(basicwidget.PanelStyleSide)
+	context.SetSize(&s.panelContent, context.Size(s))
+	s.panel.SetContent(&s.panelContent)
 
-	appender.AppendChildWidgetWithBounds(&s.sidebar, context.Bounds(s))
+	appender.AppendChildWidgetWithBounds(&s.panel, context.Bounds(s))
 
 	return nil
 }

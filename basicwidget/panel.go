@@ -13,16 +13,32 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
+type PanelStyle int
+
+const (
+	PanelStyleDefault PanelStyle = iota
+	PanelStyleSide
+)
+
 type Panel struct {
 	guigui.DefaultWidget
 
 	content      guigui.Widget
 	scollOverlay ScrollOverlay
 	border       panelBorder
+	style        PanelStyle
 }
 
 func (p *Panel) SetContent(widget guigui.Widget) {
 	p.content = widget
+}
+
+func (p *Panel) SetStyle(typ PanelStyle) {
+	if p.style == typ {
+		return
+	}
+	p.style = typ
+	guigui.RequestRedraw(p)
 }
 
 func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -40,6 +56,13 @@ func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	appender.AppendChildWidgetWithBounds(&p.border, context.Bounds(p))
 
 	return nil
+}
+
+func (p *Panel) Draw(context *guigui.Context, dst *ebiten.Image) {
+	switch p.style {
+	case PanelStyleSide:
+		dst.Fill(draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.875))
+	}
 }
 
 type panelBorder struct {
