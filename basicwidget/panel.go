@@ -20,6 +20,13 @@ const (
 	PanelStyleSide
 )
 
+type PanelBorders struct {
+	Start  bool
+	Top    bool
+	End    bool
+	Bottom bool
+}
+
 type Panel struct {
 	guigui.DefaultWidget
 
@@ -41,7 +48,8 @@ func (p *Panel) SetStyle(typ PanelStyle) {
 	guigui.RequestRedraw(p)
 }
 
-func (p *Panel) SetBorder() {
+func (p *Panel) SetBorders(borders PanelBorders) {
+	p.border.setBorders(borders)
 }
 
 func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -72,6 +80,15 @@ type panelBorder struct {
 	guigui.DefaultWidget
 
 	scrollOverlay *ScrollOverlay
+	borders       PanelBorders
+}
+
+func (b *panelBorder) setBorders(borders PanelBorders) {
+	if b.borders == borders {
+		return
+	}
+	b.borders = borders
+	guigui.RequestRedraw(b)
 }
 
 func (p *panelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
@@ -84,17 +101,17 @@ func (p *panelBorder) Draw(context *guigui.Context, dst *ebiten.Image) {
 	y1 := float32(bounds.Max.Y)
 	offsetX, offsetY := p.scrollOverlay.Offset()
 	r := p.scrollOverlay.scrollRange(context)
-	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.85)
-	if offsetX < float64(r.Max.X) {
+	clr := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.825)
+	if offsetX < float64(r.Max.X) || p.borders.Start {
 		vector.StrokeLine(dst, x0+strokeWidth/2, y0, x0+strokeWidth/2, y1, strokeWidth, clr, false)
 	}
-	if offsetY < float64(r.Max.Y) {
+	if offsetY < float64(r.Max.Y) || p.borders.Top {
 		vector.StrokeLine(dst, x0, y0+strokeWidth/2, x1, y0+strokeWidth/2, strokeWidth, clr, false)
 	}
-	if offsetX > float64(r.Min.X) {
+	if offsetX > float64(r.Min.X) || p.borders.End {
 		vector.StrokeLine(dst, x1-strokeWidth/2, y0, x1-strokeWidth/2, y1, strokeWidth, clr, false)
 	}
-	if offsetY > float64(r.Min.Y) {
+	if offsetY > float64(r.Min.Y) || p.borders.Bottom {
 		vector.StrokeLine(dst, x0, y1-strokeWidth/2, x1, y1-strokeWidth/2, strokeWidth, clr, false)
 	}
 }
