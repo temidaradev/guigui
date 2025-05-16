@@ -135,7 +135,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
 	n.textInput.SetTabular(true)
-	n.textInput.setPaddingRight(UnitSize(context) / 2)
+	n.textInput.setPaddingEnd(UnitSize(context) / 2)
 	n.textInput.SetOnValueChanged(func(text string, committed bool) {
 		if !committed {
 			return
