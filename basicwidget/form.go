@@ -152,7 +152,7 @@ func (f *Form) Draw(context *guigui.Context, dst *ebiten.Image) {
 
 func (f *Form) DefaultSize(context *guigui.Context) image.Point {
 	paddingS := formItemPadding(context)
-	gapX := UnitSize(context) / 2
+	gapX := UnitSize(context)
 
 	var s image.Point
 	for _, item := range f.items {
