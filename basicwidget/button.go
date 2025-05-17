@@ -45,6 +45,14 @@ func (b *Button) setPairedButton(pair *Button) {
 	b.pairedButton = pair
 }
 
+func (b *Button) setPressed(pressed bool) {
+	if b.pressed == pressed {
+		return
+	}
+	b.pressed = pressed
+	guigui.RequestRedraw(b)
+}
+
 func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	hovered := b.isHovered(context)
 	if b.prevHovered != hovered {
@@ -58,7 +66,7 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 	if b.isHovered(context) && !b.keepPressed {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			context.SetFocused(b, true)
-			b.pressed = true
+			b.setPressed(true)
 			if b.onDown != nil {
 				b.onDown()
 			}
@@ -76,15 +84,16 @@ func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 			return guigui.HandleInputByWidget(b)
 		}
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && b.pressed {
-			b.pressed = false
+			b.setPressed(false)
 			if b.onUp != nil {
 				b.onUp()
 			}
+			guigui.RequestRedraw(b)
 			return guigui.HandleInputByWidget(b)
 		}
 	}
 	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		b.pressed = false
+		b.setPressed(false)
 	}
 	return guigui.HandleInputResult{}
 }
