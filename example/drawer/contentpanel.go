@@ -30,7 +30,9 @@ type contentPanelContent struct {
 }
 
 func (c *contentPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	c.text.SetValue("Content panel")
+	c.text.SetValue("Content panel: " + dummyText)
+	c.text.SetAutoWrap(true)
+	c.text.SetSelectable(true)
 	u := basicwidget.UnitSize(context)
 	appender.AppendChildWidgetWithBounds(&c.text, context.Bounds(c).Inset(u/2))
 	return nil

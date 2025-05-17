@@ -34,7 +34,9 @@ type leftPanelContent struct {
 }
 
 func (l *leftPanelContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	l.text.SetValue("Left panel")
+	l.text.SetValue("Left panel: " + dummyText)
+	l.text.SetAutoWrap(true)
+	l.text.SetSelectable(true)
 	u := basicwidget.UnitSize(context)
 	appender.AppendChildWidgetWithBounds(&l.text, context.Bounds(l).Inset(u/2))
 	return nil
