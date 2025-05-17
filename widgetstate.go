@@ -5,8 +5,10 @@ package guigui
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"maps"
+	"runtime"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -87,6 +89,7 @@ type widgetState struct {
 	offscreen *ebiten.Image
 
 	dirty     bool
+	dirtyAt   string
 	hasZCache bool
 	zCache    int
 
@@ -153,6 +156,12 @@ func traverseWidget(widget Widget, f func(widget Widget) error) error {
 
 func RequestRedraw(widget Widget) {
 	widget.widgetState().dirty = true
+	if theDebugMode.showRenderingRegions {
+		_, file, line, ok := runtime.Caller(1)
+		if ok {
+			widget.widgetState().dirtyAt = fmt.Sprintf("%s:%d", file, line)
+		}
+	}
 }
 
 func z(widget Widget) int {

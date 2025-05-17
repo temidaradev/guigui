@@ -237,10 +237,11 @@ func (a *app) Update() error {
 			return nil
 		}
 		if theDebugMode.showRenderingRegions {
-			slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "region", vb)
+			slog.Info("request redrawing", "requester", fmt.Sprintf("%T", widget), "at", widget.widgetState().dirtyAt, "region", vb)
 		}
 		a.requestRedrawWidget(widget)
 		widget.widgetState().dirty = false
+		widget.widgetState().dirtyAt = ""
 		return nil
 	})
 
