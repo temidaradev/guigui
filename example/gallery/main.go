@@ -18,9 +18,6 @@ import (
 	"github.com/hajimehoshi/guigui/layout"
 )
 
-func init() {
-}
-
 type Root struct {
 	guigui.DefaultWidget
 
