@@ -91,6 +91,16 @@ func TestReplaceNewLineWithSpace(t *testing.T) {
 			outEnd:        7,
 			outShiftIndex: 7,
 		},
+		{
+			text:          "a\r\u2028\nb",
+			start:         5,
+			end:           7,
+			shiftIndex:    5,
+			outText:       "a   b",
+			outStart:      3,
+			outEnd:        5,
+			outShiftIndex: 3,
+		},
 	}
 
 	for _, tc := range testCases {
