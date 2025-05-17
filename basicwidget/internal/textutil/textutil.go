@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"image"
 	"iter"
+	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -70,7 +72,7 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 				if lineEnd-lineStart > 0 {
 					l := origStr[lineStart : lineEnd+len(segment)]
 					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
-					if advance(l[:len(l)-tailingLineBreakLen(l)]) > float64(width) {
+					if advance(strings.TrimRightFunc(l[:len(l)-tailingLineBreakLen(l)], unicode.IsSpace)) > float64(width) {
 						if !yield(pos, origStr[lineStart:lineEnd]) {
 							return
 						}
