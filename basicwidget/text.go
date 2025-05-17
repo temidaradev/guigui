@@ -252,6 +252,10 @@ func (t *Text) setSelection(start, end int) {
 }
 
 func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) {
+	if !t.multiline {
+		text, start, end, shiftIndex = replaceNewLinesWithSpace(text, start, end, shiftIndex)
+	}
+
 	t.selectionShiftIndexPlus1 = shiftIndex + 1
 	if start > end {
 		start, end = end, start
@@ -1128,4 +1132,46 @@ func (t *textCursor) DefaultSize(context *guigui.Context) image.Point {
 
 func (t *textCursor) PassThrough() bool {
 	return true
+}
+
+func replaceNewLinesWithSpace(text string, start, end, shiftIndex int) (string, int, int, int) {
+	var buf strings.Builder
+	for {
+		pos, len := textutil.FirstLineBreakPositionAndLen(text)
+		if len == 0 {
+			buf.WriteString(text)
+			break
+		}
+		buf.WriteString(text[:pos])
+		origLen := buf.Len()
+		buf.WriteString(" ")
+		if diff := len - 1; diff > 0 {
+			if origLen < start {
+				if start >= origLen+len {
+					start -= diff
+				} else {
+					// This is a very rare case, e.g. the position is in between '\r' and '\n'.
+					start = origLen + 1
+				}
+			}
+			if origLen < end {
+				if end >= origLen+len {
+					end -= diff
+				} else {
+					end = origLen + 1
+				}
+			}
+			if shiftIndex >= 0 && origLen < shiftIndex {
+				if shiftIndex >= origLen+len {
+					shiftIndex -= diff
+				} else {
+					shiftIndex = origLen + 1
+				}
+			}
+		}
+		text = text[pos+len:]
+	}
+	text = buf.String()
+
+	return text, start, end, shiftIndex
 }

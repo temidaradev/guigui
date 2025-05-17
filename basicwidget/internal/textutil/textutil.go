@@ -48,7 +48,7 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 		if !autoWrap {
 			var pos int
 			for pos < len(str) {
-				p, l := firstLineBreakPositionAndLen(str[pos:])
+				p, l := FirstLineBreakPositionAndLen(str[pos:])
 				if p == -1 {
 					if !yield(pos, str[pos:]) {
 						return
@@ -231,7 +231,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	return pos0, pos1, 2
 }
 
-func firstLineBreakPositionAndLen(str string) (pos, length int) {
+func FirstLineBreakPositionAndLen(str string) (pos, length int) {
 	for i, r := range str {
 		if r == 0x000a || r == 0x000b || r == 0x000c {
 			return i, 1
