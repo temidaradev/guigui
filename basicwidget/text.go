@@ -100,15 +100,19 @@ type Text struct {
 	bold        bool
 	tabular     bool
 
-	selectable               bool
-	editable                 bool
-	multiline                bool
-	autoWrap                 bool
-	selectionDragStartPlus1  int
-	selectionDragEndPlus1    int
+	selectable bool
+	editable   bool
+	multiline  bool
+	autoWrap   bool
+
+	selectionDragStartPlus1 int
+	selectionDragEndPlus1   int
+
+	// selectionShiftIndexPlus1 is the index (+1) of the selection that is moved by Shift and arrow keys.
 	selectionShiftIndexPlus1 int
-	dragging                 bool
-	prevFocused              bool
+
+	dragging    bool
+	prevFocused bool
 
 	clickCount         int
 	lastClickTick      int64
