@@ -153,12 +153,25 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	if l.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 		l.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
-		if l.isHoveringVisible() {
+		if l.isHoveringVisible() || l.hasMovableItems() {
 			guigui.RequestRedraw(l)
 		}
 	}
 
 	return nil
+}
+
+func (l *List[T]) hasMovableItems() bool {
+	for i := range l.abstractList.ItemCount() {
+		item, ok := l.abstractList.ItemByIndex(i)
+		if !ok {
+			continue
+		}
+		if item.Movable {
+			return true
+		}
+	}
+	return false
 }
 
 func (l *List[T]) ItemByIndex(index int) (ListItem[T], bool) {
