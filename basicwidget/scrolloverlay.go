@@ -269,7 +269,6 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 		s.adjustOffset(context)
 		s.lastSize = cs
 	}
-
 	context.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
 	return nil
 }
