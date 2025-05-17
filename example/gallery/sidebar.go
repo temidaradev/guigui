@@ -35,7 +35,7 @@ func (s *Sidebar) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 type sidebarContent struct {
 	guigui.DefaultWidget
 
-	list basicwidget.TextList[string]
+	list basicwidget.List[string]
 
 	model *Model
 }
@@ -47,7 +47,7 @@ func (s *sidebarContent) SetModel(model *Model) {
 func (s *sidebarContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	s.list.SetStyle(basicwidget.ListStyleSidebar)
 
-	items := []basicwidget.TextListItem[string]{
+	items := []basicwidget.ListItem[string]{
 		{
 			Text: "Settings",
 			ID:   "settings",

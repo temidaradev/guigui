@@ -22,8 +22,8 @@ type PopupMenuItem[T comparable] struct {
 type PopupMenu[T comparable] struct {
 	guigui.DefaultWidget
 
-	textList TextList[T]
-	popup    Popup
+	list  List[T]
+	popup Popup
 
 	onClosed func(index int)
 }
@@ -33,27 +33,27 @@ func (p *PopupMenu[T]) SetOnClosed(f func(index int)) {
 }
 
 func (p *PopupMenu[T]) SetCheckmarkIndex(index int) {
-	p.textList.SetCheckmarkIndex(index)
+	p.list.SetCheckmarkIndex(index)
 }
 
 func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p.textList.SetStyle(ListStyleMenu)
-	p.textList.list.SetOnItemSelected(func(index int) {
+	p.list.SetStyle(ListStyleMenu)
+	p.list.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
 		if p.onClosed != nil {
 			p.onClosed(index)
 		}
 	})
 
-	p.popup.SetContent(&p.textList)
+	p.popup.SetContent(&p.list)
 	p.popup.SetCloseByClickingOutside(true)
 	p.popup.SetOnClosed(func(reason PopupClosedReason) {
 		if p.onClosed != nil {
-			p.onClosed(p.textList.SelectedItemIndex())
+			p.onClosed(p.list.SelectedItemIndex())
 		}
 	})
 	bounds := p.contentBounds(context)
-	context.SetSize(&p.textList, bounds.Size())
+	context.SetSize(&p.list, bounds.Size())
 	appender.AppendChildWidgetWithBounds(&p.popup, bounds)
 
 	return nil
@@ -61,9 +61,9 @@ func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidg
 
 func (p *PopupMenu[T]) contentBounds(context *guigui.Context) image.Rectangle {
 	pos := context.Position(p)
-	// textList's size is updated at Build so do not call guigui.Size to determine the content size.
+	// list's size is updated at Build so do not call guigui.Size to determine the content size.
 	// Call DefaultSize instead.
-	s := p.textList.DefaultSize(context)
+	s := p.list.DefaultSize(context)
 	if s.Y > 24*UnitSize(context) {
 		s.Y = 24 * UnitSize(context)
 	}
@@ -104,62 +104,62 @@ func (p *PopupMenu[T]) IsOpen() bool {
 }
 
 func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
-	var textListItems []TextListItem[T]
+	var listItems []ListItem[T]
 	for _, item := range items {
-		textListItems = append(textListItems, TextListItem[T]{
-			Text:     item.Text,
-			Color:    item.Color,
-			Header:   item.Header,
-			Disabled: item.Disabled,
-			Border:   item.Border,
-			ID:       item.ID,
+		listItems = append(listItems, ListItem[T]{
+			Text:      item.Text,
+			TextColor: item.Color,
+			Header:    item.Header,
+			Disabled:  item.Disabled,
+			Border:    item.Border,
+			ID:        item.ID,
 		})
 	}
-	p.textList.SetItems(textListItems)
+	p.list.SetItems(listItems)
 }
 
 func (p *PopupMenu[T]) SetItemsByStrings(items []string) {
-	p.textList.SetItemsByStrings(items)
+	p.list.SetItemsByStrings(items)
 }
 
 func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
-	textListItem, ok := p.textList.SelectedItem()
+	listItem, ok := p.list.SelectedItem()
 	if !ok {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     textListItem.Text,
-		Color:    textListItem.Color,
-		Header:   textListItem.Header,
-		Disabled: textListItem.Disabled,
-		Border:   textListItem.Border,
-		ID:       textListItem.ID,
+		Text:     listItem.Text,
+		Color:    listItem.TextColor,
+		Header:   listItem.Header,
+		Disabled: listItem.Disabled,
+		Border:   listItem.Border,
+		ID:       listItem.ID,
 	}, true
 }
 
 func (p *PopupMenu[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
-	textListItem, ok := p.textList.ItemByIndex(index)
+	listItem, ok := p.list.ItemByIndex(index)
 	if !ok {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     textListItem.Text,
-		Color:    textListItem.Color,
-		Header:   textListItem.Header,
-		Disabled: textListItem.Disabled,
-		Border:   textListItem.Border,
-		ID:       textListItem.ID,
+		Text:     listItem.Text,
+		Color:    listItem.TextColor,
+		Header:   listItem.Header,
+		Disabled: listItem.Disabled,
+		Border:   listItem.Border,
+		ID:       listItem.ID,
 	}, true
 }
 
 func (p *PopupMenu[T]) SelectedItemIndex() int {
-	return p.textList.SelectedItemIndex()
+	return p.list.SelectedItemIndex()
 }
 
 func (p *PopupMenu[T]) SelectItemByIndex(index int) {
-	p.textList.SelectItemByIndex(index)
+	p.list.SelectItemByIndex(index)
 }
 
 func (p *PopupMenu[T]) SelectItemByID(id T) {
-	p.textList.SelectItemByID(id)
+	p.list.SelectItemByID(id)
 }

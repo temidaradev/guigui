@@ -23,8 +23,8 @@ type Basic struct {
 	numberInput     basicwidget.NumberInput
 	sliderText      basicwidget.Text
 	slider          basicwidget.Slider
-	textListText    basicwidget.Text
-	textList        basicwidget.TextList[int]
+	listText        basicwidget.Text
+	list            basicwidget.List[int]
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
@@ -37,8 +37,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.sliderText.SetValue("Slider")
 	b.slider.SetMinimumValueInt64(0)
 	b.slider.SetMaximumValueInt64(100)
-	b.textListText.SetValue("Text list")
-	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
+	b.listText.SetValue("Text list")
+	b.list.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
 	b.form.SetItems([]basicwidget.FormItem{
 		{
@@ -62,8 +62,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &b.slider,
 		},
 		{
-			PrimaryWidget:   &b.textListText,
-			SecondaryWidget: &b.textList,
+			PrimaryWidget:   &b.listText,
+			SecondaryWidget: &b.list,
 		},
 	})
 

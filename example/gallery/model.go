@@ -283,17 +283,17 @@ func (n *NumberInputsModel) SetNumberInputValue3(value int) {
 }
 
 type ListsModel struct {
-	listItems []basicwidget.TextListItem[int]
+	listItems []basicwidget.ListItem[int]
 
 	stripeVisible bool
 	unmovable     bool
 	disabled      bool
 }
 
-func (l *ListsModel) AppendListItems(items []basicwidget.TextListItem[int]) []basicwidget.TextListItem[int] {
+func (l *ListsModel) AppendListItems(items []basicwidget.ListItem[int]) []basicwidget.ListItem[int] {
 	if l.listItems == nil {
 		for i := range 99 {
-			l.listItems = append(l.listItems, basicwidget.TextListItem[int]{
+			l.listItems = append(l.listItems, basicwidget.ListItem[int]{
 				Text: fmt.Sprintf("Item %d", i+1),
 			})
 		}
