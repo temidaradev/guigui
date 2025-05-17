@@ -10,40 +10,40 @@ import (
 )
 
 type Model struct {
-	leftOpening  bool
-	leftClosing  bool
-	leftCount    int
-	rightOpening bool
-	rightClosing bool
-	rightCount   int
+	leftOpening       bool
+	leftClosing       bool
+	leftClosingCount  int
+	rightOpening      bool
+	rightClosing      bool
+	rightClosingCount int
 }
 
-func panelInitCount() int {
+func panelMaxClosingCount() int {
 	return ebiten.TPS() / 10
 }
 
 func (m *Model) Tick() {
 	if m.leftOpening {
-		m.leftCount--
-		if m.leftCount == 0 {
+		m.leftClosingCount--
+		if m.leftClosingCount == 0 {
 			m.leftOpening = false
 		}
 	}
 	if m.leftClosing {
-		m.leftCount++
-		if m.leftCount == panelInitCount() {
+		m.leftClosingCount++
+		if m.leftClosingCount == panelMaxClosingCount() {
 			m.leftClosing = false
 		}
 	}
 	if m.rightOpening {
-		m.rightCount--
-		if m.rightCount == 0 {
+		m.rightClosingCount--
+		if m.rightClosingCount == 0 {
 			m.rightOpening = false
 		}
 	}
 	if m.rightClosing {
-		m.rightCount++
-		if m.rightCount == panelInitCount() {
+		m.rightClosingCount++
+		if m.rightClosingCount == panelMaxClosingCount() {
 			m.rightClosing = false
 		}
 	}
@@ -55,7 +55,7 @@ func (m *Model) DefaultPanelWidth(context *guigui.Context) int {
 }
 
 func (m *Model) IsLeftPanelOpen() bool {
-	return m.leftCount == 0 && !m.leftOpening && !m.leftClosing
+	return m.leftClosingCount == 0 && !m.leftOpening && !m.leftClosing
 }
 
 func (m *Model) SetLeftPanelOpen(open bool) {
@@ -63,7 +63,7 @@ func (m *Model) SetLeftPanelOpen(open bool) {
 		if m.leftOpening {
 			return
 		}
-		if m.leftCount == 0 {
+		if m.leftClosingCount == 0 {
 			return
 		}
 		m.leftOpening = true
@@ -73,7 +73,7 @@ func (m *Model) SetLeftPanelOpen(open bool) {
 	if m.leftClosing {
 		return
 	}
-	if m.leftCount == panelInitCount() {
+	if m.leftClosingCount == panelMaxClosingCount() {
 		return
 	}
 	m.leftClosing = true
@@ -82,12 +82,12 @@ func (m *Model) SetLeftPanelOpen(open bool) {
 
 func (m *Model) LeftPanelWidth(context *guigui.Context) int {
 	fullWidth := m.DefaultPanelWidth(context)
-	rate := float64(m.leftCount) / float64(panelInitCount())
+	rate := float64(m.leftClosingCount) / float64(panelMaxClosingCount())
 	return int(float64(fullWidth) * (1 - rate))
 }
 
 func (m *Model) IsRightPanelOpen() bool {
-	return m.rightCount == 0 && !m.rightOpening && !m.rightClosing
+	return m.rightClosingCount == 0 && !m.rightOpening && !m.rightClosing
 }
 
 func (m *Model) SetRightPanelOpen(open bool) {
@@ -95,7 +95,7 @@ func (m *Model) SetRightPanelOpen(open bool) {
 		if m.rightOpening {
 			return
 		}
-		if m.rightCount == 0 {
+		if m.rightClosingCount == 0 {
 			return
 		}
 		m.rightOpening = true
@@ -105,7 +105,7 @@ func (m *Model) SetRightPanelOpen(open bool) {
 	if m.rightClosing {
 		return
 	}
-	if m.rightCount == panelInitCount() {
+	if m.rightClosingCount == panelMaxClosingCount() {
 		return
 	}
 	m.rightClosing = true
@@ -114,6 +114,6 @@ func (m *Model) SetRightPanelOpen(open bool) {
 
 func (m *Model) RightPanelWidth(context *guigui.Context) int {
 	fullWidth := m.DefaultPanelWidth(context)
-	rate := float64(m.rightCount) / float64(panelInitCount())
+	rate := float64(m.rightClosingCount) / float64(panelMaxClosingCount())
 	return int(float64(fullWidth) * (1 - rate))
 }
