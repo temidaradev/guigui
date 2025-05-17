@@ -741,7 +741,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			}
 		}
 		return guigui.HandleInputByWidget(t)
-	case t.multiline && isKeyRepeating(ebiten.KeyUp) ||
+	case isKeyRepeating(ebiten.KeyUp) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyP):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
@@ -766,7 +766,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			}
 		}
 		return guigui.HandleInputByWidget(t)
-	case t.multiline && isKeyRepeating(ebiten.KeyDown) ||
+	case isKeyRepeating(ebiten.KeyDown) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyN):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
