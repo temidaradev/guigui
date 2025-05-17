@@ -18,10 +18,11 @@ import (
 type Root struct {
 	guigui.DefaultWidget
 
-	background basicwidget.Background
-	toolbar    Toolbar
-	leftPanel  LeftPanel
-	rightPanel RightPanel
+	background   basicwidget.Background
+	toolbar      Toolbar
+	leftPanel    LeftPanel
+	contentPanel ContentPanel
+	rightPanel   RightPanel
 
 	model Model
 }
@@ -58,6 +59,7 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		},
 	}
 	appender.AppendChildWidgetWithBounds(&r.leftPanel, contentGL.CellBounds(0, 0))
+	appender.AppendChildWidgetWithBounds(&r.contentPanel, contentGL.CellBounds(1, 0))
 	appender.AppendChildWidgetWithBounds(&r.rightPanel, contentGL.CellBounds(2, 0))
 
 	return nil
