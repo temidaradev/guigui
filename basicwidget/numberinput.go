@@ -30,8 +30,8 @@ type NumberInput struct {
 	guigui.DefaultWidget
 
 	textInput  TextInput
-	upButton   TextButton
-	downButton TextButton
+	upButton   Button
+	downButton Button
 
 	abstractNumberInput abstractNumberInput
 }

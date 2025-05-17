@@ -74,9 +74,9 @@ func (r *Root) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 
 	for i := range r.buttons {
 		if r.buttons[i] == nil {
-			r.buttons[i] = &basicwidget.TextButton{}
+			r.buttons[i] = &basicwidget.Button{}
 		}
-		t := r.buttons[i].(*basicwidget.TextButton)
+		t := r.buttons[i].(*basicwidget.Button)
 		t.SetText(fmt.Sprintf("Button %d", i))
 	}
 

@@ -22,7 +22,7 @@ type Popups struct {
 	blurBackgroundToggle         basicwidget.Toggle
 	closeByClickingOutsideText   basicwidget.Text
 	closeByClickingOutsideToggle basicwidget.Toggle
-	showButton                   basicwidget.TextButton
+	showButton                   basicwidget.Button
 
 	contextMenuPopupText          basicwidget.Text
 	contextMenuPopupClickHereText basicwidget.Text
@@ -125,7 +125,7 @@ type simplePopupContent struct {
 	popup *basicwidget.Popup
 
 	titleText   basicwidget.Text
-	closeButton basicwidget.TextButton
+	closeButton basicwidget.Button
 }
 
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

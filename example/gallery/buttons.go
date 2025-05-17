@@ -15,14 +15,14 @@ type Buttons struct {
 	guigui.DefaultWidget
 
 	buttonsForm           basicwidget.Form
-	textButtonText        basicwidget.Text
-	textButton            basicwidget.TextButton
+	buttonText            basicwidget.Text
+	button                basicwidget.Button
 	textIconButton1Text   basicwidget.Text
-	textIconButton1       basicwidget.TextButton
+	textIconButton1       basicwidget.Button
 	textIconButton2Text   basicwidget.Text
-	textIconButton2       basicwidget.TextButton
+	textIconButton2       basicwidget.Button
 	imageButtonText       basicwidget.Text
-	imageButton           basicwidget.TextButton
+	imageButton           basicwidget.Button
 	segmentedControlHText basicwidget.Text
 	segmentedControlH     basicwidget.SegmentedControl[int]
 	segmentedControlVText basicwidget.Text
@@ -44,9 +44,9 @@ func (b *Buttons) SetModel(model *Model) {
 func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	u := basicwidget.UnitSize(context)
 
-	b.textButtonText.SetValue("Text button")
-	b.textButton.SetText("Button")
-	context.SetEnabled(&b.textButton, b.model.Buttons().Enabled())
+	b.buttonText.SetValue("Button")
+	b.button.SetText("Button")
+	context.SetEnabled(&b.button, b.model.Buttons().Enabled())
 
 	b.textIconButton1Text.SetValue("Button w/ text and icon (1)")
 	b.textIconButton1.SetText("Button")
@@ -109,8 +109,8 @@ func (b *Buttons) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	b.buttonsForm.SetItems([]basicwidget.FormItem{
 		{
-			PrimaryWidget:   &b.textButtonText,
-			SecondaryWidget: &b.textButton,
+			PrimaryWidget:   &b.buttonText,
+			SecondaryWidget: &b.button,
 		},
 		{
 			PrimaryWidget:   &b.textIconButton1Text,

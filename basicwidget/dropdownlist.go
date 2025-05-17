@@ -23,8 +23,8 @@ type DropdownListItem[T comparable] struct {
 type DropdownList[T comparable] struct {
 	guigui.DefaultWidget
 
-	textButton TextButton
-	popupMenu  PopupMenu[T]
+	button    Button
+	popupMenu PopupMenu[T]
 
 	onItemSelected func(index int)
 }
@@ -39,20 +39,20 @@ func (d *DropdownList[T]) updateButtonImage(context *guigui.Context) {
 		slog.Error(err.Error())
 		return
 	}
-	d.textButton.SetIcon(img)
+	d.button.SetIcon(img)
 }
 
 func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	d.updateButtonImage(context)
 	d.updateText()
 
-	d.textButton.SetOnDown(func() {
+	d.button.SetOnDown(func() {
 		d.popupMenu.Open(context)
 	})
-	d.textButton.setKeepPressed(d.popupMenu.IsOpen())
-	d.textButton.SetIconAlign(IconAlignEnd)
+	d.button.setKeepPressed(d.popupMenu.IsOpen())
+	d.button.SetIconAlign(IconAlignEnd)
 
-	appender.AppendChildWidgetWithPosition(&d.textButton, context.Position(d))
+	appender.AppendChildWidgetWithPosition(&d.button, context.Position(d))
 
 	d.popupMenu.SetOnClosed(func(index int) {
 		if d.onItemSelected != nil {
@@ -77,9 +77,9 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 
 func (d *DropdownList[T]) updateText() {
 	if item, ok := d.popupMenu.SelectedItem(); ok {
-		d.textButton.SetText(item.Text)
+		d.button.SetText(item.Text)
 	} else {
-		d.textButton.SetText("")
+		d.button.SetText("")
 	}
 }
 
@@ -130,7 +130,7 @@ func (d *DropdownList[T]) SelectItemByID(id T) {
 func (d *DropdownList[T]) DefaultSize(context *guigui.Context) image.Point {
 	// The button image affects the size.
 	d.updateButtonImage(context)
-	return context.Size(&d.textButton)
+	return context.Size(&d.button)
 }
 
 func (d *DropdownList[T]) IsPopupOpen() bool {
