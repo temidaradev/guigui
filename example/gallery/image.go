@@ -17,9 +17,9 @@ import (
 var pngImages embed.FS
 
 type imageCacheKey struct {
-	name      string
-	colorMode guigui.ColorMode
-	raw       bool
+	name       string
+	colorMode  guigui.ColorMode
+	monochrome bool
 }
 
 type imageCache struct {
@@ -30,8 +30,9 @@ var theImageCache = &imageCache{}
 
 func (i *imageCache) GetMonochrome(name string, colorMode guigui.ColorMode) (*ebiten.Image, error) {
 	key := imageCacheKey{
-		name:      name,
-		colorMode: colorMode,
+		name:       name,
+		colorMode:  colorMode,
+		monochrome: true,
 	}
 	if img, ok := i.m[key]; ok {
 		return img, nil
@@ -62,7 +63,6 @@ func (i *imageCache) GetMonochrome(name string, colorMode guigui.ColorMode) (*eb
 func (i *imageCache) Get(name string) (*ebiten.Image, error) {
 	key := imageCacheKey{
 		name: name,
-		raw:  true,
 	}
 	if img, ok := i.m[key]; ok {
 		return img, nil
