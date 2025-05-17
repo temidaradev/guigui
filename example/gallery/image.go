@@ -29,46 +29,25 @@ type imageCache struct {
 var theImageCache = &imageCache{}
 
 func (i *imageCache) GetMonochrome(name string, colorMode guigui.ColorMode) (*ebiten.Image, error) {
-	key := imageCacheKey{
+	return i.get(imageCacheKey{
 		name:       name,
 		colorMode:  colorMode,
 		monochrome: true,
-	}
-	if img, ok := i.m[key]; ok {
-		return img, nil
-	}
-
-	f, err := pngImages.Open("resource/" + name + ".png")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = f.Close()
-	}()
-	pImg, err := png.Decode(f)
-	if err != nil {
-		return nil, err
-	}
-
-	pImg = basicwidget.CreateMonochromeImage(colorMode, pImg)
-
-	img := ebiten.NewImageFromImage(pImg)
-	if i.m == nil {
-		i.m = map[imageCacheKey]*ebiten.Image{}
-	}
-	i.m[key] = img
-	return img, nil
+	})
 }
 
 func (i *imageCache) Get(name string) (*ebiten.Image, error) {
-	key := imageCacheKey{
+	return i.get(imageCacheKey{
 		name: name,
-	}
+	})
+}
+
+func (i *imageCache) get(key imageCacheKey) (*ebiten.Image, error) {
 	if img, ok := i.m[key]; ok {
 		return img, nil
 	}
 
-	f, err := pngImages.Open("resource/" + name + ".png")
+	f, err := pngImages.Open("resource/" + key.name + ".png")
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +58,10 @@ func (i *imageCache) Get(name string) (*ebiten.Image, error) {
 	pImg, err := png.Decode(f)
 	if err != nil {
 		return nil, err
+	}
+
+	if key.monochrome {
+		pImg = basicwidget.CreateMonochromeImage(key.colorMode, pImg)
 	}
 
 	img := ebiten.NewImageFromImage(pImg)
