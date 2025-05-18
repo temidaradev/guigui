@@ -84,8 +84,7 @@ func (s *ScrollOverlay) SetContentSize(context *guigui.Context, contentSize imag
 	s.contentSize = contentSize
 	s.adjustOffset(context)
 	if s.onceBuilt {
-		s.showBars()
-		guigui.RequestRedraw(s)
+		s.showBars(context)
 	}
 }
 
@@ -103,7 +102,7 @@ func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentSize image.Poi
 	s.offsetX = x
 	s.offsetY = y
 	if s.onceBuilt {
-		guigui.RequestRedraw(s)
+		s.showBars(context)
 	}
 }
 
@@ -259,7 +258,16 @@ func (s *ScrollOverlay) scrollRange(context *guigui.Context) image.Rectangle {
 	}
 }
 
+func (s *ScrollOverlay) hasBars(context *guigui.Context) bool {
+	hb, vb := s.barBounds(context)
+	return !hb.Empty() || !vb.Empty()
+}
+
 func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
+	if !s.hasBars(context) {
+		return false
+	}
+
 	if s.draggingX || s.draggingY {
 		return true
 	}
@@ -276,6 +284,7 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -293,7 +302,11 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 	return nil
 }
 
-func (s *ScrollOverlay) showBars() {
+func (s *ScrollOverlay) showBars(context *guigui.Context) {
+	if !s.hasBars(context) {
+		return
+	}
+
 	switch {
 	case s.barCount >= scrollBarMaxCount()-scrollBarFadingInTime():
 		// If the scroll bar is being fading in, do nothing.
@@ -319,7 +332,7 @@ func (s *ScrollOverlay) Tick(context *guigui.Context) error {
 
 	oldOpacity := scrollBarOpacity(s.barCount)
 	if shouldShowBar {
-		s.showBars()
+		s.showBars(context)
 	}
 	newOpacity := scrollBarOpacity(s.barCount)
 
