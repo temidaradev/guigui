@@ -14,12 +14,32 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
-func barMaxOpacity() int {
-	return int(float64(ebiten.TPS()) / 6)
+func scrollBarFadingInTime() int {
+	return ebiten.TPS() / 15
 }
 
-func barShowingTime() int {
+func scrollBarFadingOutTime() int {
+	return ebiten.TPS() / 5
+}
+
+func scrollBarShowingTime() int {
 	return ebiten.TPS() / 2
+}
+
+func scrollBarMaxCount() int {
+	return scrollBarFadingInTime() + scrollBarShowingTime() + scrollBarFadingOutTime()
+}
+
+func scrollBarOpacity(count int) float64 {
+	switch {
+	case scrollBarMaxCount()-scrollBarFadingInTime() <= count:
+		c := count - (scrollBarMaxCount() - scrollBarFadingInTime())
+		return 1 - float64(c)/float64(scrollBarFadingInTime())
+	case scrollBarFadingOutTime() <= count:
+		return 1
+	default:
+		return float64(count) / float64(scrollBarFadingOutTime())
+	}
 }
 
 type ScrollOverlay struct {
@@ -29,23 +49,20 @@ type ScrollOverlay struct {
 	offsetX     float64
 	offsetY     float64
 
-	lastSize              image.Point
-	lastCursorPosition    image.Point
-	lastWheelX            float64
-	lastWheelY            float64
-	lastOffsetX           float64
-	lastOffsetY           float64
-	draggingX             bool
-	draggingY             bool
-	draggingStartPosition image.Point
-	draggingStartOffsetX  float64
-	draggingStartOffsetY  float64
-	onceUpdated           bool
+	lastSize                image.Point
+	lastCursorPositionPlus1 image.Point
+	lastWheelX              float64
+	lastWheelY              float64
+	lastOffsetX             float64
+	lastOffsetY             float64
+	draggingX               bool
+	draggingY               bool
+	draggingStartPosition   image.Point
+	draggingStartOffsetX    float64
+	draggingStartOffsetY    float64
+	onceBuilt               bool
 
-	barOpacity     int
-	barVisibleTime int
-
-	contentSizeChanged bool
+	barCount int
 
 	onScroll func(offsetX, offsetY float64)
 }
@@ -66,8 +83,8 @@ func (s *ScrollOverlay) SetContentSize(context *guigui.Context, contentSize imag
 
 	s.contentSize = contentSize
 	s.adjustOffset(context)
-	if s.onceUpdated {
-		s.contentSizeChanged = true
+	if s.onceBuilt {
+		s.showBars()
 		guigui.RequestRedraw(s)
 	}
 }
@@ -85,7 +102,7 @@ func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentSize image.Poi
 	}
 	s.offsetX = x
 	s.offsetY = y
-	if s.onceUpdated {
+	if s.onceBuilt {
 		guigui.RequestRedraw(s)
 	}
 }
@@ -118,11 +135,11 @@ func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.Hand
 	if hovered {
 		x, y := ebiten.CursorPosition()
 		dx, dy := adjustedWheel()
-		s.lastCursorPosition = image.Pt(x, y)
+		s.lastCursorPositionPlus1 = image.Pt(x, y).Add(image.Pt(1, 1))
 		s.lastWheelX = dx
 		s.lastWheelY = dy
 	} else {
-		s.lastCursorPosition = image.Pt(-1, -1)
+		s.lastCursorPositionPlus1 = image.Point{}
 		s.lastWheelX = 0
 		s.lastWheelY = 0
 	}
@@ -249,16 +266,15 @@ func (s *ScrollOverlay) isBarVisible(context *guigui.Context) bool {
 	if s.lastWheelX != 0 || s.lastWheelY != 0 {
 		return true
 	}
-	if s.lastOffsetX != s.offsetX || s.lastOffsetY != s.offsetY {
-		return true
-	}
 
-	bounds := context.Bounds(s)
-	if s.contentSize.X > bounds.Dx() && bounds.Max.Y-UnitSize(context) <= s.lastCursorPosition.Y {
-		return true
-	}
-	if s.contentSize.Y > bounds.Dy() && bounds.Max.X-UnitSize(context) <= s.lastCursorPosition.X {
-		return true
+	if s.lastCursorPositionPlus1 != (image.Point{}) {
+		bounds := context.Bounds(s)
+		if s.contentSize.X > bounds.Dx() && bounds.Max.Y-UnitSize(context)/2 <= s.lastCursorPositionPlus1.Y-1 {
+			return true
+		}
+		if s.contentSize.Y > bounds.Dy() && bounds.Max.X-UnitSize(context)/2 <= s.lastCursorPositionPlus1.X-1 {
+			return true
+		}
 	}
 	return false
 }
@@ -269,42 +285,69 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 		s.adjustOffset(context)
 		s.lastSize = cs
 	}
-	context.SetOpacity(s, float64(s.barOpacity)/float64(barMaxOpacity())*3/4)
+	// TODO: Avoid using SetOpacity.
+	context.SetOpacity(s, scrollBarOpacity(s.barCount)*3/4)
+
+	s.onceBuilt = true
+
 	return nil
 }
 
+func (s *ScrollOverlay) showBars() {
+	switch {
+	case s.barCount >= scrollBarMaxCount()-scrollBarFadingInTime():
+		// If the scroll bar is being fading in, do nothing.
+	case s.barCount >= scrollBarFadingOutTime():
+		// If the scroll bar is shown, reset the count.
+		s.barCount = scrollBarMaxCount() - scrollBarFadingInTime()
+	case s.barCount > 0:
+		// If the scroll bar is fading out, reset the count.
+		s.barCount = scrollBarMaxCount() - scrollBarFadingInTime()
+	default:
+		s.barCount = scrollBarMaxCount()
+	}
+}
+
 func (s *ScrollOverlay) Tick(context *guigui.Context) error {
-	if s.contentSizeChanged {
-		s.barVisibleTime = barShowingTime()
-		s.contentSizeChanged = false
-	}
+	shouldShowBar := s.isBarVisible(context)
 
-	if s.isBarVisible(context) || (s.barVisibleTime == barShowingTime() && s.barOpacity < barMaxOpacity()) {
-		if s.barOpacity < barMaxOpacity() {
-			s.barOpacity++
-			guigui.RequestRedraw(s)
-		}
-		s.barVisibleTime = barShowingTime()
-	} else {
-		if s.barVisibleTime > 0 {
-			s.barVisibleTime--
-		}
-		if s.barVisibleTime == 0 && s.barOpacity > 0 {
-			s.barOpacity--
-			guigui.RequestRedraw(s)
-		}
+	if s.lastOffsetX != s.offsetX || s.lastOffsetY != s.offsetY {
+		shouldShowBar = true
 	}
-
 	s.lastOffsetX = s.offsetX
 	s.lastOffsetY = s.offsetY
 
-	s.onceUpdated = true
+	oldOpacity := scrollBarOpacity(s.barCount)
+	if shouldShowBar {
+		s.showBars()
+	}
+	newOpacity := scrollBarOpacity(s.barCount)
+
+	if newOpacity != oldOpacity {
+		guigui.RequestRedraw(s)
+	}
+
+	if s.barCount == 0 {
+		return nil
+	}
+
+	if shouldShowBar && s.barCount == scrollBarMaxCount()-scrollBarFadingInTime() {
+		// Keep showing the bar.
+		return nil
+	}
+
+	oldOpacity = scrollBarOpacity(s.barCount)
+	s.barCount--
+	newOpacity = scrollBarOpacity(s.barCount)
+	if newOpacity != oldOpacity {
+		guigui.RequestRedraw(s)
+	}
 
 	return nil
 }
 
 func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
-	if s.barOpacity == 0 {
+	if scrollBarOpacity(s.barCount) == 0 {
 		return
 	}
 
