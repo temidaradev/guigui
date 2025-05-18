@@ -14,8 +14,10 @@ import (
 )
 
 type bounds3D struct {
-	bounds image.Rectangle
-	z      int
+	bounds      image.Rectangle
+	z           int
+	visible     bool // For hit testing.
+	passThrough bool // For hit testing.
 }
 
 type widgetsAndVisibleBounds struct {
@@ -52,8 +54,10 @@ func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widg
 			continue
 		}
 		w.currentBounds3D[widget] = bounds3D{
-			bounds: context.VisibleBounds(widget),
-			z:      z(widget),
+			bounds:      context.VisibleBounds(widget),
+			z:           z(widget),
+			visible:     widget.widgetState().isVisible(),
+			passThrough: widget.PassThrough(),
 		}
 	}
 	return maps.Equal(w.bounds3Ds, w.currentBounds3D)

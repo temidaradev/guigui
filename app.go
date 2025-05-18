@@ -225,6 +225,9 @@ func (a *app) Update() error {
 		// A widget's bounds might be changed in Update, so do this after updating.
 		a.requestRedrawIfTreeChanged(a.root)
 	}
+
+	a.clearHitTestCacheIfNeeded(a.root)
+
 	a.resetPrevWidgets(a.root)
 
 	// Resolve dirty widgets.
@@ -360,10 +363,6 @@ func (a *app) build() error {
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
 	slices.Sort(a.zs)
 
-	if !a.invalidatedRegions.Empty() {
-		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
-	}
-
 	return nil
 }
 
@@ -484,6 +483,17 @@ func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 	}
 	for _, child := range widgetState.children {
 		a.requestRedrawIfTreeChanged(child)
+	}
+}
+
+func (a *app) clearHitTestCacheIfNeeded(widget Widget) {
+	widgetState := widget.widgetState()
+	if !widgetState.prev.equals(&a.context, widgetState.children) {
+		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
+		return
+	}
+	for _, child := range widgetState.children {
+		a.clearHitTestCacheIfNeeded(child)
 	}
 }
 
