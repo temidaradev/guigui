@@ -294,8 +294,6 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 		s.adjustOffset(context)
 		s.lastSize = cs
 	}
-	// TODO: Avoid using SetOpacity.
-	context.SetOpacity(s, scrollBarOpacity(s.barCount)*3/4)
 
 	if s.onceBuilt && s.contentSizeChanged {
 		s.showBars(context)
@@ -365,11 +363,14 @@ func (s *ScrollOverlay) Tick(context *guigui.Context) error {
 }
 
 func (s *ScrollOverlay) Draw(context *guigui.Context, dst *ebiten.Image) {
-	if scrollBarOpacity(s.barCount) == 0 {
+	alpha := scrollBarOpacity(s.barCount) * 3 / 4
+	if alpha == 0 {
 		return
 	}
 
 	barColor := draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.2)
+	barColor = draw.ScaleAlpha(barColor, alpha)
+
 	hb, vb := s.barBounds(context)
 
 	// Show a horizontal bar.
