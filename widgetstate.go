@@ -38,8 +38,10 @@ func (w *widgetsAndVisibleBounds) append(context *Context, widget Widget) {
 		return
 	}
 	w.bounds3Ds[widget] = bounds3D{
-		bounds: bounds,
-		z:      z(widget),
+		bounds:      bounds,
+		z:           z(widget),
+		visible:     widget.widgetState().isVisible(),
+		passThrough: widget.PassThrough(),
 	}
 }
 
