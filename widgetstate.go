@@ -20,6 +20,19 @@ type bounds3D struct {
 	passThrough bool // For hit testing.
 }
 
+func bounds3DFromWidget(context *Context, widget Widget) (bounds3D, bool) {
+	bounds := context.VisibleBounds(widget)
+	if bounds.Empty() {
+		return bounds3D{}, false
+	}
+	return bounds3D{
+		bounds:      bounds,
+		z:           z(widget),
+		visible:     widget.widgetState().isVisible(),
+		passThrough: widget.PassThrough(),
+	}, true
+}
+
 type widgetsAndVisibleBounds struct {
 	bounds3Ds       map[Widget]bounds3D
 	currentBounds3D map[Widget]bounds3D
@@ -33,16 +46,11 @@ func (w *widgetsAndVisibleBounds) append(context *Context, widget Widget) {
 	if w.bounds3Ds == nil {
 		w.bounds3Ds = map[Widget]bounds3D{}
 	}
-	bounds := context.VisibleBounds(widget)
-	if bounds.Empty() {
+	b, ok := bounds3DFromWidget(context, widget)
+	if !ok {
 		return
 	}
-	w.bounds3Ds[widget] = bounds3D{
-		bounds:      bounds,
-		z:           z(widget),
-		visible:     widget.widgetState().isVisible(),
-		passThrough: widget.PassThrough(),
-	}
+	w.bounds3Ds[widget] = b
 }
 
 func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widget) bool {
@@ -52,15 +60,11 @@ func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widg
 		clear(w.currentBounds3D)
 	}
 	for _, widget := range currentWidgets {
-		if context.VisibleBounds(widget).Empty() {
+		b, ok := bounds3DFromWidget(context, widget)
+		if !ok {
 			continue
 		}
-		w.currentBounds3D[widget] = bounds3D{
-			bounds:      context.VisibleBounds(widget),
-			z:           z(widget),
-			visible:     widget.widgetState().isVisible(),
-			passThrough: widget.PassThrough(),
-		}
+		w.currentBounds3D[widget] = b
 	}
 	return maps.Equal(w.bounds3Ds, w.currentBounds3D)
 }
