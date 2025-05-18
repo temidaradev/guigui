@@ -45,9 +45,10 @@ func scrollBarOpacity(count int) float64 {
 type ScrollOverlay struct {
 	guigui.DefaultWidget
 
-	contentSize image.Point
-	offsetX     float64
-	offsetY     float64
+	contentSize        image.Point
+	contentSizeChanged bool
+	offsetX            float64
+	offsetY            float64
 
 	lastSize                image.Point
 	lastCursorPositionPlus1 image.Point
@@ -83,9 +84,8 @@ func (s *ScrollOverlay) SetContentSize(context *guigui.Context, contentSize imag
 
 	s.contentSize = contentSize
 	s.adjustOffset(context)
-	if s.onceBuilt {
-		s.showBars(context)
-	}
+	// Do not call showBars immediately, as this widget size might not be fixed yet.
+	s.contentSizeChanged = true
 }
 
 func (s *ScrollOverlay) SetOffsetByDelta(context *guigui.Context, contentSize image.Point, dx, dy float64) {
@@ -296,6 +296,11 @@ func (s *ScrollOverlay) Build(context *guigui.Context, appender *guigui.ChildWid
 	}
 	// TODO: Avoid using SetOpacity.
 	context.SetOpacity(s, scrollBarOpacity(s.barCount)*3/4)
+
+	if s.onceBuilt && s.contentSizeChanged {
+		s.showBars(context)
+	}
+	s.contentSizeChanged = false
 
 	s.onceBuilt = true
 
