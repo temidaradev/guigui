@@ -485,7 +485,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if cursorPosition.In(context.VisibleBounds(t)) {
+		if context.IsWidgetHitAt(t, cursorPosition) {
 			idx := t.textIndexFromPosition(context, cursorPosition, false)
 
 			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {

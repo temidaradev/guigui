@@ -232,7 +232,7 @@ func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidg
 }
 
 func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
+	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 	return guigui.HandleInputResult{}
@@ -281,7 +281,7 @@ func (p *popupBackground) HandlePointingInput(context *guigui.Context) guigui.Ha
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 
-	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
+	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
 		if p.popup.closeByClickingOutside {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 				p.popup.close(PopupClosedReasonClickOutside)
