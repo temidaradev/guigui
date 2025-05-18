@@ -323,14 +323,18 @@ func (c *Context) blur(widget Widget) {
 	if !widgetState.isInTree() {
 		return
 	}
+	var unfocused bool
 	_ = traverseWidget(widget, func(w Widget) error {
 		if c.app.focusedWidget == w {
 			c.app.focusedWidget = c.app.root
+			unfocused = true
 			return skipTraverse
 		}
 		return nil
 	})
-	RequestRedraw(widget)
+	if unfocused {
+		RequestRedraw(widget)
+	}
 }
 
 func (c *Context) isFocused(widget Widget) bool {
