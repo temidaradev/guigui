@@ -144,6 +144,7 @@ func (p *Popup) Open(context *guigui.Context) {
 	}
 	p.showing = true
 	p.hiding = false
+	context.SetFocused(p, true)
 }
 
 func (p *Popup) Close() {
@@ -212,6 +213,7 @@ func (p *Popup) Tick(context *guigui.Context) error {
 			p.openingCount = max(p.openingCount, 0)
 		}
 		if p.openingCount == 0 {
+			context.SetFocused(p, false)
 			p.hiding = false
 			if p.onClosed != nil {
 				p.onClosed(p.closedReason)
