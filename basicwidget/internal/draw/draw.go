@@ -37,6 +37,11 @@ func init() {
 	whiteImage.WritePixels(pix)
 }
 
+var (
+	theNinePatchVertices []ebiten.Vertex
+	theNinePatchIndices  []uint32
+)
+
 func appendRectVectorPath(path *vector.Path, x0, y0, x1, y1 float32, radius float32) {
 	path.MoveTo(x0, y0)
 	path.LineTo(x1, y0)
@@ -351,8 +356,10 @@ func DrawRoundedRectWithSharpenCorners(context *guigui.Context, dst *ebiten.Imag
 
 	drawNinePatchParts(dst, bounds, ensureWhiteRoundedRect(radius), clr, clr, sharpenCorners.bools())
 	if !dst.Bounds().Intersect(bounds).Empty() {
-		vs, is, op := ninePatchVertices(bounds, whiteImage.Bounds(), radius, radius, clr, clr, sharpenCorners.invertedBools())
-		dst.DrawTriangles32(vs, is, whiteImage, op)
+		theNinePatchVertices, theNinePatchIndices = appendNinePatchVertices(theNinePatchVertices[:0], theNinePatchIndices[:0], bounds, whiteImage.Bounds(), radius, radius, clr, clr, sharpenCorners.invertedBools())
+		op := &ebiten.DrawTrianglesOptions{}
+		op.ColorScaleMode = ebiten.ColorScaleModePremultipliedAlpha
+		dst.DrawTriangles32(theNinePatchVertices, theNinePatchIndices, whiteImage, op)
 	}
 }
 
@@ -402,14 +409,13 @@ func drawNinePatchParts(dst *ebiten.Image, bounds image.Rectangle, src *ebiten.I
 		return
 	}
 	cornerW, cornerH := src.Bounds().Dx()/3, src.Bounds().Dy()/3
-	vs, is, op := ninePatchVertices(bounds, src.Bounds(), cornerW, cornerH, clr1, clr2, renderingParts)
-	dst.DrawTriangles32(vs, is, src, op)
-}
-
-func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH int, clr1, clr2 color.Color, renderingParts [3][3]bool) ([]ebiten.Vertex, []uint32, *ebiten.DrawTrianglesOptions) {
+	theNinePatchVertices, theNinePatchIndices = appendNinePatchVertices(theNinePatchVertices[:0], theNinePatchIndices[:0], bounds, src.Bounds(), cornerW, cornerH, clr1, clr2, renderingParts)
 	op := &ebiten.DrawTrianglesOptions{}
 	op.ColorScaleMode = ebiten.ColorScaleModePremultipliedAlpha
+	dst.DrawTriangles32(theNinePatchVertices, theNinePatchIndices, src, op)
+}
 
+func appendNinePatchVertices(vertices []ebiten.Vertex, indices []uint32, dstBounds, srcBounds image.Rectangle, cornerW, cornerH int, clr1, clr2 color.Color, renderingParts [3][3]bool) ([]ebiten.Vertex, []uint32) {
 	var c1 [4]uint32
 	var c2 [4]uint32
 	c1[0], c1[1], c1[2], c1[3] = clr1.RGBA()
@@ -431,8 +437,6 @@ func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH in
 		}
 	}
 
-	var vs []ebiten.Vertex
-	var is []uint32
 	for j := range 3 {
 		for i := range 3 {
 			if !renderingParts[j][i] {
@@ -471,8 +475,8 @@ func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH in
 			sx1 := float32(i+1) * float32(srcBounds.Dx()/3)
 			sy1 := float32(j+1) * float32(srcBounds.Dy()/3)
 
-			base := uint32(len(vs))
-			vs = append(vs,
+			base := uint32(len(vertices))
+			vertices = append(vertices,
 				ebiten.Vertex{
 					DstX:   tx0,
 					DstY:   ty0,
@@ -514,11 +518,11 @@ func ninePatchVertices(dstBounds, srcBounds image.Rectangle, cornerW, cornerH in
 					ColorA: clrs[j+1][3],
 				},
 			)
-			is = append(is, base+0, base+1, base+2, base+1, base+2, base+3)
+			indices = append(indices, base+0, base+1, base+2, base+1, base+2, base+3)
 		}
 	}
 
-	return vs, is, op
+	return vertices, indices
 }
 
 const maskShaderSource = `//kage:unit pixels
