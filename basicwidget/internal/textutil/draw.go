@@ -6,6 +6,8 @@ package textutil
 import (
 	"image"
 	"image/color"
+	"strings"
+	"unicode"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -57,7 +59,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 	op.GeoM.Translate(0, yOffset)
 
 	for pos, line := range lines(bounds.Dx(), str, options.AutoWrap, func(str string) float64 {
-		return text.Advance(str, options.Face)
+		return advanceTrimRight(str, options.Face)
 	}) {
 		start := pos
 		end := pos + len(line) - tailingLineBreakLen(line)
@@ -129,7 +131,7 @@ func Draw(bounds image.Rectangle, dst *ebiten.Image, str string, options *DrawOp
 		}
 
 		// Draw the text.
-		text.Draw(dst, line, options.Face, op)
+		text.Draw(dst, strings.TrimRightFunc(line, unicode.IsSpace), options.Face, op)
 		op.GeoM.Translate(0, options.LineHeight)
 	}
 }

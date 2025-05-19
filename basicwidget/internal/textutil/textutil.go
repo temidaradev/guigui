@@ -15,6 +15,10 @@ import (
 	"github.com/rivo/uniseg"
 )
 
+func advanceTrimRight(str string, face text.Face) float64 {
+	return text.Advance(strings.TrimRightFunc(str, unicode.IsSpace), face)
+}
+
 type Options struct {
 	AutoWrap        bool
 	Face            text.Face
@@ -72,7 +76,7 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 				if lineEnd-lineStart > 0 {
 					l := origStr[lineStart : lineEnd+len(segment)]
 					// TODO: Consider a line alignment and/or editable/selectable states when calculating the width.
-					if advance(strings.TrimRightFunc(l[:len(l)-tailingLineBreakLen(l)], unicode.IsSpace)) > float64(width) {
+					if advance(l[:len(l)-tailingLineBreakLen(l)]) > float64(width) {
 						if !yield(pos, origStr[lineStart:lineEnd]) {
 							return
 						}
@@ -111,7 +115,7 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 }
 
 func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign) float64 {
-	w := text.Advance(line[:len(line)-tailingLineBreakLen(line)], face)
+	w := advanceTrimRight(line[:len(line)-tailingLineBreakLen(line)], face)
 	switch hAlign {
 	case HorizontalAlignStart:
 		return 0
@@ -133,7 +137,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var line string
 	var lineIndex int
 	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
-		return text.Advance(str, options.Face)
+		return advanceTrimRight(str, options.Face)
 	}) {
 		line = l
 		pos = p
@@ -148,7 +152,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var prevA float64
 	var clusterFound bool
 	for _, c := range visibleCulsters(line, options.Face) {
-		a := text.Advance(line[:c.EndIndexInBytes], options.Face)
+		a := advanceTrimRight(line[:c.EndIndexInBytes], options.Face)
 		if (float64(position.X) - left) < (prevA + (a-prevA)/2) {
 			pos += c.StartIndexInBytes
 			clusterFound = true
@@ -180,7 +184,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	var line0, line1 string
 	var found0, found1 bool
 	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
-		return text.Advance(str, options.Face)
+		return advanceTrimRight(str, options.Face)
 	}) {
 		// When auto wrap is on, there can be two positions:
 		// one in the tail of the previous line and one in the head of the next line.
@@ -288,7 +292,7 @@ func trimTailingLineBreak(str string) string {
 func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 	var count int
 	for range lines(width, str, autoWrap, func(str string) float64 {
-		return text.Advance(str, face)
+		return advanceTrimRight(str, face)
 	}) {
 		count++
 	}
@@ -298,10 +302,10 @@ func lineCount(width int, str string, autoWrap bool, face text.Face) int {
 func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64) (float64, float64) {
 	var maxWidth, height float64
 	for _, line := range lines(width, str, autoWrap, func(str string) float64 {
-		return text.Advance(str, face)
+		return advanceTrimRight(str, face)
 	}) {
 		line = trimTailingLineBreak(line)
-		maxWidth = max(maxWidth, text.Advance(line, face))
+		maxWidth = max(maxWidth, advanceTrimRight(line, face))
 		// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
 		// Thus, just counting the line number is enough.
 		height += lineHeight
