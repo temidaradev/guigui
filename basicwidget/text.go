@@ -100,10 +100,11 @@ type Text struct {
 	bold        bool
 	tabular     bool
 
-	selectable bool
-	editable   bool
-	multiline  bool
-	autoWrap   bool
+	selectable       bool
+	editable         bool
+	multiline        bool
+	autoWrap         bool
+	keepTailingSpace bool
 
 	selectionDragStartPlus1 int
 	selectionDragEndPlus1   int
@@ -392,6 +393,15 @@ func (t *Text) SetAutoWrap(autoWrap bool) {
 	}
 
 	t.autoWrap = autoWrap
+	guigui.RequestRedraw(t)
+}
+
+func (t *Text) setKeepTailingSpace(keep bool) {
+	if t.keepTailingSpace == keep {
+		return
+	}
+
+	t.keepTailingSpace = keep
 	guigui.RequestRedraw(t)
 }
 
@@ -886,11 +896,12 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	face := t.face(context, false)
 	op := &textutil.DrawOptions{
 		Options: textutil.Options{
-			AutoWrap:        t.autoWrap,
-			Face:            face,
-			LineHeight:      t.lineHeight(context),
-			HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-			VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+			AutoWrap:         t.autoWrap,
+			Face:             face,
+			LineHeight:       t.lineHeight(context),
+			HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+			VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+			KeepTailingSpace: t.keepTailingSpace,
 		},
 		TextColor: textColor,
 	}
@@ -944,10 +955,10 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool, forceBold boo
 	var w, h float64
 	if useAutoWrap {
 		cw := context.Size(t).X
-		w, h = textutil.Measure(cw, txt, true, t.face(context, forceBold), t.lineHeight(context))
+		w, h = textutil.Measure(cw, txt, true, t.face(context, forceBold), t.lineHeight(context), t.keepTailingSpace)
 	} else {
 		// context.Size is not available as this causes infinite recursion, and is not needed. Give 0 as a width.
-		w, h = textutil.Measure(0, txt, false, t.face(context, forceBold), t.lineHeight(context))
+		w, h = textutil.Measure(0, txt, false, t.face(context, forceBold), t.lineHeight(context), t.keepTailingSpace)
 	}
 	// If width is 0, the text's bounds and visible bounds are empty, and nothing including its cursor is rendered.
 	// Force to set a positive number as the width.
@@ -1003,11 +1014,12 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 		return len(txt)
 	}
 	op := &textutil.Options{
-		AutoWrap:        t.autoWrap,
-		Face:            t.face(context, false),
-		LineHeight:      t.lineHeight(context),
-		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		AutoWrap:         t.autoWrap,
+		Face:             t.face(context, false),
+		LineHeight:       t.lineHeight(context),
+		HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+		KeepTailingSpace: t.keepTailingSpace,
 	}
 	position = position.Sub(textBounds.Min)
 	idx := textutil.TextIndexFromPosition(textBounds.Dx(), position, txt, op)
@@ -1024,11 +1036,12 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 	}
 	txt := t.textToDraw(context, showComposition)
 	op := &textutil.Options{
-		AutoWrap:        t.autoWrap,
-		Face:            t.face(context, false),
-		LineHeight:      t.lineHeight(context),
-		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		AutoWrap:         t.autoWrap,
+		Face:             t.face(context, false),
+		LineHeight:       t.lineHeight(context),
+		HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+		KeepTailingSpace: t.keepTailingSpace,
 	}
 	pos0, pos1, count := textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
 	if count == 0 {
