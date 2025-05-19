@@ -7,18 +7,28 @@ import (
 	"fmt"
 	"image"
 	"iter"
+	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/rivo/uniseg"
 )
 
+func advance(str string, face text.Face, keepTailingSpace bool) float64 {
+	if keepTailingSpace {
+		return text.Advance(str, face)
+	}
+	return text.Advance(strings.TrimRightFunc(str, unicode.IsSpace), face)
+}
+
 type Options struct {
-	AutoWrap        bool
-	Face            text.Face
-	LineHeight      float64
-	HorizontalAlign HorizontalAlign
-	VerticalAlign   VerticalAlign
+	AutoWrap         bool
+	Face             text.Face
+	LineHeight       float64
+	HorizontalAlign  HorizontalAlign
+	VerticalAlign    VerticalAlign
+	KeepTailingSpace bool
 }
 
 type HorizontalAlign int
@@ -48,7 +58,7 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 		if !autoWrap {
 			var pos int
 			for pos < len(str) {
-				p, l := firstLineBreakPositionAndLen(str[pos:])
+				p, l := FirstLineBreakPositionAndLen(str[pos:])
 				if p == -1 {
 					if !yield(pos, str[pos:]) {
 						return
@@ -108,8 +118,8 @@ func lines(width int, str string, autoWrap bool, advance func(str string) float6
 	}
 }
 
-func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign) float64 {
-	w := text.Advance(line[:len(line)-tailingLineBreakLen(line)], face)
+func oneLineLeft(width int, line string, face text.Face, hAlign HorizontalAlign, keepTailingSpace bool) float64 {
+	w := advance(line[:len(line)-tailingLineBreakLen(line)], face, keepTailingSpace)
 	switch hAlign {
 	case HorizontalAlignStart:
 		return 0
@@ -131,7 +141,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var line string
 	var lineIndex int
 	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
-		return text.Advance(str, options.Face)
+		return advance(str, options.Face, options.KeepTailingSpace)
 	}) {
 		line = l
 		pos = p
@@ -142,11 +152,11 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	}
 
 	// Deterine the line index.
-	left := oneLineLeft(width, line, options.Face, options.HorizontalAlign)
+	left := oneLineLeft(width, line, options.Face, options.HorizontalAlign, options.KeepTailingSpace)
 	var prevA float64
 	var clusterFound bool
 	for _, c := range visibleCulsters(line, options.Face) {
-		a := text.Advance(line[:c.EndIndexInBytes], options.Face)
+		a := advance(line[:c.EndIndexInBytes], options.Face, true)
 		if (float64(position.X) - left) < (prevA + (a-prevA)/2) {
 			pos += c.StartIndexInBytes
 			clusterFound = true
@@ -178,7 +188,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	var line0, line1 string
 	var found0, found1 bool
 	for p, l := range lines(width, str, options.AutoWrap, func(str string) float64 {
-		return text.Advance(str, options.Face)
+		return advance(str, options.Face, options.KeepTailingSpace)
 	}) {
 		// When auto wrap is on, there can be two positions:
 		// one in the tail of the previous line and one in the head of the next line.
@@ -205,8 +215,8 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 
 	var pos0, pos1 TextPosition
 	if found0 {
-		x0 := oneLineLeft(width, line0, options.Face, options.HorizontalAlign)
-		x0 += text.Advance(line0[:indexInLine0], options.Face)
+		x0 := oneLineLeft(width, line0, options.Face, options.HorizontalAlign, options.KeepTailingSpace)
+		x0 += advance(line0[:indexInLine0], options.Face, true)
 		pos0 = TextPosition{
 			X:      x0,
 			Top:    y0 + paddingY,
@@ -214,8 +224,8 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 		}
 	}
 	if found1 {
-		x1 := oneLineLeft(width, line1, options.Face, options.HorizontalAlign)
-		x1 += text.Advance(line1[:indexInLine1], options.Face)
+		x1 := oneLineLeft(width, line1, options.Face, options.HorizontalAlign, options.KeepTailingSpace)
+		x1 += advance(line1[:indexInLine1], options.Face, true)
 		pos1 = TextPosition{
 			X:      x1,
 			Top:    y1 + paddingY,
@@ -231,7 +241,7 @@ func TextPositionFromIndex(width int, str string, index int, options *Options) (
 	return pos0, pos1, 2
 }
 
-func firstLineBreakPositionAndLen(str string) (pos, length int) {
+func FirstLineBreakPositionAndLen(str string) (pos, length int) {
 	for i, r := range str {
 		if r == 0x000a || r == 0x000b || r == 0x000c {
 			return i, 1
@@ -283,23 +293,23 @@ func trimTailingLineBreak(str string) string {
 	return str
 }
 
-func lineCount(width int, str string, autoWrap bool, face text.Face) int {
+func lineCount(width int, str string, autoWrap bool, face text.Face, keepTailingSpace bool) int {
 	var count int
 	for range lines(width, str, autoWrap, func(str string) float64 {
-		return text.Advance(str, face)
+		return advance(str, face, keepTailingSpace)
 	}) {
 		count++
 	}
 	return count
 }
 
-func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64) (float64, float64) {
+func Measure(width int, str string, autoWrap bool, face text.Face, lineHeight float64, keepTailingSpace bool) (float64, float64) {
 	var maxWidth, height float64
 	for _, line := range lines(width, str, autoWrap, func(str string) float64 {
-		return text.Advance(str, face)
+		return advance(str, face, keepTailingSpace)
 	}) {
 		line = trimTailingLineBreak(line)
-		maxWidth = max(maxWidth, text.Advance(line, face))
+		maxWidth = max(maxWidth, advance(line, face, keepTailingSpace))
 		// The text is already shifted by (lineHeight - (m.HAscent + m.Descent)) / 2.
 		// Thus, just counting the line number is enough.
 		height += lineHeight
@@ -314,7 +324,7 @@ func textPadding(face text.Face, lineHeight float64) float64 {
 }
 
 func textPositionYOffset(size image.Point, str string, options *Options) float64 {
-	c := lineCount(size.X, str, options.AutoWrap, options.Face)
+	c := lineCount(size.X, str, options.AutoWrap, options.Face, options.KeepTailingSpace)
 	textHeight := options.LineHeight * float64(c)
 	yOffset := textPadding(options.Face, options.LineHeight)
 	switch options.VerticalAlign {

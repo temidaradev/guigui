@@ -15,9 +15,9 @@ import (
 type Lists struct {
 	guigui.DefaultWidget
 
-	listForm     basicwidget.Form
-	textListText basicwidget.Text
-	textList     basicwidget.TextList[int]
+	listForm basicwidget.Form
+	listText basicwidget.Text
+	list     basicwidget.List[int]
 
 	configForm       basicwidget.Form
 	showStripeText   basicwidget.Text
@@ -28,7 +28,7 @@ type Lists struct {
 	enabledToggle    basicwidget.Toggle
 
 	model *Model
-	items []basicwidget.TextListItem[int]
+	items []basicwidget.ListItem[int]
 }
 
 func (l *Lists) SetModel(model *Model) {
@@ -37,24 +37,24 @@ func (l *Lists) SetModel(model *Model) {
 
 func (l *Lists) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	// Lists
-	l.textListText.SetValue("Text list")
+	l.listText.SetValue("Text list")
 
-	l.textList.SetItemBorderVisible(l.model.Lists().IsStripeVisible())
-	l.textList.SetOnItemsMoved(func(from, count, to int) {
+	l.list.SetItemBorderVisible(l.model.Lists().IsStripeVisible())
+	l.list.SetOnItemsMoved(func(from, count, to int) {
 		idx := l.model.Lists().MoveListItems(from, count, to)
-		l.textList.SelectItemByIndex(idx)
+		l.list.SelectItemByIndex(idx)
 	})
 
 	l.items = slices.Delete(l.items, 0, len(l.items))
 	l.items = l.model.lists.AppendListItems(l.items)
-	l.textList.SetItems(l.items)
-	context.SetSize(&l.textList, image.Pt(guigui.DefaultSize, 6*basicwidget.UnitSize(context)))
-	context.SetEnabled(&l.textList, l.model.Lists().Enabled())
+	l.list.SetItems(l.items)
+	context.SetSize(&l.list, image.Pt(guigui.DefaultSize, 6*basicwidget.UnitSize(context)))
+	context.SetEnabled(&l.list, l.model.Lists().Enabled())
 
 	l.listForm.SetItems([]basicwidget.FormItem{
 		{
-			PrimaryWidget:   &l.textListText,
-			SecondaryWidget: &l.textList,
+			PrimaryWidget:   &l.listText,
+			SecondaryWidget: &l.list,
 		},
 	})
 

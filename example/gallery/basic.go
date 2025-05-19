@@ -13,8 +13,8 @@ type Basic struct {
 	guigui.DefaultWidget
 
 	form            basicwidget.Form
-	textButtonText  basicwidget.Text
-	textButton      basicwidget.TextButton
+	buttonText      basicwidget.Text
+	button          basicwidget.Button
 	toggleText      basicwidget.Text
 	toggle          basicwidget.Toggle
 	textInputText   basicwidget.Text
@@ -23,13 +23,13 @@ type Basic struct {
 	numberInput     basicwidget.NumberInput
 	sliderText      basicwidget.Text
 	slider          basicwidget.Slider
-	textListText    basicwidget.Text
-	textList        basicwidget.TextList[int]
+	listText        basicwidget.Text
+	list            basicwidget.List[int]
 }
 
 func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	b.textButtonText.SetValue("Text button")
-	b.textButton.SetText("Click me!")
+	b.buttonText.SetValue("Button")
+	b.button.SetText("Click me!")
 	b.toggleText.SetValue("Toggle")
 	b.textInputText.SetValue("Text input")
 	b.textInput.SetHorizontalAlign(basicwidget.HorizontalAlignEnd)
@@ -37,13 +37,13 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	b.sliderText.SetValue("Slider")
 	b.slider.SetMinimumValueInt64(0)
 	b.slider.SetMaximumValueInt64(100)
-	b.textListText.SetValue("Text list")
-	b.textList.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
+	b.listText.SetValue("Text list")
+	b.list.SetItemsByStrings([]string{"Item 1", "Item 2", "Item 3"})
 
 	b.form.SetItems([]basicwidget.FormItem{
 		{
-			PrimaryWidget:   &b.textButtonText,
-			SecondaryWidget: &b.textButton,
+			PrimaryWidget:   &b.buttonText,
+			SecondaryWidget: &b.button,
 		},
 		{
 			PrimaryWidget:   &b.toggleText,
@@ -62,8 +62,8 @@ func (b *Basic) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 			SecondaryWidget: &b.slider,
 		},
 		{
-			PrimaryWidget:   &b.textListText,
-			SecondaryWidget: &b.textList,
+			PrimaryWidget:   &b.listText,
+			SecondaryWidget: &b.list,
 		},
 	})
 

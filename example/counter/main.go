@@ -19,9 +19,9 @@ type Root struct {
 	guigui.DefaultWidget
 
 	background  basicwidget.Background
-	resetButton basicwidget.TextButton
-	decButton   basicwidget.TextButton
-	incButton   basicwidget.TextButton
+	resetButton basicwidget.Button
+	decButton   basicwidget.Button
+	incButton   basicwidget.Button
 	counterText basicwidget.Text
 
 	counter int

@@ -141,6 +141,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	t.text.SetEditable(!t.readonly)
 	t.text.SetSelectable(true)
 	t.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(t)))
+	t.text.setKeepTailingSpace(true)
 
 	pt := context.Position(t)
 	s := t.text.TextSize(context)

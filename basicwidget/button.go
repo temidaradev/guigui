@@ -1,185 +1,228 @@
 // SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2024 The Guigui Authors
+// SPDX-FileCopyrightText: 2025 The Guigui Authors
 
 package basicwidget
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/hajimehoshi/guigui"
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
+type IconAlign int
+
+const (
+	IconAlignStart IconAlign = iota
+	IconAlignEnd
+)
+
 type Button struct {
 	guigui.DefaultWidget
 
-	pressed         bool
-	keepPressed     bool
-	useAccentColor  bool
-	borderInvisible bool
-	prevHovered     bool
-	sharpenCorners  draw.SharpenCorners
-	pairedButton    *Button
+	button    baseButton
+	content   guigui.Widget
+	text      Text
+	icon      Image
+	iconAlign IconAlign
 
-	onDown   func()
-	onUp     func()
-	onRepeat func()
+	textColor color.Color
 }
 
 func (b *Button) SetOnDown(f func()) {
-	b.onDown = f
+	b.button.SetOnDown(f)
 }
 
 func (b *Button) SetOnUp(f func()) {
-	b.onUp = f
+	b.button.SetOnUp(f)
 }
 
 func (b *Button) setOnRepeat(f func()) {
-	b.onRepeat = f
+	b.button.setOnRepeat(f)
+}
+
+func (b *Button) SetContent(content guigui.Widget) {
+	b.content = content
+}
+
+func (b *Button) SetText(text string) {
+	b.text.SetValue(text)
+}
+
+func (b *Button) SetTextBold(bold bool) {
+	b.text.SetBold(bold)
+}
+
+func (b *Button) SetIcon(icon *ebiten.Image) {
+	b.icon.SetImage(icon)
+}
+
+func (b *Button) SetIconAlign(align IconAlign) {
+	if b.iconAlign == align {
+		return
+	}
+	b.iconAlign = align
+	guigui.RequestRedraw(b)
+}
+
+func (b *Button) SetTextColor(clr color.Color) {
+	if draw.EqualColor(b.textColor, clr) {
+		return
+	}
+	b.textColor = clr
+	guigui.RequestRedraw(b)
 }
 
 func (b *Button) setPairedButton(pair *Button) {
-	b.pairedButton = pair
-}
-
-func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	hovered := b.isHovered(context)
-	if b.prevHovered != hovered {
-		b.prevHovered = hovered
-		guigui.RequestRedraw(b)
-	}
-	return nil
-}
-
-func (b *Button) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if b.isHovered(context) && !b.keepPressed {
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			context.SetFocused(b, true)
-			b.pressed = true
-			if b.onDown != nil {
-				b.onDown()
-			}
-			if isMouseButtonRepeating(ebiten.MouseButtonLeft) {
-				if b.onRepeat != nil {
-					b.onRepeat()
-				}
-			}
-			return guigui.HandleInputByWidget(b)
-		}
-		if (b.pressed || b.pairedButton != nil && b.pairedButton.pressed) && isMouseButtonRepeating(ebiten.MouseButtonLeft) {
-			if b.onRepeat != nil {
-				b.onRepeat()
-			}
-			return guigui.HandleInputByWidget(b)
-		}
-		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && b.pressed {
-			b.pressed = false
-			if b.onUp != nil {
-				b.onUp()
-			}
-			return guigui.HandleInputByWidget(b)
-		}
-	}
-	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		b.pressed = false
-	}
-	return guigui.HandleInputResult{}
-}
-
-func (b *Button) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, bool) {
-	if (b.canPress(context) || b.pressed || b.pairedButton != nil && b.pairedButton.pressed) && !b.keepPressed {
-		return ebiten.CursorShapePointer, true
-	}
-	return 0, true
-}
-
-func (b *Button) radius(context *guigui.Context) int {
-	bounds := context.Bounds(b)
-	return min(RoundedCornerRadius(context), bounds.Dx()/4, bounds.Dy()/4)
-}
-
-func (b *Button) Draw(context *guigui.Context, dst *ebiten.Image) {
-	cm := context.ColorMode()
-	backgroundColor := draw.ControlColor(context.ColorMode(), context.IsEnabled(b))
-	if context.IsEnabled(b) {
-		if b.isPressed(context) {
-			if b.useAccentColor {
-				backgroundColor = draw.Color2(cm, draw.ColorTypeAccent, 0.875, 0.5)
-			} else {
-				backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.95, 0.25)
-			}
-		} else if b.canPress(context) {
-			backgroundColor = draw.Color2(cm, draw.ColorTypeBase, 0.975, 0.275)
-		}
-	}
-
-	r := b.radius(context)
-	border := !b.borderInvisible
-	if context.IsEnabled(b) && (b.isHovered(context) || b.keepPressed) {
-		border = true
-	}
-	bounds := context.Bounds(b)
-	if border || b.isPressed(context) {
-		draw.DrawRoundedRectWithSharpenCorners(context, dst, bounds, backgroundColor, r, b.sharpenCorners)
-	}
-
-	if border {
-		borderType := draw.RoundedRectBorderTypeOutset
-		if b.isPressed(context) {
-			borderType = draw.RoundedRectBorderTypeInset
-		}
-		clr1, clr2 := draw.BorderColors(context.ColorMode(), borderType, b.useAccentColor && b.isPressed(context) && context.IsEnabled(b))
-		draw.DrawRoundedRectBorderWithSharpenCorners(context, dst, bounds, clr1, clr2, r, float32(1*context.Scale()), borderType, b.sharpenCorners)
-	}
-}
-
-func (b *Button) canPress(context *guigui.Context) bool {
-	return context.IsEnabled(b) && b.isHovered(context) && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !b.keepPressed
-}
-
-func (b *Button) isHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition()))
-}
-
-func (b *Button) isActive(context *guigui.Context) bool {
-	return context.IsEnabled(b) && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && b.isHovered(context) && (b.pressed || b.pairedButton != nil && b.pairedButton.pressed)
-}
-
-func (b *Button) isPressed(context *guigui.Context) bool {
-	return context.IsEnabled(b) && b.isActive(context) || b.keepPressed
+	b.button.setPairedButton(&pair.button)
 }
 
 func (b *Button) setKeepPressed(keep bool) {
-	if b.keepPressed == keep {
-		return
-	}
-	b.keepPressed = keep
-	guigui.RequestRedraw(b)
+	b.button.setKeepPressed(keep)
 }
 
-func defaultButtonSize(context *guigui.Context) image.Point {
-	return image.Pt(6*UnitSize(context), UnitSize(context))
+func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidgetWithBounds(&b.button, context.Bounds(b))
+
+	if b.content != nil {
+		r := b.button.radius(context)
+		contentP := context.Position(b).Add(image.Pt(r, r))
+		contentSize := b.contentSize(context)
+		if b.button.isPressed(context) {
+			contentP.Y += int(1 * context.Scale())
+		}
+		appender.AppendChildWidgetWithBounds(b.content, image.Rectangle{
+			Min: contentP,
+			Max: contentP.Add(contentSize),
+		})
+	}
+
+	s := context.Size(b)
+	imgSize := b.iconSize(context)
+
+	tw := b.text.TextSize(context).X
+	if b.textColor != nil {
+		b.text.SetColor(b.textColor)
+	} else {
+		b.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(b)))
+	}
+	b.text.SetHorizontalAlign(HorizontalAlignCenter)
+	b.text.SetVerticalAlign(VerticalAlignMiddle)
+
+	ds := b.defaultSize(context, false)
+	textP := context.Position(b)
+	if b.icon.HasImage() {
+		textP.X += (s.X - ds.X) / 2
+		switch b.iconAlign {
+		case IconAlignStart:
+			textP.X += buttonEdgeAndImagePadding(context)
+			textP.X += imgSize.X + buttonTextAndImagePadding(context)
+		case IconAlignEnd:
+			textP.X += buttonEdgeAndTextPadding(context)
+		}
+	} else {
+		textP.X += (s.X - tw) / 2
+	}
+	if b.button.isPressed(context) {
+		textP.Y += int(1 * context.Scale())
+	}
+	appender.AppendChildWidgetWithBounds(&b.text, image.Rectangle{
+		Min: textP,
+		Max: textP.Add(image.Pt(tw, s.Y)),
+	})
+
+	imgP := context.Position(b)
+	if b.text.Value() != "" {
+		imgP.X += (s.X - ds.X) / 2
+		switch b.iconAlign {
+		case IconAlignStart:
+			imgP.X += buttonEdgeAndImagePadding(context)
+		case IconAlignEnd:
+			imgP.X += buttonEdgeAndTextPadding(context)
+			imgP.X += tw + buttonTextAndImagePadding(context)
+		}
+	} else {
+		imgP.X += (s.X - imgSize.X) / 2
+	}
+	imgP.Y += (s.Y - imgSize.Y) / 2
+	if b.button.isPressed(context) {
+		imgP.Y += int(1 * context.Scale())
+	}
+	appender.AppendChildWidgetWithBounds(&b.icon, image.Rectangle{
+		Min: imgP,
+		Max: imgP.Add(imgSize),
+	})
+
+	return nil
 }
 
 func (b *Button) DefaultSize(context *guigui.Context) image.Point {
-	return defaultButtonSize(context)
+	return b.defaultSize(context, false)
+}
+
+func (b *Button) defaultSize(context *guigui.Context, forceBold bool) image.Point {
+	dh := defaultButtonSize(context).Y
+	var w int
+	if forceBold {
+		w = b.text.boldTextSize(context).X
+	} else {
+		w = b.text.TextSize(context).X
+	}
+	if b.icon.HasImage() {
+		w += b.defaultIconSize(context)
+		if b.text.Value() != "" {
+			w += buttonTextAndImagePadding(context)
+		}
+		w += buttonEdgeAndTextPadding(context)
+		w += buttonEdgeAndImagePadding(context)
+		return image.Pt(w, dh)
+	}
+	return image.Pt(w+UnitSize(context), dh)
 }
 
 func (b *Button) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
-	if b.sharpenCorners == sharpenCorners {
-		return
+	b.button.setSharpenCorners(sharpenCorners)
+}
+
+func buttonTextAndImagePadding(context *guigui.Context) int {
+	return UnitSize(context) / 4
+}
+
+func buttonEdgeAndTextPadding(context *guigui.Context) int {
+	return UnitSize(context) / 2
+}
+
+func buttonEdgeAndImagePadding(context *guigui.Context) int {
+	return UnitSize(context) / 4
+}
+
+func (b *Button) defaultIconSize(context *guigui.Context) int {
+	return int(LineHeight(context))
+}
+
+func (b *Button) iconSize(context *guigui.Context) image.Point {
+	s := context.Size(b)
+	if b.text.Value() != "" {
+		s := min(b.defaultIconSize(context), s.X, s.Y)
+		return image.Pt(s, s)
 	}
-	b.sharpenCorners = sharpenCorners
-	guigui.RequestRedraw(b)
+	r := b.button.radius(context)
+	w := max(0, s.X-2*r)
+	h := max(int(LineHeight(context)), s.Y-2*r)
+	return image.Pt(w, h)
+}
+
+func (b *Button) contentSize(context *guigui.Context) image.Point {
+	s := context.Size(b)
+	r := b.button.radius(context)
+	w := max(0, s.X-2*r)
+	h := max(0, s.Y-2*r)
+	return image.Pt(w, h)
 }
 
 func (b *Button) setUseAccentColor(use bool) {
-	if b.useAccentColor == use {
-		return
-	}
-	b.useAccentColor = use
-	guigui.RequestRedraw(b)
+	b.button.setUseAccentColor(use)
 }

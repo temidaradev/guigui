@@ -100,15 +100,20 @@ type Text struct {
 	bold        bool
 	tabular     bool
 
-	selectable               bool
-	editable                 bool
-	multiline                bool
-	autoWrap                 bool
-	selectionDragStartPlus1  int
-	selectionDragEndPlus1    int
+	selectable       bool
+	editable         bool
+	multiline        bool
+	autoWrap         bool
+	keepTailingSpace bool
+
+	selectionDragStartPlus1 int
+	selectionDragEndPlus1   int
+
+	// selectionShiftIndexPlus1 is the index (+1) of the selection that is moved by Shift and arrow keys.
 	selectionShiftIndexPlus1 int
-	dragging                 bool
-	prevFocused              bool
+
+	dragging    bool
+	prevFocused bool
 
 	clickCount         int
 	lastClickTick      int64
@@ -248,6 +253,10 @@ func (t *Text) setSelection(start, end int) {
 }
 
 func (t *Text) setTextAndSelection(text string, start, end int, shiftIndex int) {
+	if !t.multiline {
+		text, start, end, shiftIndex = replaceNewLinesWithSpace(text, start, end, shiftIndex)
+	}
+
 	t.selectionShiftIndexPlus1 = shiftIndex + 1
 	if start > end {
 		start, end = end, start
@@ -387,6 +396,15 @@ func (t *Text) SetAutoWrap(autoWrap bool) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *Text) setKeepTailingSpace(keep bool) {
+	if t.keepTailingSpace == keep {
+		return
+	}
+
+	t.keepTailingSpace = keep
+	guigui.RequestRedraw(t)
+}
+
 func (t *Text) textBounds(context *guigui.Context) image.Rectangle {
 	b := context.Bounds(t)
 
@@ -477,7 +495,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if cursorPosition.In(context.VisibleBounds(t)) {
+		if context.IsWidgetHitAt(t, cursorPosition) {
 			idx := t.textIndexFromPosition(context, cursorPosition, false)
 
 			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
@@ -733,7 +751,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			}
 		}
 		return guigui.HandleInputByWidget(t)
-	case t.multiline && isKeyRepeating(ebiten.KeyUp) ||
+	case isKeyRepeating(ebiten.KeyUp) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyP):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
@@ -758,7 +776,7 @@ func (t *Text) HandleButtonInput(context *guigui.Context) guigui.HandleInputResu
 			}
 		}
 		return guigui.HandleInputByWidget(t)
-	case t.multiline && isKeyRepeating(ebiten.KeyDown) ||
+	case isKeyRepeating(ebiten.KeyDown) ||
 		useEmacsKeybind() && ebiten.IsKeyPressed(ebiten.KeyControl) && isKeyRepeating(ebiten.KeyN):
 		lh := t.lineHeight(context)
 		shift := ebiten.IsKeyPressed(ebiten.KeyShift)
@@ -878,11 +896,12 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 	face := t.face(context, false)
 	op := &textutil.DrawOptions{
 		Options: textutil.Options{
-			AutoWrap:        t.autoWrap,
-			Face:            face,
-			LineHeight:      t.lineHeight(context),
-			HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-			VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+			AutoWrap:         t.autoWrap,
+			Face:             face,
+			LineHeight:       t.lineHeight(context),
+			HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+			VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+			KeepTailingSpace: t.keepTailingSpace,
 		},
 		TextColor: textColor,
 	}
@@ -936,10 +955,10 @@ func (t *Text) textSize(context *guigui.Context, forceUnwrap bool, forceBold boo
 	var w, h float64
 	if useAutoWrap {
 		cw := context.Size(t).X
-		w, h = textutil.Measure(cw, txt, true, t.face(context, forceBold), t.lineHeight(context))
+		w, h = textutil.Measure(cw, txt, true, t.face(context, forceBold), t.lineHeight(context), t.keepTailingSpace)
 	} else {
 		// context.Size is not available as this causes infinite recursion, and is not needed. Give 0 as a width.
-		w, h = textutil.Measure(0, txt, false, t.face(context, forceBold), t.lineHeight(context))
+		w, h = textutil.Measure(0, txt, false, t.face(context, forceBold), t.lineHeight(context), t.keepTailingSpace)
 	}
 	// If width is 0, the text's bounds and visible bounds are empty, and nothing including its cursor is rendered.
 	// Force to set a positive number as the width.
@@ -995,11 +1014,12 @@ func (t *Text) textIndexFromPosition(context *guigui.Context, position image.Poi
 		return len(txt)
 	}
 	op := &textutil.Options{
-		AutoWrap:        t.autoWrap,
-		Face:            t.face(context, false),
-		LineHeight:      t.lineHeight(context),
-		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		AutoWrap:         t.autoWrap,
+		Face:             t.face(context, false),
+		LineHeight:       t.lineHeight(context),
+		HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+		KeepTailingSpace: t.keepTailingSpace,
 	}
 	position = position.Sub(textBounds.Min)
 	idx := textutil.TextIndexFromPosition(textBounds.Dx(), position, txt, op)
@@ -1016,11 +1036,12 @@ func (t *Text) textPosition(context *guigui.Context, index int, showComposition 
 	}
 	txt := t.textToDraw(context, showComposition)
 	op := &textutil.Options{
-		AutoWrap:        t.autoWrap,
-		Face:            t.face(context, false),
-		LineHeight:      t.lineHeight(context),
-		HorizontalAlign: textutil.HorizontalAlign(t.hAlign),
-		VerticalAlign:   textutil.VerticalAlign(t.vAlign),
+		AutoWrap:         t.autoWrap,
+		Face:             t.face(context, false),
+		LineHeight:       t.lineHeight(context),
+		HorizontalAlign:  textutil.HorizontalAlign(t.hAlign),
+		VerticalAlign:    textutil.VerticalAlign(t.vAlign),
+		KeepTailingSpace: t.keepTailingSpace,
 	}
 	pos0, pos1, count := textutil.TextPositionFromIndex(textBounds.Dx(), txt, index, op)
 	if count == 0 {
@@ -1124,4 +1145,46 @@ func (t *textCursor) DefaultSize(context *guigui.Context) image.Point {
 
 func (t *textCursor) PassThrough() bool {
 	return true
+}
+
+func replaceNewLinesWithSpace(text string, start, end, shiftIndex int) (string, int, int, int) {
+	var buf strings.Builder
+	for {
+		pos, len := textutil.FirstLineBreakPositionAndLen(text)
+		if len == 0 {
+			buf.WriteString(text)
+			break
+		}
+		buf.WriteString(text[:pos])
+		origLen := buf.Len()
+		buf.WriteString(" ")
+		if diff := len - 1; diff > 0 {
+			if origLen < start {
+				if start >= origLen+len {
+					start -= diff
+				} else {
+					// This is a very rare case, e.g. the position is in between '\r' and '\n'.
+					start = origLen + 1
+				}
+			}
+			if origLen < end {
+				if end >= origLen+len {
+					end -= diff
+				} else {
+					end = origLen + 1
+				}
+			}
+			if shiftIndex >= 0 && origLen < shiftIndex {
+				if shiftIndex >= origLen+len {
+					shiftIndex -= diff
+				} else {
+					shiftIndex = origLen + 1
+				}
+			}
+		}
+		text = text[pos+len:]
+	}
+	text = buf.String()
+
+	return text, start, end, shiftIndex
 }

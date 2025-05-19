@@ -29,7 +29,8 @@ func popupMaxOpeningCount() int {
 type PopupClosedReason int
 
 const (
-	PopupClosedReasonFuncCall PopupClosedReason = iota
+	PopupClosedReasonNone PopupClosedReason = iota
+	PopupClosedReasonFuncCall
 	PopupClosedReasonClickOutside
 	PopupClosedReasonReopen
 )
@@ -143,24 +144,49 @@ func (p *Popup) Open(context *guigui.Context) {
 	}
 	p.showing = true
 	p.hiding = false
+	context.SetFocused(p, true)
 }
 
 func (p *Popup) Close() {
 	p.close(PopupClosedReasonFuncCall)
 }
 
+func (p *Popup) setClosedReason(reason PopupClosedReason) {
+	if p.closedReason == PopupClosedReasonNone {
+		p.closedReason = reason
+		return
+	}
+	if reason != PopupClosedReasonReopen {
+		return
+	}
+	// Overwrite the closed reason if it is PopupClosedReasonReopen.
+	// A popup might already be closed by clicking outside.
+	p.closedReason = reason
+}
+
 func (p *Popup) close(reason PopupClosedReason) {
 	if p.hiding {
+		p.setClosedReason(reason)
 		return
 	}
 	if p.openingCount == 0 {
 		return
 	}
 
-	p.closedReason = reason
+	p.setClosedReason(reason)
 	p.showing = false
 	p.hiding = true
 	p.openAfterClose = false
+}
+
+func (p *Popup) IsWidgetOrBackgroundHitAt(context *guigui.Context, target guigui.Widget, point image.Point) bool {
+	if context.IsWidgetHitAt(target, point) {
+		return true
+	}
+	if context.IsWidgetHitAt(&p.background, point) && point.In(context.VisibleBounds(target)) {
+		return true
+	}
+	return false
 }
 
 func (p *Popup) Tick(context *guigui.Context) error {
@@ -187,10 +213,12 @@ func (p *Popup) Tick(context *guigui.Context) error {
 			p.openingCount = max(p.openingCount, 0)
 		}
 		if p.openingCount == 0 {
+			context.SetFocused(p, false)
 			p.hiding = false
 			if p.onClosed != nil {
 				p.onClosed(p.closedReason)
 			}
+			p.closedReason = PopupClosedReasonNone
 			if p.openAfterClose {
 				if p.hasNextContentPosition {
 					p.contentPosition = p.nextContentPosition
@@ -232,7 +260,7 @@ func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidg
 }
 
 func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
+	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 	return guigui.HandleInputResult{}
@@ -281,7 +309,7 @@ func (p *popupBackground) HandlePointingInput(context *guigui.Context) guigui.Ha
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 
-	if image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(p)) {
+	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
 		if p.popup.closeByClickingOutside {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 				p.popup.close(PopupClosedReasonClickOutside)

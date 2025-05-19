@@ -22,7 +22,7 @@ type Popups struct {
 	blurBackgroundToggle         basicwidget.Toggle
 	closeByClickingOutsideText   basicwidget.Text
 	closeByClickingOutsideToggle basicwidget.Toggle
-	showButton                   basicwidget.TextButton
+	showButton                   basicwidget.Button
 
 	contextMenuPopupText          basicwidget.Text
 	contextMenuPopupClickHereText basicwidget.Text
@@ -110,8 +110,8 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-		pt := image.Pt(ebiten.CursorPosition())
-		if pt.In(context.VisibleBounds(&p.contextMenuPopupClickHereText)) {
+		// Use IsWidgetOrBackgroundHitAt. context.IsWidgetHitAt doesn't work when a popup's transparent background exists.
+		if pt := image.Pt(ebiten.CursorPosition()); p.contextMenuPopup.IsWidgetOrBackgroundHitAt(context, &p.contextMenuPopupClickHereText, pt) {
 			context.SetPosition(&p.contextMenuPopup, pt)
 			p.contextMenuPopup.Open(context)
 		}
@@ -125,7 +125,7 @@ type simplePopupContent struct {
 	popup *basicwidget.Popup
 
 	titleText   basicwidget.Text
-	closeButton basicwidget.TextButton
+	closeButton basicwidget.Button
 }
 
 func (s *simplePopupContent) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

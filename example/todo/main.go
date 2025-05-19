@@ -22,7 +22,7 @@ type Root struct {
 	guigui.DefaultWidget
 
 	background        basicwidget.Background
-	createButton      basicwidget.TextButton
+	createButton      basicwidget.Button
 	textInput         basicwidget.TextInput
 	tasksPanel        basicwidget.Panel
 	tasksPanelContent tasksPanelContent
@@ -103,7 +103,7 @@ func (r *Root) tryCreateTask(text string) {
 type taskWidget struct {
 	guigui.DefaultWidget
 
-	doneButton basicwidget.TextButton
+	doneButton basicwidget.Button
 	text       basicwidget.Text
 
 	onDoneButtonPressed func()
