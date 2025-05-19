@@ -32,91 +32,91 @@ type Button struct {
 	textColor color.Color
 }
 
-func (t *Button) SetOnDown(f func()) {
-	t.button.SetOnDown(f)
+func (b *Button) SetOnDown(f func()) {
+	b.button.SetOnDown(f)
 }
 
-func (t *Button) SetOnUp(f func()) {
-	t.button.SetOnUp(f)
+func (b *Button) SetOnUp(f func()) {
+	b.button.SetOnUp(f)
 }
 
 func (b *Button) setOnRepeat(f func()) {
 	b.button.setOnRepeat(f)
 }
 
-func (t *Button) SetContent(content guigui.Widget) {
-	t.content = content
+func (b *Button) SetContent(content guigui.Widget) {
+	b.content = content
 }
 
-func (t *Button) SetText(text string) {
-	t.text.SetValue(text)
+func (b *Button) SetText(text string) {
+	b.text.SetValue(text)
 }
 
-func (t *Button) SetTextBold(bold bool) {
-	t.text.SetBold(bold)
+func (b *Button) SetTextBold(bold bool) {
+	b.text.SetBold(bold)
 }
 
-func (t *Button) SetIcon(icon *ebiten.Image) {
-	t.icon.SetImage(icon)
+func (b *Button) SetIcon(icon *ebiten.Image) {
+	b.icon.SetImage(icon)
 }
 
-func (t *Button) SetIconAlign(align IconAlign) {
-	if t.iconAlign == align {
+func (b *Button) SetIconAlign(align IconAlign) {
+	if b.iconAlign == align {
 		return
 	}
-	t.iconAlign = align
-	guigui.RequestRedraw(t)
+	b.iconAlign = align
+	guigui.RequestRedraw(b)
 }
 
-func (t *Button) SetTextColor(clr color.Color) {
-	if draw.EqualColor(t.textColor, clr) {
+func (b *Button) SetTextColor(clr color.Color) {
+	if draw.EqualColor(b.textColor, clr) {
 		return
 	}
-	t.textColor = clr
-	guigui.RequestRedraw(t)
+	b.textColor = clr
+	guigui.RequestRedraw(b)
 }
 
-func (t *Button) setPairedButton(pair *Button) {
-	t.button.setPairedButton(&pair.button)
+func (b *Button) setPairedButton(pair *Button) {
+	b.button.setPairedButton(&pair.button)
 }
 
-func (t *Button) setKeepPressed(keep bool) {
-	t.button.setKeepPressed(keep)
+func (b *Button) setKeepPressed(keep bool) {
+	b.button.setKeepPressed(keep)
 }
 
-func (t *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	appender.AppendChildWidgetWithBounds(&t.button, context.Bounds(t))
+func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	appender.AppendChildWidgetWithBounds(&b.button, context.Bounds(b))
 
-	if t.content != nil {
-		r := t.button.radius(context)
-		contentP := context.Position(t).Add(image.Pt(r, r))
-		contentSize := t.contentSize(context)
-		if t.button.isPressed(context) {
+	if b.content != nil {
+		r := b.button.radius(context)
+		contentP := context.Position(b).Add(image.Pt(r, r))
+		contentSize := b.contentSize(context)
+		if b.button.isPressed(context) {
 			contentP.Y += int(1 * context.Scale())
 		}
-		appender.AppendChildWidgetWithBounds(t.content, image.Rectangle{
+		appender.AppendChildWidgetWithBounds(b.content, image.Rectangle{
 			Min: contentP,
 			Max: contentP.Add(contentSize),
 		})
 	}
 
-	s := context.Size(t)
-	imgSize := t.iconSize(context)
+	s := context.Size(b)
+	imgSize := b.iconSize(context)
 
-	tw := t.text.TextSize(context).X
-	if t.textColor != nil {
-		t.text.SetColor(t.textColor)
+	tw := b.text.TextSize(context).X
+	if b.textColor != nil {
+		b.text.SetColor(b.textColor)
 	} else {
-		t.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(t)))
+		b.text.SetColor(draw.TextColor(context.ColorMode(), context.IsEnabled(b)))
 	}
-	t.text.SetHorizontalAlign(HorizontalAlignCenter)
-	t.text.SetVerticalAlign(VerticalAlignMiddle)
+	b.text.SetHorizontalAlign(HorizontalAlignCenter)
+	b.text.SetVerticalAlign(VerticalAlignMiddle)
 
-	ds := t.defaultSize(context, false)
-	textP := context.Position(t)
-	if t.icon.HasImage() {
+	ds := b.defaultSize(context, false)
+	textP := context.Position(b)
+	if b.icon.HasImage() {
 		textP.X += (s.X - ds.X) / 2
-		switch t.iconAlign {
+		switch b.iconAlign {
 		case IconAlignStart:
 			textP.X += buttonEdgeAndImagePadding(context)
 			textP.X += imgSize.X + buttonTextAndImagePadding(context)
@@ -126,18 +126,18 @@ func (t *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	} else {
 		textP.X += (s.X - tw) / 2
 	}
-	if t.button.isPressed(context) {
+	if b.button.isPressed(context) {
 		textP.Y += int(1 * context.Scale())
 	}
-	appender.AppendChildWidgetWithBounds(&t.text, image.Rectangle{
+	appender.AppendChildWidgetWithBounds(&b.text, image.Rectangle{
 		Min: textP,
 		Max: textP.Add(image.Pt(tw, s.Y)),
 	})
 
-	imgP := context.Position(t)
-	if t.text.Value() != "" {
+	imgP := context.Position(b)
+	if b.text.Value() != "" {
 		imgP.X += (s.X - ds.X) / 2
-		switch t.iconAlign {
+		switch b.iconAlign {
 		case IconAlignStart:
 			imgP.X += buttonEdgeAndImagePadding(context)
 		case IconAlignEnd:
@@ -148,10 +148,10 @@ func (t *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		imgP.X += (s.X - imgSize.X) / 2
 	}
 	imgP.Y += (s.Y - imgSize.Y) / 2
-	if t.button.isPressed(context) {
+	if b.button.isPressed(context) {
 		imgP.Y += int(1 * context.Scale())
 	}
-	appender.AppendChildWidgetWithBounds(&t.icon, image.Rectangle{
+	appender.AppendChildWidgetWithBounds(&b.icon, image.Rectangle{
 		Min: imgP,
 		Max: imgP.Add(imgSize),
 	})
@@ -159,21 +159,21 @@ func (t *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	return nil
 }
 
-func (t *Button) DefaultSize(context *guigui.Context) image.Point {
-	return t.defaultSize(context, false)
+func (b *Button) DefaultSize(context *guigui.Context) image.Point {
+	return b.defaultSize(context, false)
 }
 
-func (t *Button) defaultSize(context *guigui.Context, forceBold bool) image.Point {
+func (b *Button) defaultSize(context *guigui.Context, forceBold bool) image.Point {
 	dh := defaultButtonSize(context).Y
 	var w int
 	if forceBold {
-		w = t.text.boldTextSize(context).X
+		w = b.text.boldTextSize(context).X
 	} else {
-		w = t.text.TextSize(context).X
+		w = b.text.TextSize(context).X
 	}
-	if t.icon.HasImage() {
-		w += t.defaultIconSize(context)
-		if t.text.Value() != "" {
+	if b.icon.HasImage() {
+		w += b.defaultIconSize(context)
+		if b.text.Value() != "" {
 			w += buttonTextAndImagePadding(context)
 		}
 		w += buttonEdgeAndTextPadding(context)
@@ -183,8 +183,8 @@ func (t *Button) defaultSize(context *guigui.Context, forceBold bool) image.Poin
 	return image.Pt(w+UnitSize(context), dh)
 }
 
-func (t *Button) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
-	t.button.setSharpenCorners(sharpenCorners)
+func (b *Button) setSharpenCorners(sharpenCorners draw.SharpenCorners) {
+	b.button.setSharpenCorners(sharpenCorners)
 }
 
 func buttonTextAndImagePadding(context *guigui.Context) int {
@@ -199,30 +199,30 @@ func buttonEdgeAndImagePadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 
-func (t *Button) defaultIconSize(context *guigui.Context) int {
+func (b *Button) defaultIconSize(context *guigui.Context) int {
 	return int(LineHeight(context))
 }
 
-func (t *Button) iconSize(context *guigui.Context) image.Point {
-	s := context.Size(t)
-	if t.text.Value() != "" {
-		s := min(t.defaultIconSize(context), s.X, s.Y)
+func (b *Button) iconSize(context *guigui.Context) image.Point {
+	s := context.Size(b)
+	if b.text.Value() != "" {
+		s := min(b.defaultIconSize(context), s.X, s.Y)
 		return image.Pt(s, s)
 	}
-	r := t.button.radius(context)
+	r := b.button.radius(context)
 	w := max(0, s.X-2*r)
 	h := max(int(LineHeight(context)), s.Y-2*r)
 	return image.Pt(w, h)
 }
 
-func (t *Button) contentSize(context *guigui.Context) image.Point {
-	s := context.Size(t)
-	r := t.button.radius(context)
+func (b *Button) contentSize(context *guigui.Context) image.Point {
+	s := context.Size(b)
+	r := b.button.radius(context)
 	w := max(0, s.X-2*r)
 	h := max(0, s.Y-2*r)
 	return image.Pt(w, h)
 }
 
-func (t *Button) setUseAccentColor(use bool) {
-	t.button.setUseAccentColor(use)
+func (b *Button) setUseAccentColor(use bool) {
+	b.button.setUseAccentColor(use)
 }
