@@ -152,7 +152,7 @@ func TextIndexFromPosition(width int, position image.Point, str string, options 
 	var prevA float64
 	var clusterFound bool
 	for _, c := range visibleCulsters(line, options.Face) {
-		a := advanceTrimRight(line[:c.EndIndexInBytes], options.Face)
+		a := text.Advance(line[:c.EndIndexInBytes], options.Face)
 		if (float64(position.X) - left) < (prevA + (a-prevA)/2) {
 			pos += c.StartIndexInBytes
 			clusterFound = true
