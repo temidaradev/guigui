@@ -24,6 +24,7 @@ type Button struct {
 	guigui.DefaultWidget
 
 	button    baseButton
+	content   guigui.Widget
 	text      Text
 	icon      Image
 	iconAlign IconAlign
@@ -41,6 +42,10 @@ func (t *Button) SetOnUp(f func()) {
 
 func (b *Button) setOnRepeat(f func()) {
 	b.button.setOnRepeat(f)
+}
+
+func (t *Button) SetContent(content guigui.Widget) {
+	t.content = content
 }
 
 func (t *Button) SetText(text string) {
@@ -82,8 +87,20 @@ func (t *Button) setKeepPressed(keep bool) {
 func (t *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	appender.AppendChildWidgetWithBounds(&t.button, context.Bounds(t))
 
-	s := context.Size(t)
+	if t.content != nil {
+		r := t.button.radius(context)
+		contentP := context.Position(t).Add(image.Pt(r, r))
+		contentSize := t.contentSize(context)
+		if t.button.isPressed(context) {
+			contentP.Y += int(1 * context.Scale())
+		}
+		appender.AppendChildWidgetWithBounds(t.content, image.Rectangle{
+			Min: contentP,
+			Max: contentP.Add(contentSize),
+		})
+	}
 
+	s := context.Size(t)
 	imgSize := t.iconSize(context)
 
 	tw := t.text.TextSize(context).X
@@ -195,6 +212,14 @@ func (t *Button) iconSize(context *guigui.Context) image.Point {
 	r := t.button.radius(context)
 	w := max(0, s.X-2*r)
 	h := max(int(LineHeight(context)), s.Y-2*r)
+	return image.Pt(w, h)
+}
+
+func (t *Button) contentSize(context *guigui.Context) image.Point {
+	s := context.Size(t)
+	r := t.button.radius(context)
+	w := max(0, s.X-2*r)
+	h := max(0, s.Y-2*r)
 	return image.Pt(w, h)
 }
 
