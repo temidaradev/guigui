@@ -384,6 +384,11 @@ func (l *baseList[T]) itemBounds(context *guigui.Context, index int, fullWidth b
 	if item, ok := l.abstractList.ItemByIndex(index); ok {
 		b.Max.Y = b.Min.Y + context.Size(item.Content).Y
 	}
+
+	if l.style == ListStyleNormal {
+		// As the list items are rendered in an inset box, shift the text bounds down by 0.5 pixel.
+		b = b.Add(image.Pt(0, int(0.5*context.Scale())))
+	}
 	return b
 }
 

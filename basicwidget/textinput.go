@@ -153,8 +153,8 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	}
 	textBounds = textBounds.Add(image.Pt(paddingStart, paddingTop))
 
-	// As the text is rendered in an inset box, shift the text bounds down by 1 pixel.
-	textBounds = textBounds.Add(image.Pt(0, int(1*context.Scale())))
+	// As the text is rendered in an inset box, shift the text bounds down by 0.5 pixel.
+	textBounds = textBounds.Add(image.Pt(0, int(0.5*context.Scale())))
 
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
 	context.SetSize(&t.text, textBounds.Size())
