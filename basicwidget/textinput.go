@@ -214,9 +214,7 @@ func (t *TextInput) HandlePointingInput(context *guigui.Context) guigui.HandleIn
 	cp := image.Pt(ebiten.CursorPosition())
 	if context.IsWidgetHitAt(t, cp) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			context.SetFocused(&t.text, true)
-			idx := t.text.textIndexFromPosition(context, cp, false)
-			t.text.setSelection(idx, idx)
+			t.text.handleClick(context, cp)
 			return guigui.HandleInputByWidget(t)
 		}
 	}

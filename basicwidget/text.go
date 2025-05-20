@@ -496,36 +496,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if context.IsWidgetHitAt(t, cursorPosition) {
-			idx := t.textIndexFromPosition(context, cursorPosition, false)
-
-			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
-				t.clickCount++
-			} else {
-				t.clickCount = 1
-			}
-
-			switch t.clickCount {
-			case 1:
-				t.dragging = true
-				t.selectionDragStartPlus1 = idx + 1
-				t.selectionDragEndPlus1 = idx + 1
-				if start, end := t.field.Selection(); start != idx || end != idx {
-					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
-				}
-			case 2:
-				t.dragging = true
-				text := t.field.Text()
-				start, end := findWordBoundaries(text, idx)
-				t.selectionDragStartPlus1 = start + 1
-				t.selectionDragEndPlus1 = end + 1
-				t.setTextAndSelection(text, start, end, -1)
-			case 3:
-				t.selectAll()
-			}
-
-			context.SetFocused(t, true)
-			t.lastClickTick = ebiten.Tick()
-			t.lastClickTextIndex = idx
+			t.handleClick(context, cursorPosition)
 			return guigui.HandleInputByWidget(t)
 		}
 		context.SetFocused(t, false)
@@ -545,6 +516,39 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	return guigui.HandleInputResult{}
+}
+
+func (t *Text) handleClick(context *guigui.Context, cursorPosition image.Point) {
+	idx := t.textIndexFromPosition(context, cursorPosition, false)
+
+	if ebiten.Tick()-t.lastClickTick < int64(doubleClickLimitInTicks()) && t.lastClickTextIndex == idx {
+		t.clickCount++
+	} else {
+		t.clickCount = 1
+	}
+
+	switch t.clickCount {
+	case 1:
+		t.dragging = true
+		t.selectionDragStartPlus1 = idx + 1
+		t.selectionDragEndPlus1 = idx + 1
+		if start, end := t.field.Selection(); start != idx || end != idx {
+			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+		}
+	case 2:
+		t.dragging = true
+		text := t.field.Text()
+		start, end := findWordBoundaries(text, idx)
+		t.selectionDragStartPlus1 = start + 1
+		t.selectionDragEndPlus1 = end + 1
+		t.setTextAndSelection(text, start, end, -1)
+	case 3:
+		t.selectAll()
+	}
+
+	context.SetFocused(t, true)
+	t.lastClickTick = ebiten.Tick()
+	t.lastClickTextIndex = idx
 }
 
 func (t *Text) textToDraw(context *guigui.Context, showComposition bool) string {
