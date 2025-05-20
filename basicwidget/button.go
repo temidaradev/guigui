@@ -92,7 +92,9 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		contentP := context.Position(b).Add(image.Pt(r, r))
 		contentSize := b.contentSize(context)
 		if b.button.isPressed(context) {
-			contentP.Y += int(1 * context.Scale())
+			contentP.Y += int(0.5 * context.Scale())
+		} else {
+			contentP.Y -= int(0.5 * context.Scale())
 		}
 		appender.AppendChildWidgetWithBounds(b.content, image.Rectangle{
 			Min: contentP,

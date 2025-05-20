@@ -132,6 +132,7 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 			imgP := p
 			itemH := context.Size(item.Content).Y
 			imgP.Y += (itemH - imgSize) * 3 / 4
+			imgP.Y = b.adjustItemY(context, imgP.Y)
 			appender.AppendChildWidgetWithBounds(&b.checkmark, image.Rectangle{
 				Min: imgP,
 				Max: imgP.Add(image.Pt(imgSize, imgSize)),
@@ -142,6 +143,8 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if b.checkmarkIndexPlus1 > 0 {
 			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		}
+		itemP.Y = b.adjustItemY(context, itemP.Y)
+
 		appender.AppendChildWidgetWithPosition(item.Content, itemP)
 		p.Y += context.Size(item.Content).Y
 	}
@@ -368,28 +371,35 @@ func (b *baseList[T]) itemYFromIndex(context *guigui.Context, index int) int {
 		item, _ := b.abstractList.ItemByIndex(i)
 		y += context.Size(item.Content).Y
 	}
+	y = b.adjustItemY(context, y)
 	return y
 }
 
-func (l *baseList[T]) itemBounds(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
-	_, offsetY := l.scrollOverlay.Offset()
-	b := context.Bounds(l)
+func (b *baseList[T]) adjustItemY(context *guigui.Context, y int) int {
+	// Adjust the bounds based on the list style (inset or outset).
+	switch b.style {
+	case ListStyleNormal:
+		y += int(0.5 * context.Scale())
+	case ListStyleMenu:
+		y += int(-0.5 * context.Scale())
+	}
+	return y
+}
+
+func (b *baseList[T]) itemBounds(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
+	_, offsetY := b.scrollOverlay.Offset()
+	bounds := context.Bounds(b)
 	if !fullWidth {
 		padding := listItemPadding(context)
-		b.Min.X += RoundedCornerRadius(context) + padding
-		b.Max.X -= RoundedCornerRadius(context) + padding
+		bounds.Min.X += RoundedCornerRadius(context) + padding
+		bounds.Max.X -= RoundedCornerRadius(context) + padding
 	}
-	b.Min.Y += l.itemYFromIndex(context, index)
-	b.Min.Y += int(offsetY)
-	if item, ok := l.abstractList.ItemByIndex(index); ok {
-		b.Max.Y = b.Min.Y + context.Size(item.Content).Y
+	bounds.Min.Y += b.itemYFromIndex(context, index)
+	bounds.Min.Y += int(offsetY)
+	if item, ok := b.abstractList.ItemByIndex(index); ok {
+		bounds.Max.Y = bounds.Min.Y + context.Size(item.Content).Y
 	}
-
-	if l.style == ListStyleNormal {
-		// As the list items are rendered in an inset box, shift the text bounds down by 0.5 pixel.
-		b = b.Add(image.Pt(0, int(0.5*context.Scale())))
-	}
-	return b
+	return bounds
 }
 
 func (b *baseList[T]) selectedItemColor(context *guigui.Context) color.Color {
