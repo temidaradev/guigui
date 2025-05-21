@@ -158,10 +158,11 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			item.text.SetColor(item.item.TextColor)
 		}
 
+		w := context.Size(l).X - (2*RoundedCornerRadius(context) + 2*listItemPadding(context))
 		if l.listItemHeightPlus1 > 0 {
-			context.SetSize(item, image.Pt(guigui.DefaultSize, l.listItemHeightPlus1-1))
+			context.SetSize(item, image.Pt(w, l.listItemHeightPlus1-1))
 		} else {
-			context.SetSize(item, image.Pt(guigui.DefaultSize, guigui.DefaultSize))
+			context.SetSize(item, image.Pt(w, guigui.DefaultSize))
 		}
 	}
 
@@ -251,12 +252,13 @@ func (l *listItemWidget[T]) setListItem(listItem ListItem[T]) {
 
 func (l *listItemWidget[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p := context.Position(l)
-	if l.item.Header {
+	/*if l.item.Header {
 		p.X += UnitSize(context) / 2
 		context.SetSize(&l.text, context.Size(l).Add(image.Pt(-UnitSize(context), 0)))
 	} else {
 		context.SetSize(&l.text, context.Size(l))
-	}
+	}*/
+	context.SetSize(&l.text, context.Size(l))
 	l.text.SetValue(l.item.Text)
 	l.text.SetVerticalAlign(VerticalAlignMiddle)
 	appender.AppendChildWidgetWithPosition(&l.text, p)
@@ -275,19 +277,22 @@ func (l *listItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		vector.StrokeLine(dst, x0, y, x1, y, width, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), false)
 		return
 	}
-	if l.item.Header {
+	/*if l.item.Header {
 		bounds := context.Bounds(l)
-		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.6), RoundedCornerRadius(context))
-	}
+		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), RoundedCornerRadius(context))
+	}*/
 }
 
 func (l *listItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
 	// Assume that every item can use a bold font.
 	w := l.text.boldTextSize(context).X
+	h := int(LineHeight(context))
 	if l.item.Border {
-		return image.Pt(w, UnitSize(context)/2)
+		h = UnitSize(context) / 2
+	} else if l.item.Header {
+		h = UnitSize(context)
 	}
-	return image.Pt(w, int(LineHeight(context)))
+	return image.Pt(w, h)
 }
 
 /*func (t *textListItemWidget[T]) index() int {

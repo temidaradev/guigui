@@ -480,6 +480,7 @@ func (b *baseList[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
+	// Draw the selected item background.
 	if clr := b.selectedItemColor(context); clr != nil && b.SelectedItemIndex() >= 0 && b.SelectedItemIndex() < b.abstractList.ItemCount() {
 		bounds := b.itemBounds(context, b.SelectedItemIndex(), b.stripeVisible)
 		if bounds.Overlaps(vb) {
