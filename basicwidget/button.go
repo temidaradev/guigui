@@ -178,7 +178,7 @@ func (b *Button) defaultSize(context *guigui.Context, forceBold bool) image.Poin
 		w = b.text.TextSize(context).X
 	}
 	if b.icon.HasImage() {
-		w += b.defaultIconSize(context)
+		w += defaultIconSize(context)
 		if b.text.Value() != "" {
 			w += buttonTextAndImagePadding(context)
 		}
@@ -205,19 +205,15 @@ func buttonEdgeAndImagePadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 
-func (b *Button) defaultIconSize(context *guigui.Context) int {
-	return int(LineHeight(context))
-}
-
 func (b *Button) iconSize(context *guigui.Context) image.Point {
 	s := context.Size(b)
 	if b.text.Value() != "" {
-		s := min(b.defaultIconSize(context), s.X, s.Y)
+		s := min(defaultIconSize(context), s.X, s.Y)
 		return image.Pt(s, s)
 	}
 	r := b.button.radius(context)
 	w := max(0, s.X-2*r)
-	h := max(int(LineHeight(context)), s.Y-2*r)
+	h := max(defaultIconSize(context), s.Y-2*r)
 	return image.Pt(w, h)
 }
 
