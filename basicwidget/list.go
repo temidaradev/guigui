@@ -158,11 +158,10 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 			item.text.SetColor(item.item.TextColor)
 		}
 
-		w := context.Size(l).X - (2*RoundedCornerRadius(context) + 2*listItemPadding(context))
 		if l.listItemHeightPlus1 > 0 {
-			context.SetSize(item, image.Pt(w, l.listItemHeightPlus1-1))
+			context.SetSize(item, image.Pt(guigui.DefaultSize, l.listItemHeightPlus1-1))
 		} else {
-			context.SetSize(item, image.Pt(w, guigui.DefaultSize))
+			context.SetSize(item, image.Pt(guigui.DefaultSize, guigui.DefaultSize))
 		}
 	}
 
