@@ -290,7 +290,7 @@ func (l *listItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
 	if l.item.Border {
 		h = UnitSize(context) / 2
 	} else if l.item.Header {
-		h = UnitSize(context)
+		h = UnitSize(context) * 3 / 2
 	}
 	return image.Pt(w, h)
 }
