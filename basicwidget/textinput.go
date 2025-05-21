@@ -16,11 +16,13 @@ import (
 type TextInput struct {
 	guigui.DefaultWidget
 
-	background    textInputBackground
-	text          Text
-	frame         textInputFrame
-	scrollOverlay ScrollOverlay
-	focus         textInputFocus
+	background     textInputBackground
+	text           Text
+	iconBackground textInputIconBackground
+	icon           Image
+	frame          textInputFrame
+	scrollOverlay  ScrollOverlay
+	focus          textInputFocus
 
 	readonly     bool
 	paddingStart int
@@ -110,10 +112,21 @@ func (t *TextInput) setPaddingEnd(padding int) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *TextInput) SetIcon(icon *ebiten.Image) {
+	t.icon.SetImage(icon)
+}
+
 func (t *TextInput) textInputPaddingInScrollableContent(context *guigui.Context) (start, top, end, bottom int) {
 	x := UnitSize(context) / 2
 	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
-	return x + t.paddingStart, y, x + t.paddingEnd, y
+	start = x + t.paddingStart
+	if t.icon.HasImage() {
+		start += defaultIconSize(context)
+	}
+	top = y
+	end = x + t.paddingEnd
+	bottom = y
+	return
 }
 
 func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
@@ -169,6 +182,25 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		})
 	} else {
 		context.SetCustomDraw(&t.text, nil)
+	}
+
+	if t.icon.HasImage() {
+		t.iconBackground.textInput = t
+
+		b := context.Bounds(t)
+		iconSize := defaultIconSize(context)
+		var imgBounds image.Rectangle
+		imgBounds.Min = b.Min.Add(image.Point{
+			X: UnitSize(context)/4 + int(0.5*context.Scale()),
+			Y: (b.Dy() - iconSize) / 2,
+		})
+		imgBounds.Max = imgBounds.Min.Add(image.Pt(iconSize, iconSize))
+
+		imgBgBounds := b
+		imgBgBounds.Max.X = imgBounds.Max.X + UnitSize(context)/4
+
+		appender.AppendChildWidgetWithBounds(&t.iconBackground, imgBgBounds)
+		appender.AppendChildWidgetWithBounds(&t.icon, imgBounds)
 	}
 
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
@@ -239,6 +271,18 @@ type textInputBackground struct {
 }
 
 func (t *textInputBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
+	bounds := context.Bounds(t)
+	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t) && t.textInput.IsEditable())
+	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
+}
+
+type textInputIconBackground struct {
+	guigui.DefaultWidget
+
+	textInput *TextInput
+}
+
+func (t *textInputIconBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t) && t.textInput.IsEditable())
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))

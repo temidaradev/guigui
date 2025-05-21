@@ -14,11 +14,13 @@ import (
 type TextInputs struct {
 	guigui.DefaultWidget
 
-	textInputForm       basicwidget.Form
-	singleLineText      basicwidget.Text
-	singleLineTextInput basicwidget.TextInput
-	multilineText       basicwidget.Text
-	multilineTextInput  basicwidget.TextInput
+	textInputForm               basicwidget.Form
+	singleLineText              basicwidget.Text
+	singleLineTextInput         basicwidget.TextInput
+	singleLineWithIconText      basicwidget.Text
+	singleLineWithIconTextInput basicwidget.TextInput
+	multilineText               basicwidget.Text
+	multilineTextInput          basicwidget.TextInput
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -64,6 +66,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	if err != nil {
 		return err
 	}
+	imgSearch, err := theImageCache.GetMonochrome("search", context.ColorMode())
+	if err != nil {
+		return err
+	}
 
 	u := basicwidget.UnitSize(context)
 
@@ -82,6 +88,14 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	t.singleLineTextInput.SetEditable(t.model.TextInputs().Editable())
 	context.SetEnabled(&t.singleLineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.singleLineTextInput, image.Pt(width, guigui.DefaultSize))
+
+	t.singleLineWithIconText.SetValue("Single line with icon")
+	t.singleLineWithIconTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.singleLineWithIconTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.singleLineWithIconTextInput.SetEditable(t.model.TextInputs().Editable())
+	t.singleLineWithIconTextInput.SetIcon(imgSearch)
+	context.SetEnabled(&t.singleLineWithIconTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.singleLineWithIconTextInput, image.Pt(width, guigui.DefaultSize))
 
 	t.multilineText.SetValue("Multiline")
 	t.multilineTextInput.SetOnValueChanged(func(text string, committed bool) {
@@ -102,6 +116,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.singleLineText,
 			SecondaryWidget: &t.singleLineTextInput,
+		},
+		{
+			PrimaryWidget:   &t.singleLineWithIconText,
+			SecondaryWidget: &t.singleLineWithIconTextInput,
 		},
 		{
 			PrimaryWidget:   &t.multilineText,
