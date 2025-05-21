@@ -23,6 +23,7 @@ type List[T comparable] struct {
 	listItemWidgets []listItemWidget[T]
 
 	listItemHeightPlus1 int
+	tabular             bool
 }
 
 /*type ListCallback struct {
@@ -100,6 +101,14 @@ func (l *List[T]) SetItemHeight(height int) {
 	guigui.RequestRedraw(l)
 }
 
+func (l *List[T]) SetTabular(tabular bool) {
+	if l.tabular == tabular {
+		return
+	}
+	l.tabular = tabular
+	guigui.RequestRedraw(l)
+}
+
 func (l *List[T]) SetOnItemSelected(f func(index int)) {
 	l.list.SetOnItemSelected(f)
 }
@@ -135,6 +144,7 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	for i := range l.listItemWidgets {
 		item := &l.listItemWidgets[i]
 		item.text.SetBold(item.item.Header || l.list.style == ListStyleSidebar && l.SelectedItemIndex() == i)
+		item.text.SetTabular(l.tabular)
 		switch {
 		case l.list.style == ListStyleNormal && focused && l.list.SelectedItemIndex() == i && item.selectable():
 			item.text.SetColor(DefaultActiveListItemTextColor(context))
