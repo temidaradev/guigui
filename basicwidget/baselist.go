@@ -424,7 +424,7 @@ func (b *baseList[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bou
 	if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(b), r, bounds) {
 		dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
 	} else {
-		draw.FillInRoundedConerRect(context, dst, context.Bounds(b), r, bounds, clr)
+		draw.FillInRoundedCornerRect(context, dst, context.Bounds(b), r, bounds, clr)
 	}
 }
 
@@ -489,7 +489,7 @@ func (b *baseList[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 				if !draw.OverlapsWithRoundedCorner(context.Bounds(b), r, bounds) {
 					dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
 				} else {
-					draw.FillInRoundedConerRect(context, dst, context.Bounds(b), r, bounds, clr)
+					draw.FillInRoundedCornerRect(context, dst, context.Bounds(b), r, bounds, clr)
 				}
 			} else {
 				bounds.Min.X -= RoundedCornerRadius(context)
