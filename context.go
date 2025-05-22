@@ -205,6 +205,10 @@ func (c *Context) Position(widget Widget) image.Point {
 }
 
 func (c *Context) SetPosition(widget Widget, position image.Point) {
+	if widget.widgetState().position == position {
+		return
+	}
+	c.clearVisibleBoundsCacheForWidget(widget)
 	widget.widgetState().position = position
 	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
 }
@@ -212,6 +216,10 @@ func (c *Context) SetPosition(widget Widget, position image.Point) {
 const DefaultSize = -1
 
 func (c *Context) SetSize(widget Widget, size image.Point) {
+	if widget.widgetState().widthPlus1 == size.X+1 && widget.widgetState().heightPlus1 == size.Y+1 {
+		return
+	}
+	c.clearVisibleBoundsCacheForWidget(widget)
 	widget.widgetState().widthPlus1 = size.X + 1
 	widget.widgetState().heightPlus1 = size.Y + 1
 }
@@ -321,6 +329,7 @@ func (c *Context) focus(widget Widget) {
 	if c.app.focusedWidget == widget {
 		return
 	}
+	c.clearFocusCache()
 
 	var oldWidget Widget
 	if c.app.focusedWidget != nil {
@@ -414,4 +423,11 @@ func (c *Context) clearFocusCache() {
 
 func (c *Context) clearVisibleBoundsCache() {
 	clear(c.visibleBoundsCache)
+}
+
+func (c *Context) clearVisibleBoundsCacheForWidget(widget Widget) {
+	delete(c.visibleBoundsCache, widget.widgetState())
+	for _, child := range widget.widgetState().children {
+		c.clearVisibleBoundsCacheForWidget(child)
+	}
 }
