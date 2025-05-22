@@ -65,6 +65,7 @@ type baseList[T comparable] struct {
 	pressStartY             int
 	startPressingIndexPlus1 int
 	startPressingLeft       bool
+	prevFocused             bool
 
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
@@ -100,6 +101,12 @@ func (b *baseList[T]) contentSize(context *guigui.Context) image.Point {
 }
 
 func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	focused := context.IsFocusedOrHasFocusedChild(b)
+	if focused != b.prevFocused {
+		guigui.RequestRedraw(b)
+	}
+	b.prevFocused = focused
+
 	b.scrollOverlay.SetContentSize(context, b.contentSize(context))
 
 	if idx := b.indexToJumpPlus1 - 1; idx >= 0 {
