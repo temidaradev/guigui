@@ -358,6 +358,7 @@ func (c *Context) blur(widget Widget) {
 		return nil
 	})
 	if unfocused {
+		c.clearFocusCache()
 		RequestRedraw(widget)
 	}
 }
