@@ -63,6 +63,7 @@ type Context struct {
 	defaultColorWarnOnce       sync.Once
 	locales                    []language.Tag
 	focusCache                 map[*widgetState]bool
+	visibleBoundsCache         map[*widgetState]image.Rectangle
 }
 
 func (c *Context) Scale() float64 {
@@ -241,14 +242,28 @@ func (c *Context) Bounds(widget Widget) image.Rectangle {
 }
 
 func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
+	if vb, ok := c.visibleBoundsCache[widget.widgetState()]; ok {
+		return vb
+	}
+
+	if c.visibleBoundsCache == nil {
+		c.visibleBoundsCache = map[*widgetState]image.Rectangle{}
+	}
+
 	parent := widget.widgetState().parent
 	if parent == nil {
-		return c.app.bounds()
+		b := c.app.bounds()
+		c.visibleBoundsCache[widget.widgetState()] = b
+		return b
 	}
 	if widget.ZDelta() != 0 {
-		return c.Bounds(widget)
+		b := c.Bounds(widget)
+		c.visibleBoundsCache[widget.widgetState()] = b
+		return b
 	}
-	return c.VisibleBounds(parent).Intersect(c.Bounds(widget))
+	b := c.VisibleBounds(parent).Intersect(c.Bounds(widget))
+	c.visibleBoundsCache[widget.widgetState()] = b
+	return b
 }
 
 func (c *Context) SetVisible(widget Widget, visible bool) {
@@ -393,6 +408,10 @@ func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {
 	widget.widgetState().customDraw = customDraw
 }
 
-func (c *Context) clearCache() {
+func (c *Context) clearFocusCache() {
 	clear(c.focusCache)
+}
+
+func (c *Context) clearVisibleBoundsCache() {
+	clear(c.visibleBoundsCache)
 }

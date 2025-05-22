@@ -175,6 +175,7 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree.
+	a.context.clearVisibleBoundsCache()
 	if err := a.build(); err != nil {
 		return err
 	}
@@ -193,6 +194,7 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree again to reflect the latest state.
+	a.context.clearVisibleBoundsCache()
 	if err := a.build(); err != nil {
 		return err
 	}
@@ -227,7 +229,7 @@ func (a *app) Update() error {
 	}
 
 	a.clearHitTestCacheIfNeeded(a.root)
-	a.context.clearCache()
+	a.context.clearFocusCache()
 
 	a.resetPrevWidgets(a.root)
 
