@@ -43,7 +43,7 @@ func (t *TextInput) SetOnValueChanged(f func(text string, committed bool)) {
 	t.text.SetOnValueChanged(f)
 }
 
-func (t *TextInput) SetTextAndSelectionChanged(f func(text string, start, end int)) {
+func (t *TextInput) SetOnTextAndSelectionChanged(f func(text string, start, end int)) {
 	t.onTextAndSelectionChanged = f
 }
 
