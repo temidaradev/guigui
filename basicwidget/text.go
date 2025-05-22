@@ -174,7 +174,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetAutoWrapCachedTextSize()
 	}
 
-	if context.IsFocusedOrHasFocusedChild(t) {
+	focused := context.IsFocusedOrHasFocusedChild(t)
+	if focused {
 		if !t.prevFocused {
 			t.field.Focus()
 			t.cursor.resetCounter()
@@ -193,7 +194,7 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		}
 	}
 
-	t.prevFocused = context.IsFocusedOrHasFocusedChild(t)
+	t.prevFocused = focused
 
 	if t.selectable || t.editable {
 		t.cursor.text = t
