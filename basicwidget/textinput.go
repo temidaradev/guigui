@@ -118,7 +118,7 @@ func (t *TextInput) SetIcon(icon *ebiten.Image) {
 
 func (t *TextInput) textInputPaddingInScrollableContent(context *guigui.Context) (start, top, end, bottom int) {
 	x := UnitSize(context) / 2
-	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
+	y := int(float64(min(context.Size(t).Y, UnitSize(context)))-LineHeight(context)*(t.text.scaleMinus1+1)) / 2
 	start = x + t.paddingStart
 	if t.icon.HasImage() {
 		start += defaultIconSize(context)
