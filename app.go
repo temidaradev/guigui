@@ -208,8 +208,6 @@ func (a *app) Update() error {
 		return err
 	}
 
-	clearEventQueues(a.root)
-
 	// Invalidate the engire screen if the screen size is changed.
 	var invalidated bool
 	if a.lastScreenWidth != a.screenWidth {
@@ -461,13 +459,6 @@ func (a *app) updateWidget(widget Widget) error {
 	}
 
 	return nil
-}
-
-func clearEventQueues(widget Widget) {
-	widgetState := widget.widgetState()
-	for _, child := range widgetState.children {
-		clearEventQueues(child)
-	}
 }
 
 func (a *app) requestRedrawIfTreeChanged(widget Widget) {
