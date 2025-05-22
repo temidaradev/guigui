@@ -11,12 +11,12 @@ import (
 )
 
 type PopupMenuItem[T comparable] struct {
-	Text     string
-	Color    color.Color
-	Header   bool
-	Disabled bool
-	Border   bool
-	ID       T
+	Text      string
+	TextColor color.Color
+	Header    bool
+	Disabled  bool
+	Border    bool
+	ID        T
 }
 
 type PopupMenu[T comparable] struct {
@@ -112,7 +112,7 @@ func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
 	for _, item := range items {
 		listItems = append(listItems, ListItem[T]{
 			Text:      item.Text,
-			TextColor: item.Color,
+			TextColor: item.TextColor,
 			Header:    item.Header,
 			Disabled:  item.Disabled,
 			Border:    item.Border,
@@ -132,12 +132,12 @@ func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     listItem.Text,
-		Color:    listItem.TextColor,
-		Header:   listItem.Header,
-		Disabled: listItem.Disabled,
-		Border:   listItem.Border,
-		ID:       listItem.ID,
+		Text:      listItem.Text,
+		TextColor: listItem.TextColor,
+		Header:    listItem.Header,
+		Disabled:  listItem.Disabled,
+		Border:    listItem.Border,
+		ID:        listItem.ID,
 	}, true
 }
 
@@ -147,12 +147,12 @@ func (p *PopupMenu[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     listItem.Text,
-		Color:    listItem.TextColor,
-		Header:   listItem.Header,
-		Disabled: listItem.Disabled,
-		Border:   listItem.Border,
-		ID:       listItem.ID,
+		Text:      listItem.Text,
+		TextColor: listItem.TextColor,
+		Header:    listItem.Header,
+		Disabled:  listItem.Disabled,
+		Border:    listItem.Border,
+		ID:        listItem.ID,
 	}, true
 }
 
