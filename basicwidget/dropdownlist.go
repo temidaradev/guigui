@@ -12,12 +12,12 @@ import (
 )
 
 type DropdownListItem[T comparable] struct {
-	Text     string
-	Color    color.Color
-	Header   bool
-	Disabled bool
-	Border   bool
-	ID       T
+	Text      string
+	TextColor color.Color
+	Header    bool
+	Disabled  bool
+	Border    bool
+	ID        T
 }
 
 type DropdownList[T comparable] struct {
