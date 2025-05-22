@@ -176,7 +176,6 @@ func (a *app) Update() error {
 
 	// Construct the widget tree.
 	a.context.clearVisibleBoundsCache()
-	a.context.clearFocusCache()
 	if err := a.build(); err != nil {
 		return err
 	}
@@ -184,7 +183,6 @@ func (a *app) Update() error {
 	// Handle user inputs.
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
 	a.clearHitTestCacheIfNeeded(a.root)
-	a.context.clearFocusCache()
 	if r := a.handleInputWidget(handleInputTypePointing); r.widget != nil {
 		if theDebugMode.showInputLogs {
 			slog.Info("pointing input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
@@ -198,7 +196,6 @@ func (a *app) Update() error {
 
 	// Construct the widget tree again to reflect the latest state.
 	a.context.clearVisibleBoundsCache()
-	a.context.clearFocusCache()
 	if err := a.build(); err != nil {
 		return err
 	}

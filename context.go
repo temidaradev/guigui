@@ -62,7 +62,6 @@ type Context struct {
 	cachedDefaultColorModeTime time.Time
 	defaultColorWarnOnce       sync.Once
 	locales                    []language.Tag
-	focusCache                 map[*widgetState]bool
 	visibleBoundsCache         map[*widgetState]image.Rectangle
 }
 
@@ -329,7 +328,6 @@ func (c *Context) focus(widget Widget) {
 	if c.app.focusedWidget == widget {
 		return
 	}
-	c.clearFocusCache()
 
 	var oldWidget Widget
 	if c.app.focusedWidget != nil {
@@ -358,41 +356,17 @@ func (c *Context) blur(widget Widget) {
 		return nil
 	})
 	if unfocused {
-		c.clearFocusCache()
 		RequestRedraw(widget)
 	}
 }
 
-func (c *Context) isFocused(widget Widget) bool {
-	// Check this first to avoid unnecessary evaluation.
-	if c.app.focusedWidget != widget {
-		return false
-	}
-	widgetState := widget.widgetState()
-	return widgetState.isInTree() && widgetState.isVisible()
-}
-
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
-	if focused, ok := c.focusCache[widget.widgetState()]; ok {
-		return focused
-	}
-
-	if c.focusCache == nil {
-		c.focusCache = map[*widgetState]bool{}
-	}
-
-	if c.isFocused(widget) {
-		c.focusCache[widget.widgetState()] = true
-		return true
-	}
-
-	for _, child := range widget.widgetState().children {
-		if c.IsFocusedOrHasFocusedChild(child) {
-			c.focusCache[child.widgetState()] = true
-			return true
+	for w := c.app.focusedWidget; w != nil; w = w.widgetState().parent {
+		if w == widget {
+			widgetState := widget.widgetState()
+			return widgetState.isInTree() && widgetState.isVisible()
 		}
 	}
-	c.focusCache[widget.widgetState()] = false
 	return false
 }
 
@@ -416,10 +390,6 @@ func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
 
 func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {
 	widget.widgetState().customDraw = customDraw
-}
-
-func (c *Context) clearFocusCache() {
-	clear(c.focusCache)
 }
 
 func (c *Context) clearVisibleBoundsCache() {
