@@ -318,7 +318,11 @@ func (b *baseList[T]) HandlePointingInput(context *guigui.Context) guigui.Handle
 			}
 
 			wasFocused := context.IsFocusedOrHasFocusedChild(b)
-			context.SetFocused(b, true)
+			if item, ok := b.abstractList.ItemByIndex(index); ok {
+				context.SetFocused(item.Content, true)
+			} else {
+				context.SetFocused(b, true)
+			}
 			if b.SelectedItemIndex() != index || !wasFocused || b.style == ListStyleMenu {
 				b.selectItemByIndex(index, true)
 				b.lastSelectingItemTime = time.Now()
