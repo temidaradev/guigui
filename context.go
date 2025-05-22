@@ -362,10 +362,11 @@ func (c *Context) blur(widget Widget) {
 
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
 	for w := c.app.focusedWidget; w != nil; w = w.widgetState().parent {
-		if w == widget {
-			widgetState := widget.widgetState()
-			return widgetState.isInTree() && widgetState.isVisible()
+		widgetState := widget.widgetState()
+		if w.widgetState() != widgetState {
+			continue
 		}
+		return widgetState.isInTree() && widgetState.isVisible()
 	}
 	return false
 }
