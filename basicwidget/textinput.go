@@ -13,6 +13,13 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
+type TextInputStyle int
+
+const (
+	TextInputStyleNormal TextInputStyle = iota
+	TextInputStyleInline
+)
+
 type TextInput struct {
 	guigui.DefaultWidget
 
@@ -24,6 +31,7 @@ type TextInput struct {
 	scrollOverlay  ScrollOverlay
 	focus          textInputFocus
 
+	style        TextInputStyle
 	readonly     bool
 	paddingStart int
 	paddingEnd   int
@@ -87,6 +95,14 @@ func (t *TextInput) IsEditable() bool {
 	return !t.readonly
 }
 
+func (t *TextInput) SetStyle(style TextInputStyle) {
+	if t.style == style {
+		return
+	}
+	t.style = style
+	guigui.RequestRedraw(t)
+}
+
 func (t *TextInput) SetEditable(editable bool) {
 	if t.readonly == !editable {
 		return
@@ -117,8 +133,14 @@ func (t *TextInput) SetIcon(icon *ebiten.Image) {
 }
 
 func (t *TextInput) textInputPaddingInScrollableContent(context *guigui.Context) (start, top, end, bottom int) {
-	x := UnitSize(context) / 2
-	y := int(float64(min(context.Size(t).Y, UnitSize(context)))-LineHeight(context)*(t.text.scaleMinus1+1)) / 2
+	var x, y int
+	switch t.style {
+	case TextInputStyleNormal:
+		x = UnitSize(context) / 2
+		y = int(float64(min(context.Size(t).Y, UnitSize(context)))-LineHeight(context)*(t.text.scaleMinus1+1)) / 2
+	case TextInputStyleInline:
+		x = UnitSize(context) / 4
+	}
 	start = x + t.paddingStart
 	if t.icon.HasImage() {
 		start += defaultIconSize(context)
@@ -208,7 +230,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	context.SetVisible(&t.scrollOverlay, t.text.IsMultiline())
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
-	if context.IsFocusedOrHasFocusedChild(t) {
+	if t.style != TextInputStyleInline && context.IsFocusedOrHasFocusedChild(t) {
 		t.focus.textInput = t
 		w := textInputFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))
@@ -258,6 +280,12 @@ func (t *TextInput) CursorShape(context *guigui.Context) (ebiten.CursorShapeType
 }
 
 func (t *TextInput) DefaultSize(context *guigui.Context) image.Point {
+	if t.style == TextInputStyleInline {
+		start, _, end, _ := t.textInputPaddingInScrollableContent(context)
+		w := max(t.text.DefaultSize(context).X+start+end, UnitSize(context))
+		h := t.text.DefaultSize(context).Y
+		return image.Pt(w, h)
+	}
 	if t.text.IsMultiline() {
 		return image.Pt(6*UnitSize(context), 4*UnitSize(context))
 	}

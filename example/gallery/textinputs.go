@@ -21,6 +21,8 @@ type TextInputs struct {
 	singleLineWithIconTextInput basicwidget.TextInput
 	multilineText               basicwidget.Text
 	multilineTextInput          basicwidget.TextInput
+	inlineText                  basicwidget.Text
+	inlineTextInput             inlineTextInputContainer
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -112,6 +114,17 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
+	t.inlineText.SetValue("Inline")
+	// inlineTextInputContainer is a container for the inline text input.
+	// Without a container, an inline text input shakes by input for some reason.
+	// TODO: Fix this.
+	t.inlineTextInput.textInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.inlineTextInput.textInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.inlineTextInput.textInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
+	t.inlineTextInput.textInput.SetEditable(t.model.TextInputs().Editable())
+	context.SetEnabled(&t.inlineTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.inlineTextInput, image.Pt(width, guigui.DefaultSize))
+
 	t.textInputForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
@@ -124,6 +137,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 		{
 			PrimaryWidget:   &t.multilineText,
 			SecondaryWidget: &t.multilineTextInput,
+		},
+		{
+			PrimaryWidget:   &t.inlineText,
+			SecondaryWidget: &t.inlineTextInput,
 		},
 	})
 
@@ -231,4 +248,20 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	appender.AppendChildWidgetWithBounds(&t.textInputForm, gl.CellBounds(0, 0))
 	appender.AppendChildWidgetWithBounds(&t.configForm, gl.CellBounds(0, 2))
 	return nil
+}
+
+type inlineTextInputContainer struct {
+	guigui.DefaultWidget
+
+	textInput basicwidget.TextInput
+}
+
+func (c *inlineTextInputContainer) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	c.textInput.SetStyle(basicwidget.TextInputStyleInline)
+	appender.AppendChildWidgetWithPosition(&c.textInput, context.Position(c))
+	return nil
+}
+
+func (c *inlineTextInputContainer) DefaultSize(context *guigui.Context) image.Point {
+	return c.textInput.DefaultSize(context)
 }
