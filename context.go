@@ -62,6 +62,7 @@ type Context struct {
 	cachedDefaultColorModeTime time.Time
 	defaultColorWarnOnce       sync.Once
 	locales                    []language.Tag
+	focusCache                 map[*widgetState]bool
 }
 
 func (c *Context) Scale() float64 {
@@ -347,16 +348,26 @@ func (c *Context) isFocused(widget Widget) bool {
 }
 
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
+	if focused, ok := c.focusCache[widget.widgetState()]; ok {
+		return focused
+	}
+
+	if c.focusCache == nil {
+		c.focusCache = map[*widgetState]bool{}
+	}
+
 	if c.isFocused(widget) {
+		c.focusCache[widget.widgetState()] = true
 		return true
 	}
 
-	widgetState := widget.widgetState()
-	for _, child := range widgetState.children {
+	for _, child := range widget.widgetState().children {
 		if c.IsFocusedOrHasFocusedChild(child) {
+			c.focusCache[child.widgetState()] = true
 			return true
 		}
 	}
+	c.focusCache[widget.widgetState()] = false
 	return false
 }
 
@@ -380,4 +391,8 @@ func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
 
 func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {
 	widget.widgetState().customDraw = customDraw
+}
+
+func (c *Context) clearCache() {
+	clear(c.focusCache)
 }

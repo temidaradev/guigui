@@ -227,6 +227,7 @@ func (a *app) Update() error {
 	}
 
 	a.clearHitTestCacheIfNeeded(a.root)
+	a.context.clearCache()
 
 	a.resetPrevWidgets(a.root)
 
