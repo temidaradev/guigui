@@ -115,10 +115,7 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
 	t.inlineText.SetValue("Inline")
-	// inlineTextInputContainer is a container for the inline text input.
-	// Without a container, an inline text input shakes by input for some reason.
-	// TODO: Fix this.
-	t.inlineTextInput.textInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.inlineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
 	t.inlineTextInput.textInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
 	t.inlineTextInput.textInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
 	t.inlineTextInput.textInput.SetEditable(t.model.TextInputs().Editable())
@@ -253,12 +250,27 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 type inlineTextInputContainer struct {
 	guigui.DefaultWidget
 
-	textInput basicwidget.TextInput
+	textInput       basicwidget.TextInput
+	horizontalAlign basicwidget.HorizontalAlign
+}
+
+func (c *inlineTextInputContainer) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
+	c.horizontalAlign = align
+	c.textInput.SetHorizontalAlign(align)
 }
 
 func (c *inlineTextInputContainer) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	c.textInput.SetStyle(basicwidget.TextInputStyleInline)
-	appender.AppendChildWidgetWithPosition(&c.textInput, context.Position(c))
+	pos := context.Position(c)
+	switch c.horizontalAlign {
+	case basicwidget.HorizontalAlignStart:
+	case basicwidget.HorizontalAlignCenter:
+		pos.X += (context.Size(c).X - context.Size(&c.textInput).X) / 2
+	case basicwidget.HorizontalAlignEnd:
+		// TODO: The input field shakes when the horizontal align is AlignEnd. Fix this.
+		pos.X += context.Size(c).X - context.Size(&c.textInput).X
+	}
+	appender.AppendChildWidgetWithPosition(&c.textInput, pos)
 	return nil
 }
 
