@@ -267,7 +267,6 @@ func (c *inlineTextInputContainer) Build(context *guigui.Context, appender *guig
 	case basicwidget.HorizontalAlignCenter:
 		pos.X += (context.Size(c).X - context.Size(&c.textInput).X) / 2
 	case basicwidget.HorizontalAlignEnd:
-		// TODO: The input field shakes when the horizontal align is AlignEnd. Fix this.
 		pos.X += context.Size(c).X - context.Size(&c.textInput).X
 	}
 	appender.AppendChildWidgetWithPosition(&c.textInput, pos)
