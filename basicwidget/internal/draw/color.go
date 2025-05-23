@@ -68,7 +68,7 @@ func Color2(colorMode guigui.ColorMode, typ ColorType, lightnessInLightMode, lig
 	case ColorTypeDanger:
 		base = red
 	default:
-		panic(fmt.Sprintf("basicwidget: invalid color type: %d", typ))
+		panic(fmt.Sprintf("draw: invalid color type: %d", typ))
 	}
 	switch colorMode {
 	case guigui.ColorModeLight:
@@ -76,7 +76,7 @@ func Color2(colorMode guigui.ColorMode, typ ColorType, lightnessInLightMode, lig
 	case guigui.ColorModeDark:
 		return getColor(base, lightnessInDarkMode, black, white)
 	default:
-		panic(fmt.Sprintf("basicwidget: invalid color mode: %d", colorMode))
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
 }
 
