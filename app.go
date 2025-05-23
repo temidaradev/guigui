@@ -388,7 +388,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 	}
 
 	// Avoid (*Context).IsVisible and (*Context).IsEnabled for performance.
-	// These checks parent widget unnecessarily.
+	// These check parent widget states unnecessarily.
 
 	if widget.widgetState().hidden {
 		return HandleInputResult{}
