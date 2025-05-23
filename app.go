@@ -334,13 +334,13 @@ func (a *app) build() error {
 	}); err != nil {
 		return err
 	}
+	var appender ChildWidgetAppender
 	if err := traverseWidget(a.root, func(widget Widget) error {
 		widgetState := widget.widgetState()
 		widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
-		if err := widget.Build(&a.context, &ChildWidgetAppender{
-			app:    a,
-			widget: widget,
-		}); err != nil {
+		appender.app = a
+		appender.widget = widget
+		if err := widget.Build(&a.context, &appender); err != nil {
 			return err
 		}
 		return nil
