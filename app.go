@@ -512,10 +512,8 @@ func (a *app) drawWidget(screen *ebiten.Image) {
 }
 
 func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
-	vb := a.context.VisibleBounds(widget)
-	if vb.Empty() {
-		return
-	}
+	// Do not skip this even when visible bounds are empty.
+	// A child widget might have a different Z value and different visible bounds.
 
 	widgetState := widget.widgetState()
 	if widgetState.hidden {
@@ -528,8 +526,9 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 	customDraw := widgetState.customDraw
 	useOffscreen := widgetState.opacity() < 1 || customDraw != nil
 
+	vb := a.context.VisibleBounds(widget)
 	var origDst *ebiten.Image
-	renderCurrent := zToRender == z(widget)
+	renderCurrent := zToRender == z(widget) && !vb.Empty()
 	if renderCurrent {
 		if useOffscreen {
 			origDst = dst
