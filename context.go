@@ -268,7 +268,12 @@ func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
 		c.visibleBoundsCache[widget.widgetState()] = b
 		return b
 	}
-	b := c.VisibleBounds(parent).Intersect(c.Bounds(widget))
+
+	var b image.Rectangle
+	parentVB := c.VisibleBounds(parent)
+	if !parentVB.Empty() {
+		b = parentVB.Intersect(c.Bounds(widget))
+	}
 	c.visibleBoundsCache[widget.widgetState()] = b
 	return b
 }
