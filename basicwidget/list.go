@@ -159,8 +159,10 @@ func (l *List[T]) ItemTextColor(context *guigui.Context, index int) color.Color 
 		return DefaultActiveListItemTextColor(context)
 	case !item.selectable() && !item.item.Header:
 		return DefaultDisabledListItemTextColor(context)
-	default:
+	case item.item.TextColor != nil:
 		return item.item.TextColor
+	default:
+		return draw.TextColor(context.ColorMode(), context.IsEnabled(item))
 	}
 }
 
