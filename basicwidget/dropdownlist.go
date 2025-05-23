@@ -54,7 +54,7 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 
 	appender.AppendChildWidgetWithPosition(&d.button, context.Position(d))
 
-	d.popupMenu.SetOnClosed(func(index int) {
+	d.popupMenu.SetOnItemSelected(func(index int) {
 		if d.onItemSelected != nil {
 			d.onItemSelected(index)
 		}

@@ -25,11 +25,11 @@ type PopupMenu[T comparable] struct {
 	list  List[T]
 	popup Popup
 
-	onClosed func(index int)
+	onItemSelected func(index int)
 }
 
-func (p *PopupMenu[T]) SetOnClosed(f func(index int)) {
-	p.onClosed = f
+func (p *PopupMenu[T]) SetOnItemSelected(f func(index int)) {
+	p.onItemSelected = f
 }
 
 func (p *PopupMenu[T]) SetCheckmarkIndex(index int) {
@@ -44,18 +44,13 @@ func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidg
 	p.list.SetStyle(ListStyleMenu)
 	p.list.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
-		if p.onClosed != nil {
-			p.onClosed(index)
+		if p.onItemSelected != nil {
+			p.onItemSelected(index)
 		}
 	})
 
 	p.popup.SetContent(&p.list)
 	p.popup.SetCloseByClickingOutside(true)
-	p.popup.SetOnClosed(func(reason PopupClosedReason) {
-		if p.onClosed != nil {
-			p.onClosed(p.list.SelectedItemIndex())
-		}
-	})
 	bounds := p.contentBounds(context)
 	context.SetSize(&p.list, bounds.Size())
 	appender.AppendChildWidgetWithBounds(&p.popup, bounds)
