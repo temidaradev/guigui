@@ -129,7 +129,7 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	l.updateListItems()
 
-	// To use HasFocusedChildWidget correctly, create the tree first.
+	// IsFocusedOrHasFocusedChild should be called after the widget tree is built.
 	appender.AppendChildWidgetWithPosition(&l.list, context.Position(l))
 
 	for i := range l.listItemWidgets {

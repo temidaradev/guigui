@@ -101,12 +101,6 @@ func (b *baseList[T]) contentSize(context *guigui.Context) image.Point {
 }
 
 func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	focused := context.IsFocusedOrHasFocusedChild(b)
-	if focused != b.prevFocused {
-		guigui.RequestRedraw(b)
-	}
-	b.prevFocused = focused
-
 	b.scrollOverlay.SetContentSize(context, b.contentSize(context))
 
 	if idx := b.indexToJumpPlus1 - 1; idx >= 0 {
@@ -167,6 +161,13 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 			guigui.RequestRedraw(b)
 		}
 	}
+
+	// IsFocusedOrHasFocusedChild should be called after the widget tree is built.
+	focused := context.IsFocusedOrHasFocusedChild(b)
+	if focused != b.prevFocused {
+		guigui.RequestRedraw(b)
+	}
+	b.prevFocused = focused
 
 	return nil
 }
