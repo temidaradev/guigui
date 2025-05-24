@@ -324,30 +324,30 @@ func (c *Context) SetFocused(widget Widget, focused bool) {
 }
 
 func (c *Context) focus(widget Widget) {
-	widgetState := widget.widgetState()
-	if !widgetState.isVisible() {
+	ws := widget.widgetState()
+	if !ws.isVisible() {
 		return
 	}
-	if !widgetState.isEnabled() {
-		return
-	}
-
-	if !widgetState.isInTree() {
-		return
-	}
-	if c.app.focusedWidget == widget {
+	if !ws.isEnabled() {
 		return
 	}
 
-	var oldWidget Widget
-	if c.app.focusedWidget != nil {
-		oldWidget = c.app.focusedWidget
+	if !ws.isInTree() {
+		return
+	}
+	if c.app.focusedWidgetState == widget.widgetState() {
+		return
 	}
 
-	c.app.focusedWidget = widget
-	RequestRedraw(c.app.focusedWidget)
-	if oldWidget != nil {
-		RequestRedraw(oldWidget)
+	var oldWidgetState *widgetState
+	if c.app.focusedWidgetState != nil {
+		oldWidgetState = c.app.focusedWidgetState
+	}
+
+	c.app.focusedWidgetState = widget.widgetState()
+	requestRedraw(c.app.focusedWidgetState)
+	if oldWidgetState != nil {
+		requestRedraw(oldWidgetState)
 	}
 }
 
@@ -358,8 +358,8 @@ func (c *Context) blur(widget Widget) {
 	}
 	var unfocused bool
 	_ = traverseWidget(widget, func(w Widget) error {
-		if c.app.focusedWidget == w {
-			c.app.focusedWidget = c.app.root
+		if c.app.focusedWidgetState == w.widgetState() {
+			c.app.focusedWidgetState = c.app.root.widgetState()
 			unfocused = true
 			return skipTraverse
 		}
@@ -371,12 +371,19 @@ func (c *Context) blur(widget Widget) {
 }
 
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
-	for w := c.app.focusedWidget; w != nil; w = w.widgetState().parent {
+	w := c.app.focusedWidgetState
+	if w == nil {
+		return false
+	}
+	for {
 		widgetState := widget.widgetState()
-		if w.widgetState() != widgetState {
-			continue
+		if w == widgetState {
+			return widgetState.isInTree() && widgetState.isVisible()
 		}
-		return widgetState.isInTree() && widgetState.isVisible()
+		if w.parent == nil {
+			break
+		}
+		w = w.parent.widgetState()
 	}
 	return false
 }

@@ -77,7 +77,7 @@ type app struct {
 	lastScreenWidth  float64
 	lastScreenHeight float64
 
-	focusedWidget Widget
+	focusedWidgetState *widgetState
 
 	offscreen   *ebiten.Image
 	debugScreen *ebiten.Image
@@ -162,8 +162,8 @@ func (a *app) bounds() image.Rectangle {
 }
 
 func (a *app) Update() error {
-	if a.focusedWidget == nil {
-		a.focusedWidget = a.root
+	if a.focusedWidgetState == nil {
+		a.focusedWidgetState = a.root.widgetState()
 	}
 
 	rootState := a.root.widgetState()
