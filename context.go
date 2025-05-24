@@ -147,6 +147,29 @@ func (c *Context) autoColorMode() ColorMode {
 }
 
 func (c *Context) AppendLocales(locales []language.Tag) []language.Tag {
+	if len(c.allLocales) == 0 {
+		// App locales
+		for _, l := range c.locales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
+		}
+		// Env locales
+		for _, l := range envLocales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
+		}
+		// System locales
+		for _, l := range systemLocales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
+		}
+	}
 	return append(locales, c.allLocales...)
 }
 
@@ -168,29 +191,7 @@ func (c *Context) SetAppLocales(locales []language.Tag) {
 
 	c.locales = slices.Delete(c.locales, 0, len(c.locales))
 	c.locales = append(c.locales, locales...)
-
 	c.allLocales = slices.Delete(c.allLocales, 0, len(c.allLocales))
-	// App locales
-	for _, l := range c.locales {
-		if slices.Contains(c.allLocales, l) {
-			continue
-		}
-		c.allLocales = append(c.allLocales, l)
-	}
-	// Env locales
-	for _, l := range envLocales {
-		if slices.Contains(c.allLocales, l) {
-			continue
-		}
-		c.allLocales = append(c.allLocales, l)
-	}
-	// System locales
-	for _, l := range systemLocales {
-		if slices.Contains(c.allLocales, l) {
-			continue
-		}
-		c.allLocales = append(c.allLocales, l)
-	}
 
 	c.app.requestRedraw(c.app.bounds())
 }
