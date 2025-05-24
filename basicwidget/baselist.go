@@ -65,7 +65,6 @@ type baseList[T comparable] struct {
 	pressStartY             int
 	startPressingIndexPlus1 int
 	startPressingLeft       bool
-	prevFocused             bool
 
 	cachedDefaultWidth  int
 	cachedDefaultHeight int
