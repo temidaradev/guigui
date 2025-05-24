@@ -231,15 +231,18 @@ func (c *Context) SetSize(widget Widget, size image.Point) {
 
 func (c *Context) Size(widget Widget) image.Point {
 	widgetState := widget.widgetState()
-	ds := widget.DefaultSize(c)
+	var defaultSize image.Point
+	if widgetState.widthPlus1 == 0 || widgetState.heightPlus1 == 0 {
+		defaultSize = widget.DefaultSize(c)
+	}
 	var s image.Point
 	if widgetState.widthPlus1 == 0 {
-		s.X = ds.X
+		s.X = defaultSize.X
 	} else {
 		s.X = widgetState.widthPlus1 - 1
 	}
 	if widgetState.heightPlus1 == 0 {
-		s.Y = ds.Y
+		s.Y = defaultSize.Y
 	} else {
 		s.Y = widgetState.heightPlus1 - 1
 	}
