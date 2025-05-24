@@ -130,6 +130,7 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	l.updateListItems()
 
 	// IsFocusedOrHasFocusedChild should be called after the widget tree is built.
+	// TODO: Remove the call to IsFocusedOrHasFocusedChild (#52).
 	appender.AppendChildWidgetWithPosition(&l.list, context.Position(l))
 
 	for i := range l.listItemWidgets {
