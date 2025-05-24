@@ -176,9 +176,11 @@ func (a *app) Update() error {
 
 	// Construct the widget tree.
 	a.context.clearVisibleBoundsCache()
+	a.context.inBuild = true
 	if err := a.build(); err != nil {
 		return err
 	}
+	a.context.inBuild = false
 
 	// Handle user inputs.
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
@@ -196,9 +198,11 @@ func (a *app) Update() error {
 
 	// Construct the widget tree again to reflect the latest state.
 	a.context.clearVisibleBoundsCache()
+	a.context.inBuild = true
 	if err := a.build(); err != nil {
 		return err
 	}
+	a.context.inBuild = false
 
 	if !a.cursorShape() {
 		ebiten.SetCursorShape(ebiten.CursorShapeDefault)

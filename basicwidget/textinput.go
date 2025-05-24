@@ -157,11 +157,11 @@ func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
 }
 
 func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	if t.prevFocused != context.IsFocusedOrHasFocusedChild(t) {
-		t.prevFocused = context.IsFocusedOrHasFocusedChild(t)
+	if t.prevFocused != (context.IsFocused(t) || context.IsFocused(&t.text)) {
+		t.prevFocused = (context.IsFocused(t) || context.IsFocused(&t.text))
 		guigui.RequestRedraw(t)
 	}
-	if context.IsFocusedOrHasFocusedChild(t) && !context.IsFocusedOrHasFocusedChild(&t.text) {
+	if context.IsFocused(t) {
 		context.SetFocused(&t.text, true)
 		guigui.RequestRedraw(t)
 	}
@@ -232,7 +232,7 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	context.SetVisible(&t.scrollOverlay, t.text.IsMultiline())
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
-	if t.style != TextInputStyleInline && context.IsFocusedOrHasFocusedChild(t) {
+	if t.style != TextInputStyleInline && (context.IsFocused(t) || context.IsFocused(&t.text)) {
 		t.focus.textInput = t
 		w := textInputFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))

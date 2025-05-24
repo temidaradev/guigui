@@ -53,7 +53,8 @@ const (
 )
 
 type Context struct {
-	app *app
+	app     *app
+	inBuild bool
 
 	appScaleMinus1             float64
 	colorMode                  ColorMode
@@ -367,9 +368,15 @@ func (c *Context) blur(widget Widget) {
 	}
 }
 
-// TODO: Avoid referring the previous tree state (#52).
-// A focused widget might not be in the current constructed tree.
+func (c *Context) IsFocused(widget Widget) bool {
+	return c.app.focusedWidgetState == widget.widgetState()
+}
+
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
+	if c.inBuild {
+		panic("guigui: IsFocusedOrHasFocusedChild cannot be called in Build")
+	}
+
 	if len(widget.widgetState().children) == 0 {
 		return c.app.focusedWidgetState == widget.widgetState()
 	}
