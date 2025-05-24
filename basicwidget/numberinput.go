@@ -133,6 +133,7 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		}
 	})
 
+	n.textInput.SetValue(n.abstractNumberInput.ValueString())
 	n.textInput.SetHorizontalAlign(HorizontalAlignEnd)
 	n.textInput.SetTabular(true)
 	n.textInput.setPaddingEnd(UnitSize(context) / 2)
@@ -143,10 +144,6 @@ func (n *NumberInput) Build(context *guigui.Context, appender *guigui.ChildWidge
 		n.abstractNumberInput.CommitString(text)
 	})
 	appender.AppendChildWidgetWithBounds(&n.textInput, context.Bounds(n))
-	// HasFocusedChildWidget works after appending the child widget.
-	if !context.IsFocusedOrHasFocusedChild(n) {
-		n.textInput.SetValue(n.abstractNumberInput.ValueString())
-	}
 
 	imgUp, err := theResourceImages.Get("keyboard_arrow_up", context.ColorMode())
 	if err != nil {
