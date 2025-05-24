@@ -438,25 +438,8 @@ func (t *Text) face(context *guigui.Context, forceBold bool) text.Face {
 		weight = text.WeightBold
 	}
 
-	var liga uint32
-	if !t.selectable && !t.editable {
-		liga = 1
-	}
-	var tnum uint32
-	if t.tabular {
-		tnum = 1
-	}
-
-	features := []fontFeature{
-		{
-			Tag:   text.MustParseTag("liga"),
-			Value: liga,
-		},
-		{
-			Tag:   text.MustParseTag("tnum"),
-			Value: tnum,
-		},
-	}
+	liga := !t.selectable && !t.editable
+	tnum := t.tabular
 
 	var lang language.Tag
 	if len(t.locales) > 0 {
@@ -468,7 +451,7 @@ func (t *Text) face(context *guigui.Context, forceBold bool) text.Face {
 			lang = t.tmpLocales[0]
 		}
 	}
-	return fontFace(size, weight, features, lang)
+	return fontFace(size, weight, liga, tnum, lang)
 }
 
 func (t *Text) lineHeight(context *guigui.Context) float64 {
