@@ -339,16 +339,11 @@ func (c *Context) focus(widget Widget) {
 		return
 	}
 
-	var oldWidgetState *widgetState
-	if c.app.focusedWidgetState != nil {
-		oldWidgetState = c.app.focusedWidgetState
-	}
-
 	c.app.focusedWidgetState = widget.widgetState()
-	requestRedraw(c.app.focusedWidgetState)
-	if oldWidgetState != nil {
-		requestRedraw(oldWidgetState)
-	}
+
+	// Rerender everything when a focus changes.
+	// A widget including a focused widget might be affected.
+	c.app.requestRedraw(c.app.bounds())
 }
 
 func (c *Context) blur(widget Widget) {
@@ -366,7 +361,9 @@ func (c *Context) blur(widget Widget) {
 		return nil
 	})
 	if unfocused {
-		RequestRedraw(widget)
+		// Rerender everything when a focus changes.
+		// A widget including a focused widget might be affected.
+		c.app.requestRedraw(c.app.bounds())
 	}
 }
 

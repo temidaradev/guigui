@@ -162,14 +162,6 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 		}
 	}
 
-	// IsFocusedOrHasFocusedChild should be called after the widget tree is built.
-	// TODO: This works as a coincidence, since a list has a child widget (ScrollOverlay). Remove this (#52).
-	focused := context.IsFocusedOrHasFocusedChild(b)
-	if focused != b.prevFocused {
-		guigui.RequestRedraw(b)
-	}
-	b.prevFocused = focused
-
 	return nil
 }
 
