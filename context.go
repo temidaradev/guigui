@@ -373,6 +373,10 @@ func (c *Context) blur(widget Widget) {
 // TODO: Avoid referring the previous tree state (#52).
 // A focused widget might not be in the current constructed tree.
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
+	if len(widget.widgetState().children) == 0 {
+		return c.app.focusedWidgetState == widget.widgetState()
+	}
+
 	w := c.app.focusedWidgetState
 	if w == nil {
 		return false
