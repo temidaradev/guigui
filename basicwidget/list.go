@@ -147,12 +147,9 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 }
 
 func (l *List[T]) ItemTextColor(context *guigui.Context, index int) color.Color {
-	// IsFocusedOrHasFocusedChild should be called after the widget tree is built.
-	// TODO: Remove the call to IsFocusedOrHasFocusedChild (#52).
-	focused := context.IsFocusedOrHasFocusedChild(l)
 	item := &l.listItemWidgets[index]
 	switch {
-	case l.list.style == ListStyleNormal && focused && l.list.SelectedItemIndex() == index && item.selectable():
+	case l.list.style == ListStyleNormal && l.list.SelectedItemIndex() == index && item.selectable():
 		return DefaultActiveListItemTextColor(context)
 	case l.list.style == ListStyleSidebar && l.list.SelectedItemIndex() == index && item.selectable():
 		return DefaultActiveListItemTextColor(context)

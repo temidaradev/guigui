@@ -417,7 +417,7 @@ func (b *baseList[T]) selectedItemColor(context *guigui.Context) color.Color {
 	if context.IsFocusedOrHasFocusedChild(b) || b.style == ListStyleSidebar {
 		return draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	}
-	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
+	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.6)
 }
 
 func (b *baseList[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle) {
