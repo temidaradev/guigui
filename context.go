@@ -370,6 +370,8 @@ func (c *Context) blur(widget Widget) {
 	}
 }
 
+// TODO: Avoid referring the previous tree state (#52).
+// A focused widget might not be in the current constructed tree.
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
 	w := c.app.focusedWidgetState
 	if w == nil {
@@ -402,6 +404,8 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 	RequestRedraw(widget)
 }
 
+// TODO: Avoid referring the previous tree state (#52).
+// The hit detection depends on the child widget in the previous tree state.
 func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
 	return c.app.isWidgetHitAt(widget, point)
 }
