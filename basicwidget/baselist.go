@@ -110,8 +110,6 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	appender.AppendChildWidgetWithBounds(&b.scrollOverlay, context.Bounds(b))
 
-	// TODO: Do not call HoveredItemIndex in Build (#52).
-	hoveredItemIndex := b.hoveredItemIndex(context)
 	p := context.Position(b)
 	_, offsetY := b.scrollOverlay.Offset()
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
@@ -119,16 +117,6 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 	for i := range b.abstractList.ItemCount() {
 		item, _ := b.abstractList.ItemByIndex(i)
 		if b.checkmarkIndexPlus1 == i+1 {
-			mode := context.ColorMode()
-			if b.checkmarkIndexPlus1 == hoveredItemIndex+1 {
-				mode = guigui.ColorModeDark
-			}
-			img, err := theResourceImages.Get("check", mode)
-			if err != nil {
-				return err
-			}
-			b.checkmark.SetImage(img)
-
 			imgSize := listItemCheckmarkSize(context)
 			imgP := p
 			itemH := context.Size(item.Content).Y
@@ -266,11 +254,25 @@ func (b *baseList[T]) calcDropDstIndex(context *guigui.Context) int {
 }
 
 func (b *baseList[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+	hoveredItemIndex := b.hoveredItemIndex(context)
 	if b.isHoveringVisible() || b.hasMovableItems() {
-		if hoveredItemIndex := b.hoveredItemIndex(context); b.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
+		if b.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
 			b.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
 			guigui.RequestRedraw(b)
 		}
+	}
+
+	if b.checkmarkIndexPlus1 > 0 {
+		mode := context.ColorMode()
+		if b.checkmarkIndexPlus1 == hoveredItemIndex+1 {
+			mode = guigui.ColorModeDark
+		}
+		img, err := theResourceImages.Get("check", mode)
+		if err != nil {
+			// TODO: Is there a better way to handle this error?
+			panic(err)
+		}
+		b.checkmark.SetImage(img)
 	}
 
 	// Process dragging.
