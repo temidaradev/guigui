@@ -153,7 +153,7 @@ func (l *List[T]) ItemTextColor(context *guigui.Context, index int) color.Color 
 		return DefaultActiveListItemTextColor(context)
 	case l.list.style == ListStyleSidebar && l.list.SelectedItemIndex() == index && item.selectable():
 		return DefaultActiveListItemTextColor(context)
-	case l.list.style == ListStyleMenu && l.list.isHoveringVisible() && l.list.HoveredItemIndex(context) == index && item.selectable():
+	case l.list.style == ListStyleMenu && l.list.isHoveringVisible() && l.list.hoveredItemIndex(context) == index && item.selectable():
 		return DefaultActiveListItemTextColor(context)
 	case !item.selectable() && !item.item.Header:
 		return DefaultDisabledListItemTextColor(context)
