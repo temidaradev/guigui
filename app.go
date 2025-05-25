@@ -332,8 +332,11 @@ func (a *app) build() error {
 	if err := traverseWidget(a.root, func(widget Widget) error {
 		widgetState := widget.widgetState()
 
-		widgetState.hasZCache = false
-		widgetState.zCache = 0
+		if parent := widgetState.parent; parent != nil {
+			widgetState.z = parent.widgetState().z + widget.ZDelta()
+		} else {
+			widgetState.z = 0
+		}
 		widgetState.hasVisibleBoundsCache = false
 		widgetState.visibleBoundsCache = image.Rectangle{}
 
@@ -344,7 +347,7 @@ func (a *app) build() error {
 			return err
 		}
 
-		a.visitedZs[z(widget)] = struct{}{}
+		a.visitedZs[widgetState.z] = struct{}{}
 
 		return nil
 	}); err != nil {
@@ -411,7 +414,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 		}
 	}
 
-	if zToHandle != z(widget) {
+	if zToHandle != widget.widgetState().z {
 		return HandleInputResult{}
 	}
 
@@ -429,9 +432,9 @@ func (a *app) cursorShape() bool {
 	var firstZ int
 	for i, widget := range a.hitWidgets {
 		if i == 0 {
-			firstZ = z(widget)
+			firstZ = widget.widgetState().z
 		}
-		if z(widget) < firstZ {
+		if widget.widgetState().z < firstZ {
 			break
 		}
 		if !widget.widgetState().isEnabled() {
@@ -520,7 +523,7 @@ func (a *app) doDrawWidget(dst *ebiten.Image, widget Widget, zToRender int) {
 
 	vb := a.context.VisibleBounds(widget)
 	var origDst *ebiten.Image
-	renderCurrent := zToRender == z(widget) && !vb.Empty()
+	renderCurrent := zToRender == widget.widgetState().z && !vb.Empty()
 	if renderCurrent {
 		if useOffscreen {
 			origDst = dst
@@ -585,11 +588,13 @@ func (a *app) isWidgetHitAt(widget Widget) bool {
 	// hitWidgets are ordered by descending z values.
 	// Always use a fixed set hitWidgets, as the tree might be dynamically changed during Build.
 	for _, w := range a.hitWidgets {
-		if z(w) > z(widget) {
+		z1 := w.widgetState().z
+		z2 := widget.widgetState().z
+		if z1 > z2 {
 			// w overlaps widget at point.
 			return false
 		}
-		if z(w) < z(widget) {
+		if z1 < z2 {
 			// The same z value no longer exists.
 			return false
 		}
@@ -614,7 +619,7 @@ func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, 
 		widgets = a.appendWidgetsAt(widgets, point, targetZ, child)
 	}
 
-	if z(widget) != targetZ {
+	if widget.widgetState().z != targetZ {
 		return widgets
 	}
 	if !point.In(a.context.VisibleBounds(widget)) {

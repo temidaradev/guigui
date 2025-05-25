@@ -100,8 +100,7 @@ type widgetState struct {
 
 	dirty                 bool
 	dirtyAt               string
-	hasZCache             bool
-	zCache                int
+	z                     int
 	hasVisibleBoundsCache bool
 	visibleBoundsCache    image.Rectangle
 
@@ -178,21 +177,6 @@ func requestRedraw(widgetState *widgetState) {
 			widgetState.dirtyAt = fmt.Sprintf("%s:%d", file, line)
 		}
 	}
-}
-
-func z(widget Widget) int {
-	s := widget.widgetState()
-	if s.hasZCache {
-		return widget.widgetState().zCache
-	}
-	var r int
-	if parent := s.parent; parent != nil {
-		r = z(parent)
-	}
-	r += widget.ZDelta()
-	s.zCache = r
-	s.hasZCache = true
-	return r
 }
 
 // noCopy is a struct to warn that the struct should not be copied.
