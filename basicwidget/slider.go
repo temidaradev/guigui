@@ -119,14 +119,14 @@ func (s *Slider) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 		return guigui.HandleInputResult{}
 	}
 
-	c := image.Pt(ebiten.CursorPosition())
-	if context.IsEnabled(s) && context.IsWidgetHitAt(s, c) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !s.dragging {
+	if context.IsEnabled(s) && context.IsWidgetHitAt(s) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !s.dragging {
 		context.SetFocused(s, true)
 		if !s.isThumbHovered(context) {
 			s.setValueFromCursor(context)
 		}
 		s.dragging = true
-		s.draggingStartX = c.X
+		x, _ := ebiten.CursorPosition()
+		s.draggingStartX = x
 		s.draggingStartValue.Set(s.abstractNumberInput.ValueBigInt())
 		guigui.RequestRedraw(s)
 		return guigui.HandleInputByWidget(s)
@@ -265,8 +265,7 @@ func (s *Slider) canPress(context *guigui.Context) bool {
 }
 
 func (s *Slider) isThumbHovered(context *guigui.Context) bool {
-	c := image.Pt(ebiten.CursorPosition())
-	return context.IsWidgetHitAt(s, c) && c.In(s.thumbBounds(context))
+	return context.IsWidgetHitAt(s) && image.Pt(ebiten.CursorPosition()).In(s.thumbBounds(context))
 }
 
 func (s *Slider) isActive(context *guigui.Context) bool {

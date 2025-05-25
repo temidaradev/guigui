@@ -414,10 +414,8 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 	RequestRedraw(widget)
 }
 
-// TODO: Avoid referring the previous tree state (#52).
-// The hit detection depends on the child widget in the previous tree state.
-func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
-	return c.app.isWidgetHitAt(widget, point)
+func (c *Context) IsWidgetHitAt(widget Widget) bool {
+	return c.app.isWidgetHitAt(widget)
 }
 
 func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {

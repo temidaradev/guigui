@@ -180,7 +180,7 @@ func (b *baseList[T]) SelectedItemIndex() int {
 }
 
 func (b *baseList[T]) hoveredItemIndex(context *guigui.Context) int {
-	if !context.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition())) {
+	if !context.IsWidgetHitAt(b) {
 		return -1
 	}
 	_, y := ebiten.CursorPosition()

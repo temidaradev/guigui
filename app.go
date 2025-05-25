@@ -54,17 +54,12 @@ func invalidatedRegionForDebugMaxTime() int {
 	return ebiten.TPS() / 5
 }
 
-type hitTestCacheItem struct {
-	point   image.Point
-	widgets []Widget
-}
-
 type app struct {
-	root         Widget
-	context      Context
-	visitedZs    map[int]struct{}
-	zs           []int
-	hitTestCache []hitTestCacheItem
+	root       Widget
+	context    Context
+	visitedZs  map[int]struct{}
+	zs         []int
+	hitWidgets []Widget
 
 	invalidatedRegions image.Rectangle
 
@@ -183,7 +178,6 @@ func (a *app) Update() error {
 
 	// Handle user inputs.
 	// TODO: Handle this in Ebitengine's HandleInput in the future (hajimehoshi/ebiten#1704)
-	a.clearHitTestCacheIfNeeded(a.root)
 	if r := a.handleInputWidget(handleInputTypePointing); r.widget != nil {
 		if theDebugMode.showInputLogs {
 			slog.Info("pointing input handled", "widget", fmt.Sprintf("%T", r.widget), "aborted", r.aborted)
@@ -361,6 +355,13 @@ func (a *app) build() error {
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
 	slices.Sort(a.zs)
 
+	a.hitWidgets = slices.Delete(a.hitWidgets, 0, len(a.hitWidgets))
+	pt := image.Pt(ebiten.CursorPosition())
+	for i := len(a.zs) - 1; i >= 0; i-- {
+		z := a.zs[i]
+		a.hitWidgets = a.appendWidgetsAt(a.hitWidgets, pt, z, a.root)
+	}
+
 	return nil
 }
 
@@ -426,7 +427,7 @@ func (a *app) doHandleInputWidget(typ handleInputType, widget Widget, zToHandle 
 
 func (a *app) cursorShape() bool {
 	var firstZ int
-	for i, widget := range a.widgetsInDescendingZOrderAt(image.Pt(ebiten.CursorPosition())) {
+	for i, widget := range a.hitWidgets {
 		if i == 0 {
 			firstZ = z(widget)
 		}
@@ -477,17 +478,6 @@ func (a *app) requestRedrawIfTreeChanged(widget Widget) {
 	}
 	for _, child := range widgetState.children {
 		a.requestRedrawIfTreeChanged(child)
-	}
-}
-
-func (a *app) clearHitTestCacheIfNeeded(widget Widget) {
-	widgetState := widget.widgetState()
-	if !widgetState.prev.equals(&a.context, widgetState.children) {
-		a.hitTestCache = slices.Delete(a.hitTestCache, 0, len(a.hitTestCache))
-		return
-	}
-	for _, child := range widgetState.children {
-		a.clearHitTestCacheIfNeeded(child)
 	}
 }
 
@@ -588,12 +578,12 @@ func (a *app) drawDebugIfNeeded(screen *ebiten.Image) {
 	screen.DrawImage(a.debugScreen, nil)
 }
 
-func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
+func (a *app) isWidgetHitAt(widget Widget) bool {
 	if !widget.widgetState().isInTree() {
 		return false
 	}
 	// widgets are ordered by descending z values.
-	for _, w := range a.widgetsInDescendingZOrderAt(point) {
+	for _, w := range a.hitWidgets {
 		if z(w) > z(widget) {
 			// w overlaps widget at point.
 			return false
@@ -607,31 +597,6 @@ func (a *app) isWidgetHitAt(widget Widget, point image.Point) bool {
 		}
 	}
 	return false
-}
-
-func (a *app) widgetsInDescendingZOrderAt(point image.Point) []Widget {
-	idx := slices.IndexFunc(a.hitTestCache, func(i hitTestCacheItem) bool {
-		return i.point.Eq(point)
-	})
-	if idx >= 0 {
-		return a.hitTestCache[idx].widgets
-	}
-
-	var widgets []Widget
-	for i := len(a.zs) - 1; i >= 0; i-- {
-		z := a.zs[i]
-		widgets = a.appendWidgetsAt(widgets, point, z, a.root)
-	}
-	a.hitTestCache = slices.Insert(a.hitTestCache, 0, hitTestCacheItem{
-		point:   point,
-		widgets: widgets,
-	})
-	const maxCacheSize = 4
-	if len(a.hitTestCache) > maxCacheSize {
-		a.hitTestCache = slices.Delete(a.hitTestCache, maxCacheSize, len(a.hitTestCache))
-	}
-
-	return widgets
 }
 
 func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, widget Widget) []Widget {

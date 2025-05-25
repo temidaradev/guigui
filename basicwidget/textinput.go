@@ -268,7 +268,7 @@ func (t *TextInput) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 
 func (t *TextInput) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	cp := image.Pt(ebiten.CursorPosition())
-	if context.IsWidgetHitAt(t, cp) {
+	if context.IsWidgetHitAt(t) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			t.text.handleClick(context, cp)
 			return guigui.HandleInputByWidget(t)
