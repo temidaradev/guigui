@@ -53,13 +53,17 @@ func (b *baseButton) setPressed(pressed bool) {
 	guigui.RequestRedraw(b)
 }
 
-func (b *baseButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+func (b *baseButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	// TODO: Do not call isHovered in Build (#52).
 	hovered := b.isHovered(context)
 	if b.prevHovered != hovered {
 		b.prevHovered = hovered
 		guigui.RequestRedraw(b)
 	}
+	return nil
+}
 
+func (b *baseButton) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if b.isHovered(context) && !b.keepPressed {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			context.SetFocused(b, true)
