@@ -329,39 +329,33 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 }
 
 func (a *app) build() error {
-	if err := traverseWidget(a.root, func(widget Widget) error {
-		state := widget.widgetState()
-		state.hasZCache = false
-		state.zCache = 0
-		state.hasVisibleBoundsCache = false
-		state.visibleBoundsCache = image.Rectangle{}
-		return nil
-	}); err != nil {
-		return err
+	clear(a.visitedZs)
+	if a.visitedZs == nil {
+		a.visitedZs = map[int]struct{}{}
 	}
+
 	var appender ChildWidgetAppender
 	if err := traverseWidget(a.root, func(widget Widget) error {
 		widgetState := widget.widgetState()
+
+		widgetState.hasZCache = false
+		widgetState.zCache = 0
+		widgetState.hasVisibleBoundsCache = false
+		widgetState.visibleBoundsCache = image.Rectangle{}
+
 		widgetState.children = slices.Delete(widgetState.children, 0, len(widgetState.children))
 		appender.app = a
 		appender.widget = widget
 		if err := widget.Build(&a.context, &appender); err != nil {
 			return err
 		}
+
+		a.visitedZs[z(widget)] = struct{}{}
+
 		return nil
 	}); err != nil {
 		return err
 	}
-
-	// Calculate z values.
-	clear(a.visitedZs)
-	_ = traverseWidget(a.root, func(widget Widget) error {
-		if a.visitedZs == nil {
-			a.visitedZs = map[int]struct{}{}
-		}
-		a.visitedZs[z(widget)] = struct{}{}
-		return nil
-	})
 
 	a.zs = slices.Delete(a.zs, 0, len(a.zs))
 	a.zs = slices.AppendSeq(a.zs, maps.Keys(a.visitedZs))
