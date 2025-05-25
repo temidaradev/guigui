@@ -606,7 +606,9 @@ func (a *app) isWidgetHitAt(widget Widget) bool {
 }
 
 func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, widget Widget) []Widget {
-	if !widget.widgetState().isVisible() {
+	// Avoid (*widgetState).isVisible for performance.
+	// These check parent widget states unnecessarily.
+	if widget.widgetState().hidden {
 		return widgets
 	}
 	if widget.PassThrough() {
