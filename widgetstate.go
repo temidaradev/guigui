@@ -98,10 +98,12 @@ type widgetState struct {
 
 	offscreen *ebiten.Image
 
-	dirty     bool
-	dirtyAt   string
-	hasZCache bool
-	zCache    int
+	dirty                 bool
+	dirtyAt               string
+	hasZCache             bool
+	zCache                int
+	hasVisibleBoundsCache bool
+	visibleBoundsCache    image.Rectangle
 
 	_ noCopy
 }

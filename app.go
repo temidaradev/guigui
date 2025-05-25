@@ -175,7 +175,6 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree.
-	a.context.clearVisibleBoundsCache()
 	a.context.inBuild = true
 	if err := a.build(); err != nil {
 		return err
@@ -197,7 +196,6 @@ func (a *app) Update() error {
 	}
 
 	// Construct the widget tree again to reflect the latest state.
-	a.context.clearVisibleBoundsCache()
 	a.context.inBuild = true
 	if err := a.build(); err != nil {
 		return err
@@ -332,8 +330,11 @@ func (a *app) requestRedrawIfDifferentParentZ(widget Widget) {
 
 func (a *app) build() error {
 	if err := traverseWidget(a.root, func(widget Widget) error {
-		widget.widgetState().zCache = 0
-		widget.widgetState().hasZCache = false
+		state := widget.widgetState()
+		state.hasZCache = false
+		state.zCache = 0
+		state.hasVisibleBoundsCache = false
+		state.visibleBoundsCache = image.Rectangle{}
 		return nil
 	}); err != nil {
 		return err
