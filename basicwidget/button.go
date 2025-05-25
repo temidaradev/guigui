@@ -91,7 +91,6 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		r := b.button.radius(context)
 		contentP := context.Position(b).Add(image.Pt(r, r))
 		contentSize := b.contentSize(context)
-		// TODO: isPressed calls isHovered indirectly. Avoid this (#52).
 		if b.button.isPressed(context) {
 			contentP.Y += int(0.5 * context.Scale())
 		} else {
