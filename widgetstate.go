@@ -15,7 +15,7 @@ import (
 
 type bounds3D struct {
 	bounds      image.Rectangle
-	z           int
+	zDelta      int
 	visible     bool // For hit testing.
 	passThrough bool // For hit testing.
 }
@@ -27,15 +27,15 @@ func bounds3DFromWidget(context *Context, widget Widget) (bounds3D, bool) {
 	}
 	return bounds3D{
 		bounds:      bounds,
-		z:           z(widget),
+		zDelta:      widget.ZDelta(),
 		visible:     widget.widgetState().isVisible(),
 		passThrough: widget.PassThrough(),
 	}, true
 }
 
 type widgetsAndVisibleBounds struct {
-	bounds3Ds       map[Widget]bounds3D
-	currentBounds3D map[Widget]bounds3D
+	bounds3Ds       map[*widgetState]bounds3D
+	currentBounds3D map[*widgetState]bounds3D
 }
 
 func (w *widgetsAndVisibleBounds) reset() {
@@ -44,18 +44,18 @@ func (w *widgetsAndVisibleBounds) reset() {
 
 func (w *widgetsAndVisibleBounds) append(context *Context, widget Widget) {
 	if w.bounds3Ds == nil {
-		w.bounds3Ds = map[Widget]bounds3D{}
+		w.bounds3Ds = map[*widgetState]bounds3D{}
 	}
 	b, ok := bounds3DFromWidget(context, widget)
 	if !ok {
 		return
 	}
-	w.bounds3Ds[widget] = b
+	w.bounds3Ds[widget.widgetState()] = b
 }
 
 func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widget) bool {
 	if w.currentBounds3D == nil {
-		w.currentBounds3D = map[Widget]bounds3D{}
+		w.currentBounds3D = map[*widgetState]bounds3D{}
 	} else {
 		clear(w.currentBounds3D)
 	}
@@ -64,16 +64,16 @@ func (w *widgetsAndVisibleBounds) equals(context *Context, currentWidgets []Widg
 		if !ok {
 			continue
 		}
-		w.currentBounds3D[widget] = b
+		w.currentBounds3D[widget.widgetState()] = b
 	}
 	return maps.Equal(w.bounds3Ds, w.currentBounds3D)
 }
 
 func (w *widgetsAndVisibleBounds) redrawIfDifferentParentZ(app *app) {
-	for widget, bounds3D := range w.bounds3Ds {
-		if widget.ZDelta() != 0 {
+	for widgetState, bounds3D := range w.bounds3Ds {
+		if bounds3D.zDelta != 0 {
 			app.requestRedraw(bounds3D.bounds)
-			RequestRedraw(widget)
+			requestRedraw(widgetState)
 		}
 	}
 }
@@ -98,10 +98,11 @@ type widgetState struct {
 
 	offscreen *ebiten.Image
 
-	dirty     bool
-	dirtyAt   string
-	hasZCache bool
-	zCache    int
+	dirty                 bool
+	dirtyAt               string
+	z                     int
+	hasVisibleBoundsCache bool
+	visibleBoundsCache    image.Rectangle
 
 	_ noCopy
 }
@@ -165,28 +166,17 @@ func traverseWidget(widget Widget, f func(widget Widget) error) error {
 }
 
 func RequestRedraw(widget Widget) {
-	widget.widgetState().dirty = true
+	requestRedraw(widget.widgetState())
+}
+
+func requestRedraw(widgetState *widgetState) {
+	widgetState.dirty = true
 	if theDebugMode.showRenderingRegions {
 		_, file, line, ok := runtime.Caller(1)
 		if ok {
-			widget.widgetState().dirtyAt = fmt.Sprintf("%s:%d", file, line)
+			widgetState.dirtyAt = fmt.Sprintf("%s:%d", file, line)
 		}
 	}
-}
-
-func z(widget Widget) int {
-	s := widget.widgetState()
-	if s.hasZCache {
-		return widget.widgetState().zCache
-	}
-	var r int
-	if parent := s.parent; parent != nil {
-		r = z(parent)
-	}
-	r += widget.ZDelta()
-	s.zCache = r
-	s.hasZCache = true
-	return r
 }
 
 // noCopy is a struct to warn that the struct should not be copied.

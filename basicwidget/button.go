@@ -92,7 +92,9 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		contentP := context.Position(b).Add(image.Pt(r, r))
 		contentSize := b.contentSize(context)
 		if b.button.isPressed(context) {
-			contentP.Y += int(1 * context.Scale())
+			contentP.Y += int(0.5 * context.Scale())
+		} else {
+			contentP.Y -= int(0.5 * context.Scale())
 		}
 		appender.AppendChildWidgetWithBounds(b.content, image.Rectangle{
 			Min: contentP,
@@ -127,7 +129,9 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 		textP.X += (s.X - tw) / 2
 	}
 	if b.button.isPressed(context) {
-		textP.Y += int(1 * context.Scale())
+		textP.Y += int(0.5 * context.Scale())
+	} else {
+		textP.Y -= int(0.5 * context.Scale())
 	}
 	appender.AppendChildWidgetWithBounds(&b.text, image.Rectangle{
 		Min: textP,
@@ -149,7 +153,9 @@ func (b *Button) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 	}
 	imgP.Y += (s.Y - imgSize.Y) / 2
 	if b.button.isPressed(context) {
-		imgP.Y += int(1 * context.Scale())
+		imgP.Y += int(0.5 * context.Scale())
+	} else {
+		imgP.Y -= int(0.5 * context.Scale())
 	}
 	appender.AppendChildWidgetWithBounds(&b.icon, image.Rectangle{
 		Min: imgP,
@@ -172,7 +178,7 @@ func (b *Button) defaultSize(context *guigui.Context, forceBold bool) image.Poin
 		w = b.text.TextSize(context).X
 	}
 	if b.icon.HasImage() {
-		w += b.defaultIconSize(context)
+		w += defaultIconSize(context)
 		if b.text.Value() != "" {
 			w += buttonTextAndImagePadding(context)
 		}
@@ -199,19 +205,15 @@ func buttonEdgeAndImagePadding(context *guigui.Context) int {
 	return UnitSize(context) / 4
 }
 
-func (b *Button) defaultIconSize(context *guigui.Context) int {
-	return int(LineHeight(context))
-}
-
 func (b *Button) iconSize(context *guigui.Context) image.Point {
 	s := context.Size(b)
 	if b.text.Value() != "" {
-		s := min(b.defaultIconSize(context), s.X, s.Y)
+		s := min(defaultIconSize(context), s.X, s.Y)
 		return image.Pt(s, s)
 	}
 	r := b.button.radius(context)
 	w := max(0, s.X-2*r)
-	h := max(int(LineHeight(context)), s.Y-2*r)
+	h := max(defaultIconSize(context), s.Y-2*r)
 	return image.Pt(w, h)
 }
 

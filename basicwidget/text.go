@@ -87,9 +87,13 @@ func findWordBoundaries(text string, idx int) (start, end int) {
 type Text struct {
 	guigui.DefaultWidget
 
-	field       textinput.Field
-	nextText    string
-	nextTextSet bool
+	field        textinput.Field
+	nextText     string
+	nextTextSet  bool
+	nextStart    int
+	nextStartSet bool
+	nextEnd      int
+	nextEndSet   bool
 
 	hAlign      HorizontalAlign
 	vAlign      VerticalAlign
@@ -170,7 +174,8 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 		t.resetAutoWrapCachedTextSize()
 	}
 
-	if context.IsFocusedOrHasFocusedChild(t) {
+	focused := context.IsFocused(t)
+	if focused {
 		if !t.prevFocused {
 			t.field.Focus()
 			t.cursor.resetCounter()
@@ -182,12 +187,14 @@ func (t *Text) Build(context *guigui.Context, appender *guigui.ChildWidgetAppend
 	} else {
 		if t.prevFocused {
 			t.commit()
-		} else if t.nextTextSet {
-			t.setText(t.nextText)
+		} else {
+			if t.nextTextSet {
+				t.setText(t.nextText)
+			}
 		}
 	}
 
-	t.prevFocused = context.IsFocusedOrHasFocusedChild(t)
+	t.prevFocused = focused
 
 	if t.selectable || t.editable {
 		t.cursor.text = t
@@ -431,25 +438,8 @@ func (t *Text) face(context *guigui.Context, forceBold bool) text.Face {
 		weight = text.WeightBold
 	}
 
-	var liga uint32
-	if !t.selectable && !t.editable {
-		liga = 1
-	}
-	var tnum uint32
-	if t.tabular {
-		tnum = 1
-	}
-
-	features := []fontFeature{
-		{
-			Tag:   text.MustParseTag("liga"),
-			Value: liga,
-		},
-		{
-			Tag:   text.MustParseTag("tnum"),
-			Value: tnum,
-		},
-	}
+	liga := !t.selectable && !t.editable
+	tnum := t.tabular
 
 	var lang language.Tag
 	if len(t.locales) > 0 {
@@ -461,7 +451,7 @@ func (t *Text) face(context *guigui.Context, forceBold bool) text.Face {
 			lang = t.tmpLocales[0]
 		}
 	}
-	return fontFace(size, weight, features, lang)
+	return fontFace(size, weight, liga, tnum, lang)
 }
 
 func (t *Text) lineHeight(context *guigui.Context) float64 {
@@ -495,43 +485,14 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if context.IsWidgetHitAt(t, cursorPosition) {
-			idx := t.textIndexFromPosition(context, cursorPosition, false)
-
-			if ebiten.Tick()-t.lastClickTick < int64(ebiten.TPS()/2) && t.lastClickTextIndex == idx {
-				t.clickCount++
-			} else {
-				t.clickCount = 1
-			}
-
-			switch t.clickCount {
-			case 1:
-				t.dragging = true
-				t.selectionDragStartPlus1 = idx + 1
-				t.selectionDragEndPlus1 = idx + 1
-				if start, end := t.field.Selection(); start != idx || end != idx {
-					t.setTextAndSelection(t.field.Text(), idx, idx, -1)
-				}
-			case 2:
-				t.dragging = true
-				text := t.field.Text()
-				start, end := findWordBoundaries(text, idx)
-				t.selectionDragStartPlus1 = start + 1
-				t.selectionDragEndPlus1 = end + 1
-				t.setTextAndSelection(text, start, end, -1)
-			case 3:
-				t.selectAll()
-			}
-
-			context.SetFocused(t, true)
-			t.lastClickTick = ebiten.Tick()
-			t.lastClickTextIndex = idx
+		if context.IsWidgetHitAtCursor(t) {
+			t.handleClick(context, cursorPosition)
 			return guigui.HandleInputByWidget(t)
 		}
 		context.SetFocused(t, false)
 	}
 
-	if !context.IsFocusedOrHasFocusedChild(t) {
+	if !context.IsFocused(t) {
 		if t.field.IsFocused() {
 			t.field.Blur()
 			guigui.RequestRedraw(t)
@@ -547,8 +508,41 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	return guigui.HandleInputResult{}
 }
 
+func (t *Text) handleClick(context *guigui.Context, cursorPosition image.Point) {
+	idx := t.textIndexFromPosition(context, cursorPosition, false)
+
+	if ebiten.Tick()-t.lastClickTick < int64(doubleClickLimitInTicks()) && t.lastClickTextIndex == idx {
+		t.clickCount++
+	} else {
+		t.clickCount = 1
+	}
+
+	switch t.clickCount {
+	case 1:
+		t.dragging = true
+		t.selectionDragStartPlus1 = idx + 1
+		t.selectionDragEndPlus1 = idx + 1
+		if start, end := t.field.Selection(); start != idx || end != idx {
+			t.setTextAndSelection(t.field.Text(), idx, idx, -1)
+		}
+	case 2:
+		t.dragging = true
+		text := t.field.Text()
+		start, end := findWordBoundaries(text, idx)
+		t.selectionDragStartPlus1 = start + 1
+		t.selectionDragEndPlus1 = end + 1
+		t.setTextAndSelection(text, start, end, -1)
+	case 3:
+		t.selectAll()
+	}
+
+	context.SetFocused(t, true)
+	t.lastClickTick = ebiten.Tick()
+	t.lastClickTextIndex = idx
+}
+
 func (t *Text) textToDraw(context *guigui.Context, showComposition bool) string {
-	if !context.IsFocusedOrHasFocusedChild(t) && t.nextTextSet {
+	if !context.IsFocused(t) && t.nextTextSet {
 		return t.nextText
 	}
 	if showComposition {
@@ -562,7 +556,7 @@ func (t *Text) selectionToDraw(context *guigui.Context) (start, end int, ok bool
 	if !t.editable {
 		return s, e, true
 	}
-	if !context.IsFocusedOrHasFocusedChild(t) {
+	if !context.IsFocused(t) {
 		return s, e, true
 	}
 	cs, ce, ok := t.field.CompositionSelection()
@@ -582,7 +576,7 @@ func (t *Text) compositionSelectionToDraw(context *guigui.Context) (uStart, cSta
 	if !t.editable {
 		return 0, 0, 0, 0, false
 	}
-	if !context.IsFocusedOrHasFocusedChild(t) {
+	if !context.IsFocused(t) {
 		return 0, 0, 0, 0, false
 	}
 	s, _ := t.field.Selection()
@@ -906,7 +900,7 @@ func (t *Text) Draw(context *guigui.Context, dst *ebiten.Image) {
 		TextColor: textColor,
 	}
 	if start, end, ok := t.selectionToDraw(context); ok {
-		if context.IsFocusedOrHasFocusedChild(t) {
+		if context.IsFocused(t) {
 			op.DrawSelection = true
 			op.SelectionStart = start
 			op.SelectionEnd = end
@@ -982,7 +976,7 @@ func (t *Text) CursorShape(context *guigui.Context) (ebiten.CursorShapeType, boo
 }
 
 func (t *Text) cursorPosition(context *guigui.Context) (position textutil.TextPosition, ok bool) {
-	if !context.IsFocusedOrHasFocusedChild(t) {
+	if !context.IsFocused(t) {
 		return textutil.TextPosition{}, false
 	}
 	if !t.editable {

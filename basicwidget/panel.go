@@ -34,6 +34,11 @@ type Panel struct {
 	scollOverlay ScrollOverlay
 	border       panelBorder
 	style        PanelStyle
+
+	hasNextOffset     bool
+	nextOffsetX       float64
+	nextOffsetY       float64
+	isNextOffsetDelta bool
 }
 
 func (p *Panel) SetContent(widget guigui.Widget) {
@@ -56,9 +61,34 @@ func (p *Panel) SetAutoBorder(auto bool) {
 	p.border.SetAutoBorder(auto)
 }
 
+func (p *Panel) SetScrollOffset(offsetX, offsetY float64) {
+	p.hasNextOffset = true
+	p.nextOffsetX = offsetX
+	p.nextOffsetY = offsetY
+	p.isNextOffsetDelta = false
+}
+
+func (p *Panel) SetScrollOffsetByDelta(offsetXDelta, offsetYDelta float64) {
+	p.hasNextOffset = true
+	p.nextOffsetX = offsetXDelta
+	p.nextOffsetY = offsetYDelta
+	p.isNextOffsetDelta = true
+}
+
 func (p *Panel) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	if p.content == nil {
 		return nil
+	}
+
+	if p.hasNextOffset {
+		if p.isNextOffsetDelta {
+			p.scollOverlay.SetOffsetByDelta(context, context.Size(p.content), p.nextOffsetX, p.nextOffsetY)
+		} else {
+			p.scollOverlay.SetOffset(context, context.Size(p.content), p.nextOffsetX, p.nextOffsetY)
+		}
+		p.hasNextOffset = false
+		p.nextOffsetX = 0
+		p.nextOffsetY = 0
 	}
 
 	offsetX, offsetY := p.scollOverlay.Offset()

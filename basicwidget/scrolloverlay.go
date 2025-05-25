@@ -106,10 +106,6 @@ func (s *ScrollOverlay) SetOffset(context *guigui.Context, contentSize image.Poi
 	}
 }
 
-func (s *ScrollOverlay) isHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(s, image.Pt(ebiten.CursorPosition()))
-}
-
 func (s *ScrollOverlay) setDragging(draggingX, draggingY bool) {
 	if s.draggingX == draggingX && s.draggingY == draggingY {
 		return
@@ -130,7 +126,7 @@ func adjustedWheel() (float64, float64) {
 }
 
 func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	hovered := s.isHovered(context)
+	hovered := context.IsWidgetHitAtCursor(s)
 	if hovered {
 		x, y := ebiten.CursorPosition()
 		dx, dy := adjustedWheel()

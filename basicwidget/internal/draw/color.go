@@ -68,7 +68,7 @@ func Color2(colorMode guigui.ColorMode, typ ColorType, lightnessInLightMode, lig
 	case ColorTypeDanger:
 		base = red
 	default:
-		panic(fmt.Sprintf("basicwidget: invalid color type: %d", typ))
+		panic(fmt.Sprintf("draw: invalid color type: %d", typ))
 	}
 	switch colorMode {
 	case guigui.ColorModeLight:
@@ -76,7 +76,7 @@ func Color2(colorMode guigui.ColorMode, typ ColorType, lightnessInLightMode, lig
 	case guigui.ColorModeDark:
 		return getColor(base, lightnessInDarkMode, black, white)
 	default:
-		panic(fmt.Sprintf("basicwidget: invalid color mode: %d", colorMode))
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
 }
 
@@ -142,30 +142,89 @@ func BorderColors(colorMode guigui.ColorMode, borderType RoundedRectBorderType, 
 	panic(fmt.Sprintf("draw: invalid border type: %d", borderType))
 }
 
+var (
+	textEnabledLightColor              = Color(guigui.ColorModeLight, ColorTypeBase, 0.1)
+	textEnabledDarkColor               = Color(guigui.ColorModeDark, ColorTypeBase, 0.1)
+	textDisabledLightColor             = Color(guigui.ColorModeLight, ColorTypeBase, 0.5)
+	textDisabledDarkColor              = Color(guigui.ColorModeDark, ColorTypeBase, 0.5)
+	controlEnabledLightColor           = Color2(guigui.ColorModeLight, ColorTypeBase, 1, 0.3)
+	controlEnabledDarkColor            = Color2(guigui.ColorModeDark, ColorTypeBase, 1, 0.3)
+	controlDisabledLightColor          = Color2(guigui.ColorModeLight, ColorTypeBase, 0.9, 0.1)
+	controlDisabledDarkColor           = Color2(guigui.ColorModeDark, ColorTypeBase, 0.9, 0.1)
+	secondaryControlEnabledLightColor  = Color2(guigui.ColorModeLight, ColorTypeBase, 0.95, 0.25)
+	secondaryControlEnabledDarkColor   = Color2(guigui.ColorModeDark, ColorTypeBase, 0.95, 0.25)
+	secondaryControlDisabledLightColor = Color2(guigui.ColorModeLight, ColorTypeBase, 0.85, 0.05)
+	secondaryControlDisabledDarkColor  = Color2(guigui.ColorModeDark, ColorTypeBase, 0.85, 0.05)
+	thumbEnabledLightColor             = Color2(guigui.ColorModeLight, ColorTypeBase, 1, 0.6)
+	thumbEnabledDarkColor              = Color2(guigui.ColorModeDark, ColorTypeBase, 1, 0.6)
+	thumbDisabledLightColor            = Color2(guigui.ColorModeLight, ColorTypeBase, 0.9, 0.55)
+	thumbDisabledDarkColor             = Color2(guigui.ColorModeDark, ColorTypeBase, 0.9, 0.55)
+)
+
 func TextColor(colorMode guigui.ColorMode, enabled bool) color.Color {
-	if !enabled {
-		return Color(colorMode, ColorTypeBase, 0.5)
+	switch colorMode {
+	case guigui.ColorModeLight:
+		if enabled {
+			return textEnabledLightColor
+		}
+		return textDisabledLightColor
+	case guigui.ColorModeDark:
+		if enabled {
+			return textEnabledDarkColor
+		}
+		return textDisabledDarkColor
+	default:
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
-	return Color(colorMode, ColorTypeBase, 0.1)
 }
 
 func ControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
-	if !enabled {
-		return Color2(colorMode, ColorTypeBase, 0.9, 0.1)
+	switch colorMode {
+	case guigui.ColorModeLight:
+		if enabled {
+			return controlEnabledLightColor
+		}
+		return controlDisabledLightColor
+	case guigui.ColorModeDark:
+		if enabled {
+			return controlEnabledDarkColor
+		}
+		return controlDisabledDarkColor
+	default:
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
-	return Color2(colorMode, ColorTypeBase, 1, 0.3)
 }
 
 func SecondaryControlColor(colorMode guigui.ColorMode, enabled bool) color.Color {
-	if !enabled {
-		return Color2(colorMode, ColorTypeBase, 0.85, 0.05)
+	switch colorMode {
+	case guigui.ColorModeLight:
+		if enabled {
+			return secondaryControlEnabledLightColor
+		}
+		return secondaryControlDisabledLightColor
+	case guigui.ColorModeDark:
+		if enabled {
+			return secondaryControlEnabledDarkColor
+		}
+		return secondaryControlDisabledDarkColor
+	default:
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
-	return Color2(colorMode, ColorTypeBase, 0.95, 0.25)
 }
 
 func ThumbColor(colorMode guigui.ColorMode, enabled bool) color.Color {
-	if !enabled {
-		return Color2(colorMode, ColorTypeBase, 0.9, 0.55)
+	switch colorMode {
+	case guigui.ColorModeLight:
+		if enabled {
+			return thumbEnabledLightColor
+		}
+		return thumbDisabledLightColor
+	case guigui.ColorModeDark:
+		if enabled {
+			return thumbEnabledDarkColor
+		}
+		return thumbDisabledDarkColor
+	default:
+		panic(fmt.Sprintf("draw: invalid color mode: %d", colorMode))
 	}
-	return Color2(colorMode, ColorTypeBase, 1, 0.6)
 }

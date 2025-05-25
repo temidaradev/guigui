@@ -53,7 +53,8 @@ const (
 )
 
 type Context struct {
-	app *app
+	app     *app
+	inBuild bool
 
 	appScaleMinus1             float64
 	colorMode                  ColorMode
@@ -62,6 +63,7 @@ type Context struct {
 	cachedDefaultColorModeTime time.Time
 	defaultColorWarnOnce       sync.Once
 	locales                    []language.Tag
+	allLocales                 []language.Tag
 }
 
 func (c *Context) Scale() float64 {
@@ -145,29 +147,30 @@ func (c *Context) autoColorMode() ColorMode {
 }
 
 func (c *Context) AppendLocales(locales []language.Tag) []language.Tag {
-	origLen := len(locales)
-	// App locales
-	for _, l := range c.locales {
-		if slices.Contains(locales[origLen:], l) {
-			continue
+	if len(c.allLocales) == 0 {
+		// App locales
+		for _, l := range c.locales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
 		}
-		locales = append(locales, l)
-	}
-	// Env locales
-	for _, l := range envLocales {
-		if slices.Contains(locales[origLen:], l) {
-			continue
+		// Env locales
+		for _, l := range envLocales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
 		}
-		locales = append(locales, l)
-	}
-	// System locales
-	for _, l := range systemLocales {
-		if slices.Contains(locales[origLen:], l) {
-			continue
+		// System locales
+		for _, l := range systemLocales {
+			if slices.Contains(c.allLocales, l) {
+				continue
+			}
+			c.allLocales = append(c.allLocales, l)
 		}
-		locales = append(locales, l)
 	}
-	return locales
+	return append(locales, c.allLocales...)
 }
 
 func (c *Context) AppendAppLocales(locales []language.Tag) []language.Tag {
@@ -186,7 +189,10 @@ func (c *Context) SetAppLocales(locales []language.Tag) {
 		return
 	}
 
-	c.locales = append([]language.Tag(nil), locales...)
+	c.locales = slices.Delete(c.locales, 0, len(c.locales))
+	c.locales = append(c.locales, locales...)
+	c.allLocales = slices.Delete(c.allLocales, 0, len(c.allLocales))
+
 	c.app.requestRedraw(c.app.bounds())
 }
 
@@ -203,6 +209,10 @@ func (c *Context) Position(widget Widget) image.Point {
 }
 
 func (c *Context) SetPosition(widget Widget, position image.Point) {
+	if widget.widgetState().position == position {
+		return
+	}
+	c.clearVisibleBoundsCacheForWidget(widget)
 	widget.widgetState().position = position
 	// Rerendering happens at (*.app).requestRedrawIfTreeChanged if necessary.
 }
@@ -210,21 +220,28 @@ func (c *Context) SetPosition(widget Widget, position image.Point) {
 const DefaultSize = -1
 
 func (c *Context) SetSize(widget Widget, size image.Point) {
+	if widget.widgetState().widthPlus1 == size.X+1 && widget.widgetState().heightPlus1 == size.Y+1 {
+		return
+	}
+	c.clearVisibleBoundsCacheForWidget(widget)
 	widget.widgetState().widthPlus1 = size.X + 1
 	widget.widgetState().heightPlus1 = size.Y + 1
 }
 
 func (c *Context) Size(widget Widget) image.Point {
 	widgetState := widget.widgetState()
-	ds := widget.DefaultSize(c)
+	var defaultSize image.Point
+	if widgetState.widthPlus1 == 0 || widgetState.heightPlus1 == 0 {
+		defaultSize = widget.DefaultSize(c)
+	}
 	var s image.Point
 	if widgetState.widthPlus1 == 0 {
-		s.X = ds.X
+		s.X = defaultSize.X
 	} else {
 		s.X = widgetState.widthPlus1 - 1
 	}
 	if widgetState.heightPlus1 == 0 {
-		s.Y = ds.Y
+		s.Y = defaultSize.Y
 	} else {
 		s.Y = widgetState.heightPlus1 - 1
 	}
@@ -240,14 +257,33 @@ func (c *Context) Bounds(widget Widget) image.Rectangle {
 }
 
 func (c *Context) VisibleBounds(widget Widget) image.Rectangle {
+	state := widget.widgetState()
+	if state.hasVisibleBoundsCache {
+		return state.visibleBoundsCache
+	}
+
 	parent := widget.widgetState().parent
 	if parent == nil {
-		return c.app.bounds()
+		b := c.app.bounds()
+		state.hasVisibleBoundsCache = true
+		state.visibleBoundsCache = b
+		return b
 	}
 	if widget.ZDelta() != 0 {
-		return c.Bounds(widget)
+		b := c.Bounds(widget)
+		state.hasVisibleBoundsCache = true
+		state.visibleBoundsCache = b
+		return b
 	}
-	return c.VisibleBounds(parent).Intersect(c.Bounds(widget))
+
+	var b image.Rectangle
+	parentVB := c.VisibleBounds(parent)
+	if !parentVB.Empty() {
+		b = parentVB.Intersect(c.Bounds(widget))
+	}
+	state.hasVisibleBoundsCache = true
+	state.visibleBoundsCache = b
+	return b
 }
 
 func (c *Context) SetVisible(widget Widget, visible bool) {
@@ -291,31 +327,26 @@ func (c *Context) SetFocused(widget Widget, focused bool) {
 }
 
 func (c *Context) focus(widget Widget) {
-	widgetState := widget.widgetState()
-	if !widgetState.isVisible() {
+	ws := widget.widgetState()
+	if !ws.isVisible() {
 		return
 	}
-	if !widgetState.isEnabled() {
-		return
-	}
-
-	if !widgetState.isInTree() {
-		return
-	}
-	if c.app.focusedWidget == widget {
+	if !ws.isEnabled() {
 		return
 	}
 
-	var oldWidget Widget
-	if c.app.focusedWidget != nil {
-		oldWidget = c.app.focusedWidget
+	if !ws.isInTree() {
+		return
+	}
+	if c.app.focusedWidgetState == widget.widgetState() {
+		return
 	}
 
-	c.app.focusedWidget = widget
-	RequestRedraw(c.app.focusedWidget)
-	if oldWidget != nil {
-		RequestRedraw(oldWidget)
-	}
+	c.app.focusedWidgetState = widget.widgetState()
+
+	// Rerender everything when a focus changes.
+	// A widget including a focused widget might be affected.
+	c.app.requestRedraw(c.app.bounds())
 }
 
 func (c *Context) blur(widget Widget) {
@@ -325,37 +356,46 @@ func (c *Context) blur(widget Widget) {
 	}
 	var unfocused bool
 	_ = traverseWidget(widget, func(w Widget) error {
-		if c.app.focusedWidget == w {
-			c.app.focusedWidget = c.app.root
+		if c.app.focusedWidgetState == w.widgetState() {
+			c.app.focusedWidgetState = c.app.root.widgetState()
 			unfocused = true
 			return skipTraverse
 		}
 		return nil
 	})
 	if unfocused {
-		RequestRedraw(widget)
+		// Rerender everything when a focus changes.
+		// A widget including a focused widget might be affected.
+		c.app.requestRedraw(c.app.bounds())
 	}
 }
 
-func (c *Context) isFocused(widget Widget) bool {
-	// Check this first to avoid unnecessary evaluation.
-	if c.app.focusedWidget != widget {
-		return false
-	}
-	widgetState := widget.widgetState()
-	return widgetState.isInTree() && widgetState.isVisible()
+func (c *Context) IsFocused(widget Widget) bool {
+	return c.app.focusedWidgetState == widget.widgetState()
 }
 
 func (c *Context) IsFocusedOrHasFocusedChild(widget Widget) bool {
-	if c.isFocused(widget) {
-		return true
+	if c.inBuild {
+		panic("guigui: IsFocusedOrHasFocusedChild cannot be called in Build")
 	}
 
-	widgetState := widget.widgetState()
-	for _, child := range widgetState.children {
-		if c.IsFocusedOrHasFocusedChild(child) {
-			return true
+	if len(widget.widgetState().children) == 0 {
+		return c.app.focusedWidgetState == widget.widgetState()
+	}
+
+	w := c.app.focusedWidgetState
+	if w == nil {
+		return false
+	}
+	for {
+		widgetState := widget.widgetState()
+		if w == widgetState {
+			return widgetState.isInTree() && widgetState.isVisible()
 		}
+		if w.parent == nil {
+			break
+		}
+		w = w.parent.widgetState()
 	}
 	return false
 }
@@ -374,10 +414,18 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 	RequestRedraw(widget)
 }
 
-func (c *Context) IsWidgetHitAt(widget Widget, point image.Point) bool {
-	return c.app.isWidgetHitAt(widget, point)
+func (c *Context) IsWidgetHitAtCursor(widget Widget) bool {
+	return c.app.isWidgetHitAt(widget)
 }
 
 func (c *Context) SetCustomDraw(widget Widget, customDraw CustomDrawFunc) {
 	widget.widgetState().customDraw = customDraw
+}
+
+func (c *Context) clearVisibleBoundsCacheForWidget(widget Widget) {
+	widget.widgetState().hasVisibleBoundsCache = false
+	widget.widgetState().visibleBoundsCache = image.Rectangle{}
+	for _, child := range widget.widgetState().children {
+		c.clearVisibleBoundsCacheForWidget(child)
+	}
 }

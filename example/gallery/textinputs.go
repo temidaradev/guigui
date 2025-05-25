@@ -14,11 +14,15 @@ import (
 type TextInputs struct {
 	guigui.DefaultWidget
 
-	textInputForm       basicwidget.Form
-	singleLineText      basicwidget.Text
-	singleLineTextInput basicwidget.TextInput
-	multilineText       basicwidget.Text
-	multilineTextInput  basicwidget.TextInput
+	textInputForm               basicwidget.Form
+	singleLineText              basicwidget.Text
+	singleLineTextInput         basicwidget.TextInput
+	singleLineWithIconText      basicwidget.Text
+	singleLineWithIconTextInput basicwidget.TextInput
+	multilineText               basicwidget.Text
+	multilineTextInput          basicwidget.TextInput
+	inlineText                  basicwidget.Text
+	inlineTextInput             inlineTextInputContainer
 
 	configForm                      basicwidget.Form
 	horizontalAlignText             basicwidget.Text
@@ -64,6 +68,10 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	if err != nil {
 		return err
 	}
+	imgSearch, err := theImageCache.GetMonochrome("search", context.ColorMode())
+	if err != nil {
+		return err
+	}
 
 	u := basicwidget.UnitSize(context)
 
@@ -83,6 +91,14 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.singleLineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.singleLineTextInput, image.Pt(width, guigui.DefaultSize))
 
+	t.singleLineWithIconText.SetValue("Single line with icon")
+	t.singleLineWithIconTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.singleLineWithIconTextInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.singleLineWithIconTextInput.SetEditable(t.model.TextInputs().Editable())
+	t.singleLineWithIconTextInput.SetIcon(imgSearch)
+	context.SetEnabled(&t.singleLineWithIconTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.singleLineWithIconTextInput, image.Pt(width, guigui.DefaultSize))
+
 	t.multilineText.SetValue("Multiline")
 	t.multilineTextInput.SetOnValueChanged(func(text string, committed bool) {
 		if committed {
@@ -98,14 +114,30 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	context.SetEnabled(&t.multilineTextInput, t.model.TextInputs().Enabled())
 	context.SetSize(&t.multilineTextInput, image.Pt(width, 4*u))
 
+	t.inlineText.SetValue("Inline")
+	t.inlineTextInput.SetHorizontalAlign(t.model.TextInputs().HorizontalAlign())
+	t.inlineTextInput.textInput.SetVerticalAlign(t.model.TextInputs().VerticalAlign())
+	t.inlineTextInput.textInput.SetAutoWrap(t.model.TextInputs().AutoWrap())
+	t.inlineTextInput.textInput.SetEditable(t.model.TextInputs().Editable())
+	context.SetEnabled(&t.inlineTextInput, t.model.TextInputs().Enabled())
+	context.SetSize(&t.inlineTextInput, image.Pt(width, guigui.DefaultSize))
+
 	t.textInputForm.SetItems([]basicwidget.FormItem{
 		{
 			PrimaryWidget:   &t.singleLineText,
 			SecondaryWidget: &t.singleLineTextInput,
 		},
 		{
+			PrimaryWidget:   &t.singleLineWithIconText,
+			SecondaryWidget: &t.singleLineWithIconTextInput,
+		},
+		{
 			PrimaryWidget:   &t.multilineText,
 			SecondaryWidget: &t.multilineTextInput,
+		},
+		{
+			PrimaryWidget:   &t.inlineText,
+			SecondaryWidget: &t.inlineTextInput,
 		},
 	})
 
@@ -213,4 +245,34 @@ func (t *TextInputs) Build(context *guigui.Context, appender *guigui.ChildWidget
 	appender.AppendChildWidgetWithBounds(&t.textInputForm, gl.CellBounds(0, 0))
 	appender.AppendChildWidgetWithBounds(&t.configForm, gl.CellBounds(0, 2))
 	return nil
+}
+
+type inlineTextInputContainer struct {
+	guigui.DefaultWidget
+
+	textInput       basicwidget.TextInput
+	horizontalAlign basicwidget.HorizontalAlign
+}
+
+func (c *inlineTextInputContainer) SetHorizontalAlign(align basicwidget.HorizontalAlign) {
+	c.horizontalAlign = align
+	c.textInput.SetHorizontalAlign(align)
+}
+
+func (c *inlineTextInputContainer) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	c.textInput.SetStyle(basicwidget.TextInputStyleInline)
+	pos := context.Position(c)
+	switch c.horizontalAlign {
+	case basicwidget.HorizontalAlignStart:
+	case basicwidget.HorizontalAlignCenter:
+		pos.X += (context.Size(c).X - context.Size(&c.textInput).X) / 2
+	case basicwidget.HorizontalAlignEnd:
+		pos.X += context.Size(c).X - context.Size(&c.textInput).X
+	}
+	appender.AppendChildWidgetWithPosition(&c.textInput, pos)
+	return nil
+}
+
+func (c *inlineTextInputContainer) DefaultSize(context *guigui.Context) image.Point {
+	return c.textInput.DefaultSize(context)
 }

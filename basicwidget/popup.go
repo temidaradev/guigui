@@ -125,10 +125,12 @@ func (p *Popup) Build(context *guigui.Context, appender *guigui.ChildWidgetAppen
 	context.SetOpacity(&p.content, p.openingRate())
 	context.SetOpacity(&p.frame, p.openingRate())
 
-	appender.AppendChildWidgetWithBounds(&p.background, context.AppBounds())
-	appender.AppendChildWidgetWithBounds(&p.shadow, context.AppBounds())
-	appender.AppendChildWidgetWithBounds(&p.content, p.ContentBounds(context))
-	appender.AppendChildWidgetWithBounds(&p.frame, context.AppBounds())
+	if p.openingRate() > 0 {
+		appender.AppendChildWidgetWithBounds(&p.background, context.AppBounds())
+		appender.AppendChildWidgetWithBounds(&p.shadow, context.AppBounds())
+		appender.AppendChildWidgetWithBounds(&p.content, p.ContentBounds(context))
+		appender.AppendChildWidgetWithBounds(&p.frame, context.AppBounds())
+	}
 
 	return nil
 }
@@ -179,11 +181,11 @@ func (p *Popup) close(reason PopupClosedReason) {
 	p.openAfterClose = false
 }
 
-func (p *Popup) IsWidgetOrBackgroundHitAt(context *guigui.Context, target guigui.Widget, point image.Point) bool {
-	if context.IsWidgetHitAt(target, point) {
+func (p *Popup) IsWidgetOrBackgroundHitAtCursor(context *guigui.Context, target guigui.Widget) bool {
+	if context.IsWidgetHitAtCursor(target) {
 		return true
 	}
-	if context.IsWidgetHitAt(&p.background, point) && point.In(context.VisibleBounds(target)) {
+	if context.IsWidgetHitAtCursor(&p.background) && image.Pt(ebiten.CursorPosition()).In(context.VisibleBounds(target)) {
 		return true
 	}
 	return false
@@ -260,7 +262,7 @@ func (p *popupContent) Build(context *guigui.Context, appender *guigui.ChildWidg
 }
 
 func (p *popupContent) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
+	if context.IsWidgetHitAtCursor(p) {
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 	return guigui.HandleInputResult{}
@@ -309,7 +311,7 @@ func (p *popupBackground) HandlePointingInput(context *guigui.Context) guigui.Ha
 		return guigui.AbortHandlingInputByWidget(p)
 	}
 
-	if context.IsWidgetHitAt(p, image.Pt(ebiten.CursorPosition())) {
+	if context.IsWidgetHitAtCursor(p) {
 		if p.popup.closeByClickingOutside {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
 				p.popup.close(PopupClosedReasonClickOutside)

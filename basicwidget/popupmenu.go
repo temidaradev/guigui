@@ -11,12 +11,12 @@ import (
 )
 
 type PopupMenuItem[T comparable] struct {
-	Text     string
-	Color    color.Color
-	Header   bool
-	Disabled bool
-	Border   bool
-	ID       T
+	Text      string
+	TextColor color.Color
+	Header    bool
+	Disabled  bool
+	Border    bool
+	ID        T
 }
 
 type PopupMenu[T comparable] struct {
@@ -25,37 +25,32 @@ type PopupMenu[T comparable] struct {
 	list  List[T]
 	popup Popup
 
-	onClosed func(index int)
+	onItemSelected func(index int)
 }
 
-func (p *PopupMenu[T]) SetOnClosed(f func(index int)) {
-	p.onClosed = f
+func (p *PopupMenu[T]) SetOnItemSelected(f func(index int)) {
+	p.onItemSelected = f
 }
 
 func (p *PopupMenu[T]) SetCheckmarkIndex(index int) {
 	p.list.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu[T]) IsWidgetOrBackgroundHitAt(context *guigui.Context, widget guigui.Widget, point image.Point) bool {
-	return p.popup.IsWidgetOrBackgroundHitAt(context, widget, point)
+func (p *PopupMenu[T]) IsWidgetOrBackgroundHitAtCursor(context *guigui.Context, widget guigui.Widget) bool {
+	return p.popup.IsWidgetOrBackgroundHitAtCursor(context, widget)
 }
 
 func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
 	p.list.SetStyle(ListStyleMenu)
 	p.list.list.SetOnItemSelected(func(index int) {
 		p.popup.Close()
-		if p.onClosed != nil {
-			p.onClosed(index)
+		if p.onItemSelected != nil {
+			p.onItemSelected(index)
 		}
 	})
 
 	p.popup.SetContent(&p.list)
 	p.popup.SetCloseByClickingOutside(true)
-	p.popup.SetOnClosed(func(reason PopupClosedReason) {
-		if p.onClosed != nil {
-			p.onClosed(p.list.SelectedItemIndex())
-		}
-	})
 	bounds := p.contentBounds(context)
 	context.SetSize(&p.list, bounds.Size())
 	appender.AppendChildWidgetWithBounds(&p.popup, bounds)
@@ -112,7 +107,7 @@ func (p *PopupMenu[T]) SetItems(items []PopupMenuItem[T]) {
 	for _, item := range items {
 		listItems = append(listItems, ListItem[T]{
 			Text:      item.Text,
-			TextColor: item.Color,
+			TextColor: item.TextColor,
 			Header:    item.Header,
 			Disabled:  item.Disabled,
 			Border:    item.Border,
@@ -132,12 +127,12 @@ func (p *PopupMenu[T]) SelectedItem() (PopupMenuItem[T], bool) {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     listItem.Text,
-		Color:    listItem.TextColor,
-		Header:   listItem.Header,
-		Disabled: listItem.Disabled,
-		Border:   listItem.Border,
-		ID:       listItem.ID,
+		Text:      listItem.Text,
+		TextColor: listItem.TextColor,
+		Header:    listItem.Header,
+		Disabled:  listItem.Disabled,
+		Border:    listItem.Border,
+		ID:        listItem.ID,
 	}, true
 }
 
@@ -147,12 +142,12 @@ func (p *PopupMenu[T]) ItemByIndex(index int) (PopupMenuItem[T], bool) {
 		return PopupMenuItem[T]{}, false
 	}
 	return PopupMenuItem[T]{
-		Text:     listItem.Text,
-		Color:    listItem.TextColor,
-		Header:   listItem.Header,
-		Disabled: listItem.Disabled,
-		Border:   listItem.Border,
-		ID:       listItem.ID,
+		Text:      listItem.Text,
+		TextColor: listItem.TextColor,
+		Header:    listItem.Header,
+		Disabled:  listItem.Disabled,
+		Border:    listItem.Border,
+		ID:        listItem.ID,
 	}, true
 }
 

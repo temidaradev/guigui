@@ -5,6 +5,10 @@ package basicwidget
 
 import (
 	"slices"
+
+	"github.com/hajimehoshi/ebiten/v2"
+
+	"github.com/hajimehoshi/guigui"
 )
 
 func adjustSliceSize[T any](slice []T, size int) []T {
@@ -41,4 +45,12 @@ func MoveItemsInSlice[T any](slice []T, from int, count int, to int) int {
 		return to - count
 	}
 	return to
+}
+
+func doubleClickLimitInTicks() int {
+	return ebiten.TPS() / 2
+}
+
+func defaultIconSize(context *guigui.Context) int {
+	return int(LineHeight(context))
 }

@@ -54,6 +54,7 @@ func (b *baseButton) setPressed(pressed bool) {
 }
 
 func (b *baseButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	// TODO: Do not call isHovered in Build (#52).
 	hovered := b.isHovered(context)
 	if b.prevHovered != hovered {
 		b.prevHovered = hovered
@@ -150,7 +151,7 @@ func (b *baseButton) canPress(context *guigui.Context) bool {
 }
 
 func (b *baseButton) isHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition()))
+	return context.IsWidgetHitAtCursor(b)
 }
 
 func (b *baseButton) isActive(context *guigui.Context) bool {

@@ -579,7 +579,7 @@ func DrawInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds 
 	dst.DrawRectShader(src.Bounds().Dx(), src.Bounds().Dy(), maskShader, sOp)
 }
 
-func FillInRoundedConerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, srcBounds image.Rectangle, clr color.Color) {
+func FillInRoundedCornerRect(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle, radius int, srcBounds image.Rectangle, clr color.Color) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(srcBounds.Dx()), float64(srcBounds.Dy()))
 	op.GeoM.Translate(float64(srcBounds.Min.X), float64(srcBounds.Min.Y))

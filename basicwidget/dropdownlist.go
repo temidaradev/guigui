@@ -12,12 +12,12 @@ import (
 )
 
 type DropdownListItem[T comparable] struct {
-	Text     string
-	Color    color.Color
-	Header   bool
-	Disabled bool
-	Border   bool
-	ID       T
+	Text      string
+	TextColor color.Color
+	Header    bool
+	Disabled  bool
+	Border    bool
+	ID        T
 }
 
 type DropdownList[T comparable] struct {
@@ -54,7 +54,7 @@ func (d *DropdownList[T]) Build(context *guigui.Context, appender *guigui.ChildW
 
 	appender.AppendChildWidgetWithPosition(&d.button, context.Position(d))
 
-	d.popupMenu.SetOnClosed(func(index int) {
+	d.popupMenu.SetOnItemSelected(func(index int) {
 		if d.onItemSelected != nil {
 			d.onItemSelected(index)
 		}

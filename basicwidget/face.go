@@ -54,12 +54,18 @@ func init() {
 	theFaceSourceEntries = []FaceSourceEntry{e}
 }
 
-func fontFace(size float64, weight text.Weight, features []fontFeature, lang language.Tag) text.Face {
+var (
+	tagLiga = text.MustParseTag("liga")
+	tagTnum = text.MustParseTag("tnum")
+)
+
+func fontFace(size float64, weight text.Weight, liga bool, tnum bool, lang language.Tag) text.Face {
 	key := faceCacheKey{
-		size:     size,
-		weight:   weight,
-		features: string(serializeFontFeatures(features)),
-		lang:     lang,
+		size:   size,
+		weight: weight,
+		liga:   liga,
+		tnum:   tnum,
+		lang:   lang,
 	}
 	if f, ok := theFaceCache[key]; ok {
 		return f
@@ -73,8 +79,15 @@ func fontFace(size float64, weight text.Weight, features []fontFeature, lang lan
 			Language: lang,
 		}
 		gtf.SetVariation(text.MustParseTag("wght"), float32(weight))
-		for _, ff := range features {
-			gtf.SetFeature(ff.Tag, ff.Value)
+		if liga {
+			gtf.SetFeature(tagLiga, 1)
+		} else {
+			gtf.SetFeature(tagLiga, 0)
+		}
+		if tnum {
+			gtf.SetFeature(tagTnum, 1)
+		} else {
+			gtf.SetFeature(tagTnum, 0)
 		}
 
 		var f text.Face
@@ -133,26 +146,9 @@ func SetFaceSources(entries []FaceSourceEntry) {
 }
 
 type faceCacheKey struct {
-	size     float64
-	weight   text.Weight
-	features string
-	lang     language.Tag
-}
-
-type fontFeature struct {
-	Tag   text.Tag
-	Value uint32
-}
-
-func serializeFontFeatures(features []fontFeature) []byte {
-	if len(features) == 0 {
-		return nil
-	}
-
-	b := make([]byte, 0, len(features)*8)
-	for _, ff := range features {
-		b = append(b, byte(ff.Tag), byte(ff.Tag>>8), byte(ff.Tag>>16), byte(ff.Tag>>24))
-		b = append(b, byte(ff.Value), byte(ff.Value>>8), byte(ff.Value>>16), byte(ff.Value>>24))
-	}
-	return b
+	size   float64
+	weight text.Weight
+	liga   bool
+	tnum   bool
+	lang   language.Tag
 }

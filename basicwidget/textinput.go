@@ -13,15 +13,25 @@ import (
 	"github.com/hajimehoshi/guigui/basicwidget/internal/draw"
 )
 
+type TextInputStyle int
+
+const (
+	TextInputStyleNormal TextInputStyle = iota
+	TextInputStyleInline
+)
+
 type TextInput struct {
 	guigui.DefaultWidget
 
-	background    textInputBackground
-	text          Text
-	frame         textInputFrame
-	scrollOverlay ScrollOverlay
-	focus         textInputFocus
+	background     textInputBackground
+	text           Text
+	iconBackground textInputIconBackground
+	icon           Image
+	frame          textInputFrame
+	scrollOverlay  ScrollOverlay
+	focus          textInputFocus
 
+	style        TextInputStyle
 	readonly     bool
 	paddingStart int
 	paddingEnd   int
@@ -41,7 +51,7 @@ func (t *TextInput) SetOnValueChanged(f func(text string, committed bool)) {
 	t.text.SetOnValueChanged(f)
 }
 
-func (t *TextInput) SetTextAndSelectionChanged(f func(text string, start, end int)) {
+func (t *TextInput) SetOnTextAndSelectionChanged(f func(text string, start, end int)) {
 	t.onTextAndSelectionChanged = f
 }
 
@@ -85,6 +95,14 @@ func (t *TextInput) IsEditable() bool {
 	return !t.readonly
 }
 
+func (t *TextInput) SetStyle(style TextInputStyle) {
+	if t.style == style {
+		return
+	}
+	t.style = style
+	guigui.RequestRedraw(t)
+}
+
 func (t *TextInput) SetEditable(editable bool) {
 	if t.readonly == !editable {
 		return
@@ -110,10 +128,27 @@ func (t *TextInput) setPaddingEnd(padding int) {
 	guigui.RequestRedraw(t)
 }
 
+func (t *TextInput) SetIcon(icon *ebiten.Image) {
+	t.icon.SetImage(icon)
+}
+
 func (t *TextInput) textInputPaddingInScrollableContent(context *guigui.Context) (start, top, end, bottom int) {
-	x := UnitSize(context) / 2
-	y := int(float64(UnitSize(context))-LineHeight(context)) / 2
-	return x + t.paddingStart, y, x + t.paddingEnd, y
+	var x, y int
+	switch t.style {
+	case TextInputStyleNormal:
+		x = UnitSize(context) / 2
+		y = int(float64(min(context.Size(t).Y, UnitSize(context)))-LineHeight(context)*(t.text.scaleMinus1+1)) / 2
+	case TextInputStyleInline:
+		x = UnitSize(context) / 4
+	}
+	start = x + t.paddingStart
+	if t.icon.HasImage() {
+		start += defaultIconSize(context)
+	}
+	top = y
+	end = x + t.paddingEnd
+	bottom = y
+	return
 }
 
 func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
@@ -122,11 +157,11 @@ func (t *TextInput) scrollContentSize(context *guigui.Context) image.Point {
 }
 
 func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	if t.prevFocused != context.IsFocusedOrHasFocusedChild(t) {
-		t.prevFocused = context.IsFocusedOrHasFocusedChild(t)
+	if t.prevFocused != (context.IsFocused(t) || context.IsFocused(&t.text)) {
+		t.prevFocused = (context.IsFocused(t) || context.IsFocused(&t.text))
 		guigui.RequestRedraw(t)
 	}
-	if context.IsFocusedOrHasFocusedChild(t) && !context.IsFocusedOrHasFocusedChild(&t.text) {
+	if context.IsFocused(t) {
 		context.SetFocused(&t.text, true)
 		guigui.RequestRedraw(t)
 	}
@@ -153,11 +188,16 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 	}
 	textBounds = textBounds.Add(image.Pt(paddingStart, paddingTop))
 
+	// As the text is rendered in an inset box, shift the text bounds down by 0.5 pixel.
+	textBounds = textBounds.Add(image.Pt(0, int(0.5*context.Scale())))
+
 	// Set the content size before adjustScrollOffset, as the size affects the adjustment.
 	context.SetSize(&t.text, textBounds.Size())
 	t.adjustScrollOffsetIfNeeded(context)
-	offsetX, offsetY := t.scrollOverlay.Offset()
-	textBounds.Min = textBounds.Min.Add(image.Pt(int(offsetX), int(offsetY)))
+	if t.style == TextInputStyleNormal {
+		offsetX, offsetY := t.scrollOverlay.Offset()
+		textBounds.Min = textBounds.Min.Add(image.Pt(int(offsetX), int(offsetY)))
+	}
 	appender.AppendChildWidgetWithPosition(&t.text, textBounds.Min)
 	if draw.OverlapsWithRoundedCorner(context.Bounds(t), RoundedCornerRadius(context), textBounds) {
 		// CustomDraw might be too generic and overkill for this case.
@@ -168,12 +208,31 @@ func (t *TextInput) Build(context *guigui.Context, appender *guigui.ChildWidgetA
 		context.SetCustomDraw(&t.text, nil)
 	}
 
+	if t.icon.HasImage() {
+		t.iconBackground.textInput = t
+
+		b := context.Bounds(t)
+		iconSize := defaultIconSize(context)
+		var imgBounds image.Rectangle
+		imgBounds.Min = b.Min.Add(image.Point{
+			X: UnitSize(context)/4 + int(0.5*context.Scale()),
+			Y: (b.Dy() - iconSize) / 2,
+		})
+		imgBounds.Max = imgBounds.Min.Add(image.Pt(iconSize, iconSize))
+
+		imgBgBounds := b
+		imgBgBounds.Max.X = imgBounds.Max.X + UnitSize(context)/4
+
+		appender.AppendChildWidgetWithBounds(&t.iconBackground, imgBgBounds)
+		appender.AppendChildWidgetWithBounds(&t.icon, imgBounds)
+	}
+
 	appender.AppendChildWidgetWithBounds(&t.frame, context.Bounds(t))
 
 	context.SetVisible(&t.scrollOverlay, t.text.IsMultiline())
 	appender.AppendChildWidgetWithBounds(&t.scrollOverlay, context.Bounds(t))
 
-	if context.IsFocusedOrHasFocusedChild(t) {
+	if t.style != TextInputStyleInline && (context.IsFocused(t) || context.IsFocused(&t.text)) {
 		t.focus.textInput = t
 		w := textInputFocusBorderWidth(context)
 		p := context.Position(t).Add(image.Pt(-w, -w))
@@ -209,11 +268,9 @@ func (t *TextInput) adjustScrollOffsetIfNeeded(context *guigui.Context) {
 
 func (t *TextInput) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	cp := image.Pt(ebiten.CursorPosition())
-	if context.IsWidgetHitAt(t, cp) {
+	if context.IsWidgetHitAtCursor(t) {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			context.SetFocused(&t.text, true)
-			idx := t.text.textIndexFromPosition(context, cp, false)
-			t.text.setSelection(idx, idx)
+			t.text.handleClick(context, cp)
 			return guigui.HandleInputByWidget(t)
 		}
 	}
@@ -225,6 +282,12 @@ func (t *TextInput) CursorShape(context *guigui.Context) (ebiten.CursorShapeType
 }
 
 func (t *TextInput) DefaultSize(context *guigui.Context) image.Point {
+	if t.style == TextInputStyleInline {
+		start, _, end, _ := t.textInputPaddingInScrollableContent(context)
+		w := max(t.text.DefaultSize(context).X+start+end, UnitSize(context))
+		h := t.text.DefaultSize(context).Y
+		return image.Pt(w, h)
+	}
 	if t.text.IsMultiline() {
 		return image.Pt(6*UnitSize(context), 4*UnitSize(context))
 	}
@@ -238,6 +301,18 @@ type textInputBackground struct {
 }
 
 func (t *textInputBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
+	bounds := context.Bounds(t)
+	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t) && t.textInput.IsEditable())
+	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))
+}
+
+type textInputIconBackground struct {
+	guigui.DefaultWidget
+
+	textInput *TextInput
+}
+
+func (t *textInputIconBackground) Draw(context *guigui.Context, dst *ebiten.Image) {
 	bounds := context.Bounds(t)
 	clr := draw.ControlColor(context.ColorMode(), context.IsEnabled(t) && t.textInput.IsEditable())
 	draw.DrawRoundedRect(context, dst, bounds, clr, RoundedCornerRadius(context))

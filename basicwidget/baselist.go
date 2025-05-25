@@ -110,7 +110,8 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	appender.AppendChildWidgetWithBounds(&b.scrollOverlay, context.Bounds(b))
 
-	hoveredItemIndex := b.HoveredItemIndex(context)
+	// TODO: Do not call HoveredItemIndex in Build (#52).
+	hoveredItemIndex := b.hoveredItemIndex(context)
 	p := context.Position(b)
 	_, offsetY := b.scrollOverlay.Offset()
 	p.X += RoundedCornerRadius(context) + listItemPadding(context)
@@ -132,6 +133,7 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 			imgP := p
 			itemH := context.Size(item.Content).Y
 			imgP.Y += (itemH - imgSize) * 3 / 4
+			imgP.Y = b.adjustItemY(context, imgP.Y)
 			appender.AppendChildWidgetWithBounds(&b.checkmark, image.Rectangle{
 				Min: imgP,
 				Max: imgP.Add(image.Pt(imgSize, imgSize)),
@@ -142,6 +144,8 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 		if b.checkmarkIndexPlus1 > 0 {
 			itemP.X += listItemCheckmarkSize(context) + listItemTextAndImagePadding(context)
 		}
+		itemP.Y = b.adjustItemY(context, itemP.Y)
+
 		appender.AppendChildWidgetWithPosition(item.Content, itemP)
 		p.Y += context.Size(item.Content).Y
 	}
@@ -149,13 +153,6 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 	if b.style != ListStyleSidebar && b.style != ListStyleMenu {
 		b.listFrame.list = b
 		appender.AppendChildWidgetWithBounds(&b.listFrame, context.Bounds(b))
-	}
-
-	if b.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
-		b.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
-		if b.isHoveringVisible() || b.hasMovableItems() {
-			guigui.RequestRedraw(b)
-		}
 	}
 
 	return nil
@@ -182,8 +179,8 @@ func (b *baseList[T]) SelectedItemIndex() int {
 	return b.abstractList.SelectedItemIndex()
 }
 
-func (b *baseList[T]) HoveredItemIndex(context *guigui.Context) int {
-	if !context.IsWidgetHitAt(b, image.Pt(ebiten.CursorPosition())) {
+func (b *baseList[T]) hoveredItemIndex(context *guigui.Context) int {
+	if !context.IsWidgetHitAtCursor(b) {
 		return -1
 	}
 	_, y := ebiten.CursorPosition()
@@ -269,6 +266,13 @@ func (b *baseList[T]) calcDropDstIndex(context *guigui.Context) int {
 }
 
 func (b *baseList[T]) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
+	if b.isHoveringVisible() || b.hasMovableItems() {
+		if hoveredItemIndex := b.hoveredItemIndex(context); b.lastHoverredItemIndexPlus1 != hoveredItemIndex+1 {
+			b.lastHoverredItemIndexPlus1 = hoveredItemIndex + 1
+			guigui.RequestRedraw(b)
+		}
+	}
+
 	// Process dragging.
 	if b.dragSrcIndexPlus1 > 0 {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -301,7 +305,7 @@ func (b *baseList[T]) HandlePointingInput(context *guigui.Context) guigui.Handle
 		return guigui.HandleInputByWidget(b)
 	}
 
-	index := b.HoveredItemIndex(context)
+	index := b.hoveredItemIndex(context)
 	if index >= 0 && index < b.abstractList.ItemCount() {
 		x, y := ebiten.CursorPosition()
 		left := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
@@ -315,7 +319,11 @@ func (b *baseList[T]) HandlePointingInput(context *guigui.Context) guigui.Handle
 			}
 
 			wasFocused := context.IsFocusedOrHasFocusedChild(b)
-			context.SetFocused(b, true)
+			if item, ok := b.abstractList.ItemByIndex(index); ok {
+				context.SetFocused(item.Content, true)
+			} else {
+				context.SetFocused(b, true)
+			}
 			if b.SelectedItemIndex() != index || !wasFocused || b.style == ListStyleMenu {
 				b.selectItemByIndex(index, true)
 				b.lastSelectingItemTime = time.Now()
@@ -368,23 +376,35 @@ func (b *baseList[T]) itemYFromIndex(context *guigui.Context, index int) int {
 		item, _ := b.abstractList.ItemByIndex(i)
 		y += context.Size(item.Content).Y
 	}
+	y = b.adjustItemY(context, y)
 	return y
 }
 
-func (l *baseList[T]) itemBounds(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
-	_, offsetY := l.scrollOverlay.Offset()
-	b := context.Bounds(l)
+func (b *baseList[T]) adjustItemY(context *guigui.Context, y int) int {
+	// Adjust the bounds based on the list style (inset or outset).
+	switch b.style {
+	case ListStyleNormal:
+		y += int(0.5 * context.Scale())
+	case ListStyleMenu:
+		y += int(-0.5 * context.Scale())
+	}
+	return y
+}
+
+func (b *baseList[T]) itemBounds(context *guigui.Context, index int, fullWidth bool) image.Rectangle {
+	_, offsetY := b.scrollOverlay.Offset()
+	bounds := context.Bounds(b)
 	if !fullWidth {
 		padding := listItemPadding(context)
-		b.Min.X += RoundedCornerRadius(context) + padding
-		b.Max.X -= RoundedCornerRadius(context) + padding
+		bounds.Min.X += RoundedCornerRadius(context) + padding
+		bounds.Max.X -= RoundedCornerRadius(context) + padding
 	}
-	b.Min.Y += l.itemYFromIndex(context, index)
-	b.Min.Y += int(offsetY)
-	if item, ok := l.abstractList.ItemByIndex(index); ok {
-		b.Max.Y = b.Min.Y + context.Size(item.Content).Y
+	bounds.Min.Y += b.itemYFromIndex(context, index)
+	bounds.Min.Y += int(offsetY)
+	if item, ok := b.abstractList.ItemByIndex(index); ok {
+		bounds.Max.Y = bounds.Min.Y + context.Size(item.Content).Y
 	}
-	return b
+	return bounds
 }
 
 func (b *baseList[T]) selectedItemColor(context *guigui.Context) color.Color {
@@ -397,7 +417,7 @@ func (b *baseList[T]) selectedItemColor(context *guigui.Context) color.Color {
 	if context.IsFocusedOrHasFocusedChild(b) || b.style == ListStyleSidebar {
 		return draw.Color(context.ColorMode(), draw.ColorTypeAccent, 0.5)
 	}
-	return draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8)
+	return draw.Color2(context.ColorMode(), draw.ColorTypeBase, 0.7, 0.5)
 }
 
 func (b *baseList[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bounds image.Rectangle) {
@@ -409,7 +429,7 @@ func (b *baseList[T]) drawStripe(context *guigui.Context, dst *ebiten.Image, bou
 	if r == 0 || !draw.OverlapsWithRoundedCorner(context.Bounds(b), r, bounds) {
 		dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
 	} else {
-		draw.FillInRoundedConerRect(context, dst, context.Bounds(b), r, bounds, clr)
+		draw.FillInRoundedCornerRect(context, dst, context.Bounds(b), r, bounds, clr)
 	}
 }
 
@@ -465,6 +485,7 @@ func (b *baseList[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
+	// Draw the selected item background.
 	if clr := b.selectedItemColor(context); clr != nil && b.SelectedItemIndex() >= 0 && b.SelectedItemIndex() < b.abstractList.ItemCount() {
 		bounds := b.itemBounds(context, b.SelectedItemIndex(), b.stripeVisible)
 		if bounds.Overlaps(vb) {
@@ -473,7 +494,7 @@ func (b *baseList[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 				if !draw.OverlapsWithRoundedCorner(context.Bounds(b), r, bounds) {
 					dst.SubImage(bounds).(*ebiten.Image).Fill(clr)
 				} else {
-					draw.FillInRoundedConerRect(context, dst, context.Bounds(b), r, bounds, clr)
+					draw.FillInRoundedCornerRect(context, dst, context.Bounds(b), r, bounds, clr)
 				}
 			} else {
 				bounds.Min.X -= RoundedCornerRadius(context)
@@ -483,7 +504,7 @@ func (b *baseList[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		}
 	}
 
-	hoveredItemIndex := b.HoveredItemIndex(context)
+	hoveredItemIndex := b.hoveredItemIndex(context)
 	hoveredItem, ok := b.abstractList.ItemByIndex(hoveredItemIndex)
 	if ok && b.isHoveringVisible() && hoveredItemIndex >= 0 && hoveredItemIndex < b.abstractList.ItemCount() && hoveredItem.Selectable {
 		bounds := b.itemBounds(context, hoveredItemIndex, false)

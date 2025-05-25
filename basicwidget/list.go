@@ -37,6 +37,7 @@ type ListItem[T comparable] struct {
 	Text      string
 	TextColor color.Color
 	Header    bool
+	Content   guigui.Widget
 	Disabled  bool
 	Border    bool
 	Movable   bool
@@ -128,25 +129,12 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 
 	l.updateListItems()
 
-	// To use HasFocusedChildWidget correctly, create the tree first.
 	appender.AppendChildWidgetWithPosition(&l.list, context.Position(l))
 
-	focused := context.IsFocusedOrHasFocusedChild(l)
 	for i := range l.listItemWidgets {
 		item := &l.listItemWidgets[i]
 		item.text.SetBold(item.item.Header || l.list.style == ListStyleSidebar && l.SelectedItemIndex() == i)
-		switch {
-		case l.list.style == ListStyleNormal && focused && l.list.SelectedItemIndex() == i && item.selectable():
-			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		case l.list.style == ListStyleSidebar && l.list.SelectedItemIndex() == i && item.selectable():
-			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		case l.list.style == ListStyleMenu && l.list.isHoveringVisible() && l.list.HoveredItemIndex(context) == i && item.selectable():
-			item.text.SetColor(DefaultActiveListItemTextColor(context))
-		case !item.selectable() && !item.item.Header:
-			item.text.SetColor(DefaultDisabledListItemTextColor(context))
-		default:
-			item.text.SetColor(item.item.TextColor)
-		}
+		item.text.SetColor(l.ItemTextColor(context, i))
 
 		if l.listItemHeightPlus1 > 0 {
 			context.SetSize(item, image.Pt(guigui.DefaultSize, l.listItemHeightPlus1-1))
@@ -156,6 +144,24 @@ func (l *List[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetApp
 	}
 
 	return nil
+}
+
+func (l *List[T]) ItemTextColor(context *guigui.Context, index int) color.Color {
+	item := &l.listItemWidgets[index]
+	switch {
+	case l.list.style == ListStyleNormal && l.list.SelectedItemIndex() == index && item.selectable():
+		return DefaultActiveListItemTextColor(context)
+	case l.list.style == ListStyleSidebar && l.list.SelectedItemIndex() == index && item.selectable():
+		return DefaultActiveListItemTextColor(context)
+	case l.list.style == ListStyleMenu && l.list.isHoveringVisible() && l.list.hoveredItemIndex(context) == index && item.selectable():
+		return DefaultActiveListItemTextColor(context)
+	case !item.selectable() && !item.item.Header:
+		return DefaultDisabledListItemTextColor(context)
+	case item.item.TextColor != nil:
+		return item.item.TextColor
+	default:
+		return draw.TextColor(context.ColorMode(), context.IsEnabled(item))
+	}
 }
 
 func (l *List[T]) SelectedItemIndex() int {
@@ -230,7 +236,6 @@ type listItemWidget[T comparable] struct {
 
 	item ListItem[T]
 
-	// TODO: Allow various widgets.
 	text Text
 }
 
@@ -240,16 +245,13 @@ func (l *listItemWidget[T]) setListItem(listItem ListItem[T]) {
 }
 
 func (l *listItemWidget[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
-	p := context.Position(l)
-	if l.item.Header {
-		p.X += UnitSize(context) / 2
-		context.SetSize(&l.text, context.Size(l).Add(image.Pt(-UnitSize(context), 0)))
-	} else {
-		context.SetSize(&l.text, context.Size(l))
+	if l.item.Content != nil {
+		appender.AppendChildWidgetWithBounds(l.item.Content, context.Bounds(l))
 	}
+
 	l.text.SetValue(l.item.Text)
 	l.text.SetVerticalAlign(VerticalAlignMiddle)
-	appender.AppendChildWidgetWithPosition(&l.text, p)
+	appender.AppendChildWidgetWithBounds(&l.text, context.Bounds(l))
 
 	return nil
 }
@@ -265,19 +267,28 @@ func (l *listItemWidget[T]) Draw(context *guigui.Context, dst *ebiten.Image) {
 		vector.StrokeLine(dst, x0, y, x1, y, width, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), false)
 		return
 	}
-	if l.item.Header {
+	/*if l.item.Header {
 		bounds := context.Bounds(l)
-		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.6), RoundedCornerRadius(context))
-	}
+		draw.DrawRoundedRect(context, dst, bounds, draw.Color(context.ColorMode(), draw.ColorTypeBase, 0.8), RoundedCornerRadius(context))
+	}*/
 }
 
 func (l *listItemWidget[T]) DefaultSize(context *guigui.Context) image.Point {
-	// Assume that every item can use a bold font.
-	w := l.text.boldTextSize(context).X
-	if l.item.Border {
-		return image.Pt(w, UnitSize(context)/2)
+	var w, h int
+	if l.item.Content != nil {
+		s := l.item.Content.DefaultSize(context)
+		w, h = s.X, s.Y
 	}
-	return image.Pt(w, int(LineHeight(context)))
+
+	// Assume that every item can use a bold font.
+	w = max(w, l.text.boldTextSize(context).X)
+	h = max(h, int(LineHeight(context)))
+	if l.item.Border {
+		h = UnitSize(context) / 2
+	} else if l.item.Header {
+		h = UnitSize(context) * 3 / 2
+	}
+	return image.Pt(w, h)
 }
 
 /*func (t *textListItemWidget[T]) index() int {
