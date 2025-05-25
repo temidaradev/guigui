@@ -54,6 +54,7 @@ func (b *baseButton) setPressed(pressed bool) {
 }
 
 func (b *baseButton) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {
+	// TODO: Do not call isHovered in Build (#52).
 	hovered := b.isHovered(context)
 	if b.prevHovered != hovered {
 		b.prevHovered = hovered

@@ -110,6 +110,7 @@ func (b *baseList[T]) Build(context *guigui.Context, appender *guigui.ChildWidge
 
 	appender.AppendChildWidgetWithBounds(&b.scrollOverlay, context.Bounds(b))
 
+	// TODO: Do not call HoveredItemIndex in Build (#52).
 	hoveredItemIndex := b.HoveredItemIndex(context)
 	p := context.Position(b)
 	_, offsetY := b.scrollOverlay.Offset()
