@@ -360,10 +360,10 @@ func (a *app) build() error {
 
 	a.hitWidgets = slices.Delete(a.hitWidgets, 0, len(a.hitWidgets))
 	pt := image.Pt(ebiten.CursorPosition())
-	for i := len(a.zs) - 1; i >= 0; i-- {
-		z := a.zs[i]
-		a.hitWidgets = a.appendWidgetsAt(a.hitWidgets, pt, z, a.root)
-	}
+	a.hitWidgets = a.appendWidgetsAt(a.hitWidgets, pt, a.root)
+	slices.SortStableFunc(a.hitWidgets, func(a, b Widget) int {
+		return b.widgetState().z - a.widgetState().z
+	})
 
 	return nil
 }
@@ -605,7 +605,7 @@ func (a *app) isWidgetHitAt(widget Widget) bool {
 	return false
 }
 
-func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, widget Widget) []Widget {
+func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, widget Widget) []Widget {
 	// Avoid (*widgetState).isVisible for performance.
 	// These check parent widget states unnecessarily.
 	if widget.widgetState().hidden {
@@ -618,12 +618,9 @@ func (a *app) appendWidgetsAt(widgets []Widget, point image.Point, targetZ int, 
 	children := widget.widgetState().children
 	for i := len(children) - 1; i >= 0; i-- {
 		child := children[i]
-		widgets = a.appendWidgetsAt(widgets, point, targetZ, child)
+		widgets = a.appendWidgetsAt(widgets, point, child)
 	}
 
-	if widget.widgetState().z != targetZ {
-		return widgets
-	}
 	if !point.In(a.context.VisibleBounds(widget)) {
 		return widgets
 	}
