@@ -126,7 +126,7 @@ func adjustedWheel() (float64, float64) {
 }
 
 func (s *ScrollOverlay) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
-	hovered := context.IsWidgetHitAt(s)
+	hovered := context.IsWidgetHitAtCursor(s)
 	if hovered {
 		x, y := ebiten.CursorPosition()
 		dx, dy := adjustedWheel()

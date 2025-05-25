@@ -582,7 +582,8 @@ func (a *app) isWidgetHitAt(widget Widget) bool {
 	if !widget.widgetState().isInTree() {
 		return false
 	}
-	// widgets are ordered by descending z values.
+	// hitWidgets are ordered by descending z values.
+	// Always use a fixed set hitWidgets, as the tree might be dynamically changed during Build.
 	for _, w := range a.hitWidgets {
 		if z(w) > z(widget) {
 			// w overlaps widget at point.

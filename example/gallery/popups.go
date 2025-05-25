@@ -110,8 +110,9 @@ func (p *Popups) Build(context *guigui.Context, appender *guigui.ChildWidgetAppe
 
 func (p *Popups) HandlePointingInput(context *guigui.Context) guigui.HandleInputResult {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-		// Use IsWidgetOrBackgroundHitAt. context.IsWidgetHitAt doesn't work when a popup's transparent background exists.
-		if pt := image.Pt(ebiten.CursorPosition()); p.contextMenuPopup.IsWidgetOrBackgroundHitAt(context, &p.contextMenuPopupClickHereText, pt) {
+		// Use IsWidgetOrBackgroundHitAtCursor. context.IsWidgetHitAtCursor doesn't work when a popup's transparent background exists.
+		if p.contextMenuPopup.IsWidgetOrBackgroundHitAtCursor(context, &p.contextMenuPopupClickHereText) {
+			pt := image.Pt(ebiten.CursorPosition())
 			context.SetPosition(&p.contextMenuPopup, pt)
 			p.contextMenuPopup.Open(context)
 		}

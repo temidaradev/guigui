@@ -485,7 +485,7 @@ func (t *Text) HandlePointingInput(context *guigui.Context) guigui.HandleInputRe
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if context.IsWidgetHitAt(t) {
+		if context.IsWidgetHitAtCursor(t) {
 			t.handleClick(context, cursorPosition)
 			return guigui.HandleInputByWidget(t)
 		}

@@ -151,7 +151,7 @@ func (t *Toggle) canPress(context *guigui.Context) bool {
 }
 
 func (t *Toggle) isHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(t)
+	return context.IsWidgetHitAtCursor(t)
 }
 
 func (t *Toggle) isActive(context *guigui.Context) bool {

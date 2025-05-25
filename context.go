@@ -414,7 +414,7 @@ func (c *Context) SetOpacity(widget Widget, opacity float64) {
 	RequestRedraw(widget)
 }
 
-func (c *Context) IsWidgetHitAt(widget Widget) bool {
+func (c *Context) IsWidgetHitAtCursor(widget Widget) bool {
 	return c.app.isWidgetHitAt(widget)
 }
 

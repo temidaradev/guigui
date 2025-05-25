@@ -151,7 +151,7 @@ func (b *baseButton) canPress(context *guigui.Context) bool {
 }
 
 func (b *baseButton) isHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(b)
+	return context.IsWidgetHitAtCursor(b)
 }
 
 func (b *baseButton) isActive(context *guigui.Context) bool {

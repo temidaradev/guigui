@@ -36,8 +36,8 @@ func (p *PopupMenu[T]) SetCheckmarkIndex(index int) {
 	p.list.SetCheckmarkIndex(index)
 }
 
-func (p *PopupMenu[T]) IsWidgetOrBackgroundHitAt(context *guigui.Context, widget guigui.Widget, point image.Point) bool {
-	return p.popup.IsWidgetOrBackgroundHitAt(context, widget)
+func (p *PopupMenu[T]) IsWidgetOrBackgroundHitAtCursor(context *guigui.Context, widget guigui.Widget) bool {
+	return p.popup.IsWidgetOrBackgroundHitAtCursor(context, widget)
 }
 
 func (p *PopupMenu[T]) Build(context *guigui.Context, appender *guigui.ChildWidgetAppender) error {

@@ -119,7 +119,7 @@ func (s *Slider) HandlePointingInput(context *guigui.Context) guigui.HandleInput
 		return guigui.HandleInputResult{}
 	}
 
-	if context.IsEnabled(s) && context.IsWidgetHitAt(s) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !s.dragging {
+	if context.IsEnabled(s) && context.IsWidgetHitAtCursor(s) && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !s.dragging {
 		context.SetFocused(s, true)
 		if !s.isThumbHovered(context) {
 			s.setValueFromCursor(context)
@@ -265,7 +265,7 @@ func (s *Slider) canPress(context *guigui.Context) bool {
 }
 
 func (s *Slider) isThumbHovered(context *guigui.Context) bool {
-	return context.IsWidgetHitAt(s) && image.Pt(ebiten.CursorPosition()).In(s.thumbBounds(context))
+	return context.IsWidgetHitAtCursor(s) && image.Pt(ebiten.CursorPosition()).In(s.thumbBounds(context))
 }
 
 func (s *Slider) isActive(context *guigui.Context) bool {
